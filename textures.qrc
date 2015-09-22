@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>textures/crosswalk.png</file>
+        <file>textures/double_solid.png</file>
+        <file>textures/double_solid_intermittent.png</file>
+        <file>textures/intermittent.png</file>
+        <file>textures/double_intermittent.png</file>
+        <file>textures/tramways.png</file>
+        <file>textures/railroad.png</file>
+    </qresource>
+</RCC>
