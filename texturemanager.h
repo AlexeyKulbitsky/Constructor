@@ -5,9 +5,9 @@
 #include <QMap>
 #include <QString>
 
-class TextureManager: public QObject
+class TextureManager
 {
-    Q_OBJECT
+
 protected:
     static TextureManager* manager;
     TextureManager(){}

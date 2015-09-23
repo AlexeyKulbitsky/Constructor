@@ -644,14 +644,6 @@ void Intersection::calculateRoadIntersections()
         vec3 p1 = roads[i / 2]->getCoordOfPoint(1);
         vec3 p2 = roads[i / 2]->getCoordOfPoint(2);
 
-        /*
-        float k1;
-        if ((p2.x - p1.x) == 0)
-            k1 = 0.0f;
-        else
-            k1 = (p2.y - p1.y)/(p2.x - p1.x);
-        float b1 = p1.y - p1.x * k1;
-        */
         vec3 t1(0.0f, 0.0f, 0.0f);
         vec3 t2(0.0f, 0.0f, 0.0f);
 
@@ -666,19 +658,6 @@ void Intersection::calculateRoadIntersections()
             t2 = roads[i / 2 + 1]->getCoordOfPoint(3);
         }
 
-        /*
-        float k2;
-        if ((t2.x - t1.x) == 0)
-            k2 = 0.0f;
-        else
-            k2 = (t2.y - t1.y)/(t2.x - t1.x);
-        float b2 = t1.y - t1.x * k2;
-
-
-        float xTemp = (b2 - b1) / (k1 - k2);
-        float yTemp = k1 * xTemp + b1;
-
-        */
 
         float xTemp, yTemp;
         float a1, a2, b1, b2, c1, c2;
@@ -691,36 +670,6 @@ void Intersection::calculateRoadIntersections()
         b2 = t1.x - t2.x;
         c2 = t1.y * (t2.x - t1.x) - t1.x * (t2.y - t1.y);
 
-        /*
-        if(a1 == 0.0f)
-        {
-            xTemp = (c1 * b2 / b1 - c2) / a2;
-            yTemp = (-1.0f) * c1 / b1;
-        }
-        else
-            if(b1 == 0.0f)
-            {
-                yTemp = (c1 * a2 / a1 - c2) / b2;
-                xTemp = (-1.0f) * c1 / a1;
-            }
-        else
-            if (a2 == 0.0f)
-            {
-                xTemp = (c2 * b1 / b2 - c2) / a1;
-                yTemp = (-1.0f) * c2 / b2;
-            }
-        else
-            if (b2 == 0.0f)
-            {
-                yTemp = (c2 * a1 / a2 - c1) / b1;
-                xTemp = (-1.0f) * c2 / b2;
-            }
-        else
-            {
-                xTemp = (c1 * b2 / b1 - c2) / (a2 - a1 * b2 / b1);
-                yTemp = (-1.0f) * (a1 * xTemp + c1) / b1;
-            }
-        */
         if (abs(a1) < 0.0001f)
         {
             yTemp = p1.y;

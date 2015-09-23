@@ -10,10 +10,10 @@
 
 struct LineBrokenLinked
 {
-    RoadElement *line = NULL;
-    int lineType = -1;
+    RoadElement *line;// = NULL;
+    int lineType;// = -1;
     float lineWidth;
-    bool nearSide = true;
+    bool nearSide;// = true;
     bool beginSide;
     float step;
     float beginStep;

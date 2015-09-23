@@ -438,6 +438,7 @@ void Road::drawMeasurements(QGLWidget *render)
 bool Road::setFixed(bool fixed)
 {
     this->fixed = fixed;
+    return true;
 }
 
 

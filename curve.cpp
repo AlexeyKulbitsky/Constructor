@@ -11,6 +11,8 @@ Curve::Curve(float xCenter, float yCenter, float zCenter,
              QString texture_2, float texture_2Usize, float texture_2Vsize,
              int numberOfSides)
 {
+    qDebug() << texture_1;
+    qDebug() << texture_2;
     this->numberOfSides = numberOfSides;
     controlPoints[0] = xCenter;
     controlPoints[1] = yCenter;
@@ -52,6 +54,8 @@ Curve::Curve(float xCenter, float yCenter, float zCenter,
     fixed = selected = false;
     showBoard = true;
     layer = 0;
+    qDebug() << "New Curve";
+    qDebug() << "Vertex Size: " << vertexArray.size() / 3;
 }
 
 Curve::~Curve()
@@ -493,7 +497,27 @@ void Curve::setVertexArray()
     float yRight = controlPoints[7];
     float zRight = controlPoints[8];
 
+    float aLeft = xLeft - xCenter;
+    float bLeft = yLeft - yCenter;
+    float cLeft = (-1.0f)*(xLeft * aLeft + yLeft * bLeft);
 
+    float aRight = xRight - xCenter;
+    float bRight = yRight - yCenter;
+    float cRight = (-1.0f)*(xRight * aRight + yRight * bRight);
+
+    float a = xRight - xLeft;
+    float b = yRight - yLeft;
+    float c = (-1.0f)*((xRight + xLeft) / 2.0f * a + (yRight + yLeft) / 2.0f * b);
+
+
+
+    float y1 = (c * aLeft - cLeft * a) / (bLeft * a - b * aLeft);
+    float x1 = (-1.0f) * (b * y1 + c) / a;
+
+    float y2 = (c * aRight - cRight * a) / (bRight * a - b * aRight);
+    float x2 = (-1.0f) * (b * y2 + c) / a;
+
+    /*
     float kLeft, kLeftP;
     if ((xLeft - xCenter) == 0)
     {
@@ -557,8 +581,11 @@ void Curve::setVertexArray()
     }
     y2 = kHordP * x2 + bHordP;
 
+    */
     float r1 = sqrt((x1 - xLeft)*(x1 - xLeft) + (y1 - yLeft)*(y1 - yLeft));
     float r2 = sqrt((x2 - xRight)*(x2 - xRight) + (y2 - yRight)*(y2 - yRight));
+
+    float x, y;
 
     x = r1 > r2 ? x1 : x2;
     y = r1 > r2 ? y1 : y2;

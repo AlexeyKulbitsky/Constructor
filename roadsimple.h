@@ -9,11 +9,11 @@
 
 struct LineLinked
 {
-    RoadElement *line = NULL;
+    RoadElement *line;// = NULL;
     bool beginSide;
-    int lineType = -1;
+    int lineType;// = -1;
     float lineWidth;
-    bool rightSide = true;
+    bool rightSide;// = true;
     float step;
     float beginStep;
     float endStep;

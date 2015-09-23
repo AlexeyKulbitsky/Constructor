@@ -343,11 +343,11 @@ void SelectedState::dropEvent(QDropEvent *event)
         if (s == "Закругление")
         {
              model->getGroup(0).push_back(new Curve(x, y, 0.0f,
-                                     x - 5.0f, y, 0.0f,
-                                     x, y + 5.0f, 0.0f,
-                                     "D:/3ds/city_roads/nr_07C.jpg", 6.0f, 6.0f,
-                                     "D:/3ds/city_roads/bksid_11.jpg", 2.75f, 6.0f,
-                                     10));
+                                                    x - 5.0f, y, 0.0f,
+                                                    x, y + 5.0f, 0.0f,
+                                                    QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
+                                                    QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
+                                                    10));
              model->setModified(true);
         } else
             if (s == "Разделительная зона")

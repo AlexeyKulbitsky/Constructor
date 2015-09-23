@@ -40,11 +40,11 @@ struct vec2
 
 struct Point
 {
-    float position[3] = {0.0f, 0.0f, 0.0f};
+    float position[3];// = {0.0f, 0.0f, 0.0f};
 };
 struct Textute
 {
-    float position[2] = {0.0f, 0.0f};
+    float position[2];// = {0.0f, 0.0f};
     void operator= (Textute& source)
     {
         position[0] = source.position[0];
@@ -54,7 +54,7 @@ struct Textute
 
 struct Face
 {
-    unsigned short point[3] = {0, 0, 0};
+    unsigned short point[3];// = {0, 0, 0};
     void operator= (Face& source)
     {
         point[0] = source.point[0];
@@ -66,9 +66,9 @@ struct Face
 struct Vertex
 {
     float position[3];
-    float color[3] = {0.5f, 0.5f, 0.5f};
-    float texture[2] = {0.0f, 0.0f};
-    float normal[3] = {0.0f, 0.0f, 0.0f};
+    float color[3];// = {0.5f, 0.5f, 0.5f};
+    float texture[2];// = {0.0f, 0.0f};
+    float normal[3];// = {0.0f, 0.0f, 0.0f};
 };
 
 struct Mesh
@@ -82,13 +82,13 @@ struct Mesh
     float Ns; // Блеск
     int illum;
 
-    char map_Ka[256] = {0};
-    char map_Kd[256] = {0};
-    char map_Ks[256] = {0};
+    char map_Ka[256];// = {0};
+    char map_Kd[256];// = {0};
+    char map_Ks[256];// = {0};
 
-    unsigned map_Ka_ID = 0;
-    unsigned map_Kd_ID = 0;
-    unsigned map_Ks_ID = 0;
+    unsigned map_Ka_ID;// = 0;
+    unsigned map_Kd_ID;// = 0;
+    unsigned map_Ks_ID;// = 0;
 
 };
 

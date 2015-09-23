@@ -1,6 +1,6 @@
 #ifndef ROADELEMENTOBJ_H
 #define ROADELEMENTOBJ_H
-
+#include <QObject>
 #include "roadelement.h"
 
 class RoadElementOBJ: public RoadElement
