@@ -36,6 +36,11 @@ ObjectsList::ObjectsList(QWidget *parent)
     this->addItem("Микроавтобус Ford");
     this->addItem("Грузовик Ford");
     this->addItem("Остановка");
+    this->addItem("Здание 1");
+    this->addItem("Здание 2");
+    this->addItem("Дерево 1");
+    this->addItem("Дерево 2");
+    this->addItem("Дерево 3");
     //this->addItem("Знак");
     //this->addItem("Человек");
     //this->addItem("");
@@ -69,6 +74,10 @@ void ObjectsList::mouseMoveEvent(QMouseEvent *event)
 {
     if (!(event->buttons() & Qt::LeftButton))
         return;
+    if (!itemAt(dragStartPosition))
+        return;
+    //if (event->button() != Qt::LeftButton)
+    //    return;
     /*
     if ((event->pos() - dragStartPosition).manhattanLength()
          < QApplication::startDragDistance())
@@ -100,7 +109,14 @@ void ObjectsList::mouseMoveEvent(QMouseEvent *event)
 
 void ObjectsList::mouseReleaseEvent(QMouseEvent *event)
 {
-    itemAt(event->pos())->setSelected(true);
-    emit itemClicked(itemAt(event->pos()));
+    if (event->button() == Qt::LeftButton)
+    {
+        if (itemAt(event->pos()))
+        {
+        itemAt(event->pos())->setSelected(true);
+        emit itemClicked(itemAt(event->pos()));
+        }
+    }
+
 
 }

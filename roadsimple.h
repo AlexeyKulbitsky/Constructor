@@ -26,12 +26,14 @@ class RoadSimple: public RoadElement
     Q_OBJECT
 public:
     RoadSimple();
-    RoadSimple(float x1, float y1, float x2, float y2, QString name,int layer);
-    RoadSimple(float x1, float y1, float x2, float y2, float width, float red, float green, float blue, float alpha, QString name, int layer);
+    RoadSimple(float x1, float y1, float x2, float y2, QString name,int layer, QString description = '\0');
+    RoadSimple(float x1, float y1, float x2, float y2, float width, float red, float green, float blue, float alpha, QString name, int layer,
+               QString description = '\0');
     RoadSimple(float x1, float y1, float x2, float y2, float width,
                QString source_1, float textureSize_1_Usize, float textureSize_1_Vsize,
                QString source_2, float textureSize_2_Usize, float textureSize_2_Vsize,
-               QString name, int layer);
+               QString name, int layer,
+               QString description = '\0');
     ~RoadSimple();
 
     void setVertexArray(float x1, float y1, float x2, float y2, float width);
@@ -57,6 +59,8 @@ public:
     float getWidth() { return width; }
     void setCoordForPoint(int index, float newX, float newY, float newZ);
     vec3 getCoordOfPoint(int index);
+    void setDescription(const QString& description);
+    void drawDescription(QGLWidget* render = 0, float red = 1.0f, float green = 1.0f, float blue = 1.0f);
 
 public:
     QVector<GLfloat> vertexArrayRight;
@@ -113,6 +117,7 @@ protected:
     QFormLayout* layout;
     QGLWidget* render;
 
+    QString description;
 public:
 
     bool hasPoint(GLfloat x, GLfloat y);

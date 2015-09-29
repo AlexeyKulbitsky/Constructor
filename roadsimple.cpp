@@ -19,8 +19,9 @@ RoadSimple::RoadSimple()
     //selected = false;
 
 }
-RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, QString name, int layer)
+RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, QString name, int layer, QString description)
 {
+    this->description = description;
     this->layer = layer;
     this->name = name;
     if (name == "Crosswalk")
@@ -61,8 +62,9 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, QString name, int
     connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
 }
 
-RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, float width, float red, float green, float blue, float alpha, QString name, int layer)
+RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, float width, float red, float green, float blue, float alpha, QString name, int layer, QString description)
 {
+    this->description = description;
     this->layer = layer;
     this->name = name;
     useColor = true;
@@ -107,8 +109,9 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, float width, floa
 RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, float width,
                        QString source_1, float textureSize_1_Usize, float textureSize_1_Vsize,
                        QString source_2, float textureSize_2_Usize, float textureSize_2_Vsize,
-                       QString name, int layer)
+                       QString name, int layer, QString description)
 {
+    this->description = description;
     this->layer = layer;
     this->name = name;
     indexOfSelectedControl = -1;
@@ -721,6 +724,29 @@ vec3 RoadSimple::getCoordOfPoint(int index)
     return res;
 }
 
+void RoadSimple::setDescription(const QString &description)
+{
+    this->description = description;
+}
+
+void RoadSimple::drawDescription(QGLWidget *render, float red, float green, float blue)
+{
+    glColor3f(red, green, blue);
+    if (render && description[0] != '\0')
+    {
+        GLdouble x, y, z;
+        GLdouble wx, wy, wz;
+        x = x2;
+        y = y2;
+        z = 0.0f;
+        QFont shrift = QFont("Times", 8, QFont::Black);
+        getWindowCoord(x, y, z, wx, wy, wz);
+        render->renderText(wx + 5, wy + 5, description, shrift);
+    }
+}
+
+
+
 
 
 void RoadSimple::drawSelectionFrame()
@@ -966,7 +992,10 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
     {
         float dr = ((xP1 - xP2)*dx + (yP1 - yP2)*dy)/
                 sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
-        setVertexArray(x1, y1, x2, y2, width + dr * 2.0f);
+        float widthResult = width + dr * 2.0f > 0 ?
+                    width + dr * 2.0f :
+                    0.1f;
+        setVertexArray(x1, y1, x2, y2, widthResult);
         resetLines();
         emit widthChanged(width);
     }
@@ -975,7 +1004,10 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
     {
         float dr = ((xP2 - xP1)*dx + (yP2 - yP1)*dy)/
                 sqrt((xP2 - xP1)*(xP2 - xP1) + (yP2 - yP1)*(yP2 - yP1));
-        setVertexArray(x1, y1, x2, y2, width + dr * 2.0f);
+        float widthResult = width + dr * 2.0f > 0 ?
+                    width + dr * 2.0f :
+                    0.1f;
+        setVertexArray(x1, y1, x2, y2, widthResult);
         resetLines();
         emit widthChanged(width);
     }
@@ -1218,7 +1250,7 @@ void RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)
 
         for (int i = 0; i < lines.size(); ++i)
         {
-            QPushButton* b = new QPushButton(QString::number(i));
+            QPushButton* b = new QPushButton(QString::number(i + 1));
             connect(b, SIGNAL(clicked(bool)), this, SLOT(deleteLine()));
             layout->addRow("Удалить линию ",b);
         }
@@ -1589,7 +1621,8 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
     switch (lineType)
     {
     case 6:
-        line.line = new SplitZone(line_x1, line_y1, 0.02f, line_x2, line_y2, 0.02f, splitZoneWidth, beginRounding, endRounding);
+        line.line = new SplitZone(line_x1, line_y1, 0.02f, line_x2, line_y2, 0.02f, splitZoneWidth, beginRounding, endRounding,
+                                  QString("Линия №") + QString::number(lines.size() + 1));
         qDebug() << "SplitZone width:" << splitZoneWidth;
         qDebug() << "Begin rounding:" << beginRounding;
         qDebug() << "End rounding:" << endRounding;
@@ -1702,11 +1735,13 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
                 }
             }
         }
-        line.line = new LineSimple(line_x1, line_y1, line_x2, line_y2, lineWidth, textureSource, textureSize, "LineSimple", 1);
+        line.line = new LineSimple(line_x1, line_y1, line_x2, line_y2, lineWidth, textureSource, textureSize, "LineSimple", 1,
+                                   QString("Линия №") + QString::number(lines.size() + 1));
     }
         break;
     default:
-        line.line = new LineSimple(line_x1, line_y1, line_x2, line_y2, lineWidth, textureSource, textureSize, "LineSimple", 1);
+        line.line = new LineSimple(line_x1, line_y1, line_x2, line_y2, lineWidth, textureSource, textureSize, "LineSimple", 1,
+                                   QString("Линия №") + QString::number(lines.size() + 1));
         break;
     }
     line.lineWidth = lineWidth;
@@ -1815,9 +1850,22 @@ void RoadSimple::deleteLine()
     QPushButton * b = qobject_cast<QPushButton*>(sender());
     if (!b) return;
     //qDebug() << "delete line " << b->text();
-    int i = b->text().toInt();
+    int i = b->text().toInt() - 1;
     delete lines[i].line;
     lines.remove(i);
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].lineType != 6)
+        {
+            LineSimple* line = dynamic_cast<LineSimple*>(lines[i].line);
+            line->setDescription(QString("Линия №") + QString::number(i + 1));
+        }
+        else
+        {
+            SplitZone* line = dynamic_cast<SplitZone*>(lines[i].line);
+            line->setDescription(QString("Линия №") + QString::number(i + 1));
+        }
+    }
     if (this->layout && this->render)
         emit linesChanged(layout, render);
 }
@@ -1909,6 +1957,19 @@ void RoadSimple::drawMeasurements(QGLWidget *render)
         dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
         getWindowCoord(x, y, z, wx, wy, wz);
         render->renderText(wx + 5, wy, "W=" + QString("%1").arg(dr), shrift);
+    }
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].lineType != 6)
+        {
+            LineSimple* line = dynamic_cast<LineSimple*>(lines[i].line);
+            line->drawDescription(render);
+        }
+        else
+        {
+            SplitZone* line = dynamic_cast<SplitZone*>(lines[i].line);
+            line->drawDescription(render);
+        }
     }
 }
 

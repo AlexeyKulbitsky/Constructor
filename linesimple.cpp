@@ -1,5 +1,5 @@
 #include "linesimple.h"
-
+#include <GL/glu.h>
 
 
 LineSimple::LineSimple()
@@ -14,6 +14,7 @@ LineSimple::LineSimple()
 
     //selected = false;
     fixed = false;
+    this->description = '\0';
 
 }
 LineSimple::LineSimple(float x1, float y1, float x2, float y2, QString name, int layer)
@@ -40,6 +41,7 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, QString name, int
 
     selected = false;
     fixed = false;
+    this->description = '\0';
 }
 
 LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, float red, float green, float blue, float alpha, QString name,int layer)
@@ -68,6 +70,7 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, floa
 
     selected = false;
     fixed = false;
+    this->description = '\0';
 }
 
 LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QString source, float textureSize, QString name, int layer)
@@ -97,8 +100,40 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QStr
 
     selected = false;
     fixed = false;
-
+    this->description = '\0';
 }
+
+LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QString source, float textureSize, QString name, int layer, QString description)
+{
+    qDebug() << "LineSimple";
+    this->layer = layer;
+    this->name = name;
+    this->textureSize = textureSize;
+    textureSource = source;
+    useColor = false;
+    this->size = size;
+    this->width = width;
+
+    setVertexArray(x1, y1, x2, y2, width);
+    //getTextures(source);
+    textureID[0] = TextureManager::getInstance()->getID(source);
+    setTextureArray();
+    setIndexArray();
+    qDebug() << "Texture binded";
+    this->x1 = x1;
+    this->y1 = y1;
+    this->x2 = x2;
+    this->y2 = y2;
+
+    setIndexArrayForSelectionFrame();
+    setColorArrayForSelectionFrame(0.0f, 0.0f, 0.0f);
+
+    selected = false;
+    fixed = false;
+
+    this->description = description;
+}
+
 
 // Индексы вершины для отрисовки
 void LineSimple::setVertexArray(float x1, float y1, float x2, float y2, float width)
@@ -555,6 +590,35 @@ QPoint LineSimple::getCoorninateOfPointControl(int index)
     return p;
 }
 
+void LineSimple::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)
+{
+    GLint viewport[4];
+    GLdouble mvmatrix[16], projmatrix[16];
+
+    glGetIntegerv(GL_VIEWPORT,viewport);
+    glGetDoublev(GL_MODELVIEW_MATRIX,mvmatrix);
+    glGetDoublev(GL_PROJECTION_MATRIX,projmatrix);
+
+    gluProject(x, y, z, mvmatrix, projmatrix, viewport, &wx, &wy, &wz);
+    wy=viewport[3]-wy;
+}
+
+void LineSimple::drawDescription(QGLWidget *render, float red, float green, float blue)
+{
+    glColor3f(red, green, blue);
+    if (render && description[0] != '\0')
+    {
+        GLdouble x, y, z;
+        GLdouble wx, wy, wz;
+        x = (x1 + x2) / 2.0f;
+        y = (y1 + y2) / 2.0f;
+        z = 0.0f;
+        QFont shrift = QFont("Times", 8, QFont::Black);
+        getWindowCoord(x, y, z, wx, wy, wz);
+        render->renderText(wx + 5, wy + 5, description, shrift);
+    }
+}
+
 
 QJsonObject LineSimple::getJSONInfo()
 {
@@ -656,6 +720,11 @@ void LineSimple::setLength(double length)
     {
         return;
     }
+}
+
+void LineSimple::setDescription(QString description)
+{
+    this->description = description;
 }
 
 

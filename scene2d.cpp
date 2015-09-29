@@ -407,6 +407,7 @@ void Scene2D::createActions()
 
 void Scene2D::drawAxis()
 {
+    glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
     glLineWidth(3.0f);
 
@@ -427,6 +428,7 @@ void Scene2D::drawAxis()
     glVertex3f( 0.0f,  0.0f,  1.0f);
     glVertex3f( 0.0f,  0.0f, -1.0f);
     glEnd();
+    glEnable(GL_DEPTH_TEST);
 }
 
 void Scene2D::dragEnterEvent(QDragEnterEvent* event)
@@ -443,6 +445,7 @@ void Scene2D::dropEvent(QDropEvent* event)
 
 void Scene2D::drawGrid()
 {
+    glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
     if (showGrid)
     {
@@ -466,6 +469,7 @@ void Scene2D::drawGrid()
     }
     }
     //qDebug() << "Draw grid";
+    glEnable(GL_DEPTH_TEST);
 }
 
 bool Scene2D::isRulerActive()

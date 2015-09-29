@@ -1362,7 +1362,7 @@ void RoundingRoad::getProperties(QFormLayout *layout, QGLWidget* render)
     layout->addRow("Ширина", farBoardWidthSpinBox);
     for (int i = 0; i < lines.size(); ++i)
     {
-        QPushButton* b = new QPushButton(QString::number(i));
+        QPushButton* b = new QPushButton(QString::number(i + 1));
         connect(b, SIGNAL(clicked(bool)), this, SLOT(deleteLine()));
         layout->addRow("Удалить линию ",b);
     }
@@ -1569,12 +1569,14 @@ void RoundingRoad::addLine(float step, QString textureSource, float textureSize,
 
     if (lineType == 6)
     {
-        line.line = new SplitZone(lineVertexArray, size, splitZoneWidth, beginRounding, endRounding);
+        line.line = new SplitZone(lineVertexArray, size, splitZoneWidth, beginRounding, endRounding,
+                                  QString("Линия №") + QString::number(lines.size() + 1));
         line.splitZoneWidth = splitZoneWidth;
     }
     else
     {
-        line.line = new LineBroken(lineWidth, lineVertexArray, size, textureSource, textureSize, "LineBroken", 1);
+        line.line = new LineBroken(lineWidth, lineVertexArray, size, textureSource, textureSize, "LineBroken", 1,
+                                   QString("Линия №") + QString::number(lines.size() + 1));
     }
 
     //line.line = new LineBroken(lineWidth, lineVertexArray, size, textureSource, textureSize, "LineBroken", 1);
@@ -1654,9 +1656,22 @@ void RoundingRoad::deleteLine()
     QPushButton * b = qobject_cast<QPushButton*>(sender());
     if (!b) return;
     //qDebug() << "delete line " << b->text();
-    int i = b->text().toInt();
+    int i = b->text().toInt() - 1;
     delete lines[i].line;
     lines.remove(i);
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].lineType != 6)
+        {
+            LineBroken* line = dynamic_cast<LineBroken*>(lines[i].line);
+            line->setDescription(QString("Линия №") + QString::number(i + 1));
+        }
+        else
+        {
+            SplitZone* line = dynamic_cast<SplitZone*>(lines[i].line);
+            line->setDescription(QString("Линия №") + QString::number(i + 1));
+        }
+    }
     emit linesChanged(layout, render);
 }
 
@@ -1870,6 +1885,19 @@ void RoundingRoad::drawMeasurements(QGLWidget *render)
             getWindowCoord(x, y, z, wx, wy, wz);
 
             render->renderText(wx, wy, QString("%1").arg(farBoardWidth), shrift);
+        }
+        for (int i = 0; i < lines.size(); ++i)
+        {
+            if (lines[i].lineType != 6)
+            {
+                LineBroken* line = dynamic_cast<LineBroken*>(lines[i].line);
+                line->drawDescription(render);
+            }
+            else
+            {
+                SplitZone* line = dynamic_cast<SplitZone*>(lines[i].line);
+                line->drawDescription(render);
+            }
         }
     }
     else

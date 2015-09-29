@@ -35,6 +35,7 @@ private:
     GLint controlIndex;
     int layer;
     QString name;
+    int groupIndex, elementIndex;
     // State interface
 public:
     virtual void mousePressEvent(QMouseEvent *pe);
@@ -50,6 +51,8 @@ public:
     bool tryToSelectFigures(QPoint mp);
     void setName(QString name);
     void setLayer(int layer);
+    void setGroupIndex(int index);
+    void setElementIndex(int index);
 
     // State interface
 public:

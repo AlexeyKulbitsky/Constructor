@@ -1,4 +1,5 @@
 #include "linebroken.h"
+#include <gl/glu.h>
 
 LineBroken::LineBroken()
 {
@@ -157,6 +158,12 @@ LineBroken::LineBroken(float width, float *axisVertices, int size, QString sourc
 
     selected = false;
     fixed = false;
+}
+
+LineBroken::LineBroken(float width, float *axisVertices, int size, QString source, float textureSize, QString name, int layer, QString description):
+    LineBroken(width, axisVertices, size, source, textureSize, name, layer)
+{
+    this->description = description;
 }
 
 // Индексы вершины для отрисовки
@@ -704,6 +711,35 @@ QPoint LineBroken::getCoorninateOfPointControl(int index)
     return p;
 }
 
+void LineBroken::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)
+{
+    GLint viewport[4];
+    GLdouble mvmatrix[16], projmatrix[16];
+
+    glGetIntegerv(GL_VIEWPORT,viewport);
+    glGetDoublev(GL_MODELVIEW_MATRIX,mvmatrix);
+    glGetDoublev(GL_PROJECTION_MATRIX,projmatrix);
+
+    gluProject(x, y, z, mvmatrix, projmatrix, viewport, &wx, &wy, &wz);
+    wy=viewport[3]-wy;
+}
+
+void LineBroken::drawDescription(QGLWidget *render, float red, float green, float blue)
+{
+    glColor3f(red, green, blue);
+    if (render && description[0] != '\0')
+    {
+        GLdouble x, y, z;
+        GLdouble wx, wy, wz;
+        x = vertexArrayForAxis[vertexArrayForAxis.size() / 6 * 3];
+        y = vertexArrayForAxis[vertexArrayForAxis.size() / 6 * 3 + 1];
+        z = 0.0f;
+        QFont shrift = QFont("Times", 8, QFont::Black);
+        getWindowCoord(x, y, z, wx, wy, wz);
+        render->renderText(wx + 5, wy + 5, description, shrift);
+    }
+}
+
 void LineBroken::addControl(float x, float y)
 {
 
@@ -778,6 +814,11 @@ void LineBroken::drawMeasurements(QGLWidget *render)
 bool LineBroken::setFixed(bool fixed)
 {
     this->fixed = fixed;
+}
+
+void LineBroken::setDescription(QString description)
+{
+    this->description = description;
 }
 
 

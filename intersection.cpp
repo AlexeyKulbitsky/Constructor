@@ -25,7 +25,8 @@ Intersection::Intersection(float x, float y)
         RoadSimple *road = new RoadSimple(x, y, x + dx, y + dy, 6.0f,
                                           QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
                                           QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
-                                          "RoadSimple", 0);
+                                          "RoadSimple", 0,
+                                          QString("Рукав №") + QString::number(i + 1));
         road->setLeftBoardShowStatus(true);
         road->setRightBoardShowStatus(true);
         //QObject::connect(road, SIGNAL(widthChanged(double)), this, SLOT(calculateRoadIntersections()));
@@ -134,8 +135,17 @@ void Intersection::drawFigure(QGLWidget *render)
     for (int i = 0; i < roads.size(); ++i)
     {
         if (roads[i]->isSelected())
+        {
             roads[i]->drawSelectionFrame();
+        }
         roads[i]->drawFigure();
+    }
+    for (int i = 0; i < roads.size(); ++i)
+    {
+        if (roads[i]->isSelected())
+        {
+            roads[i]->drawDescription(render, 1.0f, 0.0f, 0.0f);
+        }
     }
 
 }
@@ -513,7 +523,7 @@ void Intersection::getProperties(QFormLayout *layout, QGLWidget *render)
         QPushButton *deletePushButton = new QPushButton("Удалить");
         if (roads.size() > 3)
             connect(deletePushButton, SIGNAL(clicked(bool)), this, SLOT(deleteRoad()));
-        layout->addRow("Рукав " + QString::number(i),deletePushButton);
+        layout->addRow("Рукав " + QString::number(i + 1),deletePushButton);
         QDoubleSpinBox *widthDoubleSpinBox = new QDoubleSpinBox();
         widthDoubleSpinBox->setValue(roads[i]->getWidth());
         widthDoubleSpinBox->setMinimum(0.1);
@@ -551,8 +561,8 @@ void Intersection::getProperties(QFormLayout *layout, QGLWidget *render)
         connect(stepDialog, SIGNAL(accepted()), this, SLOT(addLine()));
         for (int j = 0; j < roads[i]->lines.size(); ++j)
         {
-            QPushButton* b = new QPushButton(QString::number(j));
-            connect(b, SIGNAL(clicked(bool)), roads[i], SLOT(deleteLine()));
+            QPushButton* b = new QPushButton(QString::number(j + 1));
+            connect(b, SIGNAL(clicked(bool)), roads[i + 1], SLOT(deleteLine()));
             connect(b, SIGNAL(clicked(bool)), this, SLOT(deleteLine()));
             layout->addRow("Удалить линию ",b);
         }
@@ -593,7 +603,7 @@ void Intersection::getProperties(QFormLayout *layout, QGLWidget *render)
         connect(curves[i], SIGNAL(angleChanged(double)), angleDoubleSpinBox, SLOT(setValue(double)));
         connect(angleDoubleSpinBox, SIGNAL(valueChanged(double)), curves[i], SLOT(setAngle(double)));
 
-        layout->addRow("Закругление " + QString::number(i), showBoardCheckBox);
+        layout->addRow("Закругление " + QString::number(i + 1), showBoardCheckBox);
         //layout->addRow("Отобразить", showBoardCheckBox);
         layout->addRow("Левая сторона", leftLengthDoubleSpinBox);
         layout->addRow("Правая сторона", rightLengthDoubleSpinBox);
@@ -842,7 +852,8 @@ void Intersection::addRoad()
         RoadSimple *road = new RoadSimple(x, y, x + dx, y + dy, 6.0f,
                                           QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
                                           QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
-                                          "RoadSimple", 0);
+                                          "RoadSimple", 0,
+                                          QString("Рукав №") + QString::number(i + 1));
         road->setLeftBoardShowStatus(true);
         road->setRightBoardShowStatus(true);
         //QObject::connect(road, SIGNAL(widthChanged(double)), this, SLOT(calculateRoadIntersections()));
@@ -916,7 +927,8 @@ void Intersection::deleteRoad()
         RoadSimple *road = new RoadSimple(x, y, x + dx, y + dy, 6.0f,
                                           QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
                                           QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
-                                          "RoadSimple", 0);
+                                          "RoadSimple", 0,
+                                          QString("Рукав №") + QString::number(i + 1));
         road->setLeftBoardShowStatus(true);
         road->setRightBoardShowStatus(true);
         //QObject::connect(road, SIGNAL(widthChanged(double)), this, SLOT(calculateRoadIntersections()));

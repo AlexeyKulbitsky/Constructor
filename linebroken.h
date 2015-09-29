@@ -65,12 +65,14 @@ protected:
     int numberOfVerticesOfAxis;
     int numberOfAxises;
     bool selected;
+    QString description;
 
 public:
     LineBroken();
     LineBroken(float width, float* axisVertices, int size, QString name, int layer);
     LineBroken(float width, float* axisVertices, int size, float red, float green, float blue, float alpha, QString name, int layer);
     LineBroken(float width, float* axisVertices, int size, QString source, float textureSize, QString name, int layer);
+    LineBroken(float width, float* axisVertices, int size, QString source, float textureSize, QString name, int layer, QString description);
     bool hasPoint(GLfloat x, GLfloat y);
     void drawFigure(QGLWidget* render = 0);
     void drawSelectionFrame();
@@ -83,6 +85,8 @@ public:
     void changeColorOfSelectedControl(int index);
 
     QPoint getCoorninateOfPointControl(int index);
+    void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
+    void drawDescription(QGLWidget* render = 0, float red = 1.0f, float green = 1.0f, float blue = 1.0f);
 
 protected:
     void addControl(float x, float y);
@@ -107,6 +111,7 @@ public:
     // RoadElement interface
 public slots:
     virtual bool setFixed(bool fixed);
+    void setDescription(QString description);
 
     // RoadElement interface
 public:

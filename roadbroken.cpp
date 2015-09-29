@@ -2062,7 +2062,7 @@ void RoadBroken::getProperties(QFormLayout *layout, QGLWidget* render)
 
     for (int i = 0; i < lines.size(); ++i)
     {
-        QPushButton* b = new QPushButton(QString::number(i));
+        QPushButton* b = new QPushButton(QString::number(i + 1));
         connect(b, SIGNAL(clicked(bool)), this, SLOT(deleteLine()));
         layout->addRow("Удалить линию ",b);
     }
@@ -2092,14 +2092,16 @@ void RoadBroken::addLine(float step, QString textureSource, float textureSize, f
     LineBrokenLinkedToRoadBroken line;
     if (lineType == 6)
     {
-        line.line = new SplitZone(lineVertexArray, size, splitZoneWidth, beginRounding, endRounding);
+        line.line = new SplitZone(lineVertexArray, size, splitZoneWidth, beginRounding, endRounding,
+                                  QString("Линия №") + QString::number(lines.size() + 1));
         line.splitZoneWidth = splitZoneWidth;
         line.beginRounding = beginRounding;
         line.endRounding = endRounding;
     }
     else
     {
-        line.line = new LineBroken(lineWidth, lineVertexArray, size, textureSource, textureSize, "LineBroken", 1);
+        line.line = new LineBroken(lineWidth, lineVertexArray, size, textureSource, textureSize, "LineBroken", 1,
+                                   QString("Линия №") + QString::number(lines.size() + 1));
     }
     qDebug() << "Creted line";
     line.lineWidth = lineWidth;
@@ -2177,9 +2179,22 @@ void RoadBroken::deleteLine()
     QPushButton * b = qobject_cast<QPushButton*>(sender());
     if (!b) return;
     qDebug() << "delete line " << b->text();
-    int i = b->text().toInt();
+    int i = b->text().toInt() - 1;
     delete lines[i].line;
     lines.remove(i);
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].lineType != 6)
+        {
+            LineBroken* line = dynamic_cast<LineBroken*>(lines[i].line);
+            line->setDescription(QString("Линия №") + QString::number(i + 1));
+        }
+        else
+        {
+            SplitZone* line = dynamic_cast<SplitZone*>(lines[i].line);
+            line->setDescription(QString("Линия №") + QString::number(i + 1));
+        }
+    }
     emit linesChanged(layout, render);
 }
 
@@ -2199,11 +2214,13 @@ void RoadBroken::resetLines()
 
         if (lines[i].lineType == 6)
         {
-            lines[i].line = new SplitZone(lineVertexArray, size, lines[i].splitZoneWidth, lines[i].beginRounding, lines[i].endRounding);
+            lines[i].line = new SplitZone(lineVertexArray, size, lines[i].splitZoneWidth, lines[i].beginRounding, lines[i].endRounding,
+                                          QString("Линия №") + QString::number(i + 1));
         }
         else
         {
-            lines[i].line = new LineBroken(lines[i].lineWidth, lineVertexArray, size, lines[i].textureSource, 6.0f, "LineBroken", 1);
+            lines[i].line = new LineBroken(lines[i].lineWidth, lineVertexArray, size, lines[i].textureSource, 6.0f, "LineBroken", 1,
+                                           QString("Линия №") + QString::number(i + 1));
         }
         //lines[i].line = new LineBroken(lines[i].lineWidth, lineVertexArray, size, lines[i].textureSource, 6.0f, "LineBroken", 1);
         delete[] lineVertexArray;
@@ -2288,6 +2305,20 @@ void RoadBroken::drawMeasurements(QGLWidget *render)
 
     }
     glDisable(GL_LINE_STIPPLE);
+
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].lineType != 6)
+        {
+            LineBroken* line = dynamic_cast<LineBroken*>(lines[i].line);
+            line->drawDescription(render);
+        }
+        else
+        {
+            SplitZone* line = dynamic_cast<SplitZone*>(lines[i].line);
+            line->drawDescription(render);
+        }
+    }
 }
 
 

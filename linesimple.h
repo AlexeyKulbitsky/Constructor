@@ -44,12 +44,15 @@ protected:
     GLubyte IndexArrayForSelection[4];
     GLfloat ColorArrayForSelection[4][3];
     bool selected;
+    QString description;
 
 public:
     LineSimple();
     LineSimple(float x1, float y1, float x2, float y2, QString name,int layer);
     LineSimple(float x1, float y1, float x2, float y2, float width, float red, float green, float blue, float alpha, QString name,int layer);
     LineSimple(float x1, float y1, float x2, float y2, float width, QString source, float textureSize, QString name, int layer);
+    LineSimple(float x1, float y1, float x2, float y2, float width, QString source, float textureSize, QString name, int layer, QString description);
+
     bool hasPoint(GLfloat x, GLfloat y);
     void drawFigure(QGLWidget* render = 0);
     void drawSelectionFrame();
@@ -63,7 +66,8 @@ public:
     vec2 getAxisPoint_1(){return vec2(x1, y1);}
     vec2 getAxisPoint_2(){return vec2(x2, y2);}
     QPoint getCoorninateOfPointControl(int index);
-
+    void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
+    void drawDescription(QGLWidget* render = 0, float red = 1.0f, float green = 1.0f, float blue = 1.0f);
 
     // RoadElement interface
 public:
@@ -80,7 +84,7 @@ signals:
 public slots:
     void setWidth(double width);
     void setLength(double length);
-
+    void setDescription(QString description);
     // RoadElement interface
 public:
     virtual bool isFixed();

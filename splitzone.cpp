@@ -10,8 +10,10 @@ SplitZone::SplitZone()
 SplitZone::SplitZone(float *pointsArray, int size,
                      float width,
                      bool beginRounding,
-                     bool endRounding)
+                     bool endRounding,
+                     QString description)
 {
+    this->description = description;
     this->name = "SplitZone";
     line = NULL;
     this->beginRounding = beginRounding;
@@ -35,8 +37,10 @@ SplitZone::SplitZone(float x1, float y1, float z1,
                      float x2, float y2, float z2,
                      float width,
                      bool beginRounding,
-                     bool endRounding)
+                     bool endRounding,
+                     QString description)
 {
+    this->description = description;
     this->name = "SplitZone";
     this->layer = 1;
     line = NULL;
@@ -322,6 +326,8 @@ bool SplitZone::setFixed(bool fixed)
 void SplitZone::calculateLine(vec3 p1, vec3 p2, float width)
 {
 
+    xCenter = (p1.x + p2.x) / 2.0f;
+    yCenter = (p1.y + p2.y) / 2.0f;
     float r = sqrt((p1.x - p2.x)*(p1.x - p2.x) + (p1.y - p2.y)*(p1.y - p2.y));
     float xR1, yR1, xR2, yR2;
     float pi = 3.1415926f;
@@ -531,6 +537,8 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
 {
     QVector<GLfloat> lineAxis;
 
+    xCenter = pointsArray[size / 6 * 3];
+    yCenter = pointsArray[size / 6 * 3 + 1];
     for (int i = 0; i < size / 3; ++i)
     {
         // Если теукщий индекс - начало осевой линии,
@@ -781,4 +789,25 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
 float SplitZone::getWidth()
 {
     return width;
+}
+
+void SplitZone::setDescription(const QString& description)
+{
+    this->description = description;
+}
+
+void SplitZone::drawDescription(QGLWidget *render, float red, float green, float blue)
+{
+    glColor3f(red, green, blue);
+    if (render && description[0] != '\0')
+    {
+        GLdouble x, y, z;
+        GLdouble wx, wy, wz;
+        x = xCenter;
+        y = yCenter;
+        z = 0.0f;
+        QFont shrift = QFont("Times", 8, QFont::Black);
+        getWindowCoord(x, y, z, wx, wy, wz);
+        render->renderText(wx + 5, wy + 5, description, shrift);
+    }
 }

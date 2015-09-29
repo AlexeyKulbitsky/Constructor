@@ -42,6 +42,8 @@ void DefaultState::mousePressEvent(QMouseEvent *pe)
             if ((*it)->getName() == "RoadBroken")
             {
                 stateManager->roadBuilderState->setRoad(dynamic_cast<RoadBroken*>(*it));
+                stateManager->roadBuilderState->setGroupIndex(selectedGroup);
+                stateManager->roadBuilderState->setElementIndex(selectedIndex);
                 stateManager->setState(stateManager->roadBuilderState);
             }
             else
@@ -425,6 +427,59 @@ void DefaultState::dropEvent(QDropEvent *event)
         model->setModified(true);
     }
     */
+            if (s == "Здание 1")
+            {
+                OBJFileManager* fileManager = new OBJFileManager(model);
+                RoadElementOBJ* element = new RoadElementOBJ();
+                fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/buildings/build10/").toStdString().c_str(),"Build10_obj.obj",
+                                     element->meshes,50.374f, element->scaleFactor);
+                model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
+                model->setModified(true);
+            }
+    else
+                if (s == "Здание 2")
+                {
+                    OBJFileManager* fileManager = new OBJFileManager(model);
+                    RoadElementOBJ* element = new RoadElementOBJ();
+                    fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/buildings/build11/").toStdString().c_str(),"Build11_obj.obj",
+                                         element->meshes,2.374f, element->scaleFactor);
+                    model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
+                    model->setModified(true);
+                }
+        else
+                    if (s == "Дерево 1")
+                    {
+                        _3DsFileManager* fileManager = new _3DsFileManager();
+                        RoadElement3D* element = new RoadElement3D(x, y);
+                        fileManager->load3DS((QApplication::applicationDirPath() + "/models/plants/tree1/").toStdString().c_str(),"Tree1.3ds",
+                                             element->meshes,element->materials);
+                        element->setSelectedStatus(true);
+                        model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
+                        model->setModified(true);
+                    }
+            else
+                        if (s == "Дерево 2")
+                        {
+                            _3DsFileManager* fileManager = new _3DsFileManager();
+                            RoadElement3D* element = new RoadElement3D(x, y);
+                            fileManager->load3DS((QApplication::applicationDirPath() + "/models/plants/tree2/").toStdString().c_str(),"Tree2.3ds",
+                                                 element->meshes,element->materials);
+                            element->setSelectedStatus(true);
+                            model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
+                            model->setModified(true);
+                        }
+                else
+                            if (s == "Дерево 3")
+                            {
+                                _3DsFileManager* fileManager = new _3DsFileManager();
+                                RoadElement3D* element = new RoadElement3D(x, y);
+                                fileManager->load3DS((QApplication::applicationDirPath() + "/models/plants/tree3/").toStdString().c_str(),"Tree3.3ds",
+                                                     element->meshes,element->materials);
+                                element->setSelectedStatus(true);
+                                model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
+                                model->setModified(true);
+                            }
+                    else
     if (s == "Знак")
     {
         //OBJFileManager* fileManager = new OBJFileManager(model);

@@ -11,12 +11,14 @@ public:
     SplitZone(float *pointsArray, int size,
               float width,
               bool beginRounding,
-              bool endRounding);
+              bool endRounding,
+              QString description = '\0');
     SplitZone(float x1, float y1, float z1,
               float x2, float y2, float z2,
               float width,
               bool beginRounding,
-              bool endRounding);    
+              bool endRounding,
+              QString description = '\0');
     ~SplitZone();
     // RoadElement interface
 public:
@@ -56,12 +58,16 @@ private:
     float lineWidth;
     vec3 p1, p2, p3, p4;
     vec3 line1_p1, line1_p2, line2_p1, line2_p2;
+    QString description;
+    float xCenter, yCenter;
 
 public:
     void calculateLine(vec3 p1, vec3 p2, float width);
     void calculateLine(float *pointsArray, int size,
                        float width);
     float getWidth();
+    void setDescription(const QString &description);
+    void drawDescription(QGLWidget* render = 0, float red = 1.0f, float green = 1.0f, float blue = 1.0f);
 };
 
 #endif // SPLITZONE_H

@@ -78,7 +78,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QListWidget* objectList = new ObjectsList();
     connect(objectList, SIGNAL(itemClicked(QListWidgetItem*)), ui->scene2D, SLOT(listItemClicked(QListWidgetItem*)));
-    ui->toolBox->addItem(objectList, "Инструменты");
+    ui->toolBox->addItem(objectList, "Элементы");
     //QDir dir("D:/3ds/city_roads/");
 
     QDir dir(QApplication::applicationDirPath());

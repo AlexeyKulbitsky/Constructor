@@ -81,6 +81,8 @@ void RoadBuilderState::mousePressEvent(QMouseEvent *pe)
             roadBroken->getProperties(properties,scene);
             //model->getGroup(model->getNumberOfGroups() - 1).push_back(roadBroken);
             model->getGroup(layer).push_back(roadBroken);
+            groupIndex = layer;
+            elementIndex = model->getGroup(layer).size() - 1;
             scene->updateGL();
         }
         else
@@ -176,8 +178,8 @@ void RoadBuilderState::mouseMoveEvent(QMouseEvent *pe)
                 }
                 else
                 {
-                    if (this->tryToSelectFigures(pe->pos()) == true)
-                    {
+                    //if (this->tryToSelectFigures(pe->pos()) == true)
+                    //{
                         float dY = (GLfloat)(-1)*(pe->y()-ptrMousePosition.y())/
                                 scene->width()/(scene->nSca * scene->ratio) * 2.0;
                         float dX = (GLfloat)(pe->x()-ptrMousePosition.x())/
@@ -185,7 +187,7 @@ void RoadBuilderState::mouseMoveEvent(QMouseEvent *pe)
 
                         roadBroken->move(dX, dY);
                         scene->updateGL();
-                    }
+                    //}
                 }
             }
             else
@@ -296,15 +298,34 @@ void RoadBuilderState::keyPressEvent(QKeyEvent *pe)
 
     case Qt::Key_Delete:
         //model->getGroup(model->getNumberOfGroups() - 1).pop_back();
-        model->getGroup(layer).pop_back();
-        scene->setCursor(Qt::ArrowCursor);
-        delete roadBroken;
-        roadBroken = NULL;
+       // model->getGroup(layer).pop_back();
+       // scene->setCursor(Qt::ArrowCursor);
+       // delete roadBroken;
+       // roadBroken = NULL;
+       // clearProperties(properties);
+       // stateManager->setState(stateManager->defaultState);
+       // break;
+/////////////////////////////
+
+    {
+        std::list<RoadElement*>::iterator it = model->getGroup(groupIndex).begin();
+        for (int j = 0; j < elementIndex; ++j)
+            ++it;
+        (*it)->clear();
+        delete (*it);
+        model->getGroup(groupIndex).erase(it);
         clearProperties(properties);
+        scene->updateGL();
+        groupIndex = -1;
+        elementIndex = -1;
+
+        scene->setMouseTracking(false);
+        scene->setCursor(Qt::ArrowCursor);
         stateManager->setState(stateManager->defaultState);
+    }
         break;
-
-
+    default:
+        break;
     }
 
     scene->updateGL();
@@ -776,6 +797,16 @@ void RoadBuilderState::setName(QString name)
 void RoadBuilderState::setLayer(int layer)
 {
     this->layer = layer;
+}
+
+void RoadBuilderState::setGroupIndex(int index)
+{
+    groupIndex = index;
+}
+
+void RoadBuilderState::setElementIndex(int index)
+{
+    elementIndex = index;
 }
 
 
