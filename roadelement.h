@@ -120,7 +120,7 @@ struct Material
     float specularColor[3];
 
     QString textureSource;
-    unsigned int textureID;
+    unsigned int textureID = 0;
 };
 
 

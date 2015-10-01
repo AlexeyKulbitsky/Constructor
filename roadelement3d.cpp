@@ -39,6 +39,10 @@ void RoadElement3D::setSelectedStatus(bool status)
 
 void RoadElement3D::drawFigure(QGLWidget *render)
 {
+    //glFrontFace(GL_CCW);
+    glEnable(GL_DEPTH_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK , GL_FILL);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     glPushMatrix();
 
@@ -160,7 +164,10 @@ void RoadElement3D::drawFigure(QGLWidget *render)
                     glBindTexture(GL_TEXTURE_2D, materials[meshes[i]->materialMeshes[j].materialName].textureID);
                 }
                 else
+                {
                     qDebug() << "No texture";
+                    //glDisable(GL_LIGHTING);
+                }
                 // qDebug() << meshes[i]->materialMeshes[j].faces.size();
 
                 glDrawElements(GL_TRIANGLES,meshes[i]->materialMeshes[j].faces.size(),GL_UNSIGNED_SHORT,meshes[i]->materialMeshes[j].faces.begin());

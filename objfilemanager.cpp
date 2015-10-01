@@ -307,12 +307,12 @@ void OBJFileManager::readMtl(char *mtlSource, std::vector<MaterialInfo*>& materi
     FILE *mtlFile = fopen(mtlSource, "r");
     if (mtlFile == NULL)
     {
-        //qDebug() << "Impossible to open the .mtl file !\n";
+        qDebug() << "Impossible to open the .mtl file !\n";
         return;
     }
     else
     {
-        //qDebug() << "File .mtl successfully opened";
+       qDebug() << "File .mtl successfully opened";
     }
     char mtlBuffer[256];
 

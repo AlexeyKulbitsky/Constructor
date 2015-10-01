@@ -153,6 +153,7 @@ bool _3DsFileManager::load3DS(const char *folder, const char *filename, std::vec
         {
             //qDebug() << "MAT_ENTRY";
             Material material;
+            material.textureID = 0;
             if (readMaterial(file, material, chunkLength - 6))
                 materials[material.name] = material;
         }

@@ -35,21 +35,23 @@ ObjectsList::ObjectsList(QWidget *parent)
     this->addItem("Автобус ПАЗ");
     this->addItem("Микроавтобус Ford");
     this->addItem("Грузовик Ford");
+    this->addItem("DAF XF");
     this->addItem("Остановка");
     this->addItem("Здание 1");
     this->addItem("Здание 2");
     this->addItem("Дерево 1");
     this->addItem("Дерево 2");
     this->addItem("Дерево 3");
+    this->addItem("Здание");
     //this->addItem("Знак");
     //this->addItem("Человек");
     //this->addItem("");
 
 }
 
-ObjectsList::ObjectsList(QDir directory, QWidget *parent): QListWidget(parent)
+ObjectsList::ObjectsList(QDir directory, QString fileType, QWidget *parent): QListWidget(parent)
 {
-    QStringList list(directory.entryList(QStringList() << "*.3ds"));
+    QStringList list(directory.entryList(QStringList() << fileType));
     for (int i = 0; i < list.size(); ++i)
         this->addItem(list.at(i));
     filePath = directory.absolutePath();

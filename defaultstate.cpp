@@ -398,6 +398,17 @@ void DefaultState::dropEvent(QDropEvent *event)
         model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
         model->setModified(true);
     } else
+        if (s == "DAF XF")
+        {
+            OBJFileManager* fileManager = new OBJFileManager(model);
+            RoadElementOBJ* element = new RoadElementOBJ(x, y);
+            fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/DAF_xf/").toStdString().c_str(),"DAF_XF.obj",
+                                 element->meshes,3.374f, element->scaleFactor);
+            //fileManager->loadOBJ("models/cars/","ford_transit_1.obj",
+            //                     element->meshes,1.74f, element->scaleFactor);
+            model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
+            model->setModified(true);
+        } else
     if (s == "Остановка")
     {
         OBJFileManager* fileManager = new OBJFileManager(model);
@@ -449,31 +460,31 @@ void DefaultState::dropEvent(QDropEvent *event)
         else
                     if (s == "Дерево 1")
                     {
-                        _3DsFileManager* fileManager = new _3DsFileManager();
-                        RoadElement3D* element = new RoadElement3D(x, y);
-                        fileManager->load3DS((QApplication::applicationDirPath() + "/models/plants/tree1/").toStdString().c_str(),"Tree1.3ds",
-                                             element->meshes,element->materials);
-                        element->setSelectedStatus(true);
+                        OBJFileManager* fileManager = new OBJFileManager(model);
+                        RoadElementOBJ* element = new RoadElementOBJ();
+                        fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/humans/man/").toStdString().c_str(),"Man.obj",
+                                             element->meshes,2.374f, element->scaleFactor);
                         model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
                         model->setModified(true);
                     }
             else
                         if (s == "Дерево 2")
                         {
-                            _3DsFileManager* fileManager = new _3DsFileManager();
-                            RoadElement3D* element = new RoadElement3D(x, y);
-                            fileManager->load3DS((QApplication::applicationDirPath() + "/models/plants/tree2/").toStdString().c_str(),"Tree2.3ds",
-                                                 element->meshes,element->materials);
-                            element->setSelectedStatus(true);
+                            OBJFileManager* fileManager = new OBJFileManager(model);
+                            RoadElementOBJ* element = new RoadElementOBJ();
+                            fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/plants/tree2/").toStdString().c_str(),"Tree2.obj",
+                                                 element->meshes,2.374f, element->scaleFactor);
                             model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
                             model->setModified(true);
                         }
                 else
                             if (s == "Дерево 3")
                             {
+
                                 _3DsFileManager* fileManager = new _3DsFileManager();
                                 RoadElement3D* element = new RoadElement3D(x, y);
-                                fileManager->load3DS((QApplication::applicationDirPath() + "/models/plants/tree3/").toStdString().c_str(),"Tree3.3ds",
+                                fileManager->load3DS((QApplication::applicationDirPath() + "/models/plants/BlackLocust/").toStdString().c_str(),
+                                                     "black_locust1.3ds",
                                                      element->meshes,element->materials);
                                 element->setSelectedStatus(true);
                                 model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
@@ -490,7 +501,17 @@ void DefaultState::dropEvent(QDropEvent *event)
         element->setSelectedStatus(true);
         model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
         model->setModified(true);
-    }
+    }else
+        if (s == "Здание")
+        {
+            OBJFileManager* fileManager = new OBJFileManager(model);
+            RoadElementOBJ* element = new RoadElementOBJ();
+            fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/buildings/").toStdString().c_str(),"Bld_02.obj",
+                                 element->meshes,0.0f, element->scaleFactor);
+            element->scaleFactor = 1.0f;
+            model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
+            model->setModified(true);
+        }
     /*
     else
     {
@@ -505,21 +526,41 @@ void DefaultState::dropEvent(QDropEvent *event)
     //QString(event->mimeData()->data());
     else
     {
-        _3DsFileManager* fileManager = new _3DsFileManager();
-        RoadElement3D* element = new RoadElement3D(x, y);
+
         QStringList lst =  QString(event->mimeData()->data("text/plain")).split(' ');
         for (int i = 0; i < lst.size(); ++i)
         {
             qDebug() << lst.at(i);
         }
+        if (lst.at(1)[lst.at(1).size() - 1] == 's')
+        {
+            _3DsFileManager* fileManager = new _3DsFileManager();
+            RoadElement3D* element = new RoadElement3D(x, y);
+            fileManager->load3DS(lst.at(0).toStdString().c_str(),
+                                 lst.at(1).toStdString().c_str(),
+                                 element->meshes,
+                                 element->materials);
+
+            model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
+            model->setModified(true);
+            element->setSelectedStatus(false);
+        }
+        else
+            if (lst.at(1)[lst.at(1).size() - 1] == 'j')
+            {
+                OBJFileManager* fileManager = new OBJFileManager(model);
+                RoadElementOBJ* element = new RoadElementOBJ();
+                fileManager->loadOBJ(lst.at(0).toStdString().c_str(),
+                                     lst.at(1).toStdString().c_str(),
+                                     element->meshes,2.374f, element->scaleFactor);
+                model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
+                model->setModified(true);
+                element->setSelectedStatus(false);
+            }
+        //qDebug() << lst.at(1)[lst.at(1).size() - 1];
         //qDebug() << s.toStdString().c_str();
-        fileManager->load3DS(lst.at(0).toStdString().c_str(),
-                             lst.at(1).toStdString().c_str(),
-                             element->meshes,
-                             element->materials);
-        element->setSelectedStatus(false);
-        model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-        model->setModified(true);
+
+
     }
 
 

@@ -41,6 +41,7 @@ void RoadElementOBJ::setSelectedStatus(bool status)
 
 void RoadElementOBJ::drawFigure(QGLWidget *render)
 {
+    glPolygonMode(GL_FRONT_AND_BACK , GL_FILL);
     glPushMatrix();
 
     glTranslatef(deltaX, deltaY, 0.0f);
