@@ -23,7 +23,8 @@ StateManager::StateManager(Model *model, Scene2D* scene, QFormLayout *properties
     rulerState = new RulerState(this, model, scene);
     lineBuilderState = new LineBuilderState(this, model, scene, properties);
     roadBuilderState = new RoadBuilderState(this, model, scene, properties);
-
+    fileManager3DS = new _3DsFileManager();
+    fileManagerOBJ = new OBJFileManager(model);
     connect(rulerState, SIGNAL(rulerStatusChanged(bool)), this, SLOT(setRulerActive(bool)));
     currentState = defaultState;
     //currentState = lineBuilderState;

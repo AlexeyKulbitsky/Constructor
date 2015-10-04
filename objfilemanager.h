@@ -39,7 +39,7 @@ public:
     float *calculateNormals(int a, int b, int c);
 
     bool loadOBJ(const char *folder, const char* filename,
-                 std::vector<Mesh *> &meshes, float width, float &scaleFactor);
+                 std::vector<Mesh *> &meshes, float velocity, float &scaleFactor, int axis = 0);
 
 
     void readVertex(char* line);

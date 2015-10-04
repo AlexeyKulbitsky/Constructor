@@ -76,7 +76,7 @@ float* OBJFileManager::calculateNormals(int a, int b, int c)
 
 
 
-bool OBJFileManager::loadOBJ(const char *folder, const char *filename, std::vector<Mesh*>& meshes, float width, float& scaleFactor)
+bool OBJFileManager::loadOBJ(const char *folder, const char *filename, std::vector<Mesh*>& meshes, float velocity, float& scaleFactor, int axis)
 {
     std::vector< vec3 > temp_vertices;
     std::vector< vec2 > temp_uvs;
@@ -97,6 +97,7 @@ bool OBJFileManager::loadOBJ(const char *folder, const char *filename, std::vect
     bool hasNormals = false;
     bool hasTextures = false;
     float minX = 0.0f, maxX = 0.0f;
+    float minZ = 0.0f, maxZ = 0.0f;
     float minY = 0.0f, maxY = 0.0f;
     FILE * file = fopen(fullPath, "r");
     if( file == NULL ){
@@ -124,7 +125,9 @@ bool OBJFileManager::loadOBJ(const char *folder, const char *filename, std::vect
             if (minY > vert.y) minY = vert.y;
             else
                 if (maxY < vert.y) maxY = vert.y;
-
+            if (minZ > vert.z) minZ = vert.z;
+            else
+                if (maxZ < vert.z) maxZ = vert.z;
             temp_vertices.push_back(vert);
         }
         else if (buffer[0] == 'v' && buffer[1] == 't')
@@ -264,10 +267,22 @@ bool OBJFileManager::loadOBJ(const char *folder, const char *filename, std::vect
         }else continue;
     }
     fclose(file);
-    if ((maxX - minX) < (maxY - minY))
-        scaleFactor = width / (maxX - minX);
-    else
-        scaleFactor = width / (maxY - minY);
+    switch (axis)
+    {
+    case 1:
+        scaleFactor = velocity / (maxX - minX);
+        break;
+    case 2:
+        scaleFactor = velocity / (maxY - minY);
+        break;
+    case 3:
+        scaleFactor = velocity / (maxZ - minZ);
+        break;
+    default:
+        scaleFactor = 1.0f;
+        break;
+    }
+    meshes.push_back(currentMesh);
 }
 
 

@@ -34,13 +34,16 @@ signals:
     void zRotationChanged(double value);
     void xScaleChanged(double value);
     void yScaleChanged(double value);
+    void zScaleChanged(double value);
+    void scaleChanged(double value);
 
 public slots:
     virtual bool setFixed(bool fixed);
     void setZRotation(double value);
     void setXScale(double value);
     void setYScale(double value);
-
+    void setZScale(double value);
+    void setScale(double scale);
 
 public:
 
@@ -60,7 +63,7 @@ public:
 
     GLdouble xScale;
     GLdouble yScale;
-
+    GLdouble zScale;
 
     std::vector<vec3> vertexArray;
     std::vector<vec3> normalArray;

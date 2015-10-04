@@ -48,8 +48,22 @@ void DefaultState::mousePressEvent(QMouseEvent *pe)
             }
             else
             {
-                stateManager->setState(stateManager->selectedState);
+                if ((*it)->getName() == "LineBroken" ||
+                        (*it)->getName() == "Tramways" ||
+                        (*it)->getName() == "VoltageLine" ||
+                        (*it)->getName() == "DoubleVoltageLine")
+                {
+                    stateManager->lineBuilderState->setLine(dynamic_cast<LineBroken*>(*it));
+                    stateManager->lineBuilderState->setGroupIndex(selectedGroup);
+                    stateManager->lineBuilderState->setElementIndex(selectedIndex);
+                    stateManager->setState(stateManager->lineBuilderState);
+                }
+                else
+                {
+                    stateManager->setState(stateManager->selectedState);
+                }
             }
+
 
         }
         break;
@@ -245,22 +259,50 @@ void DefaultState::dropEvent(QDropEvent *event)
         } else
     if (s == "Сплошая")
     {
-        model->getGroup(1).push_back(new LineSimple(x - 2.0, y, x + 2.0, y, 0.1, 1.0f, 1.0f, 1.0f, 1.0f, "LineSolid", 1));
+        float axis[6];
+        axis[0] = x - 2.5f;
+        axis[1] = y;
+        axis[2] = 0.02f;
+        axis[3] = x + 2.5f;
+        axis[4] = y;
+        axis[5] = 0.02f;
+        model->getGroup(1).push_back(new LineBroken(0.1f, axis, 6, QString("LineBroken"), 1));
         model->setModified(true);
     } else
     if (s == "Прерывистая")
     {
-        model->getGroup(1).push_back(new LineSimple(x - 2.0, y, x + 2.0, y, 0.1, QString(":/textures/intermittent.png"), 0.8f, "LineIntermittent", 1));
+        float axis[6];
+        axis[0] = x - 2.5f;
+        axis[1] = y;
+        axis[2] = 0.02f;
+        axis[3] = x + 2.5f;
+        axis[4] = y;
+        axis[5] = 0.02f;
+        model->getGroup(1).push_back(new LineBroken(0.1f, axis, 6, QString(":/textures/intermittent.png"), 0.8f, QString("LineBroken"), 1));
         model->setModified(true);
     } else
     if (s == "Двойная сплошая")
     {
-        model->getGroup(1).push_back(new LineSimple(x - 2.0, y, x + 2.0, y, 0.28, QString(":/textures/double_solid.png"), 1.0f, "LineDoubleSolid", 1));
+        float axis[6];
+        axis[0] = x - 2.5f;
+        axis[1] = y;
+        axis[2] = 0.02f;
+        axis[3] = x + 2.5f;
+        axis[4] = y;
+        axis[5] = 0.02f;
+        model->getGroup(1).push_back(new LineBroken(0.25f, axis, 6, QString(":/textures/double_solid.png"), 1.0f, QString("LineBroken"), 1));
         model->setModified(true);
     } else
     if (s == "Двойная прерывистая")
     {
-        model->getGroup(1).push_back(new LineSimple(x - 2.0, y, x + 2.0, y, 0.28, QString(":/textures/double_solid_intermittent.png"), 0.8f, "LineDoubleSolidIntermittent", 1));
+        float axis[6];
+        axis[0] = x - 2.5f;
+        axis[1] = y;
+        axis[2] = 0.02f;
+        axis[3] = x + 2.5f;
+        axis[4] = y;
+        axis[5] = 0.02f;
+        model->getGroup(1).push_back(new LineBroken(0.25f, axis, 6, QString(":/textures/double_solid_intermittent.png"), 0.8f, QString("LineBroken"), 1));
         model->setModified(true);
     } else
     if (s == "Пешеходный переход")
@@ -273,7 +315,14 @@ void DefaultState::dropEvent(QDropEvent *event)
     } else
     if (s == "Трамвайные пути")
     {
-        model->getGroup(1).push_back(new LineSimple(x - 2.0, y, x + 2.0, y, 1.5, QString(":/textures/tramways.png"), 1.5f, "Tramways", 1));
+        float axis[6];
+        axis[0] = x - 2.5f;
+        axis[1] = y;
+        axis[2] = 0.02f;
+        axis[3] = x + 2.5f;
+        axis[4] = y;
+        axis[5] = 0.02f;
+        model->getGroup(1).push_back(new LineBroken(1.5f, axis, 6, QString(":/textures/tramways.png"), 1.5f, "Tramways", 1));
         model->setModified(true);
     } else
     if (s == "Железная дорога")
@@ -281,6 +330,30 @@ void DefaultState::dropEvent(QDropEvent *event)
         model->getGroup(1).push_back(new LineSimple(x - 2.0, y, x + 2.0, y, 2.1, QString(":/textures/railroad.png"), 2.1f, "Railroad", 1));
         model->setModified(true);
     } else
+        if (s == "Провод")
+        {
+            float axis[6];
+            axis[0] = x - 2.5f;
+            axis[1] = y - 0.5f;
+            axis[2] = 1.0f;
+            axis[3] = x + 2.5f;
+            axis[4] = y + 0.5f;
+            axis[5] = 1.0f;
+            model->getGroup(1).push_back(new VoltageLine(axis, 6));
+            model->setModified(true);
+        } else
+            if (s == "Двойной провод")
+            {
+                float axis[6];
+                axis[0] = x - 5.0f;
+                axis[1] = y - 0.5f;
+                axis[2] = 1.0f;
+                axis[3] = x + 5.0f;
+                axis[4] = y + 0.5f;
+                axis[5] = 1.0f;
+                model->getGroup(1).push_back(new DoubleVoltageLine(axis, 6));
+                model->setModified(true);
+            } else
     if (s == "Ломаная")
     {
         float ar[15];
@@ -310,9 +383,9 @@ void DefaultState::dropEvent(QDropEvent *event)
     } else
     if (s == "Audi Q7")
     {
-        OBJFileManager* fileManager = new OBJFileManager(model);       
         RoadElementOBJ* element = new RoadElementOBJ(x, y);
-       fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/audi_q7/").toStdString().c_str(),"audi_q7.obj",
+
+       stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/audi_q7/").toStdString().c_str(),"audi_q7.obj",
                              element->meshes,2.177f, element->scaleFactor);
         //fileManager->loadOBJ("models/cars/","audi_q7.obj",
         //                     element->meshes,2.177f, element->scaleFactor);
@@ -322,9 +395,8 @@ void DefaultState::dropEvent(QDropEvent *event)
     } else
     if (s == "BMW M3")
     {
-        OBJFileManager* fileManager = new OBJFileManager(model);
         RoadElementOBJ* element = new RoadElementOBJ(x, y);
-        fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/bmw_m3/").toStdString().c_str(),"bmw_m3.obj",
+        stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/bmw_m3/").toStdString().c_str(),"bmw_m3.obj",
                              element->meshes,1.976f, element->scaleFactor);
         //fileManager->loadOBJ("models/cars/","bmw_m3.obj",
         //                     element->meshes,2.177f, element->scaleFactor);
@@ -334,9 +406,8 @@ void DefaultState::dropEvent(QDropEvent *event)
     } else
             if (s == "ВАЗ-2104")
             {
-                OBJFileManager* fileManager = new OBJFileManager(model);
                 RoadElementOBJ* element = new RoadElementOBJ(x, y);
-                fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/vaz_2104/").toStdString().c_str(),"vaz_2104.obj",
+                stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/vaz_2104/").toStdString().c_str(),"vaz_2104.obj",
                                      element->meshes,1.74f, element->scaleFactor);
                 //fileManager->loadOBJ("models/cars/","vaz_2104.obj",
                 //                     element->meshes,1.74f, element->scaleFactor);
@@ -345,9 +416,8 @@ void DefaultState::dropEvent(QDropEvent *event)
             } else
     if (s == "ВАЗ-2106")
     {
-        OBJFileManager* fileManager = new OBJFileManager(model);
         RoadElementOBJ* element = new RoadElementOBJ(x, y);
-        fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/VAZ_2106/").toStdString().c_str(),"VAZ_2106.obj",
+        stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/VAZ_2106/").toStdString().c_str(),"VAZ_2106.obj",
                              element->meshes,1.74f, element->scaleFactor);
         //fileManager->loadOBJ("models/cars/","VAZ_2106.obj",
         //                     element->meshes,1.74f, element->scaleFactor);
@@ -356,9 +426,8 @@ void DefaultState::dropEvent(QDropEvent *event)
     } else
         if (s == "Dodge_Ram_2007")
         {
-            OBJFileManager* fileManager = new OBJFileManager(model);
             RoadElementOBJ* element = new RoadElementOBJ(x, y);
-            fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/Dodge_Ram_2007/").toStdString().c_str(),"Dodge_Ram_2007.obj",
+            stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/Dodge_Ram_2007/").toStdString().c_str(),"Dodge_Ram_2007.obj",
                                  element->meshes,2.022f, element->scaleFactor);
             //fileManager->loadOBJ("models/cars/","Dodge_Ram_2007.obj",
             //                     element->meshes,1.74f, element->scaleFactor);
@@ -367,9 +436,8 @@ void DefaultState::dropEvent(QDropEvent *event)
         } else
                 if (s == "Автобус ПАЗ")
                 {
-                    OBJFileManager* fileManager = new OBJFileManager(model);
                     RoadElementOBJ* element = new RoadElementOBJ(x, y);
-                    fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/PAZ_1/").toStdString().c_str(),"PAZ_1.obj",
+                    stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/PAZ_1/").toStdString().c_str(),"PAZ_1.obj",
                                          element->meshes,2.5f, element->scaleFactor);
                     //fileManager->loadOBJ("models/cars/","PAZ_1.obj",
                     //                     element->meshes,1.74f, element->scaleFactor);
@@ -378,9 +446,8 @@ void DefaultState::dropEvent(QDropEvent *event)
                 } else
     if (s == "Микроавтобус Ford")
     {
-        OBJFileManager* fileManager = new OBJFileManager(model);
         RoadElementOBJ* element = new RoadElementOBJ(x, y);
-        fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/ford_transit_bus/").toStdString().c_str(),"ford_transit_bus.obj",
+        stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/ford_transit_bus/").toStdString().c_str(),"ford_transit_bus.obj",
                              element->meshes,2.374f, element->scaleFactor);
         //fileManager->loadOBJ("models/cars/","ford_transit_bus.obj",
         //                     element->meshes,1.74f, element->scaleFactor);
@@ -389,9 +456,8 @@ void DefaultState::dropEvent(QDropEvent *event)
     } else
     if (s == "Грузовик Ford")
     {
-        OBJFileManager* fileManager = new OBJFileManager(model);
         RoadElementOBJ* element = new RoadElementOBJ(x, y);
-        fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/ford_transit_1/").toStdString().c_str(),"ford_transit_1.obj",
+        stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/ford_transit_1/").toStdString().c_str(),"ford_transit_1.obj",
                              element->meshes,2.374f, element->scaleFactor);
         //fileManager->loadOBJ("models/cars/","ford_transit_1.obj",
         //                     element->meshes,1.74f, element->scaleFactor);
@@ -400,9 +466,8 @@ void DefaultState::dropEvent(QDropEvent *event)
     } else
         if (s == "DAF XF")
         {
-            OBJFileManager* fileManager = new OBJFileManager(model);
             RoadElementOBJ* element = new RoadElementOBJ(x, y);
-            fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/DAF_xf/").toStdString().c_str(),"DAF_XF.obj",
+            stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/DAF_xf/").toStdString().c_str(),"DAF_XF.obj",
                                  element->meshes,3.374f, element->scaleFactor);
             //fileManager->loadOBJ("models/cars/","ford_transit_1.obj",
             //                     element->meshes,1.74f, element->scaleFactor);
@@ -411,18 +476,16 @@ void DefaultState::dropEvent(QDropEvent *event)
         } else
     if (s == "Остановка")
     {
-        OBJFileManager* fileManager = new OBJFileManager(model);
-        RoadElementOBJ* element = new RoadElementOBJ();
-        fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/bus_stop_1/").toStdString().c_str(),"bus_stop_1.obj",
+        RoadElementOBJ* element = new RoadElementOBJ(x, y);
+        stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/bus_stop_1/").toStdString().c_str(),"bus_stop_1.obj",
                              element->meshes,2.374f, element->scaleFactor);
         model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
         model->setModified(true);
     } else
         if (s == "Человек")
         {
-            OBJFileManager* fileManager = new OBJFileManager(model);
             RoadElementOBJ* element = new RoadElementOBJ(x, y);
-            fileManager->loadOBJ("D:/QT/Projects/Constructor/build-Constructor-Desktop_Qt_5_4_1_MinGW_32bit-Debug/debug/","man.obj",
+            stateManager->fileManagerOBJ->loadOBJ("D:/QT/Projects/Constructor/build-Constructor-Desktop_Qt_5_4_1_MinGW_32bit-Debug/debug/","man.obj",
                                  element->meshes,2.374f, element->scaleFactor);
             model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
             model->setModified(true);
@@ -440,9 +503,8 @@ void DefaultState::dropEvent(QDropEvent *event)
     */
             if (s == "Здание 1")
             {
-                OBJFileManager* fileManager = new OBJFileManager(model);
-                RoadElementOBJ* element = new RoadElementOBJ();
-                fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/buildings/build10/").toStdString().c_str(),"Build10_obj.obj",
+                RoadElementOBJ* element = new RoadElementOBJ(x, y);
+                stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/buildings/build10/").toStdString().c_str(),"Build10_obj.obj",
                                      element->meshes,50.374f, element->scaleFactor);
                 model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
                 model->setModified(true);
@@ -450,9 +512,8 @@ void DefaultState::dropEvent(QDropEvent *event)
     else
                 if (s == "Здание 2")
                 {
-                    OBJFileManager* fileManager = new OBJFileManager(model);
-                    RoadElementOBJ* element = new RoadElementOBJ();
-                    fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/buildings/build11/").toStdString().c_str(),"Build11_obj.obj",
+                    RoadElementOBJ* element = new RoadElementOBJ(x, y);
+                    stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/buildings/build11/").toStdString().c_str(),"Build11_obj.obj",
                                          element->meshes,2.374f, element->scaleFactor);
                     model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
                     model->setModified(true);
@@ -460,9 +521,8 @@ void DefaultState::dropEvent(QDropEvent *event)
         else
                     if (s == "Дерево 1")
                     {
-                        OBJFileManager* fileManager = new OBJFileManager(model);
-                        RoadElementOBJ* element = new RoadElementOBJ();
-                        fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/humans/man/").toStdString().c_str(),"Man.obj",
+                        RoadElementOBJ* element = new RoadElementOBJ(x, y);
+                        stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/humans/man/").toStdString().c_str(),"Man.obj",
                                              element->meshes,2.374f, element->scaleFactor);
                         model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
                         model->setModified(true);
@@ -470,9 +530,8 @@ void DefaultState::dropEvent(QDropEvent *event)
             else
                         if (s == "Дерево 2")
                         {
-                            OBJFileManager* fileManager = new OBJFileManager(model);
-                            RoadElementOBJ* element = new RoadElementOBJ();
-                            fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/plants/tree2/").toStdString().c_str(),"Tree2.obj",
+                            RoadElementOBJ* element = new RoadElementOBJ(x, y);
+                            stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/plants/tree2/").toStdString().c_str(),"Tree2.obj",
                                                  element->meshes,2.374f, element->scaleFactor);
                             model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
                             model->setModified(true);
@@ -480,10 +539,8 @@ void DefaultState::dropEvent(QDropEvent *event)
                 else
                             if (s == "Дерево 3")
                             {
-
-                                _3DsFileManager* fileManager = new _3DsFileManager();
                                 RoadElement3D* element = new RoadElement3D(x, y);
-                                fileManager->load3DS((QApplication::applicationDirPath() + "/models/plants/BlackLocust/").toStdString().c_str(),
+                                stateManager->fileManager3DS->load3DS((QApplication::applicationDirPath() + "/models/plants/BlackLocust/").toStdString().c_str(),
                                                      "black_locust1.3ds",
                                                      element->meshes,element->materials);
                                 element->setSelectedStatus(true);
@@ -493,10 +550,8 @@ void DefaultState::dropEvent(QDropEvent *event)
                     else
     if (s == "Знак")
     {
-        //OBJFileManager* fileManager = new OBJFileManager(model);
-        _3DsFileManager* fileManager = new _3DsFileManager();
         RoadElement3D* element = new RoadElement3D(x, y);
-        fileManager->load3DS("D:/QT/Projects/Constructor/build-Constructor-Desktop_Qt_5_4_1_MinGW_32bit-Debug/debug/","road60m_15left_barrier.3ds",
+        stateManager->fileManager3DS->load3DS("D:/QT/Projects/Constructor/build-Constructor-Desktop_Qt_5_4_1_MinGW_32bit-Debug/debug/","road60m_15left_barrier.3ds",
                              element->meshes,element->materials);
         element->setSelectedStatus(true);
         model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
@@ -504,9 +559,8 @@ void DefaultState::dropEvent(QDropEvent *event)
     }else
         if (s == "Здание")
         {
-            OBJFileManager* fileManager = new OBJFileManager(model);
-            RoadElementOBJ* element = new RoadElementOBJ();
-            fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/buildings/").toStdString().c_str(),"Bld_02.obj",
+            RoadElementOBJ* element = new RoadElementOBJ(x, y);
+            stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/buildings/").toStdString().c_str(),"Bld_02.obj",
                                  element->meshes,0.0f, element->scaleFactor);
             element->scaleFactor = 1.0f;
             model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
@@ -534,9 +588,9 @@ void DefaultState::dropEvent(QDropEvent *event)
         }
         if (lst.at(1)[lst.at(1).size() - 1] == 's')
         {
-            _3DsFileManager* fileManager = new _3DsFileManager();
+
             RoadElement3D* element = new RoadElement3D(x, y);
-            fileManager->load3DS(lst.at(0).toStdString().c_str(),
+            stateManager->fileManager3DS->load3DS(lst.at(0).toStdString().c_str(),
                                  lst.at(1).toStdString().c_str(),
                                  element->meshes,
                                  element->materials);
@@ -544,18 +598,21 @@ void DefaultState::dropEvent(QDropEvent *event)
             model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
             model->setModified(true);
             element->setSelectedStatus(false);
+
         }
         else
             if (lst.at(1)[lst.at(1).size() - 1] == 'j')
             {
-                OBJFileManager* fileManager = new OBJFileManager(model);
-                RoadElementOBJ* element = new RoadElementOBJ();
-                fileManager->loadOBJ(lst.at(0).toStdString().c_str(),
+
+                RoadElementOBJ* element = new RoadElementOBJ(x, y);
+                stateManager->fileManagerOBJ->loadOBJ(lst.at(0).toStdString().c_str(),
                                      lst.at(1).toStdString().c_str(),
                                      element->meshes,2.374f, element->scaleFactor);
+                element->scaleFactor = 1.0f;
                 model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
                 model->setModified(true);
                 element->setSelectedStatus(false);
+
             }
         //qDebug() << lst.at(1)[lst.at(1).size() - 1];
         //qDebug() << s.toStdString().c_str();
@@ -650,7 +707,6 @@ bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
                 std::list<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
                 for(int k = 0; k < selectedIndex; ++k)
                     ++it;
-
                 if ((*it)->getName() != "RoadBroken")
                 {
                     stateManager->selectedState->setSelectedElement(i, j);

@@ -8,7 +8,7 @@ RoadElementOBJ::RoadElementOBJ()
     listNumber = -1;
     deltaX = deltaY = 0.0f;
     xRot = yRot = zRot = 0.0f;
-    xScale = yScale = 1.0f;
+    xScale = yScale = zScale = 1.0f;
     indexOfSelectedControl = -1;
     figureList = selectedFigureList = 0;
 }
@@ -22,7 +22,7 @@ RoadElementOBJ::RoadElementOBJ(float x, float y)
     layer = 2;
     listNumber = -1;
     xRot = yRot = zRot = 0.0f;
-    xScale = yScale = 1.0f;
+    xScale = yScale = zScale = 1.0f;
     indexOfSelectedControl = -1;
     figureList = selectedFigureList = 0;
 }
@@ -41,6 +41,7 @@ void RoadElementOBJ::setSelectedStatus(bool status)
 
 void RoadElementOBJ::drawFigure(QGLWidget *render)
 {
+    //glFrontFace(GL_CW);
     glPolygonMode(GL_FRONT_AND_BACK , GL_FILL);
     glPushMatrix();
 
@@ -53,113 +54,12 @@ void RoadElementOBJ::drawFigure(QGLWidget *render)
     //glRotatef(90.0f, 1.0f, 0.0f, 0.0f); // поворот по X
 
     glScalef(scaleFactor, scaleFactor, scaleFactor);
-
+    glScalef(xScale, yScale, zScale);
     //glDisableClientState(GL_COLOR_ARRAY);
     //glDisableClientState(GL_NORMAL_ARRAY);
 
-    /*
-    if (figureList == 0)
-    {
-        figureList = glGenLists( 1 );
-        glNewList( figureList, GL_COMPILE );
 
-
-        for (int i = 0; i < meshes.size(); ++i)
-       {
-
-            //glDisableClientState(GL_NORMAL_ARRAY);
-
-           GLfloat materialAmbient[]= { meshes[i]->Ka[0], meshes[i]->Ka[1], meshes[i]->Ka[2], 1.0f }; // Значения фонового света ( НОВОЕ )
-           GLfloat materialDiffuse[]= { meshes[i]->Kd[0], meshes[i]->Kd[1], meshes[i]->Kd[2], 1.0f }; // Значения диффузного света ( НОВОЕ )
-           GLfloat materialSpecular[]= { meshes[i]->Ks[0], meshes[i]->Ks[1], meshes[i]->Ks[2], 1.0f };
-
-           /*
-           if (meshes[i]->map_Ka_ID > 0)
-           {
-               glEnable(GL_TEXTURE_2D);
-               glBindTexture(GL_TEXTURE_2D, meshes[i]->map_Ka_ID);
-               qDebug() << meshes[i]->map_Ka_ID;
-           }
-           else if (meshes[i]->map_Ks_ID > 0)
-           {
-               glEnable(GL_TEXTURE_2D);
-               glBindTexture(GL_TEXTURE_2D, meshes[i]->map_Ks_ID);
-               qDebug() << meshes[i]->map_Ks_ID;
-           }
-           else
-               if (meshes[i]->map_Kd_ID > 0)
-           {
-                   glEnable(GL_TEXTURE_2D);
-               glBindTexture(GL_TEXTURE_2D, meshes[i]->map_Kd_ID);
-               qDebug() << "Texture ID ID" <<  meshes[i]->map_Kd_ID;
-           }
-           */ /*
-               glDisableClientState(GL_COLOR_ARRAY);
-
-               glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-               glEnableClientState(GL_NORMAL_ARRAY);
-               glEnable(GL_LIGHTING);
-
-           glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbient);
-           glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDiffuse);
-           glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
-           glMaterialf(GL_FRONT, GL_SHININESS, meshes[i]->Ns);
-
-           glTexCoordPointer(2, GL_FLOAT,sizeof(Vertex),&meshes[i]->vertices.data()->texture);
-           glNormalPointer(GL_FLOAT, sizeof(Vertex), &meshes[i]->vertices.data()->normal);
-
-
-       glVertexPointer(3, GL_FLOAT, sizeof(Vertex), &meshes[i]->vertices.data()->position);
-       glDrawArrays(GL_TRIANGLES, 0, meshes[i]->vertices.size());
-
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-       glDisable(GL_TEXTURE_2D);
-       glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-       glDisableClientState(GL_NORMAL_ARRAY);
-       glDisable(GL_LIGHTING);
-       glEnableClientState(GL_COLOR_ARRAY);
-    }
-
-
-        glEndList();
-    }
-
-
-    if (selectedFigureList == 0)
-    {
-        selectedFigureList = glGenLists( 1 );
-        glNewList( selectedFigureList, GL_COMPILE );
-
-
-        for (int i = 0; i < meshes.size(); ++i)
-       {
-
-           glDisableClientState(GL_NORMAL_ARRAY);
-           glDisable(GL_TEXTURE_2D);
-           glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-           glEnableClientState(GL_COLOR_ARRAY);
-           //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-           //glLineWidth(1.0f);
-           glColorPointer(3, GL_FLOAT, sizeof(Vertex), &meshes[i]->vertices.data()->color);
-
-       glVertexPointer(3, GL_FLOAT, sizeof(Vertex), &meshes[i]->vertices.data()->position);
-       glDrawArrays(GL_TRIANGLES, 0, meshes[i]->vertices.size());
-       glDisable(GL_LIGHTING);
-       glEnableClientState(GL_COLOR_ARRAY);
-    }
-
-        glEndList();
-    }
-
-    if (selected)
-        glCallList(selectedFigureList);
-    else
-        glCallList(figureList);
-    qDebug() << "Number of meshes: " << meshes.size();
-
-*/
-
+    //qDebug() << "Number of meshes: " << meshes.size();
     for (int i = 0; i < meshes.size(); ++i)
    {
 
@@ -174,20 +74,20 @@ void RoadElementOBJ::drawFigure(QGLWidget *render)
        {
            glEnable(GL_TEXTURE_2D);
            glBindTexture(GL_TEXTURE_2D, meshes[i]->map_Ka_ID);
-           qDebug() << meshes[i]->map_Ka_ID;
+           //qDebug() << meshes[i]->map_Ka_ID;
        }
        else if (meshes[i]->map_Ks_ID > 0)
        {
            glEnable(GL_TEXTURE_2D);
            glBindTexture(GL_TEXTURE_2D, meshes[i]->map_Ks_ID);
-           qDebug() << meshes[i]->map_Ks_ID;
+           //qDebug() << meshes[i]->map_Ks_ID;
        }
        else
            if (meshes[i]->map_Kd_ID > 0)
        {
                glEnable(GL_TEXTURE_2D);
            glBindTexture(GL_TEXTURE_2D, meshes[i]->map_Kd_ID);
-           qDebug() << "Texture ID ID" <<  meshes[i]->map_Kd_ID;
+           //qDebug() << "Texture ID ID" <<  meshes[i]->map_Kd_ID;
        }
 
            glDisableClientState(GL_COLOR_ARRAY);
@@ -296,11 +196,48 @@ void RoadElementOBJ::getProperties(QFormLayout *layout, QGLWidget *render)
     rotationSpinBox->setMinimum(0.0f);
     rotationSpinBox->setMaximum(360.0f);
     rotationSpinBox->setValue(zRot);
-
     connect(rotationSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setZRotation(double)));
     connect(this, SIGNAL(zRotationChanged(double)), rotationSpinBox, SLOT(setValue(double)));
 
+    QDoubleSpinBox* scaleSpinBox = new QDoubleSpinBox();
+    scaleSpinBox->setMinimum(0.01);
+    scaleSpinBox->setDecimals(5);
+    scaleSpinBox->setValue(scaleFactor);
+    connect(scaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setScale(double)));
+    connect(this, SIGNAL(scaleChanged(double)), scaleSpinBox, SLOT(setValue(double)));
+
+    QDoubleSpinBox* xScaleSpinBox = new QDoubleSpinBox();
+    xScaleSpinBox->setMinimum(0.01);
+    xScaleSpinBox->setValue(xScale);
+    connect(xScaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setXScale(double)));
+    connect(this, SIGNAL(xScaleChanged(double)), xScaleSpinBox, SLOT(setValue(double)));
+
+    QDoubleSpinBox* yScaleSpinBox = new QDoubleSpinBox();
+    yScaleSpinBox->setMinimum(0.01);
+    yScaleSpinBox->setValue(yScale);
+    connect(yScaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setYScale(double)));
+    connect(this, SIGNAL(yScaleChanged(double)), yScaleSpinBox, SLOT(setValue(double)));
+
+    QDoubleSpinBox* zScaleSpinBox = new QDoubleSpinBox();
+    zScaleSpinBox->setMinimum(0.01);
+    zScaleSpinBox->setValue(zScale);
+    connect(zScaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setZScale(double)));
+    connect(this, SIGNAL(zScaleChanged(double)), zScaleSpinBox, SLOT(setValue(double)));
+
+    if (render)
+    {
+        connect(rotationSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+        connect(scaleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+        connect(xScaleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+        connect(yScaleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+        connect(zScaleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+    }
+
     layout->addRow("Поворот:", rotationSpinBox);
+    layout->addRow("Масштабирование", scaleSpinBox);
+    layout->addRow("Масштаб по X", xScaleSpinBox);
+    layout->addRow("Масштаб по Y", yScaleSpinBox);
+    layout->addRow("Масштаб по Z", zScaleSpinBox);
 }
 
 bool RoadElementOBJ::isFixed()
@@ -329,12 +266,38 @@ void RoadElementOBJ::setZRotation(double value)
 
 void RoadElementOBJ::setXScale(double value)
 {
-
+    if (xScale != value)
+    {
+        xScale = value;
+        emit xScaleChanged(xScale);
+    }
 }
 
 void RoadElementOBJ::setYScale(double value)
 {
+    if (yScale != value)
+    {
+        yScale = value;
+        emit yScaleChanged(yScale);
+    }
+}
 
+void RoadElementOBJ::setZScale(double value)
+{
+    if (zScale != value)
+    {
+        zScale = value;
+        emit zScaleChanged(zScale);
+    }
+}
+
+void RoadElementOBJ::setScale(double scale)
+{
+    if (scale != scaleFactor)
+    {
+        scaleFactor = scale;
+        emit scaleChanged(scaleFactor);
+    }
 }
 
 

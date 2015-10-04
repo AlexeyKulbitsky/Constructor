@@ -490,6 +490,14 @@ void Scene2D::setProperties(QFormLayout *properties)
     this->properties = properties;
 }
 
+void Scene2D::drawBackground(QPainter *painter)
+{
+    //painter->setPen(Qt::NoPen);
+    //painter->setBrush(gradient);
+    //painter->drawRect(rect());
+
+}
+
 void Scene2D::activateRuler()
 {
     rulerIsActive = true;

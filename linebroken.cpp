@@ -30,7 +30,7 @@ LineBroken::LineBroken(float width, float* axisVertices, int size, QString name,
     numberOfPolygones = 0;
     red = green = blue = alpha = 1.0f;
 
-    width = 1.0f;
+    this->width = width;
 
     hits = 0;
     indexOfSelectedControl = 0;
@@ -77,9 +77,6 @@ LineBroken::LineBroken(float width, float* axisVertices, int size, float red, fl
 {
     this->layer = layer;
     this->name = name;
-    //VertexArray = NULL;
-    //ColorArray = NULL;
-    //IndexArray = NULL; // количество полигонов
     numberOfVertices = 0;
     numberOfPolygones = 0;
     red = green = blue = alpha = 1.0f;
@@ -90,12 +87,6 @@ LineBroken::LineBroken(float width, float* axisVertices, int size, float red, fl
     indexOfSelectedControl = 0;
     // Рамка для выделения
 
-    //IndexArrayForSelection = NULL;
-    //ColorArrayForSelection = NULL;
-
-    //vertexArrayForAxis = NULL;
-    //colorArrayForAxis = NULL;
-    //indexArrayForAxis = NULL;
     useColor = true;
     numberOfVerticesOfAxis = 0;
     numberOfAxises = 0;
@@ -195,12 +186,12 @@ void LineBroken::setVertexArray(float width, float* axisVertices, int size)
                 dx *= -1.0f;
                 dy *= -1.0f;
             }
-            if (x1 < x2 && y1 > y2)
+            if (x1 <= x2 && y1 >= y2)
             {
                 dx *= -1.0f;
 
             }
-            if (x1 > x2 && y1 < y2)
+            if (x1 >= x2 && y1 <= y2)
             {
                 dy *= -1.0f;
 
@@ -803,6 +794,38 @@ void LineBroken::getProperties(QFormLayout *layout, QGLWidget* render)
 bool LineBroken::isFixed()
 {
     return fixed;
+}
+
+void LineBroken::addBreak(bool front)
+{
+    float x, y, z;
+    if (front)
+    {
+        x = vertexArrayForAxis[0];
+        y = vertexArrayForAxis[1];
+        z = vertexArrayForAxis[2];
+        vertexArrayForAxis.push_front(z);
+        vertexArrayForAxis.push_front(y);
+        vertexArrayForAxis.push_front(x);
+    }
+    else
+    {
+        int size = vertexArrayForAxis.size();
+        x = vertexArrayForAxis[size - 3];
+        y = vertexArrayForAxis[size - 2];
+        z = vertexArrayForAxis[size - 1];
+        vertexArrayForAxis.push_back(x);
+        vertexArrayForAxis.push_back(y);
+        vertexArrayForAxis.push_back(z);
+    }
+    setColorArrayForAxis(0.0f, 0.0f, 0.0f);
+    setIndexArrayForAxis();
+    setVertexArray(this->width, vertexArrayForAxis.begin(), vertexArrayForAxis.size());
+    setTextureArray();
+    setColorArray(red, green, blue, alpha);
+    setIndexArray();
+    setIndexArrayForSelectionFrame();
+    setColorArrayForSelectionFrame(0.0f, 0.0f, 0.0f);
 }
 
 

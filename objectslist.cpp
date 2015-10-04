@@ -25,7 +25,8 @@ ObjectsList::ObjectsList(QWidget *parent)
     this->addItem("Пешеходный переход");
     this->addItem("Трамвайные пути");
     this->addItem("Железная дорога");
-
+    this->addItem("Провод");
+    this->addItem("Двойной провод");
    // this->addItem("Куб");
     this->addItem("BMW M3");
     this->addItem("Audi Q7");
@@ -111,6 +112,7 @@ void ObjectsList::mouseMoveEvent(QMouseEvent *event)
 
 void ObjectsList::mouseReleaseEvent(QMouseEvent *event)
 {
+    /*
     if (event->button() == Qt::LeftButton)
     {
         if (itemAt(event->pos()))
@@ -119,6 +121,6 @@ void ObjectsList::mouseReleaseEvent(QMouseEvent *event)
         emit itemClicked(itemAt(event->pos()));
         }
     }
-
+    */
 
 }

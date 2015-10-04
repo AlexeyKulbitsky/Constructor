@@ -90,6 +90,7 @@ public:
     bool isRulerActive();
     void setModel(Model* model);
     void setProperties(QFormLayout* properties);
+    void drawBackground(QPainter *painter);
 
 signals:
     void selectedFigureChanged(RoadElement* roadElement);

@@ -27,6 +27,8 @@ private:
     Scene2D* scene;
     QFormLayout* properties;
 
+    LineBroken* lineBroken;
+
     LineBuilder* lineBuilder;
     QPoint ptrMousePosition;
     bool rightButtonIsPressed;
@@ -37,6 +39,10 @@ private:
     float width;
     QString name;
     int layer;
+    int controlIndex;
+    int groupIndex, elementIndex;
+    bool controlIsSelected;
+    int key;
 
     bool linking;
     // State interface
@@ -55,6 +61,13 @@ public:
     void setWidth(float width);
     void setName(QString name);
     void setLayer(int layer);
+
+    bool tryToSelectControlsInSelectedFigure(QPoint mp);
+    bool tryToSelectFigures(QPoint mp);
+    void clearProperties(QFormLayout* layout);
+    void setGroupIndex(int index);
+    void setElementIndex(int index);
+
 public:
     bool useColor;
 
@@ -63,7 +76,7 @@ public:
     // State interface
 public:
     virtual QString getName();
-
+    void setLine(LineBroken* lineBroken);
     // State interface
 public:
     virtual void contextMenuEvent(QContextMenuEvent *pe);

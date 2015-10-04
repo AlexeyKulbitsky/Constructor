@@ -103,7 +103,7 @@ public:
     // RoadElement interface
 public:
     virtual bool isFixed();
-
+    virtual void addBreak(bool front);
     // RoadElement interface
 public:
     virtual void drawMeasurements(QGLWidget *render);

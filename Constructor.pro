@@ -50,7 +50,9 @@ SOURCES += main.cpp\
     intersection.cpp \
     texturemanager.cpp \
     curve.cpp \
-    splitzone.cpp
+    splitzone.cpp \
+    voltageline.cpp \
+    doublevoltageline.cpp
 
 
 
@@ -98,7 +100,9 @@ HEADERS  += mainwindow.h\
     intersection.h \
     texturemanager.h \
     curve.h \
-    splitzone.h
+    splitzone.h \
+    voltageline.h \
+    doublevoltageline.h
 
 
 

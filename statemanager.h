@@ -26,6 +26,9 @@ class RoadBuilderState;
 
 #include "scene2d.h"
 
+#include "_3dsfilemanager.h"
+#include "objfilemanager.h"
+
 class StateManager : public QObject
 {
     Q_OBJECT
@@ -49,6 +52,9 @@ public:
     RulerState* rulerState;
     LineBuilderState* lineBuilderState;
     RoadBuilderState* roadBuilderState;
+
+    _3DsFileManager* fileManager3DS;
+    OBJFileManager* fileManagerOBJ;
 
 public:
     void setState(State* state);

@@ -21,6 +21,8 @@
 #include "curve.h"
 #include "intersection.h"
 #include "splitzone.h"
+#include "voltageline.h"
+#include "doublevoltageline.h"
 
 struct Group
 {

@@ -493,7 +493,7 @@ void RoadBuilderState::dropEvent(QDropEvent *event)
         OBJFileManager* fileManager = new OBJFileManager(model);
         RoadElementOBJ* element = new RoadElementOBJ(x, y);
        fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/audi_q7/").toStdString().c_str(),"audi_q7.obj",
-                             element->meshes,2.177f, element->scaleFactor);
+                             element->meshes,2.177f, element->scaleFactor, 0);
         //fileManager->loadOBJ("models/cars/","audi_q7.obj",
         //                     element->meshes,2.177f, element->scaleFactor);
         model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
@@ -505,7 +505,7 @@ void RoadBuilderState::dropEvent(QDropEvent *event)
         OBJFileManager* fileManager = new OBJFileManager(model);
         RoadElementOBJ* element = new RoadElementOBJ(x, y);
         fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/bmw_m3/").toStdString().c_str(),"bmw_m3.obj",
-                             element->meshes,1.976f, element->scaleFactor);
+                             element->meshes,1.976f, element->scaleFactor, 0);
         //fileManager->loadOBJ("models/cars/","bmw_m3.obj",
         //                     element->meshes,2.177f, element->scaleFactor);
         model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
@@ -517,7 +517,7 @@ void RoadBuilderState::dropEvent(QDropEvent *event)
                 OBJFileManager* fileManager = new OBJFileManager(model);
                 RoadElementOBJ* element = new RoadElementOBJ(x, y);
                 fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/vaz_2104/").toStdString().c_str(),"vaz_2104.obj",
-                                     element->meshes,1.74f, element->scaleFactor);
+                                     element->meshes,1.74f, element->scaleFactor, 0);
                 //fileManager->loadOBJ("models/cars/","vaz_2104.obj",
                 //                     element->meshes,1.74f, element->scaleFactor);
                 model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
@@ -528,7 +528,7 @@ void RoadBuilderState::dropEvent(QDropEvent *event)
         OBJFileManager* fileManager = new OBJFileManager(model);
         RoadElementOBJ* element = new RoadElementOBJ(x, y);
         fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/VAZ_2106/").toStdString().c_str(),"VAZ_2106.obj",
-                             element->meshes,1.74f, element->scaleFactor);
+                             element->meshes,1.74f, element->scaleFactor, 0);
         //fileManager->loadOBJ("models/cars/","VAZ_2106.obj",
         //                     element->meshes,1.74f, element->scaleFactor);
         model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
@@ -539,7 +539,7 @@ void RoadBuilderState::dropEvent(QDropEvent *event)
             OBJFileManager* fileManager = new OBJFileManager(model);
             RoadElementOBJ* element = new RoadElementOBJ(x, y);
             fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/Dodge_Ram_2007/").toStdString().c_str(),"Dodge_Ram_2007.obj",
-                                 element->meshes,2.022f, element->scaleFactor);
+                                 element->meshes,2.022f, element->scaleFactor, 0);
             //fileManager->loadOBJ("models/cars/","Dodge_Ram_2007.obj",
             //                     element->meshes,1.74f, element->scaleFactor);
             model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
@@ -550,7 +550,7 @@ void RoadBuilderState::dropEvent(QDropEvent *event)
                     OBJFileManager* fileManager = new OBJFileManager(model);
                     RoadElementOBJ* element = new RoadElementOBJ(x, y);
                     fileManager->loadOBJ((QApplication::applicationDirPath() + "/models/cars/PAZ_1/").toStdString().c_str(),"PAZ_1.obj",
-                                         element->meshes,2.5f, element->scaleFactor);
+                                         element->meshes,2.5f, element->scaleFactor, 0);
                     //fileManager->loadOBJ("models/cars/","PAZ_1.obj",
                     //                     element->meshes,1.74f, element->scaleFactor);
                     model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
