@@ -50,7 +50,8 @@ public:
 
     bool figureIsSelected;
     bool controlIsSelected;
-
+    bool drawRectStatus;
+    QPoint rectPoint1, rectPoint2;
     void scale_plus();
     void scale_minus();
     void rotate_up();
@@ -64,6 +65,7 @@ public:
     bool tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement* element, int& index);
     bool tryToSelectFigures(QPoint mp, RoadElement*& element);
     void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
+    void getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz);
 
     void createMenu();
     void createActions();
@@ -87,10 +89,12 @@ public:
     ~Scene2D();
     void drawGrid();
     void drawAxis();
+    void drawRect(QPoint p1, QPoint p2);
     bool isRulerActive();
     void setModel(Model* model);
     void setProperties(QFormLayout* properties);
     void drawBackground(QPainter *painter);
+    void setDrawRectStatus(bool status);
 
 signals:
     void selectedFigureChanged(RoadElement* roadElement);

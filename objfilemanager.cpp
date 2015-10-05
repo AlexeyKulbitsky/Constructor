@@ -285,6 +285,12 @@ bool OBJFileManager::loadOBJ(const char *folder, const char *filename, std::vect
     meshes.push_back(currentMesh);
 }
 
+bool OBJFileManager::loadOBJ(const char *folder, const char *filename, const char *textureName, std::vector<Mesh *> &meshes, float velocity, float &scaleFactor, int axis)
+{
+    this->textureName = textureName;
+    loadOBJ(folder, filename, meshes, velocity, scaleFactor, axis);
+}
+
 
 
 void OBJFileManager::readVertex(char *line)
@@ -388,17 +394,26 @@ void OBJFileManager::readMtl(char *mtlSource, std::vector<MaterialInfo*>& materi
         else if (strstr(mtlBuffer, "map_Ka") != NULL)
         {
             sscanf(mtlBuffer, "map_Ka %s", info->map_Ka);
-            getTexture(fileFolder + info->map_Ka, info->Ka_ID);
+            if (!strcmp(info->map_Ka, "texture"))
+                getTexture(fileFolder + textureName, info->Ka_ID);
+            else
+                getTexture(fileFolder + info->map_Ka, info->Ka_ID);
         }
         else if (strstr(mtlBuffer, "map_Kd") != NULL)
         {
             sscanf(mtlBuffer, "map_Kd %s", info->map_Kd);
-            getTexture(fileFolder + info->map_Kd, info->Kd_ID);
+            if (!strcmp(info->map_Kd, "texture"))
+                getTexture(fileFolder + textureName, info->Ka_ID);
+            else
+                getTexture(fileFolder + info->map_Kd, info->Kd_ID);
         }
         else if (strstr(mtlBuffer, "map_Ks") != NULL)
         {
             sscanf(mtlBuffer, "map_Ks %s", info->map_Ks);
-            getTexture(fileFolder + info->map_Ks, info->Ks_ID);
+            if (!strcmp(info->map_Ks, "texture"))
+                getTexture(fileFolder + textureName, info->Ka_ID);
+            else
+                getTexture(fileFolder + info->map_Ks, info->Ks_ID);
         }
     }
     materials.push_back(info);

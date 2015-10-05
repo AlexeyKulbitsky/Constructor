@@ -58,6 +58,7 @@ public:
 public:
     virtual QString getName();
     void clearProperties(QFormLayout* layout);
+    void clear();
     void setRoad(RoadBroken *roadBroken);
     // State interface
 public:

@@ -8,7 +8,8 @@ ObjectsList::ObjectsList(QWidget *parent)
 {
     this->setDragEnabled(true);
     this->setDropIndicatorShown(true);
-
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
+    //setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     //QListWidgetItem* item = new QListWidgetItem(QIcon("D://QT/Tools/QtCreator/bin/GL/1.bmp"),tr("Дорога"));
 
     this->addItem("Дорога простая");

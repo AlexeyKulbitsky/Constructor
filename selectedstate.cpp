@@ -53,7 +53,7 @@ void SelectedState::mousePressEvent(QMouseEvent *pe)
         leftButtonIsPressed = true;
         RoadElement* element = NULL;
         int index = -1;
-        if (this->tryToSelectControlsInSelectedFigure(ptrMousePosition, selectedElement, index) == true)
+        if (this->tryToSelectControlsInSelectedFigure(pe->pos(), selectedElement, index) == true)
         {
             controlIsSelected = true;
             controlIndex = index;
@@ -116,6 +116,7 @@ void SelectedState::mousePressEvent(QMouseEvent *pe)
                 stateManager->setState(stateManager->defaultState);
             }
         }
+
     }
         break;
     case Qt::RightButton:
@@ -209,7 +210,7 @@ void SelectedState::mouseReleaseEvent(QMouseEvent *pe)
         rightButtonIsPressed = false;
     }
     if(pe->button() == Qt::LeftButton)
-    {
+    {       
         leftButtonIsPressed = false;
         figureIsSelected = false;
         controlIsSelected = false;

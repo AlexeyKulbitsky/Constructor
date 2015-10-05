@@ -11,6 +11,7 @@
 #include "objectslist.h"
 #include <QDockWidget>
 #include <QScrollBar>
+#include <QToolBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -32,17 +33,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //scroll->viewport()->setBackgroundRole(QPalette::Dark);
     //scroll->viewport()->setAutoFillBackground(true);
-    scroll->show();
+    //scroll->show();
     //propertiesToolBar->addWidget(scroll);
 
 
     propertiesWidget = new QDockWidget("Инспектор");
     propertiesWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-
     //properties->addWidget(propertiesWidget);
    // propertiesWidget->setLayout(properties);
     propertiesWidget->setWidget(scroll);
     addDockWidget(Qt::RightDockWidgetArea, propertiesWidget);
+    //addDockWidget(Qt::BottomDockWidgetArea, scroll);
     //propertiesToolBar->setLayout(properties);
     //properties->addWidget(propertiesToolBar);
     //ui->properties->addWidget(propertiesToolBar);
@@ -72,62 +73,78 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //QListWidget* list_1 = new ObjectsList();
     //ui->toolBox->set
-    while (ui->toolBox->count()) {
-        ui->toolBox->removeItem(ui->toolBox->count()-1);
+    QToolBox* toolBox = new QToolBox(this);
+    toolBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
+    //toolBox->setT
+    while (toolBox->count()) {
+        toolBox->removeItem(toolBox->count()-1);
     }
+
+    ui->scrollAreaToolBox->setWidget(toolBox);
+    ui->scrollAreaToolBox->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    /*
+    QScrollArea *scrollAreaToolBox = new QScrollArea();
+    scrollAreaToolBox->setWidget(ui->toolBox);
+    scrollAreaToolBox->setWidgetResizable(true);
+    scrollAreaToolBox->setAlignment(Qt::AlignVCenter);
+    scrollAreaToolBox->show();
+    */
 
     QListWidget* objectList = new ObjectsList();
     connect(objectList, SIGNAL(itemClicked(QListWidgetItem*)), ui->scene2D, SLOT(listItemClicked(QListWidgetItem*)));
-    ui->toolBox->addItem(objectList, "Элементы");
+    toolBox->addItem(objectList, "Элементы");
     //QDir dir("D:/3ds/city_roads/");
 
     QDir dir(QApplication::applicationDirPath());
     //qDebug() << QApplication::applicationDirPath();
     //QDir dir("models/city_roads/");
     dir.cd("models/city_roads/");
-    ui->toolBox->addItem(new ObjectsList(dir, QString("*.3ds")), "Городские дороги");
+    toolBox->addItem(new ObjectsList(dir, QString("*.3ds")), "Городские дороги");
     dir.cdUp();
     dir.cd("highway/");
-    ui->toolBox->addItem(new ObjectsList(dir, QString("*.3ds")), "Магистрали");
+    toolBox->addItem(new ObjectsList(dir, QString("*.3ds")), "Магистрали");
     dir.cdUp();
     dir.cd("outtown_roads/");
-    ui->toolBox->addItem(new ObjectsList(dir, QString("*.3ds")), "Загородные дороги");
+    toolBox->addItem(new ObjectsList(dir, QString("*.3ds")), "Загородные дороги");
     dir.cdUp();
     dir.cd("elements/");
-    ui->toolBox->addItem(new ObjectsList(dir, QString("*.3ds")), "Элементы");
+    toolBox->addItem(new ObjectsList(dir, QString("*.3ds")), "Элементы");
+    dir.cdUp();
+    dir.cd("road_signs/");
+    toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Дорожные знаки");
     dir.cdUp();
     dir.cd("constructions/");
-    ui->toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Конструкции");
+    toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Конструкции");
     dir.cdUp();
     dir.cd("plants/");
-    ui->toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Деревья");
+    toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Деревья");
     dir.cdUp();
     dir.cd("buildings/");
-    ui->toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Здания");
+    toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Здания");
     dir.cdUp();
     dir.cd("humans/");
-    ui->toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Люди");
+    toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Люди");
     dir.cdUp();
     dir.cd("transport/buses/");
-    ui->toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Busses");
+    toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Busses");
     dir.cdUp();
     dir.cd("lorries/");
-    ui->toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Lorries");
+    toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Lorries");
     dir.cdUp();
     dir.cd("machinery/");
-    ui->toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Machinery");
+    toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Machinery");
     dir.cdUp();
     dir.cd("scooter/");
-    ui->toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Scooter");
+    toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Scooter");
     dir.cdUp();
     dir.cd("TGV/");
-    ui->toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "TGV");
+    toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "TGV");
     dir.cdUp();
     dir.cd("trucks/");
-    ui->toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Trucks");
+    toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Trucks");
     dir.cdUp();
     dir.cd("cars/");
-    ui->toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Легковые автомобили");
+    toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Легковые автомобили");
 
     //connect(ui->tabWidget, SIGNAL(currentChanged(int)),
     //        ui->tabWidget->currentWidget(), SLOT(setFocus()));

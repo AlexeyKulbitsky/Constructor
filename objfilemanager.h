@@ -40,6 +40,9 @@ public:
 
     bool loadOBJ(const char *folder, const char* filename,
                  std::vector<Mesh *> &meshes, float velocity, float &scaleFactor, int axis = 0);
+    bool loadOBJ(const char *folder, const char* filename, const char* textureName,
+                 std::vector<Mesh *> &meshes, float velocity, float &scaleFactor, int axis = 0);
+
 
 
     void readVertex(char* line);
@@ -58,6 +61,7 @@ public:
     bool hasNormal;
     QString fileFolder;
 
+    QString textureName;
 private:
     inline void record(char *line);
     inline void readlVertices(char *line);

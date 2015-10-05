@@ -25,9 +25,11 @@ private:
     QFormLayout* properties;
 
     QPoint ptrMousePosition;
+    QPoint rectPoint1, rectPoint2;
     bool rightButtonIsPressed;
     bool leftButtonIsPressed;
-
+    bool rectSelection;
+    int selectedElementsCount;
     int selectedGroup;
     int selectedIndex;
 
@@ -52,7 +54,9 @@ private:
     // State interface
 public:
     virtual QString getName();
-
+    void drawRect(QPoint p1, QPoint p2);
+    void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
+    void getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz);
     // State interface
 public:
     virtual void contextMenuEvent(QContextMenuEvent *pe);

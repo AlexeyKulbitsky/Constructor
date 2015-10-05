@@ -71,6 +71,8 @@ RoadBroken::RoadBroken(float x1, float y1, float x2, float y2, float width,
     this->leftBoardWidth = 2.75f;
     this->showRightBoard = true;
     this->showLeftBoard = true;
+    this->fixedRightWidth = true;
+    this->fixedLeftWidth = true;
     setVertexArray(x1, y1, x2, y2, width);
     setRightVertexArray();
     setLeftVertexArray();
@@ -181,7 +183,7 @@ void RoadBroken::setTextureArray(float textureUsize, float textureVsize)
         float r1 = sqrt((x3 - x1) * (x3 - x1) + (y3 - y1) * (y3 - y1));
         float r2 = sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1));
         float angle = acos(((x3 - x1) * (x0 - x1) + (y3 - y1) * (y0 - y1))/
-                          (r1 * r2));
+                           (r1 * r2));
         textureArray.push_back(r2 * sin(angle)/textureUsize);
         textureArray.push_back(r2 * cos(angle)/textureVsize);
 
@@ -250,273 +252,299 @@ void RoadBroken::setLeftVertexArray()
             i += 2;
         }
         else
-        if (i == vertexArray.size() / 3 - 2)
-        {
-            float x0 = vertexArray[(i + 1) * 3];
-            float y0 = vertexArray[(i + 1) * 3 + 1];
-            float z0 = vertexArray[(i + 1) * 3 + 2];
-            float x1 = vertexArray[i * 3];
-            float y1 = vertexArray[i * 3 + 1];
-            float z1 = vertexArray[i * 3 + 2];
-            float x2 = vertexArray[(i - 1) * 3];
-            float y2 = vertexArray[(i - 1) * 3 + 1];
-            float z2 = vertexArray[(i - 1) * 3 + 2];
-            if (x0 == x2 && y0 == y2)
+            if (i == vertexArray.size() / 3 - 2)
             {
-                x2 = vertexArray[(i - 5) * 3];
-                y2 = vertexArray[(i - 5) * 3 + 1];
-            }
-            float dx = x0 - x1;
-            float dy = y0 - y1;
-            float r01 = sqrt(dx*dx + dy*dy);
-            float pi = 3.1415926f;
-            float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
-                    sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
-
-            vertexArrayLeft.push_back(x0);
-            vertexArrayLeft.push_back(y0);
-            vertexArrayLeft.push_back(z0);
-
-            vertexArrayLeft.push_back(x0);
-            vertexArrayLeft.push_back(y0);
-            vertexArrayLeft.push_back(0.08f);
-
-            vertexArrayLeft.push_back(x0 + dx/r01 * (0.03f / cos(angle - pi / 2.0f)));
-            vertexArrayLeft.push_back(y0 + dy/r01 * (0.03f / cos(angle - pi / 2.0f)));
-            vertexArrayLeft.push_back(0.1f);
-
-            vertexArrayLeft.push_back(x0 + dx/r01 * (0.25f / cos(angle - pi / 2.0f)));
-            vertexArrayLeft.push_back(y0 + dy/r01 * (0.25f / cos(angle - pi / 2.0f)));
-            vertexArrayLeft.push_back(0.1f);
-
-            vertexArrayLeft.push_back(x0 + dx/r01 * (leftBoardWidth / cos(angle - pi / 2.0f)));
-            vertexArrayLeft.push_back(y0 + dy/r01 * (leftBoardWidth / cos(angle - pi / 2.0f)));
-            vertexArrayLeft.push_back(0.1f);
-
-            i += 2;
-        }
-        else
-        {
-            float x1 = vertexArray[(i - 1) * 3];
-            float y1 = vertexArray[(i - 1) * 3 + 1];
-            float x2 = vertexArray[(i + 1) * 3];
-            float y2 = vertexArray[(i + 1) * 3 + 1];
-            float x3 = vertexArray[(i + 5) * 3];
-            float y3 = vertexArray[(i + 5) * 3 + 1];
-
-            if (x1 == x2 && y1 == y2)
-            {
-                float x0 = vertexArrayLeft[((i - 2)/2*5) * 3];
-                float y0 = vertexArrayLeft[((i - 2)/2*5) * 3 + 1];
-                float z0 = vertexArrayLeft[((i - 2)/2*5) * 3 + 2];
-                float x1 = vertexArrayLeft[((i - 2)/2*5 + 1) * 3];
-                float y1 = vertexArrayLeft[((i - 2)/2*5 + 1) * 3 + 1];
-                float z1 = vertexArrayLeft[((i - 2)/2*5 + 1) * 3 + 2];
-                float x2 = vertexArrayLeft[((i - 2)/2*5 + 2) * 3];
-                float y2 = vertexArrayLeft[((i - 2)/2*5 + 2) * 3 + 1];
-                float z2 = vertexArrayLeft[((i - 2)/2*5 + 2) * 3 + 2];
-                float x3 = vertexArrayLeft[((i - 2)/2*5 + 3) * 3];
-                float y3 = vertexArrayLeft[((i - 2)/2*5 + 3) * 3 + 1];
-                float z3 = vertexArrayLeft[((i - 2)/2*5 + 3) * 3 + 2];
-                float x4 = vertexArrayLeft[((i - 2)/2*5 + 4) * 3];
-                float y4 = vertexArrayLeft[((i - 2)/2*5 + 4) * 3 + 1];
-                float z4 = vertexArrayLeft[((i - 2)/2*5 + 4) * 3 + 2];
+                float x0 = vertexArray[(i + 1) * 3];
+                float y0 = vertexArray[(i + 1) * 3 + 1];
+                float z0 = vertexArray[(i + 1) * 3 + 2];
+                float x1 = vertexArray[i * 3];
+                float y1 = vertexArray[i * 3 + 1];
+                float z1 = vertexArray[i * 3 + 2];
+                float x2 = vertexArray[(i - 1) * 3];
+                float y2 = vertexArray[(i - 1) * 3 + 1];
+                float z2 = vertexArray[(i - 1) * 3 + 2];
+                if (x0 == x2 && y0 == y2)
+                {
+                    x2 = vertexArray[(i - 5) * 3];
+                    y2 = vertexArray[(i - 5) * 3 + 1];
+                }
+                float dx = x0 - x1;
+                float dy = y0 - y1;
+                float r01 = sqrt(dx*dx + dy*dy);
+                float pi = 3.1415926f;
+                float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
+                                   sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
 
                 vertexArrayLeft.push_back(x0);
                 vertexArrayLeft.push_back(y0);
                 vertexArrayLeft.push_back(z0);
 
-                vertexArrayLeft.push_back(x1);
-                vertexArrayLeft.push_back(y1);
-                vertexArrayLeft.push_back(z1);
-
-                vertexArrayLeft.push_back(x2);
-                vertexArrayLeft.push_back(y2);
-                vertexArrayLeft.push_back(z2);
-
-                vertexArrayLeft.push_back(x3);
-                vertexArrayLeft.push_back(y3);
-                vertexArrayLeft.push_back(z3);
-
-                vertexArrayLeft.push_back(x4);
-                vertexArrayLeft.push_back(y4);
-                vertexArrayLeft.push_back(z4);
-
                 vertexArrayLeft.push_back(x0);
                 vertexArrayLeft.push_back(y0);
-                vertexArrayLeft.push_back(z0);
+                vertexArrayLeft.push_back(0.08f);
 
-                vertexArrayLeft.push_back(x1);
-                vertexArrayLeft.push_back(y1);
-                vertexArrayLeft.push_back(z1);
+                vertexArrayLeft.push_back(x0 + dx/r01 * (0.03f / cos(angle - pi / 2.0f)));
+                vertexArrayLeft.push_back(y0 + dy/r01 * (0.03f / cos(angle - pi / 2.0f)));
+                vertexArrayLeft.push_back(0.1f);
 
-                vertexArrayLeft.push_back(x2);
-                vertexArrayLeft.push_back(y2);
-                vertexArrayLeft.push_back(z2);
+                vertexArrayLeft.push_back(x0 + dx/r01 * (0.25f / cos(angle - pi / 2.0f)));
+                vertexArrayLeft.push_back(y0 + dy/r01 * (0.25f / cos(angle - pi / 2.0f)));
+                vertexArrayLeft.push_back(0.1f);
 
-                vertexArrayLeft.push_back(x3);
-                vertexArrayLeft.push_back(y3);
-                vertexArrayLeft.push_back(z3);
+                vertexArrayLeft.push_back(x0 + dx/r01 * (leftBoardWidth / cos(angle - pi / 2.0f)));
+                vertexArrayLeft.push_back(y0 + dy/r01 * (leftBoardWidth / cos(angle - pi / 2.0f)));
+                vertexArrayLeft.push_back(0.1f);
 
-                vertexArrayLeft.push_back(x4);
-                vertexArrayLeft.push_back(y4);
-                vertexArrayLeft.push_back(z4);
-
-                i += 4;
-                continue;
+                i += 2;
             }
             else
-                if (x3 == x2 && y3 == y2)
+            {
+                float x1 = vertexArray[(i - 1) * 3];
+                float y1 = vertexArray[(i - 1) * 3 + 1];
+                float x2 = vertexArray[(i + 1) * 3];
+                float y2 = vertexArray[(i + 1) * 3 + 1];
+                float x3 = vertexArray[(i + 5) * 3];
+                float y3 = vertexArray[(i + 5) * 3 + 1];
+
+                if (x1 == x2 && y1 == y2)
                 {
-                    float x0 = vertexArray[(i + 1) * 3];
-                    float y0 = vertexArray[(i + 1) * 3 + 1];
-                    float z0 = vertexArray[(i + 1) * 3 + 2];
-                    float x1 = vertexArray[i * 3];
-                    float y1 = vertexArray[i * 3 + 1];
-                    float z1 = vertexArray[i * 3 + 2];
-                    float x2 = vertexArray[(i - 1) * 3];
-                    float y2 = vertexArray[(i - 1) * 3 + 1];
-                    float z2 = vertexArray[(i - 1) * 3 + 2];
-                    if (x0 == x2 && y0 == y2)
-                    {
-                        x2 = vertexArray[(i - 5) * 3];
-                        y2 = vertexArray[(i - 5) * 3 + 1];
-                    }
-                    float dx = x0 - x1;
-                    float dy = y0 - y1;
-                    float r01 = sqrt(dx*dx + dy*dy);
-                    float pi = 3.1415926f;
-                    float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
-                            sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
+                    float x0 = vertexArrayLeft[((i - 2)/2*5) * 3];
+                    float y0 = vertexArrayLeft[((i - 2)/2*5) * 3 + 1];
+                    float z0 = vertexArrayLeft[((i - 2)/2*5) * 3 + 2];
+                    float x1 = vertexArrayLeft[((i - 2)/2*5 + 1) * 3];
+                    float y1 = vertexArrayLeft[((i - 2)/2*5 + 1) * 3 + 1];
+                    float z1 = vertexArrayLeft[((i - 2)/2*5 + 1) * 3 + 2];
+                    float x2 = vertexArrayLeft[((i - 2)/2*5 + 2) * 3];
+                    float y2 = vertexArrayLeft[((i - 2)/2*5 + 2) * 3 + 1];
+                    float z2 = vertexArrayLeft[((i - 2)/2*5 + 2) * 3 + 2];
+                    float x3 = vertexArrayLeft[((i - 2)/2*5 + 3) * 3];
+                    float y3 = vertexArrayLeft[((i - 2)/2*5 + 3) * 3 + 1];
+                    float z3 = vertexArrayLeft[((i - 2)/2*5 + 3) * 3 + 2];
+                    float x4 = vertexArrayLeft[((i - 2)/2*5 + 4) * 3];
+                    float y4 = vertexArrayLeft[((i - 2)/2*5 + 4) * 3 + 1];
+                    float z4 = vertexArrayLeft[((i - 2)/2*5 + 4) * 3 + 2];
 
                     vertexArrayLeft.push_back(x0);
                     vertexArrayLeft.push_back(y0);
                     vertexArrayLeft.push_back(z0);
 
-                    vertexArrayLeft.push_back(x0);
-                    vertexArrayLeft.push_back(y0);
-                    vertexArrayLeft.push_back(0.08f);
+                    vertexArrayLeft.push_back(x1);
+                    vertexArrayLeft.push_back(y1);
+                    vertexArrayLeft.push_back(z1);
 
-                    vertexArrayLeft.push_back(x0 + dx/r01 * (0.03f / cos(angle - pi / 2.0f)));
-                    vertexArrayLeft.push_back(y0 + dy/r01 * (0.03f / cos(angle - pi / 2.0f)));
-                    vertexArrayLeft.push_back(0.1f);
+                    vertexArrayLeft.push_back(x2);
+                    vertexArrayLeft.push_back(y2);
+                    vertexArrayLeft.push_back(z2);
 
-                    vertexArrayLeft.push_back(x0 + dx/r01 * (0.25f / cos(angle - pi / 2.0f)));
-                    vertexArrayLeft.push_back(y0 + dy/r01 * (0.25f / cos(angle - pi / 2.0f)));
-                    vertexArrayLeft.push_back(0.1f);
+                    vertexArrayLeft.push_back(x3);
+                    vertexArrayLeft.push_back(y3);
+                    vertexArrayLeft.push_back(z3);
 
-                    vertexArrayLeft.push_back(x0 + dx/r01 * (leftBoardWidth / cos(angle - pi / 2.0f)));
-                    vertexArrayLeft.push_back(y0 + dy/r01 * (leftBoardWidth / cos(angle - pi / 2.0f)));
-                    vertexArrayLeft.push_back(0.1f);
+                    vertexArrayLeft.push_back(x4);
+                    vertexArrayLeft.push_back(y4);
+                    vertexArrayLeft.push_back(z4);
 
                     vertexArrayLeft.push_back(x0);
                     vertexArrayLeft.push_back(y0);
                     vertexArrayLeft.push_back(z0);
 
-                    vertexArrayLeft.push_back(x0);
-                    vertexArrayLeft.push_back(y0);
-                    vertexArrayLeft.push_back(0.08f);
+                    vertexArrayLeft.push_back(x1);
+                    vertexArrayLeft.push_back(y1);
+                    vertexArrayLeft.push_back(z1);
 
-                    vertexArrayLeft.push_back(x0 + dx/r01 * (0.03f / cos(angle - pi / 2.0f)));
-                    vertexArrayLeft.push_back(y0 + dy/r01 * (0.03f / cos(angle - pi / 2.0f)));
-                    vertexArrayLeft.push_back(0.1f);
+                    vertexArrayLeft.push_back(x2);
+                    vertexArrayLeft.push_back(y2);
+                    vertexArrayLeft.push_back(z2);
 
-                    vertexArrayLeft.push_back(x0 + dx/r01 * (0.25f / cos(angle - pi / 2.0f)));
-                    vertexArrayLeft.push_back(y0 + dy/r01 * (0.25f / cos(angle - pi / 2.0f)));
-                    vertexArrayLeft.push_back(0.1f);
+                    vertexArrayLeft.push_back(x3);
+                    vertexArrayLeft.push_back(y3);
+                    vertexArrayLeft.push_back(z3);
 
-                    vertexArrayLeft.push_back(x0 + dx/r01 * (leftBoardWidth / cos(angle - pi / 2.0f)));
-                    vertexArrayLeft.push_back(y0 + dy/r01 * (leftBoardWidth / cos(angle - pi / 2.0f)));
-                    vertexArrayLeft.push_back(0.1f);
+                    vertexArrayLeft.push_back(x4);
+                    vertexArrayLeft.push_back(y4);
+                    vertexArrayLeft.push_back(z4);
 
                     i += 4;
                     continue;
                 }
+                else
+                    if (x3 == x2 && y3 == y2)
+                    {
+                        float x0 = vertexArray[(i + 1) * 3];
+                        float y0 = vertexArray[(i + 1) * 3 + 1];
+                        float z0 = vertexArray[(i + 1) * 3 + 2];
+                        float x1 = vertexArray[i * 3];
+                        float y1 = vertexArray[i * 3 + 1];
+                        float z1 = vertexArray[i * 3 + 2];
+                        float x2 = vertexArray[(i - 1) * 3];
+                        float y2 = vertexArray[(i - 1) * 3 + 1];
+                        float z2 = vertexArray[(i - 1) * 3 + 2];
+                        if (x0 == x2 && y0 == y2)
+                        {
+                            x2 = vertexArray[(i - 5) * 3];
+                            y2 = vertexArray[(i - 5) * 3 + 1];
+                        }
+                        float dx = x0 - x1;
+                        float dy = y0 - y1;
+                        float r01 = sqrt(dx*dx + dy*dy);
+                        float pi = 3.1415926f;
+                        float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
+                                           sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
+
+                        vertexArrayLeft.push_back(x0);
+                        vertexArrayLeft.push_back(y0);
+                        vertexArrayLeft.push_back(z0);
+
+                        vertexArrayLeft.push_back(x0);
+                        vertexArrayLeft.push_back(y0);
+                        vertexArrayLeft.push_back(0.08f);
+
+                        vertexArrayLeft.push_back(x0 + dx/r01 * (0.03f / cos(angle - pi / 2.0f)));
+                        vertexArrayLeft.push_back(y0 + dy/r01 * (0.03f / cos(angle - pi / 2.0f)));
+                        vertexArrayLeft.push_back(0.1f);
+
+                        vertexArrayLeft.push_back(x0 + dx/r01 * (0.25f / cos(angle - pi / 2.0f)));
+                        vertexArrayLeft.push_back(y0 + dy/r01 * (0.25f / cos(angle - pi / 2.0f)));
+                        vertexArrayLeft.push_back(0.1f);
+
+                        vertexArrayLeft.push_back(x0 + dx/r01 * (leftBoardWidth / cos(angle - pi / 2.0f)));
+                        vertexArrayLeft.push_back(y0 + dy/r01 * (leftBoardWidth / cos(angle - pi / 2.0f)));
+                        vertexArrayLeft.push_back(0.1f);
+
+                        vertexArrayLeft.push_back(x0);
+                        vertexArrayLeft.push_back(y0);
+                        vertexArrayLeft.push_back(z0);
+
+                        vertexArrayLeft.push_back(x0);
+                        vertexArrayLeft.push_back(y0);
+                        vertexArrayLeft.push_back(0.08f);
+
+                        vertexArrayLeft.push_back(x0 + dx/r01 * (0.03f / cos(angle - pi / 2.0f)));
+                        vertexArrayLeft.push_back(y0 + dy/r01 * (0.03f / cos(angle - pi / 2.0f)));
+                        vertexArrayLeft.push_back(0.1f);
+
+                        vertexArrayLeft.push_back(x0 + dx/r01 * (0.25f / cos(angle - pi / 2.0f)));
+                        vertexArrayLeft.push_back(y0 + dy/r01 * (0.25f / cos(angle - pi / 2.0f)));
+                        vertexArrayLeft.push_back(0.1f);
+
+                        vertexArrayLeft.push_back(x0 + dx/r01 * (leftBoardWidth / cos(angle - pi / 2.0f)));
+                        vertexArrayLeft.push_back(y0 + dy/r01 * (leftBoardWidth / cos(angle - pi / 2.0f)));
+                        vertexArrayLeft.push_back(0.1f);
+
+                        i += 4;
+                        continue;
+                    }
 
 
-            float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
-            float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
-            float alpha = (acos(num / den))/2.0f;
-            float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
-            float pi = 3.1415926f;
-            if(sa < 0) // Точка находится справа
-            {
-                alpha = pi - alpha;
+                float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
+                float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                float alpha = (acos(num / den))/2.0f;
+                float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
+                float pi = 3.1415926f;
+                if(sa < 0) // Точка находится справа
+                {
+                    alpha = pi - alpha;
+                }
+
+
+                float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
+                if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
+                {
+                    beta *= -1.0f;
+                }
+                float hamma = alpha + beta;
+
+
+                vertexArrayLeft.push_back(x2);
+                vertexArrayLeft.push_back(y2);
+                vertexArrayLeft.push_back(0.0f);
+
+                vertexArrayLeft.push_back(x2);
+                vertexArrayLeft.push_back(y2);
+                vertexArrayLeft.push_back(0.08f);
+
+                float dx = (0.03f / sin(alpha)) * cos(hamma);
+                float dy = (0.03f / sin(alpha)) * sin(hamma);
+
+                vertexArrayLeft.push_back(x2 + dx);
+                vertexArrayLeft.push_back(y2 + dy);
+                vertexArrayLeft.push_back(0.1f);
+
+                dx = (0.25f / sin(alpha)) * cos(hamma);
+                dy = (0.25f / sin(alpha)) * sin(hamma);
+
+                vertexArrayLeft.push_back(x2 + dx);
+                vertexArrayLeft.push_back(y2 + dy);
+                vertexArrayLeft.push_back(0.1f);
+
+                dx = (leftBoardWidth / sin(alpha)) * cos(hamma);
+                dy = (leftBoardWidth / sin(alpha)) * sin(hamma);
+
+                vertexArrayLeft.push_back(x2 + dx);
+                vertexArrayLeft.push_back(y2 + dy);
+                vertexArrayLeft.push_back(0.1f);
+
+                //////////////////////////////////////////////////
+
+                vertexArrayLeft.push_back(x2);
+                vertexArrayLeft.push_back(y2);
+                vertexArrayLeft.push_back(0.0f);
+
+                vertexArrayLeft.push_back(x2);
+                vertexArrayLeft.push_back(y2);
+                vertexArrayLeft.push_back(0.08f);
+
+                dx = (0.03f / sin(alpha)) * cos(hamma);
+                dy = (0.03f / sin(alpha)) * sin(hamma);
+
+                vertexArrayLeft.push_back(x2 + dx);
+                vertexArrayLeft.push_back(y2 + dy);
+                vertexArrayLeft.push_back(0.1f);
+
+                dx = (0.25f / sin(alpha)) * cos(hamma);
+                dy = (0.25f / sin(alpha)) * sin(hamma);
+
+                vertexArrayLeft.push_back(x2 + dx);
+                vertexArrayLeft.push_back(y2 + dy);
+                vertexArrayLeft.push_back(0.1f);
+
+                dx = (leftBoardWidth / sin(alpha)) * cos(hamma);
+                dy = (leftBoardWidth / sin(alpha)) * sin(hamma);
+
+                vertexArrayLeft.push_back(x2 + dx);
+                vertexArrayLeft.push_back(y2 + dy);
+                vertexArrayLeft.push_back(0.1f);
+
+                i += 4;
+
             }
 
+    }
+}
 
-            float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
-            if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
-            {
-                beta *= -1.0f;
-            }
-            float hamma = alpha + beta;
-
-
-            vertexArrayLeft.push_back(x2);
-            vertexArrayLeft.push_back(y2);
-            vertexArrayLeft.push_back(0.0f);
-
-            vertexArrayLeft.push_back(x2);
-            vertexArrayLeft.push_back(y2);
-            vertexArrayLeft.push_back(0.08f);
-
-            float dx = (0.03f / sin(alpha)) * cos(hamma);
-            float dy = (0.03f / sin(alpha)) * sin(hamma);
-
-            vertexArrayLeft.push_back(x2 + dx);
-            vertexArrayLeft.push_back(y2 + dy);
-            vertexArrayLeft.push_back(0.1f);
-
-            dx = (0.25f / sin(alpha)) * cos(hamma);
-            dy = (0.25f / sin(alpha)) * sin(hamma);
-
-            vertexArrayLeft.push_back(x2 + dx);
-            vertexArrayLeft.push_back(y2 + dy);
-            vertexArrayLeft.push_back(0.1f);
-
-            dx = (leftBoardWidth / sin(alpha)) * cos(hamma);
-            dy = (leftBoardWidth / sin(alpha)) * sin(hamma);
-
-            vertexArrayLeft.push_back(x2 + dx);
-            vertexArrayLeft.push_back(y2 + dy);
-            vertexArrayLeft.push_back(0.1f);
-
-            //////////////////////////////////////////////////
-
-            vertexArrayLeft.push_back(x2);
-            vertexArrayLeft.push_back(y2);
-            vertexArrayLeft.push_back(0.0f);
-
-            vertexArrayLeft.push_back(x2);
-            vertexArrayLeft.push_back(y2);
-            vertexArrayLeft.push_back(0.08f);
-
-            dx = (0.03f / sin(alpha)) * cos(hamma);
-            dy = (0.03f / sin(alpha)) * sin(hamma);
-
-            vertexArrayLeft.push_back(x2 + dx);
-            vertexArrayLeft.push_back(y2 + dy);
-            vertexArrayLeft.push_back(0.1f);
-
-            dx = (0.25f / sin(alpha)) * cos(hamma);
-            dy = (0.25f / sin(alpha)) * sin(hamma);
-
-            vertexArrayLeft.push_back(x2 + dx);
-            vertexArrayLeft.push_back(y2 + dy);
-            vertexArrayLeft.push_back(0.1f);
-
-            dx = (leftBoardWidth / sin(alpha)) * cos(hamma);
-            dy = (leftBoardWidth / sin(alpha)) * sin(hamma);
-
-            vertexArrayLeft.push_back(x2 + dx);
-            vertexArrayLeft.push_back(y2 + dy);
-            vertexArrayLeft.push_back(0.1f);
-
-            i += 4;
-
+void RoadBroken::resetLeftVertexArray()
+{
+    for (int i = 1; i < vertexArray.size() / 3; i += 2)
+    {
+        float x1 = vertexArray[i * 3];
+        float y1 = vertexArray[i * 3 + 1];
+        float x2 = vertexArrayLeft[i / 2 * 5 * 3];
+        float y2 = vertexArrayLeft[i / 2 * 5 * 3 + 1];
+        if (x1 != x2 || y1 != y2)
+        {
+            float dx = x1 - x2;
+            float dy = y1 - y2;
+            vertexArrayLeft[(i - 1) / 2 * 5 * 3] += dx;
+            vertexArrayLeft[(i - 1) / 2 * 5 * 3 + 1] += dy;
+            vertexArrayLeft[((i - 1) / 2 * 5 + 1) * 3] += dx;
+            vertexArrayLeft[((i - 1) / 2 * 5 + 1) * 3 + 1] += dy;
+            vertexArrayLeft[((i - 1) / 2 * 5 + 2) * 3] += dx;
+            vertexArrayLeft[((i - 1) / 2 * 5 + 2) * 3 + 1] += dy;
+            vertexArrayLeft[((i - 1) / 2 * 5 + 3) * 3] += dx;
+            vertexArrayLeft[((i - 1) / 2 * 5 + 3) * 3 + 1] += dy;
+            vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3] += dx;
+            vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3 + 1] += dy;
         }
-
     }
 }
 
@@ -525,107 +553,107 @@ void RoadBroken::setRightTextureArray(float textureUsize, float textureVsize)
     textureArrayRight.clear();
     for (int i = 0; i < vertexArrayRight.size() / 3 - 5; i += 10)
     {
-    float x0 = vertexArrayRight[i * 3];
-    float y0 = vertexArrayRight[i * 3 + 1];
-    float x1 = vertexArrayRight[(i + 1) * 3];
-    float y1 = vertexArrayRight[(i + 1) * 3 + 1];
-    float x2 = vertexArrayRight[(i + 2) * 3];
-    float y2 = vertexArrayRight[(i + 2) * 3 + 1];
-    float x3 = vertexArrayRight[(i + 3) * 3];
-    float y3 = vertexArrayRight[(i + 3) * 3 + 1];
-    float x4 = vertexArrayRight[(i + 4) * 3];
-    float y4 = vertexArrayRight[(i + 4) * 3 + 1];
-    float x5 = vertexArrayRight[(i + 5) * 3];
-    float y5 = vertexArrayRight[(i + 5) * 3 + 1];
-    float x6 = vertexArrayRight[(i + 6) * 3];
-    float y6 = vertexArrayRight[(i + 6) * 3 + 1];
-    float x7 = vertexArrayRight[(i + 7) * 3];
-    float y7 = vertexArrayRight[(i + 7) * 3 + 1];
-    float x8 = vertexArrayRight[(i + 8) * 3];
-    float y8 = vertexArrayRight[(i + 8) * 3 + 1];
-    float x9 = vertexArrayRight[(i + 9) * 3];
-    float y9 = vertexArrayRight[(i + 9) * 3 + 1];
-    float pi = 3.1415926f;
+        float x0 = vertexArrayRight[i * 3];
+        float y0 = vertexArrayRight[i * 3 + 1];
+        float x1 = vertexArrayRight[(i + 1) * 3];
+        float y1 = vertexArrayRight[(i + 1) * 3 + 1];
+        float x2 = vertexArrayRight[(i + 2) * 3];
+        float y2 = vertexArrayRight[(i + 2) * 3 + 1];
+        float x3 = vertexArrayRight[(i + 3) * 3];
+        float y3 = vertexArrayRight[(i + 3) * 3 + 1];
+        float x4 = vertexArrayRight[(i + 4) * 3];
+        float y4 = vertexArrayRight[(i + 4) * 3 + 1];
+        float x5 = vertexArrayRight[(i + 5) * 3];
+        float y5 = vertexArrayRight[(i + 5) * 3 + 1];
+        float x6 = vertexArrayRight[(i + 6) * 3];
+        float y6 = vertexArrayRight[(i + 6) * 3 + 1];
+        float x7 = vertexArrayRight[(i + 7) * 3];
+        float y7 = vertexArrayRight[(i + 7) * 3 + 1];
+        float x8 = vertexArrayRight[(i + 8) * 3];
+        float y8 = vertexArrayRight[(i + 8) * 3 + 1];
+        float x9 = vertexArrayRight[(i + 9) * 3];
+        float y9 = vertexArrayRight[(i + 9) * 3 + 1];
+        float pi = 3.1415926f;
 
-    textureArrayRight.push_back(0.0f);
-    textureArrayRight.push_back(0.0f);
+        textureArrayRight.push_back(0.0f);
+        textureArrayRight.push_back(0.0f);
 
-    float r1 = sqrt((x5 - x0) * (x5 - x0) + (y5 - y0) * (y5 - y0));
+        float r1 = sqrt((x5 - x0) * (x5 - x0) + (y5 - y0) * (y5 - y0));
 
-    float factor;
+        float factor;
 
-    if (x5 == x0 && y5 == y0)
-        factor = 0.0f;
-    else
-        factor = ((x5 - x0) * (x1 - x0) + (y5 - y0) * (y1 - y0))/r1;
+        if (x5 == x0 && y5 == y0)
+            factor = 0.0f;
+        else
+            factor = ((x5 - x0) * (x1 - x0) + (y5 - y0) * (y1 - y0))/r1;
 
-    textureArrayRight.push_back(0.08f);
-    textureArrayRight.push_back(factor/textureVsize);
+        textureArrayRight.push_back(0.08f);
+        textureArrayRight.push_back(factor/textureVsize);
 
-    if (x5 == x0 && y5 == y0)
-        factor = 0.0f;
-    else
-    factor = ((x5 - x0) * (x2 - x0) + (y5 - y0) * (y2 - y0))/r1;
+        if (x5 == x0 && y5 == y0)
+            factor = 0.0f;
+        else
+            factor = ((x5 - x0) * (x2 - x0) + (y5 - y0) * (y2 - y0))/r1;
 
-    textureArrayRight.push_back(0.09f);
-    textureArrayRight.push_back(factor/textureVsize);
+        textureArrayRight.push_back(0.09f);
+        textureArrayRight.push_back(factor/textureVsize);
 
-    if (x5 == x0 && y5 == y0)
-        factor = 0.0f;
-    else
-    factor = ((x5 - x0) * (x3 - x0) + (y5 - y0) * (y3 - y0))/r1;
+        if (x5 == x0 && y5 == y0)
+            factor = 0.0f;
+        else
+            factor = ((x5 - x0) * (x3 - x0) + (y5 - y0) * (y3 - y0))/r1;
 
-    textureArrayRight.push_back(0.16666f);
-    textureArrayRight.push_back(factor/textureVsize);
+        textureArrayRight.push_back(0.16666f);
+        textureArrayRight.push_back(factor/textureVsize);
 
-    if (x5 == x0 && y5 == y0)
-        factor = 0.0f;
-    else
-    factor = ((x5 - x0) * (x4 - x0) + (y5 - y0) * (y4 - y0))/r1;
+        if (x5 == x0 && y5 == y0)
+            factor = 0.0f;
+        else
+            factor = ((x5 - x0) * (x4 - x0) + (y5 - y0) * (y4 - y0))/r1;
 
-    textureArrayRight.push_back(1.0f);
-    textureArrayRight.push_back(factor/textureVsize);
+        textureArrayRight.push_back(1.0f);
+        textureArrayRight.push_back(factor/textureVsize);
 
-    //////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////
 
-    textureArrayRight.push_back(0.0f);
-    textureArrayRight.push_back(r1 / textureVsize);
+        textureArrayRight.push_back(0.0f);
+        textureArrayRight.push_back(r1 / textureVsize);
 
-    if (x5 == x0 && y5 == y0)
-        factor = 0.0f;
-    else
-    factor = ((x5 - x0) * (x6 - x0) + (y5 - y0) * (y6 - y0))/r1;
+        if (x5 == x0 && y5 == y0)
+            factor = 0.0f;
+        else
+            factor = ((x5 - x0) * (x6 - x0) + (y5 - y0) * (y6 - y0))/r1;
 
-    textureArrayRight.push_back(0.08f);
-    textureArrayRight.push_back(r1 / textureVsize);
+        textureArrayRight.push_back(0.08f);
+        textureArrayRight.push_back(r1 / textureVsize);
 
-    //r2 = sqrt((x7 - x5) * (x7 - x5) + (y7 - y5) * (y7 - y5));
-    //cosAngle = ((x0 - x5) * (x7 - x5) + (y0 - y5) * (y7 - y5))/
-    //                  (r1 * r2);
+        //r2 = sqrt((x7 - x5) * (x7 - x5) + (y7 - y5) * (y7 - y5));
+        //cosAngle = ((x0 - x5) * (x7 - x5) + (y0 - y5) * (y7 - y5))/
+        //                  (r1 * r2);
 
-    if (x5 == x0 && y5 == y0)
-        factor = 0.0f;
-    else
-    factor = ((x5 - x0) * (x7 - x0) + (y5 - y0) * (y7 - y0))/r1;
+        if (x5 == x0 && y5 == y0)
+            factor = 0.0f;
+        else
+            factor = ((x5 - x0) * (x7 - x0) + (y5 - y0) * (y7 - y0))/r1;
 
-    textureArrayRight.push_back(0.09f);
-    textureArrayRight.push_back(factor / textureVsize);
+        textureArrayRight.push_back(0.09f);
+        textureArrayRight.push_back(factor / textureVsize);
 
-    if (x5 == x0 && y5 == y0)
-        factor = 0.0f;
-    else
-    factor = ((x5 - x0) * (x8 - x0) + (y5 - y0) * (y8 - y0))/r1;
+        if (x5 == x0 && y5 == y0)
+            factor = 0.0f;
+        else
+            factor = ((x5 - x0) * (x8 - x0) + (y5 - y0) * (y8 - y0))/r1;
 
-    textureArrayRight.push_back(0.16666f);
-    textureArrayRight.push_back(factor / textureVsize);
+        textureArrayRight.push_back(0.16666f);
+        textureArrayRight.push_back(factor / textureVsize);
 
-    if (x5 == x0 && y5 == y0)
-        factor = 0.0f;
-    else
-    factor = ((x5 - x0) * (x9 - x0) + (y5 - y0) * (y9 - y0))/r1;
+        if (x5 == x0 && y5 == y0)
+            factor = 0.0f;
+        else
+            factor = ((x5 - x0) * (x9 - x0) + (y5 - y0) * (y9 - y0))/r1;
 
-    textureArrayRight.push_back(1.0f);
-    textureArrayRight.push_back(factor / textureVsize);
+        textureArrayRight.push_back(1.0f);
+        textureArrayRight.push_back(factor / textureVsize);
     }
 
 }
@@ -721,274 +749,300 @@ void RoadBroken::setRightVertexArray()
             i += 2;
         }
         else
-        if (i == vertexArray.size() / 3 - 2)
-        {
-
-            float x0 = vertexArray[i * 3];
-            float y0 = vertexArray[i * 3 + 1];
-            float z0 = vertexArray[i * 3 + 2];
-            float x1 = vertexArray[(i + 1) * 3];
-            float y1 = vertexArray[(i + 1) * 3 + 1];
-            float z1 = vertexArray[(i + 1) * 3 + 2];
-            float x2 = vertexArray[(i - 2) * 3];
-            float y2 = vertexArray[(i - 2) * 3 + 1];
-            float z2 = vertexArray[(i - 2) * 3 + 2];
-            if (x0 == x2 && y0 == y2)
-            {
-                x2 = vertexArray[(i - 6) * 3];
-                y2 = vertexArray[(i - 6) * 3 + 1];
-            }
-            float dx = x0 - x1;
-            float dy = y0 - y1;
-            float r01 = sqrt(dx*dx + dy*dy);
-            float pi = 3.1415926f;
-            float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
-                    sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
-
-            vertexArrayRight.push_back(x0);
-            vertexArrayRight.push_back(y0);
-            vertexArrayRight.push_back(z0);
-
-            vertexArrayRight.push_back(x0);
-            vertexArrayRight.push_back(y0);
-            vertexArrayRight.push_back(0.08f);
-
-            vertexArrayRight.push_back(x0 + dx/r01 * (0.03f / cos(angle - pi / 2.0f)));
-            vertexArrayRight.push_back(y0 + dy/r01 * (0.03f / cos(angle - pi / 2.0f)));
-            vertexArrayRight.push_back(0.1f);
-
-            vertexArrayRight.push_back(x0 + dx/r01 * (0.25f / cos(angle - pi / 2.0f)));
-            vertexArrayRight.push_back(y0 + dy/r01 * (0.25f / cos(angle - pi / 2.0f)));
-            vertexArrayRight.push_back(0.1f);
-
-            vertexArrayRight.push_back(x0 + dx/r01 * (rightBoardWidth / cos(angle - pi / 2.0f)));
-            vertexArrayRight.push_back(y0 + dy/r01 * (rightBoardWidth / cos(angle - pi / 2.0f)));
-            vertexArrayRight.push_back(0.1f);
-
-            i += 2;
-
-        }
-        else
-        {
-            float x1 = vertexArray[(i - 2) * 3];
-            float y1 = vertexArray[(i - 2) * 3 + 1];
-            float x2 = vertexArray[i * 3];
-            float y2 = vertexArray[i * 3 + 1];
-            float x3 = vertexArray[(i + 4) * 3];
-            float y3 = vertexArray[(i + 4) * 3 + 1];
-            if (x1 == x2 && y1 == y2)
-
+            if (i == vertexArray.size() / 3 - 2)
             {
 
-                float x0 = vertexArrayRight[((i - 2)/2*5) * 3];
-                float y0 = vertexArrayRight[((i - 2)/2*5) * 3 + 1];
-                float z0 = vertexArrayRight[((i - 2)/2*5) * 3 + 2];
-                float x1 = vertexArrayRight[((i - 2)/2*5 + 1) * 3];
-                float y1 = vertexArrayRight[((i - 2)/2*5 + 1) * 3 + 1];
-                float z1 = vertexArrayRight[((i - 2)/2*5 + 1) * 3 + 2];
-                float x2 = vertexArrayRight[((i - 2)/2*5 + 2) * 3];
-                float y2 = vertexArrayRight[((i - 2)/2*5 + 2) * 3 + 1];
-                float z2 = vertexArrayRight[((i - 2)/2*5 + 2) * 3 + 2];
-                float x3 = vertexArrayRight[((i - 2)/2*5 + 3) * 3];
-                float y3 = vertexArrayRight[((i - 2)/2*5 + 3) * 3 + 1];
-                float z3 = vertexArrayRight[((i - 2)/2*5 + 3) * 3 + 2];
-                float x4 = vertexArrayRight[((i - 2)/2*5 + 4) * 3];
-                float y4 = vertexArrayRight[((i - 2)/2*5 + 4) * 3 + 1];
-                float z4 = vertexArrayRight[((i - 2)/2*5 + 4) * 3 + 2];
+                float x0 = vertexArray[i * 3];
+                float y0 = vertexArray[i * 3 + 1];
+                float z0 = vertexArray[i * 3 + 2];
+                float x1 = vertexArray[(i + 1) * 3];
+                float y1 = vertexArray[(i + 1) * 3 + 1];
+                float z1 = vertexArray[(i + 1) * 3 + 2];
+                float x2 = vertexArray[(i - 2) * 3];
+                float y2 = vertexArray[(i - 2) * 3 + 1];
+                float z2 = vertexArray[(i - 2) * 3 + 2];
+                if (x0 == x2 && y0 == y2)
+                {
+                    x2 = vertexArray[(i - 6) * 3];
+                    y2 = vertexArray[(i - 6) * 3 + 1];
+                }
+                float dx = x0 - x1;
+                float dy = y0 - y1;
+                float r01 = sqrt(dx*dx + dy*dy);
+                float pi = 3.1415926f;
+                float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
+                                   sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
 
                 vertexArrayRight.push_back(x0);
                 vertexArrayRight.push_back(y0);
                 vertexArrayRight.push_back(z0);
 
-                vertexArrayRight.push_back(x1);
-                vertexArrayRight.push_back(y1);
-                vertexArrayRight.push_back(z1);
-
-                vertexArrayRight.push_back(x2);
-                vertexArrayRight.push_back(y2);
-                vertexArrayRight.push_back(z2);
-
-                vertexArrayRight.push_back(x3);
-                vertexArrayRight.push_back(y3);
-                vertexArrayRight.push_back(z3);
-
-                vertexArrayRight.push_back(x4);
-                vertexArrayRight.push_back(y4);
-                vertexArrayRight.push_back(z4);
-
                 vertexArrayRight.push_back(x0);
                 vertexArrayRight.push_back(y0);
-                vertexArrayRight.push_back(z0);
+                vertexArrayRight.push_back(0.08f);
 
-                vertexArrayRight.push_back(x1);
-                vertexArrayRight.push_back(y1);
-                vertexArrayRight.push_back(z1);
+                vertexArrayRight.push_back(x0 + dx/r01 * (0.03f / cos(angle - pi / 2.0f)));
+                vertexArrayRight.push_back(y0 + dy/r01 * (0.03f / cos(angle - pi / 2.0f)));
+                vertexArrayRight.push_back(0.1f);
 
-                vertexArrayRight.push_back(x2);
-                vertexArrayRight.push_back(y2);
-                vertexArrayRight.push_back(z2);
+                vertexArrayRight.push_back(x0 + dx/r01 * (0.25f / cos(angle - pi / 2.0f)));
+                vertexArrayRight.push_back(y0 + dy/r01 * (0.25f / cos(angle - pi / 2.0f)));
+                vertexArrayRight.push_back(0.1f);
 
-                vertexArrayRight.push_back(x3);
-                vertexArrayRight.push_back(y3);
-                vertexArrayRight.push_back(z3);
+                vertexArrayRight.push_back(x0 + dx/r01 * (rightBoardWidth / cos(angle - pi / 2.0f)));
+                vertexArrayRight.push_back(y0 + dy/r01 * (rightBoardWidth / cos(angle - pi / 2.0f)));
+                vertexArrayRight.push_back(0.1f);
 
-                vertexArrayRight.push_back(x4);
-                vertexArrayRight.push_back(y4);
-                vertexArrayRight.push_back(z4);
+                i += 2;
 
-                i += 4;
-                continue;
             }
             else
-                if (x2 == x3 && y2 == y3)
+            {
+                float x1 = vertexArray[(i - 2) * 3];
+                float y1 = vertexArray[(i - 2) * 3 + 1];
+                float x2 = vertexArray[i * 3];
+                float y2 = vertexArray[i * 3 + 1];
+                float x3 = vertexArray[(i + 4) * 3];
+                float y3 = vertexArray[(i + 4) * 3 + 1];
+                if (x1 == x2 && y1 == y2)
+
                 {
-                    float x0 = vertexArray[i * 3];
-                    float y0 = vertexArray[i * 3 + 1];
-                    float z0 = vertexArray[i * 3 + 2];
-                    float x1 = vertexArray[(i + 1) * 3];
-                    float y1 = vertexArray[(i + 1) * 3 + 1];
-                    float z1 = vertexArray[(i + 1) * 3 + 2];
-                    float x2 = vertexArray[(i - 2) * 3];
-                    float y2 = vertexArray[(i - 2) * 3 + 1];
-                    float z2 = vertexArray[(i - 2) * 3 + 2];
-                    if (x0 == x2 && y0 == y2)
-                    {
-                        x2 = vertexArray[(i - 6) * 3];
-                        y2 = vertexArray[(i - 6) * 3 + 1];
-                    }
-                    float dx = x0 - x1;
-                    float dy = y0 - y1;
-                    float r01 = sqrt(dx*dx + dy*dy);
-                    float pi = 3.1415926f;
-                    float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
-                            sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
+
+                    float x0 = vertexArrayRight[((i - 2)/2*5) * 3];
+                    float y0 = vertexArrayRight[((i - 2)/2*5) * 3 + 1];
+                    float z0 = vertexArrayRight[((i - 2)/2*5) * 3 + 2];
+                    float x1 = vertexArrayRight[((i - 2)/2*5 + 1) * 3];
+                    float y1 = vertexArrayRight[((i - 2)/2*5 + 1) * 3 + 1];
+                    float z1 = vertexArrayRight[((i - 2)/2*5 + 1) * 3 + 2];
+                    float x2 = vertexArrayRight[((i - 2)/2*5 + 2) * 3];
+                    float y2 = vertexArrayRight[((i - 2)/2*5 + 2) * 3 + 1];
+                    float z2 = vertexArrayRight[((i - 2)/2*5 + 2) * 3 + 2];
+                    float x3 = vertexArrayRight[((i - 2)/2*5 + 3) * 3];
+                    float y3 = vertexArrayRight[((i - 2)/2*5 + 3) * 3 + 1];
+                    float z3 = vertexArrayRight[((i - 2)/2*5 + 3) * 3 + 2];
+                    float x4 = vertexArrayRight[((i - 2)/2*5 + 4) * 3];
+                    float y4 = vertexArrayRight[((i - 2)/2*5 + 4) * 3 + 1];
+                    float z4 = vertexArrayRight[((i - 2)/2*5 + 4) * 3 + 2];
 
                     vertexArrayRight.push_back(x0);
                     vertexArrayRight.push_back(y0);
                     vertexArrayRight.push_back(z0);
 
-                    vertexArrayRight.push_back(x0);
-                    vertexArrayRight.push_back(y0);
-                    vertexArrayRight.push_back(0.08f);
+                    vertexArrayRight.push_back(x1);
+                    vertexArrayRight.push_back(y1);
+                    vertexArrayRight.push_back(z1);
 
-                    vertexArrayRight.push_back(x0 + dx/r01 * (0.03f / cos(angle - pi / 2.0f)));
-                    vertexArrayRight.push_back(y0 + dy/r01 * (0.03f / cos(angle - pi / 2.0f)));
-                    vertexArrayRight.push_back(0.1f);
+                    vertexArrayRight.push_back(x2);
+                    vertexArrayRight.push_back(y2);
+                    vertexArrayRight.push_back(z2);
 
-                    vertexArrayRight.push_back(x0 + dx/r01 * (0.25f / cos(angle - pi / 2.0f)));
-                    vertexArrayRight.push_back(y0 + dy/r01 * (0.25f / cos(angle - pi / 2.0f)));
-                    vertexArrayRight.push_back(0.1f);
+                    vertexArrayRight.push_back(x3);
+                    vertexArrayRight.push_back(y3);
+                    vertexArrayRight.push_back(z3);
 
-                    vertexArrayRight.push_back(x0 + dx/r01 * (rightBoardWidth / cos(angle - pi / 2.0f)));
-                    vertexArrayRight.push_back(y0 + dy/r01 * (rightBoardWidth / cos(angle - pi / 2.0f)));
-                    vertexArrayRight.push_back(0.1f);
+                    vertexArrayRight.push_back(x4);
+                    vertexArrayRight.push_back(y4);
+                    vertexArrayRight.push_back(z4);
 
                     vertexArrayRight.push_back(x0);
                     vertexArrayRight.push_back(y0);
                     vertexArrayRight.push_back(z0);
 
-                    vertexArrayRight.push_back(x0);
-                    vertexArrayRight.push_back(y0);
-                    vertexArrayRight.push_back(0.08f);
+                    vertexArrayRight.push_back(x1);
+                    vertexArrayRight.push_back(y1);
+                    vertexArrayRight.push_back(z1);
 
-                    vertexArrayRight.push_back(x0 + dx/r01 * (0.03f / cos(angle - pi / 2.0f)));
-                    vertexArrayRight.push_back(y0 + dy/r01 * (0.03f / cos(angle - pi / 2.0f)));
-                    vertexArrayRight.push_back(0.1f);
+                    vertexArrayRight.push_back(x2);
+                    vertexArrayRight.push_back(y2);
+                    vertexArrayRight.push_back(z2);
 
-                    vertexArrayRight.push_back(x0 + dx/r01 * (0.25f / cos(angle - pi / 2.0f)));
-                    vertexArrayRight.push_back(y0 + dy/r01 * (0.25f / cos(angle - pi / 2.0f)));
-                    vertexArrayRight.push_back(0.1f);
+                    vertexArrayRight.push_back(x3);
+                    vertexArrayRight.push_back(y3);
+                    vertexArrayRight.push_back(z3);
 
-                    vertexArrayRight.push_back(x0 + dx/r01 * (rightBoardWidth / cos(angle - pi / 2.0f)));
-                    vertexArrayRight.push_back(y0 + dy/r01 * (rightBoardWidth / cos(angle - pi / 2.0f)));
-                    vertexArrayRight.push_back(0.1f);
+                    vertexArrayRight.push_back(x4);
+                    vertexArrayRight.push_back(y4);
+                    vertexArrayRight.push_back(z4);
 
                     i += 4;
                     continue;
                 }
-            float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
-            float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
-            float alpha = (acos(num / den))/2.0f;
-            float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
-            float pi = 3.1415926f;
-            if(sa < 0) // Точка находится справа
-            {
-                alpha = pi - alpha;
+                else
+                    if (x2 == x3 && y2 == y3)
+                    {
+                        float x0 = vertexArray[i * 3];
+                        float y0 = vertexArray[i * 3 + 1];
+                        float z0 = vertexArray[i * 3 + 2];
+                        float x1 = vertexArray[(i + 1) * 3];
+                        float y1 = vertexArray[(i + 1) * 3 + 1];
+                        float z1 = vertexArray[(i + 1) * 3 + 2];
+                        float x2 = vertexArray[(i - 2) * 3];
+                        float y2 = vertexArray[(i - 2) * 3 + 1];
+                        float z2 = vertexArray[(i - 2) * 3 + 2];
+                        if (x0 == x2 && y0 == y2)
+                        {
+                            x2 = vertexArray[(i - 6) * 3];
+                            y2 = vertexArray[(i - 6) * 3 + 1];
+                        }
+                        float dx = x0 - x1;
+                        float dy = y0 - y1;
+                        float r01 = sqrt(dx*dx + dy*dy);
+                        float pi = 3.1415926f;
+                        float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
+                                           sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
+
+                        vertexArrayRight.push_back(x0);
+                        vertexArrayRight.push_back(y0);
+                        vertexArrayRight.push_back(z0);
+
+                        vertexArrayRight.push_back(x0);
+                        vertexArrayRight.push_back(y0);
+                        vertexArrayRight.push_back(0.08f);
+
+                        vertexArrayRight.push_back(x0 + dx/r01 * (0.03f / cos(angle - pi / 2.0f)));
+                        vertexArrayRight.push_back(y0 + dy/r01 * (0.03f / cos(angle - pi / 2.0f)));
+                        vertexArrayRight.push_back(0.1f);
+
+                        vertexArrayRight.push_back(x0 + dx/r01 * (0.25f / cos(angle - pi / 2.0f)));
+                        vertexArrayRight.push_back(y0 + dy/r01 * (0.25f / cos(angle - pi / 2.0f)));
+                        vertexArrayRight.push_back(0.1f);
+
+                        vertexArrayRight.push_back(x0 + dx/r01 * (rightBoardWidth / cos(angle - pi / 2.0f)));
+                        vertexArrayRight.push_back(y0 + dy/r01 * (rightBoardWidth / cos(angle - pi / 2.0f)));
+                        vertexArrayRight.push_back(0.1f);
+
+                        vertexArrayRight.push_back(x0);
+                        vertexArrayRight.push_back(y0);
+                        vertexArrayRight.push_back(z0);
+
+                        vertexArrayRight.push_back(x0);
+                        vertexArrayRight.push_back(y0);
+                        vertexArrayRight.push_back(0.08f);
+
+                        vertexArrayRight.push_back(x0 + dx/r01 * (0.03f / cos(angle - pi / 2.0f)));
+                        vertexArrayRight.push_back(y0 + dy/r01 * (0.03f / cos(angle - pi / 2.0f)));
+                        vertexArrayRight.push_back(0.1f);
+
+                        vertexArrayRight.push_back(x0 + dx/r01 * (0.25f / cos(angle - pi / 2.0f)));
+                        vertexArrayRight.push_back(y0 + dy/r01 * (0.25f / cos(angle - pi / 2.0f)));
+                        vertexArrayRight.push_back(0.1f);
+
+                        vertexArrayRight.push_back(x0 + dx/r01 * (rightBoardWidth / cos(angle - pi / 2.0f)));
+                        vertexArrayRight.push_back(y0 + dy/r01 * (rightBoardWidth / cos(angle - pi / 2.0f)));
+                        vertexArrayRight.push_back(0.1f);
+
+                        i += 4;
+                        continue;
+                    }
+                float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
+                float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                float alpha = (acos(num / den))/2.0f;
+                float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
+                float pi = 3.1415926f;
+                if(sa < 0) // Точка находится справа
+                {
+                    alpha = pi - alpha;
+                }
+
+
+                float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
+                if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
+                {
+                    beta *= -1.0f;
+                }
+                float hamma = alpha + beta;
+
+
+                vertexArrayRight.push_back(x2);
+                vertexArrayRight.push_back(y2);
+                vertexArrayRight.push_back(0.0f);
+
+                vertexArrayRight.push_back(x2);
+                vertexArrayRight.push_back(y2);
+                vertexArrayRight.push_back(0.08f);
+
+                float dx = (0.03f / sin(alpha)) * cos(hamma);
+                float dy = (0.03f / sin(alpha)) * sin(hamma);
+
+                vertexArrayRight.push_back(x2 - dx);
+                vertexArrayRight.push_back(y2 - dy);
+                vertexArrayRight.push_back(0.1f);
+
+                dx = (0.25f / sin(alpha)) * cos(hamma);
+                dy = (0.25f / sin(alpha)) * sin(hamma);
+
+                vertexArrayRight.push_back(x2 - dx);
+                vertexArrayRight.push_back(y2 - dy);
+                vertexArrayRight.push_back(0.1f);
+
+                dx = (rightBoardWidth / sin(alpha)) * cos(hamma);
+                dy = (rightBoardWidth / sin(alpha)) * sin(hamma);
+
+                vertexArrayRight.push_back(x2 - dx);
+                vertexArrayRight.push_back(y2 - dy);
+                vertexArrayRight.push_back(0.1f);
+
+                //////////////////////////////////////////////////
+
+                vertexArrayRight.push_back(x2);
+                vertexArrayRight.push_back(y2);
+                vertexArrayRight.push_back(0.0f);
+
+                vertexArrayRight.push_back(x2);
+                vertexArrayRight.push_back(y2);
+                vertexArrayRight.push_back(0.08f);
+
+                dx = (0.03f / sin(alpha)) * cos(hamma);
+                dy = (0.03f / sin(alpha)) * sin(hamma);
+
+                vertexArrayRight.push_back(x2 - dx);
+                vertexArrayRight.push_back(y2 - dy);
+                vertexArrayRight.push_back(0.1f);
+
+                dx = (0.25f / sin(alpha)) * cos(hamma);
+                dy = (0.25f / sin(alpha)) * sin(hamma);
+
+                vertexArrayRight.push_back(x2 - dx);
+                vertexArrayRight.push_back(y2 - dy);
+                vertexArrayRight.push_back(0.1f);
+
+                dx = (rightBoardWidth / sin(alpha)) * cos(hamma);
+                dy = (rightBoardWidth / sin(alpha)) * sin(hamma);
+
+                vertexArrayRight.push_back(x2 - dx);
+                vertexArrayRight.push_back(y2 - dy);
+                vertexArrayRight.push_back(0.1f);
+
+                i += 4;
+
             }
 
+    }
+}
 
-            float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
-            if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
-            {
-                beta *= -1.0f;
-            }
-            float hamma = alpha + beta;
-
-
-            vertexArrayRight.push_back(x2);
-            vertexArrayRight.push_back(y2);
-            vertexArrayRight.push_back(0.0f);
-
-            vertexArrayRight.push_back(x2);
-            vertexArrayRight.push_back(y2);
-            vertexArrayRight.push_back(0.08f);
-
-            float dx = (0.03f / sin(alpha)) * cos(hamma);
-            float dy = (0.03f / sin(alpha)) * sin(hamma);
-
-            vertexArrayRight.push_back(x2 - dx);
-            vertexArrayRight.push_back(y2 - dy);
-            vertexArrayRight.push_back(0.1f);
-
-            dx = (0.25f / sin(alpha)) * cos(hamma);
-            dy = (0.25f / sin(alpha)) * sin(hamma);
-
-            vertexArrayRight.push_back(x2 - dx);
-            vertexArrayRight.push_back(y2 - dy);
-            vertexArrayRight.push_back(0.1f);
-
-            dx = (rightBoardWidth / sin(alpha)) * cos(hamma);
-            dy = (rightBoardWidth / sin(alpha)) * sin(hamma);
-
-            vertexArrayRight.push_back(x2 - dx);
-            vertexArrayRight.push_back(y2 - dy);
-            vertexArrayRight.push_back(0.1f);
-
-            //////////////////////////////////////////////////
-
-            vertexArrayRight.push_back(x2);
-            vertexArrayRight.push_back(y2);
-            vertexArrayRight.push_back(0.0f);
-
-            vertexArrayRight.push_back(x2);
-            vertexArrayRight.push_back(y2);
-            vertexArrayRight.push_back(0.08f);
-
-            dx = (0.03f / sin(alpha)) * cos(hamma);
-            dy = (0.03f / sin(alpha)) * sin(hamma);
-
-            vertexArrayRight.push_back(x2 - dx);
-            vertexArrayRight.push_back(y2 - dy);
-            vertexArrayRight.push_back(0.1f);
-
-            dx = (0.25f / sin(alpha)) * cos(hamma);
-            dy = (0.25f / sin(alpha)) * sin(hamma);
-
-            vertexArrayRight.push_back(x2 - dx);
-            vertexArrayRight.push_back(y2 - dy);
-            vertexArrayRight.push_back(0.1f);
-
-            dx = (rightBoardWidth / sin(alpha)) * cos(hamma);
-            dy = (rightBoardWidth / sin(alpha)) * sin(hamma);
-
-            vertexArrayRight.push_back(x2 - dx);
-            vertexArrayRight.push_back(y2 - dy);
-            vertexArrayRight.push_back(0.1f);
-
-            i += 4;
-
+void RoadBroken::resetRightVertexArray()
+{
+    for (int i = 0; i < vertexArray.size() / 3; i += 2)
+    {
+        float x1 = vertexArray[i * 3];
+        float y1 = vertexArray[i * 3 + 1];
+        float x2 = vertexArrayRight[i / 2 * 5 * 3];
+        float y2 = vertexArrayRight[i / 2 * 5 * 3 + 1];
+        if (x1 != x2 || y1 != y2)
+        {
+            float dx = x1 - x2;
+            float dy = y1 - y2;
+            vertexArrayRight[i / 2 * 5 * 3] += dx;
+            vertexArrayRight[i / 2 * 5 * 3 + 1] += dy;
+            vertexArrayRight[(i / 2 * 5 + 1) * 3] += dx;
+            vertexArrayRight[(i / 2 * 5 + 1) * 3 + 1] += dy;
+            vertexArrayRight[(i / 2 * 5 + 2) * 3] += dx;
+            vertexArrayRight[(i / 2 * 5 + 2) * 3 + 1] += dy;
+            vertexArrayRight[(i / 2 * 5 + 3) * 3] += dx;
+            vertexArrayRight[(i / 2 * 5 + 3) * 3 + 1] += dy;
+            vertexArrayRight[(i / 2 * 5 + 4) * 3] += dx;
+            vertexArrayRight[(i / 2 * 5 + 4) * 3 + 1] += dy;
         }
-
     }
 }
 
@@ -997,80 +1051,80 @@ void RoadBroken::setLeftTextureArray(float textureUsize, float textureVsize)
     textureArrayLeft.clear();
     for (int i = 0; i < vertexArrayLeft.size() / 3 - 5; i += 10)
     {
-    float x0 = vertexArrayLeft[i * 3];
-    float y0 = vertexArrayLeft[i * 3 + 1];
-    float x1 = vertexArrayLeft[(i + 1) * 3];
-    float y1 = vertexArrayLeft[(i + 1) * 3 + 1];
-    float x2 = vertexArrayLeft[(i + 2) * 3];
-    float y2 = vertexArrayLeft[(i + 2) * 3 + 1];
-    float x3 = vertexArrayLeft[(i + 3) * 3];
-    float y3 = vertexArrayLeft[(i + 3) * 3 + 1];
-    float x4 = vertexArrayLeft[(i + 4) * 3];
-    float y4 = vertexArrayLeft[(i + 4) * 3 + 1];
-    float x5 = vertexArrayLeft[(i + 5) * 3];
-    float y5 = vertexArrayLeft[(i + 5) * 3 + 1];
-    float x6 = vertexArrayLeft[(i + 6) * 3];
-    float y6 = vertexArrayLeft[(i + 6) * 3 + 1];
-    float x7 = vertexArrayLeft[(i + 7) * 3];
-    float y7 = vertexArrayLeft[(i + 7) * 3 + 1];
-    float x8 = vertexArrayLeft[(i + 8) * 3];
-    float y8 = vertexArrayLeft[(i + 8) * 3 + 1];
-    float x9 = vertexArrayLeft[(i + 9) * 3];
-    float y9 = vertexArrayLeft[(i + 9) * 3 + 1];
-    float pi = 3.1415926f;
+        float x0 = vertexArrayLeft[i * 3];
+        float y0 = vertexArrayLeft[i * 3 + 1];
+        float x1 = vertexArrayLeft[(i + 1) * 3];
+        float y1 = vertexArrayLeft[(i + 1) * 3 + 1];
+        float x2 = vertexArrayLeft[(i + 2) * 3];
+        float y2 = vertexArrayLeft[(i + 2) * 3 + 1];
+        float x3 = vertexArrayLeft[(i + 3) * 3];
+        float y3 = vertexArrayLeft[(i + 3) * 3 + 1];
+        float x4 = vertexArrayLeft[(i + 4) * 3];
+        float y4 = vertexArrayLeft[(i + 4) * 3 + 1];
+        float x5 = vertexArrayLeft[(i + 5) * 3];
+        float y5 = vertexArrayLeft[(i + 5) * 3 + 1];
+        float x6 = vertexArrayLeft[(i + 6) * 3];
+        float y6 = vertexArrayLeft[(i + 6) * 3 + 1];
+        float x7 = vertexArrayLeft[(i + 7) * 3];
+        float y7 = vertexArrayLeft[(i + 7) * 3 + 1];
+        float x8 = vertexArrayLeft[(i + 8) * 3];
+        float y8 = vertexArrayLeft[(i + 8) * 3 + 1];
+        float x9 = vertexArrayLeft[(i + 9) * 3];
+        float y9 = vertexArrayLeft[(i + 9) * 3 + 1];
+        float pi = 3.1415926f;
 
-    textureArrayLeft.push_back(0.0f);
-    textureArrayLeft.push_back(0.0f);
+        textureArrayLeft.push_back(0.0f);
+        textureArrayLeft.push_back(0.0f);
 
-    float r1 = sqrt((x5 - x0) * (x5 - x0) + (y5 - y0) * (y5 - y0));
-    float factor = ((x5 - x0) * (x1 - x0) + (y5 - y0) * (y1 - y0))/r1;
+        float r1 = sqrt((x5 - x0) * (x5 - x0) + (y5 - y0) * (y5 - y0));
+        float factor = ((x5 - x0) * (x1 - x0) + (y5 - y0) * (y1 - y0))/r1;
 
-    textureArrayLeft.push_back(0.08f);
-    textureArrayLeft.push_back(factor/textureVsize);
+        textureArrayLeft.push_back(0.08f);
+        textureArrayLeft.push_back(factor/textureVsize);
 
-    factor = ((x5 - x0) * (x2 - x0) + (y5 - y0) * (y2 - y0))/r1;
+        factor = ((x5 - x0) * (x2 - x0) + (y5 - y0) * (y2 - y0))/r1;
 
-    textureArrayLeft.push_back(0.09f);
-    textureArrayLeft.push_back(factor/textureVsize);
+        textureArrayLeft.push_back(0.09f);
+        textureArrayLeft.push_back(factor/textureVsize);
 
-    factor = ((x5 - x0) * (x3 - x0) + (y5 - y0) * (y3 - y0))/r1;
+        factor = ((x5 - x0) * (x3 - x0) + (y5 - y0) * (y3 - y0))/r1;
 
-    textureArrayLeft.push_back(0.16666f);
-    textureArrayLeft.push_back(factor/textureVsize);
+        textureArrayLeft.push_back(0.16666f);
+        textureArrayLeft.push_back(factor/textureVsize);
 
-    factor = ((x5 - x0) * (x4 - x0) + (y5 - y0) * (y4 - y0))/r1;
+        factor = ((x5 - x0) * (x4 - x0) + (y5 - y0) * (y4 - y0))/r1;
 
-    textureArrayLeft.push_back(1.0f);
-    textureArrayLeft.push_back(factor/textureVsize);
+        textureArrayLeft.push_back(1.0f);
+        textureArrayLeft.push_back(factor/textureVsize);
 
-    //////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////
 
-    textureArrayLeft.push_back(0.0f);
-    textureArrayLeft.push_back(r1 / textureVsize);
+        textureArrayLeft.push_back(0.0f);
+        textureArrayLeft.push_back(r1 / textureVsize);
 
-    factor = ((x5 - x0) * (x6 - x0) + (y5 - y0) * (y6 - y0))/r1;
+        factor = ((x5 - x0) * (x6 - x0) + (y5 - y0) * (y6 - y0))/r1;
 
-    textureArrayLeft.push_back(0.08f);
-    textureArrayLeft.push_back(r1 / textureVsize);
+        textureArrayLeft.push_back(0.08f);
+        textureArrayLeft.push_back(r1 / textureVsize);
 
-    //r2 = sqrt((x7 - x5) * (x7 - x5) + (y7 - y5) * (y7 - y5));
-    //cosAngle = ((x0 - x5) * (x7 - x5) + (y0 - y5) * (y7 - y5))/
-    //                  (r1 * r2);
+        //r2 = sqrt((x7 - x5) * (x7 - x5) + (y7 - y5) * (y7 - y5));
+        //cosAngle = ((x0 - x5) * (x7 - x5) + (y0 - y5) * (y7 - y5))/
+        //                  (r1 * r2);
 
-    factor = ((x5 - x0) * (x7 - x0) + (y5 - y0) * (y7 - y0))/r1;
+        factor = ((x5 - x0) * (x7 - x0) + (y5 - y0) * (y7 - y0))/r1;
 
-    textureArrayLeft.push_back(0.09f);
-    textureArrayLeft.push_back(factor / textureVsize);
+        textureArrayLeft.push_back(0.09f);
+        textureArrayLeft.push_back(factor / textureVsize);
 
-    factor = ((x5 - x0) * (x8 - x0) + (y5 - y0) * (y8 - y0))/r1;
+        factor = ((x5 - x0) * (x8 - x0) + (y5 - y0) * (y8 - y0))/r1;
 
-    textureArrayLeft.push_back(0.16666f);
-    textureArrayLeft.push_back(factor / textureVsize);
+        textureArrayLeft.push_back(0.16666f);
+        textureArrayLeft.push_back(factor / textureVsize);
 
-    factor = ((x5 - x0) * (x9 - x0) + (y5 - y0) * (y9 - y0))/r1;
+        factor = ((x5 - x0) * (x9 - x0) + (y5 - y0) * (y9 - y0))/r1;
 
-    textureArrayLeft.push_back(1.0f);
-    textureArrayLeft.push_back(factor / textureVsize);
+        textureArrayLeft.push_back(1.0f);
+        textureArrayLeft.push_back(factor / textureVsize);
     }
 }
 
@@ -1181,7 +1235,7 @@ void RoadBroken::getVertexArrayForLineAxis(QVector<float> &axisArray, bool right
                     float r01 = sqrt(dx*dx + dy*dy);
                     float pi = 3.1415926f;
                     float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
-                            sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
+                                       sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
 
                     axisArray.push_back(x0 + dx/r01 * (step / cos(angle - pi / 2.0f)));
                     axisArray.push_back(y0 + dy/r01 * (step / cos(angle - pi / 2.0f)));
@@ -1266,72 +1320,72 @@ void RoadBroken::getVertexArrayForLineAxis(QVector<float> &axisArray, bool right
                 i += 2;
             }
             else
-            if (i == vertexArray.size() / 3 - 2)
-            {
-                float x0 = vertexArray[(i + 1) * 3];
-                float y0 = vertexArray[(i + 1) * 3 + 1];
-                float z0 = vertexArray[(i + 1) * 3 + 2];
-                float x1 = vertexArray[i * 3];
-                float y1 = vertexArray[i * 3 + 1];
-                float z1 = vertexArray[i * 3 + 2];
-                float x2 = vertexArray[(i - 1) * 3];
-                float y2 = vertexArray[(i - 1) * 3 + 1];
-                float z2 = vertexArray[(i - 1) * 3 + 2];
-                if (x0 == x2 && y0 == y2)
+                if (i == vertexArray.size() / 3 - 2)
                 {
-                    x2 = vertexArray[(i - 5) * 3];
-                    y2 = vertexArray[(i - 5) * 3 + 1];
+                    float x0 = vertexArray[(i + 1) * 3];
+                    float y0 = vertexArray[(i + 1) * 3 + 1];
+                    float z0 = vertexArray[(i + 1) * 3 + 2];
+                    float x1 = vertexArray[i * 3];
+                    float y1 = vertexArray[i * 3 + 1];
+                    float z1 = vertexArray[i * 3 + 2];
+                    float x2 = vertexArray[(i - 1) * 3];
+                    float y2 = vertexArray[(i - 1) * 3 + 1];
+                    float z2 = vertexArray[(i - 1) * 3 + 2];
+                    if (x0 == x2 && y0 == y2)
+                    {
+                        x2 = vertexArray[(i - 5) * 3];
+                        y2 = vertexArray[(i - 5) * 3 + 1];
+                    }
+                    float dx = x1 - x0;
+                    float dy = y1 - y0;
+                    float r01 = sqrt(dx*dx + dy*dy);
+                    float pi = 3.1415926f;
+                    float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
+                                       sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
+
+                    axisArray.push_back(x0 + dx/r01 * (step / cos(angle - pi / 2.0f)));
+                    axisArray.push_back(y0 + dy/r01 * (step / cos(angle - pi / 2.0f)));
+                    axisArray.push_back(0.001f);
+
+
+                    i += 2;
                 }
-                float dx = x1 - x0;
-                float dy = y1 - y0;
-                float r01 = sqrt(dx*dx + dy*dy);
-                float pi = 3.1415926f;
-                float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
-                        sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
-
-                axisArray.push_back(x0 + dx/r01 * (step / cos(angle - pi / 2.0f)));
-                axisArray.push_back(y0 + dy/r01 * (step / cos(angle - pi / 2.0f)));
-                axisArray.push_back(0.001f);
-
-
-                i += 2;
-            }
-            else
-            {
-                float x1 = vertexArray[(i - 1) * 3];
-                float y1 = vertexArray[(i - 1) * 3 + 1];
-                float x2 = vertexArray[(i + 1) * 3];
-                float y2 = vertexArray[(i + 1) * 3 + 1];
-                float x3 = vertexArray[(i + 5) * 3];
-                float y3 = vertexArray[(i + 5) * 3 + 1];
-                float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
-                float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
-                float alpha = (acos(num / den))/2.0f;
-                float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
-                float pi = 3.1415926f;
-                if(sa < 0) // Точка находится справа
+                else
                 {
-                    alpha = pi - alpha;
+                    float x1 = vertexArray[(i - 1) * 3];
+                    float y1 = vertexArray[(i - 1) * 3 + 1];
+                    float x2 = vertexArray[(i + 1) * 3];
+                    float y2 = vertexArray[(i + 1) * 3 + 1];
+                    float x3 = vertexArray[(i + 5) * 3];
+                    float y3 = vertexArray[(i + 5) * 3 + 1];
+                    float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
+                    float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                    float alpha = (acos(num / den))/2.0f;
+                    float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
+                    float pi = 3.1415926f;
+                    if(sa < 0) // Точка находится справа
+                    {
+                        alpha = pi - alpha;
+                    }
+
+
+                    float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
+                    if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
+                    {
+                        beta *= -1.0f;
+                    }
+                    float hamma = alpha + beta;
+
+                    float dx = (step / sin(alpha)) * cos(hamma);
+                    float dy = (step / sin(alpha)) * sin(hamma);
+
+                    axisArray.push_back(x2 - dx);
+                    axisArray.push_back(y2 - dy);
+                    axisArray.push_back(0.001f);
+
+                    i += 4;
                 }
-
-
-                float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
-                if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
-                {
-                    beta *= -1.0f;
-                }
-                float hamma = alpha + beta;
-
-                float dx = (step / sin(alpha)) * cos(hamma);
-                float dy = (step / sin(alpha)) * sin(hamma);
-
-                axisArray.push_back(x2 - dx);
-                axisArray.push_back(y2 - dy);
-                axisArray.push_back(0.001f);
-
-                i += 4;
-            }
-    }
+        }
     }
 
     for (int i = 0; i < axisArray.size() / 3;)
@@ -1464,6 +1518,26 @@ void RoadBroken::addBreak(bool front)
         vertexArray.push_front(z1);
         vertexArray.push_front(y1);
         vertexArray.push_front(x1);
+
+        int size = 15;
+        float tempRight[size];
+        float tempLeft[size];
+        for (int i = 0; i < size; ++i)
+        {
+            tempRight[i] = vertexArrayRight[i];
+            tempLeft[i] = vertexArrayLeft[i];
+        }
+        for (int i = size - 1; i >= 0; --i)
+        {
+            vertexArrayRight.push_front(tempRight[i]);
+            vertexArrayLeft.push_front(tempLeft[i]);
+        }
+        for (int i = size - 1; i >= 0; --i)
+        {
+            vertexArrayRight.push_front(tempRight[i]);
+            vertexArrayLeft.push_front(tempLeft[i]);
+        }
+
     }
     else
     {
@@ -1489,6 +1563,26 @@ void RoadBroken::addBreak(bool front)
         vertexArray.push_back(x2);
         vertexArray.push_back(y2);
         vertexArray.push_back(z2);
+
+        int size = 15;
+        float tempRight[size];
+        float tempLeft[size];
+        int arraySize = vertexArrayRight.size();
+        for (int i = arraySize - size; i < arraySize; ++i)
+        {
+            tempRight[i - (arraySize - size)] = vertexArrayRight[i];
+            tempLeft[i - (arraySize - size)] = vertexArrayLeft[i];
+        }
+        for (int i = 0; i < size; ++i)
+        {
+            vertexArrayRight.push_back(tempRight[i]);
+            vertexArrayLeft.push_back(tempLeft[i]);
+        }
+        for (int i = 0; i < size; ++i)
+        {
+            vertexArrayRight.push_back(tempRight[i]);
+            vertexArrayLeft.push_back(tempLeft[i]);
+        }
     }
 
 
@@ -1496,11 +1590,11 @@ void RoadBroken::addBreak(bool front)
     setIndexArray();
     setTextureArray(texture_1Usize, texture_1Vsize);
 
-    setRightVertexArray();
+    //setRightVertexArray();
     setRightTextureArray(texture_2Usize, texture_2Vsize);
     setRightIndexArray();
 
-    setLeftVertexArray();
+    //setLeftVertexArray();
     setLeftTextureArray(texture_2Usize, texture_2Vsize);
     setLeftIndexArray();
 
@@ -1596,20 +1690,20 @@ void RoadBroken::drawFigure(QGLWidget* render)
 
     if (showRightBoard)
     {
-    glBindTexture(GL_TEXTURE_2D, textureID[1]);
-    glVertexPointer(3, GL_FLOAT, 0, vertexArrayRight.begin());
-    //glColorPointer(4, GL_FLOAT, 0, colorArray.begin());
-    glTexCoordPointer(2, GL_FLOAT, 0, textureArrayRight.begin());
-    glDrawElements(GL_TRIANGLES, indexArrayRight.size(), GL_UNSIGNED_BYTE, indexArrayRight.begin());
+        glBindTexture(GL_TEXTURE_2D, textureID[1]);
+        glVertexPointer(3, GL_FLOAT, 0, vertexArrayRight.begin());
+        //glColorPointer(4, GL_FLOAT, 0, colorArray.begin());
+        glTexCoordPointer(2, GL_FLOAT, 0, textureArrayRight.begin());
+        glDrawElements(GL_TRIANGLES, indexArrayRight.size(), GL_UNSIGNED_BYTE, indexArrayRight.begin());
     }
 
     if (showLeftBoard)
     {
-    glBindTexture(GL_TEXTURE_2D, textureID[1]);
-    glVertexPointer(3, GL_FLOAT, 0, vertexArrayLeft.begin());
-    //glColorPointer(4, GL_FLOAT, 0, colorArray.begin());
-    glTexCoordPointer(2, GL_FLOAT, 0, textureArrayLeft.begin());
-    glDrawElements(GL_TRIANGLES, indexArrayLeft.size(), GL_UNSIGNED_BYTE, indexArrayLeft.begin());
+        glBindTexture(GL_TEXTURE_2D, textureID[1]);
+        glVertexPointer(3, GL_FLOAT, 0, vertexArrayLeft.begin());
+        //glColorPointer(4, GL_FLOAT, 0, colorArray.begin());
+        glTexCoordPointer(2, GL_FLOAT, 0, textureArrayLeft.begin());
+        glDrawElements(GL_TRIANGLES, indexArrayLeft.size(), GL_UNSIGNED_BYTE, indexArrayLeft.begin());
     }
 
     for (int i = 0; i < lines.size(); ++i)
@@ -1635,38 +1729,59 @@ void RoadBroken::drawSelectionFrame()
 
     if (showRightBoard)
     {
-    glLineWidth(5.0f);
-    for (int i = 0; i < vertexArrayRight.size() / 3 - 5; i += 10)
-    {
-        glBegin(GL_LINES);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(vertexArrayRight[(i + 4) * 3],
-                vertexArrayRight[(i + 4) * 3 + 1],
-                vertexArrayRight[(i + 4) * 3 + 2]);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(vertexArrayRight[(i + 9) * 3],
-                vertexArrayRight[(i + 9) * 3 + 1],
-                vertexArrayRight[(i + 9) * 3 + 2]);
-        glEnd();
-    }
+        glLineWidth(5.0f);
+        for (int i = 0; i < vertexArrayRight.size() / 3 - 5; i += 10)
+        {
+            glBegin(GL_LINES);
+            glColor3f(0.0f, 1.0f, 0.0f);
+            glVertex3f(vertexArrayRight[(i + 4) * 3],
+                    vertexArrayRight[(i + 4) * 3 + 1],
+                    vertexArrayRight[(i + 4) * 3 + 2]);
+            glColor3f(0.0f, 1.0f, 0.0f);
+            glVertex3f(vertexArrayRight[(i + 9) * 3],
+                    vertexArrayRight[(i + 9) * 3 + 1],
+                    vertexArrayRight[(i + 9) * 3 + 2]);
+            glEnd();
+        }
+        glPointSize(10.0f);
+        for (int i = 0; i < vertexArrayRight.size() / 3; i += 5)
+        {
+            glBegin(GL_POINTS);
+            glColor3f(0.0f, 1.0f, 0.0f);
+            glVertex3f(vertexArrayRight[(i + 4) * 3],
+                    vertexArrayRight[(i + 4) * 3 + 1],
+                    vertexArrayRight[(i + 4) * 3 + 2]);
+            glEnd();
+        }
     }
 
     if (showLeftBoard)
     {
         glLineWidth(5.0f);
-    for (int i = 0; i < vertexArrayLeft.size() / 3 - 5; i += 10)
-    {
-        glBegin(GL_LINES);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(vertexArrayLeft[(i + 4) * 3],
-                vertexArrayLeft[(i + 4) * 3 + 1],
-                vertexArrayLeft[(i + 4) * 3 + 2]);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(vertexArrayLeft[(i + 9) * 3],
-                vertexArrayLeft[(i + 9) * 3 + 1],
-                vertexArrayLeft[(i + 9) * 3 + 2]);
-        glEnd();
-    }
+        for (int i = 0; i < vertexArrayLeft.size() / 3 - 5; i += 10)
+        {
+            glBegin(GL_LINES);
+            glColor3f(0.0f, 1.0f, 0.0f);
+            glVertex3f(vertexArrayLeft[(i + 4) * 3],
+                    vertexArrayLeft[(i + 4) * 3 + 1],
+                    vertexArrayLeft[(i + 4) * 3 + 2]);
+            glColor3f(0.0f, 1.0f, 0.0f);
+            glVertex3f(vertexArrayLeft[(i + 9) * 3],
+                    vertexArrayLeft[(i + 9) * 3 + 1],
+                    vertexArrayLeft[(i + 9) * 3 + 2]);
+            glEnd();
+        }
+
+        glPointSize(10.0f);
+        for (int i = 0; i < vertexArrayLeft.size() / 3; i += 5)
+        {
+            glBegin(GL_POINTS);
+            glColor3f(0.0f, 1.0f, 0.0f);
+            glVertex3f(vertexArrayLeft[(i + 4) * 3],
+                    vertexArrayLeft[(i + 4) * 3 + 1],
+                    vertexArrayLeft[(i + 4) * 3 + 2]);
+            glEnd();
+        }
     }
 
 }
@@ -1699,7 +1814,7 @@ void RoadBroken::move(float dx, float dy, float dz)
 
 void RoadBroken::drawControlElement(int index, float lineWidth, float pointSize)
 {   
-    if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6)
+    if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3)
     {
         glLineWidth(lineWidth);
         glBegin(GL_LINES);
@@ -1712,120 +1827,151 @@ void RoadBroken::drawControlElement(int index, float lineWidth, float pointSize)
                 vertexArray[4],
                 vertexArray[5]);
         glEnd();
+        return;
     }
-    else
+    if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3 + 1)
     {
-        if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + 1)
+        int j = vertexArray.size() / 3 - 2;
+        glLineWidth(lineWidth);
+        glBegin(GL_LINES);
+        glColor3f(0.0f, 0.0f, 0.0f);
+        glVertex3f(vertexArray[j * 3],
+                vertexArray[j * 3 + 1],
+                vertexArray[j * 3 + 2]);
+        glColor3f(0.0f, 0.0f, 0.0f);
+        glVertex3f(vertexArray[(j + 1) * 3],
+                vertexArray[(j + 1) * 3 + 1],
+                vertexArray[(j + 1) * 3 + 2]);
+        glEnd();
+        return;
+    }
+    if (index >= vertexArray.size() / 3 + vertexArray.size() / 3 + vertexArray.size() / 6)
+    {
+        int j = index - vertexArray.size() / 3 - vertexArray.size() / 3 - vertexArray.size() / 6;
+        if (j < vertexArray.size() / (3 * 4))
         {
-            int j = vertexArray.size() / 3 - 2;
             glLineWidth(lineWidth);
             glBegin(GL_LINES);
             glColor3f(0.0f, 0.0f, 0.0f);
-            glVertex3f(vertexArray[j * 3],
-                    vertexArray[j * 3 + 1],
-                    vertexArray[j * 3 + 2]);
+            glVertex3f(vertexArray[(j * 4) * 3],
+                    vertexArray[(j * 4) * 3 + 1],
+                    vertexArray[(j * 4) * 3 + 2]);
             glColor3f(0.0f, 0.0f, 0.0f);
-            glVertex3f(vertexArray[(j + 1) * 3],
-                    vertexArray[(j + 1) * 3 + 1],
-                    vertexArray[(j + 1) * 3 + 2]);
+            glVertex3f(vertexArray[(j * 4 + 2) * 3],
+                    vertexArray[(j * 4 + 2) * 3 + 1],
+                    vertexArray[(j * 4 + 2) * 3 + 2]);
+
+            glEnd();
+            return;
+        }
+        else
+        {
+            j -= vertexArray.size() / (3 * 4);
+            glLineWidth(lineWidth);
+            glBegin(GL_LINES);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(vertexArray[(j * 4 + 1) * 3],
+                    vertexArray[(j * 4 + 1) * 3 + 1],
+                    vertexArray[(j * 4 + 1) * 3 + 2]);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(vertexArray[(j * 4 + 3) * 3],
+                    vertexArray[(j * 4 + 3) * 3 + 1],
+                    vertexArray[(j * 4 + 3) * 3 + 2]);
+
+            glEnd();
+            return;
+        }
+        return;
+    }
+
+    if (index >= vertexArray.size() / 3 + vertexArray.size() / 3)
+    {
+
+        int j = index - vertexArray.size() / 3 - vertexArray.size() / 3;
+        if (j < vertexArray.size() / (3 * 4))
+        {
+            if (showRightBoard)
+            {
+                glLineWidth(lineWidth);
+                glBegin(GL_LINES);
+                glColor3f(0.0f, 1.0f, 0.0f);
+                glVertex3f(vertexArrayRight[(j * 10 + 4) * 3],
+                        vertexArrayRight[(j * 10 + 4) * 3 + 1],
+                        vertexArrayRight[(j * 10 + 4) * 3 + 2]);
+                glColor3f(0.0f, 1.0f, 0.0f);
+                glVertex3f(vertexArrayRight[(j * 10 + 9) * 3],
+                        vertexArrayRight[(j * 10 + 9) * 3 + 1],
+                        vertexArrayRight[(j * 10 + 9) * 3 + 2]);
+
+                glEnd();
+                return;
+            }
+        }
+        else
+        {
+            if (showLeftBoard)
+            {
+                j -= vertexArray.size() / (3 * 4);
+                glLineWidth(lineWidth);
+                glBegin(GL_LINES);
+                glColor3f(0.0f, 1.0f, 0.0f);
+                glVertex3f(vertexArrayLeft[(j * 10 + 4) * 3],
+                        vertexArrayLeft[(j * 10 + 4) * 3 + 1],
+                        vertexArrayLeft[(j * 10 + 4) * 3 + 2]);
+                glColor3f(0.0f, 1.0f, 0.0f);
+                glVertex3f(vertexArrayLeft[(j * 10 + 9) * 3],
+                        vertexArrayLeft[(j * 10 + 9) * 3 + 1],
+                        vertexArrayLeft[(j * 10 + 9) * 3 + 2]);
+
+                glEnd();
+                return;
+            }
+        }
+
+    }
+
+
+
+    if (index >= vertexArray.size() / 3)
+    {
+        int j = index - vertexArray.size() / 3;
+        if (j % 2 == 0)
+        {
+            glPointSize(pointSize + 20.f);
+            glBegin(GL_POINTS);
+            glColor3f(0.0f, 1.0f, 0.0f);
+            glVertex3f(vertexArrayRight[(j / 2 * 5 + 4) * 3],
+                    vertexArrayRight[(j / 2 * 5 + 4) * 3 + 1],
+                    vertexArrayRight[(j / 2 * 5 + 4) * 3 + 2]);
             glEnd();
         }
         else
         {
-            if (index >= vertexArray.size() / 3 + vertexArray.size() / 6)
-            {
-                int j = index - vertexArray.size() / 3 - vertexArray.size() / 6;
-                if (j < vertexArray.size() / (3 * 4))
-                {
-                    glLineWidth(lineWidth);
-                    glBegin(GL_LINES);
-                        glColor3f(0.0f, 0.0f, 0.0f);
-                        glVertex3f(vertexArray[(j * 4) * 3],
-                                vertexArray[(j * 4) * 3 + 1],
-                                vertexArray[(j * 4) * 3 + 2]);
-                        glColor3f(0.0f, 0.0f, 0.0f);
-                        glVertex3f(vertexArray[(j * 4 + 2) * 3],
-                                vertexArray[(j * 4 + 2) * 3 + 1],
-                                vertexArray[(j * 4 + 2) * 3 + 2]);
-
-                    glEnd();
-                }
-                else
-                {
-                    j -= vertexArray.size() / (3 * 4);
-                    glLineWidth(lineWidth);
-                    glBegin(GL_LINES);
-                        glColor3f(0.0f, 0.0f, 0.0f);
-                        glVertex3f(vertexArray[(j * 4 + 1) * 3],
-                                vertexArray[(j * 4 + 1) * 3 + 1],
-                                vertexArray[(j * 4 + 1) * 3 + 2]);
-                        glColor3f(0.0f, 0.0f, 0.0f);
-                        glVertex3f(vertexArray[(j * 4 + 3) * 3],
-                                vertexArray[(j * 4 + 3) * 3 + 1],
-                                vertexArray[(j * 4 + 3) * 3 + 2]);
-
-                    glEnd();
-                }
-            }
-            else
-            if (index >= vertexArray.size() / 3)
-            {
-                int j = index - vertexArray.size() / 3;
-                if (j < vertexArray.size() / (3 * 4))
-                {
-                    if (showRightBoard)
-                    {
-                    glLineWidth(lineWidth);
-                    glBegin(GL_LINES);
-                        glColor3f(0.0f, 1.0f, 0.0f);
-                        glVertex3f(vertexArrayRight[(j * 10 + 4) * 3],
-                                vertexArrayRight[(j * 10 + 4) * 3 + 1],
-                                vertexArrayRight[(j * 10 + 4) * 3 + 2]);
-                        glColor3f(0.0f, 1.0f, 0.0f);
-                        glVertex3f(vertexArrayRight[(j * 10 + 9) * 3],
-                                vertexArrayRight[(j * 10 + 9) * 3 + 1],
-                                vertexArrayRight[(j * 10 + 9) * 3 + 2]);
-
-                    glEnd();
-                    }
-                }
-                else
-                {
-                    if (showLeftBoard)
-                    {
-                    j -= vertexArray.size() / (3 * 4);
-                    glLineWidth(lineWidth);
-                    glBegin(GL_LINES);
-                        glColor3f(0.0f, 1.0f, 0.0f);
-                        glVertex3f(vertexArrayLeft[(j * 10 + 4) * 3],
-                                vertexArrayLeft[(j * 10 + 4) * 3 + 1],
-                                vertexArrayLeft[(j * 10 + 4) * 3 + 2]);
-                        glColor3f(0.0f, 1.0f, 0.0f);
-                        glVertex3f(vertexArrayLeft[(j * 10 + 9) * 3],
-                                vertexArrayLeft[(j * 10 + 9) * 3 + 1],
-                                vertexArrayLeft[(j * 10 + 9) * 3 + 2]);
-
-                    glEnd();
-                    }
-                }
-
-            }
-
-
-                else
-                {                    
-                        glPointSize(pointSize);
-                        glBegin(GL_POINTS);
-                        glColor3f(0.0f, 0.0f, 0.0f);
-                        glVertex3f(vertexArray[index * 3],
-                                vertexArray[index * 3 + 1],
-                                vertexArray[index * 3 + 2]);
-                        glEnd();
-                }
-
+            glPointSize(pointSize + 20.f);
+            glBegin(GL_POINTS);
+            glColor3f(0.0f, 1.0f, 0.0f);
+            glVertex3f(vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3],
+                    vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3 + 1],
+                    vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3 + 2]);
+            glEnd();
         }
-
+        return;
     }
+    else
+    {
+        glPointSize(pointSize);
+        glBegin(GL_POINTS);
+        glColor3f(0.0f, 0.0f, 0.0f);
+        glVertex3f(vertexArray[index * 3],
+                vertexArray[index * 3 + 1],
+                vertexArray[index * 3 + 2]);
+        glEnd();
+        return;
+    }
+
+
+
+
 }
 
 QCursor RoadBroken::getCursorForControlElement(int index)
@@ -1839,7 +1985,7 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
     {
         return;
     }
-    if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6)
+    if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3)
     {
         vertexArray[0] += dx;
         vertexArray[1] += dy;
@@ -1849,7 +1995,7 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
     }
     else
     {
-        if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + 1)
+        if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3 + 1)
         {
             int j = vertexArray.size() / 3 - 2;
 
@@ -1860,74 +2006,155 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
             vertexArray[(j + 1) * 3 + 1] += dy;
 
         }
-        else
-        {
-            if (index >= vertexArray.size() / 3 + vertexArray.size() / 6)
-            {
 
+            else
+            if (index >= vertexArray.size() / 3 + vertexArray.size() / 3 + vertexArray.size() / 6)
+            {
+                // Изменение линий дороги
             }
             else
-            if (index >= vertexArray.size() / 3)
             {
-                int j = index - vertexArray.size() / 3;
-                if (j < vertexArray.size() / (3 * 4))
+                if (index >= vertexArray.size() / 3 + vertexArray.size() / 3)
                 {
-                    float x0 = vertexArrayRight[(j * 10 + 4) * 3];
-                    float y0 = vertexArrayRight[(j * 10 + 4) * 3 + 1];
-                    float x1 = vertexArrayRight[(j * 10 + 9) * 3];
-                    float y1 = vertexArrayRight[(j * 10 + 9) * 3 + 1];
-                    float pi = 3.1415926f;
-                    float angle = acos((dx * (x1 - x0) + dy * (y1 - y0))/
-                            sqrt((dx*dx + dy*dy)*((x1 - x0)*(x1 - x0) + (y1 - y0)*(y1 - y0))));
-                    float dr = sqrt(dx*dx + dy*dy);
-                    float sa = dx*(x1-x0) - dy*(x1-x0);
-                    float factor = sa < 0 ? -1 : 1;
-                    rightBoardWidth += dr * sin(angle) * factor;
-                    emit rightBoardWidthChanged(rightBoardWidth);
+                    int j = index - vertexArray.size() / 3 - vertexArray.size() / 3;
+                    if (j < vertexArray.size() / (3 * 4))
+                    {
+                        float x0 = vertexArrayRight[(j * 10 + 4) * 3];
+                        float y0 = vertexArrayRight[(j * 10 + 4) * 3 + 1];
+                        float x1 = vertexArrayRight[(j * 10 + 9) * 3];
+                        float y1 = vertexArrayRight[(j * 10 + 9) * 3 + 1];
+                        float pi = 3.1415926f;
+                        float angle = acos((dx * (x1 - x0) + dy * (y1 - y0))/
+                                           sqrt((dx*dx + dy*dy)*((x1 - x0)*(x1 - x0) + (y1 - y0)*(y1 - y0))));
+                        float dr = sqrt(dx*dx + dy*dy);
+                        float sa = dx*(x1-x0) - dy*(x1-x0);
+                        float factor = sa < 0 ? -1 : 1;
+                        rightBoardWidth += dr * sin(angle) * factor;
+                        emit rightBoardWidthChanged(rightBoardWidth);
+                    }
+                    else
+                    {
+                        j -= vertexArray.size() / (3 * 4);
+                        float x0 = vertexArrayLeft[(j * 10 + 4) * 3];
+                        float y0 = vertexArrayLeft[(j * 10 + 4) * 3 + 1];
+                        float x1 = vertexArrayLeft[(j * 10 + 9) * 3];
+                        float y1 = vertexArrayLeft[(j * 10 + 9) * 3 + 1];
+                        float angle = acos((dx * (x1 - x0) + dy * (y1 - y0))/
+                                           sqrt((dx*dx + dy*dy)*((x1 - x0)*(x1 - x0) + (y1 - y0)*(y1 - y0))));
+                        float dr = sqrt(dx*dx + dy*dy);
+                        float sa = dx*(x1-x0) - dy*(x1-x0);
+                        float factor = sa < 0 ? 1 : -1;
+                        leftBoardWidth += dr * sin(angle) * factor;
+                        emit leftBoardWidthChanged(leftBoardWidth);
+                    }
                 }
                 else
+
+                    if (index >= vertexArray.size() / 3)
+                    {
+                        // Изменение точек тротуара
+                        int j = index - vertexArray.size() / 3;
+                        if (j % 2 == 0)
+                        {
+                            vertexArrayRight[(j / 2 * 5 + 4) * 3] += dx;
+                            vertexArrayRight[(j / 2 * 5 + 4) * 3 + 1] += dy;
+                            float x1 = vertexArrayRight[(j / 2 * 5 + 4) * 3];
+                            float y1 = vertexArrayRight[(j / 2 * 5 + 4) * 3 + 1];
+                            float x2 = vertexArrayRight[j / 2 * 5 * 3];
+                            float y2 = vertexArrayRight[j / 2 * 5 * 3 + 1];
+                            float r = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+
+                            vertexArrayRight[(j / 2 * 5 + 2) * 3] = x2 + (x1 - x2) / r * 0.03f;
+                            vertexArrayRight[(j / 2 * 5 + 2) * 3 + 1] = y2 + (y1 - y2) / r * 0.03f;
+
+                            vertexArrayRight[(j / 2 * 5 + 3) * 3] = x2 + (x1 - x2) / r * 0.25f;
+                            vertexArrayRight[(j / 2 * 5 + 3) * 3 + 1] = y2 + (y1 - y2) / r * 0.25f;
+
+                            if (j != 0 && j != (vertexArray.size() / 3 - 2))
+                            {
+                                j = (j % 4) == 0 ? j - 2 : j + 2;
+                                vertexArrayRight[(j / 2 * 5 + 4) * 3] += dx;
+                                vertexArrayRight[(j / 2 * 5 + 4) * 3 + 1] += dy;
+
+                                vertexArrayRight[(j / 2 * 5 + 2) * 3] = x2 + (x1 - x2) / r * 0.03f;
+                                vertexArrayRight[(j / 2 * 5 + 2) * 3 + 1] = y2 + (y1 - y2) / r * 0.03f;
+
+                                vertexArrayRight[(j / 2 * 5 + 3) * 3] = x2 + (x1 - x2) / r * 0.25f;
+                                vertexArrayRight[(j / 2 * 5 + 3) * 3 + 1] = y2 + (y1 - y2) / r * 0.25f;
+                            }
+
+
+                            fixedRightWidth = false;
+
+                        }
+                        else
+                        {
+                            vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3] += dx;
+                            vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3 + 1] += dy;
+                            float x1 = vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3];
+                            float y1 = vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3 + 1];
+                            float x2 = vertexArrayLeft[(j - 1) / 2 * 5 * 3];
+                            float y2 = vertexArrayLeft[(j - 1) / 2 * 5 * 3 + 1];
+                            float r = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+
+                            vertexArrayLeft[((j - 1) / 2 * 5 + 2) * 3] = x2 + (x1 - x2) / r * 0.03f;
+                            vertexArrayLeft[((j - 1) / 2 * 5 + 2) * 3 + 1] = y2 + (y1 - y2) / r * 0.03f;
+
+                            vertexArrayLeft[((j - 1) / 2 * 5 + 3) * 3] = x2 + (x1 - x2) / r * 0.25f;
+                            vertexArrayLeft[((j - 1) / 2 * 5 + 3) * 3 + 1] = y2 + (y1 - y2) / r * 0.25f;
+                            if (j != 1 && j != (vertexArray.size() / 3 - 1))
+                            {
+                                j = ((j - 1) % 4) == 0 ? j - 2 : j + 2;
+                                vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3] += dx;
+                                vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3 + 1] += dy;
+
+                                vertexArrayLeft[((j - 1) / 2 * 5 + 2) * 3] = x2 + (x1 - x2) / r * 0.03f;
+                                vertexArrayLeft[((j - 1) / 2 * 5 + 2) * 3 + 1] = y2 + (y1 - y2) / r * 0.03f;
+
+                                vertexArrayLeft[((j - 1) / 2 * 5 + 3) * 3] = x2 + (x1 - x2) / r * 0.25f;
+                                vertexArrayLeft[((j - 1) / 2 * 5 + 3) * 3 + 1] = y2 + (y1 - y2) / r * 0.25f;
+                            }
+
+                            fixedLeftWidth = false;
+                        }
+
+                    }
+                else
+
                 {
-                    j -= vertexArray.size() / (3 * 4);
-                    float x0 = vertexArrayLeft[(j * 10 + 4) * 3];
-                    float y0 = vertexArrayLeft[(j * 10 + 4) * 3 + 1];
-                    float x1 = vertexArrayLeft[(j * 10 + 9) * 3];
-                    float y1 = vertexArrayLeft[(j * 10 + 9) * 3 + 1];
-                    float angle = acos((dx * (x1 - x0) + dy * (y1 - y0))/
-                            sqrt((dx*dx + dy*dy)*((x1 - x0)*(x1 - x0) + (y1 - y0)*(y1 - y0))));
-                    float dr = sqrt(dx*dx + dy*dy);
-                    float sa = dx*(x1-x0) - dy*(x1-x0);
-                    float factor = sa < 0 ? 1 : -1;
-                    leftBoardWidth += dr * sin(angle) * factor;
-                    emit leftBoardWidthChanged(leftBoardWidth);
+                    // Изменение узловых точек
+                    vertexArray[index * 3] += dx;
+                    vertexArray[index * 3 + 1] += dy;
+
+                    if (index != 0 && index != 1 &&
+                            (index != vertexArray.size() / 3 - 1) &&
+                            (index != vertexArray.size() / 3 - 2))
+                    {
+                        if (index % 2 == 0)
+                        {
+                            index += index % 4 == 0 ? -2 : 2;
+                        }
+                        else
+                            index += index % 4 == 1 ? -2 : 2;
+
+                        vertexArray[index * 3] += dx;
+                        vertexArray[index * 3 + 1] += dy;
+                    }
                 }
             }
-        else
-        {
-            // Изменение узловых точек
-            vertexArray[index * 3] += dx;
-            vertexArray[index * 3 + 1] += dy;
-
-            if (index != 0 && index != 1 &&
-                    (index != vertexArray.size() / 3 - 1) &&
-                    (index != vertexArray.size() / 3 - 2))
-            {
-            if (index % 2 == 0)
-            {
-                index += index % 4 == 0 ? -2 : 2;
-            }
-            else
-                index += index % 4 == 1 ? -2 : 2;
-
-                vertexArray[index * 3] += dx;
-                vertexArray[index * 3 + 1] += dy;
-            }
         }
-        }
-    }
-    setTextureArray(texture_1Usize, texture_1Vsize);\
-    setRightVertexArray();
+
+
+    setTextureArray(texture_1Usize, texture_1Vsize);
+    if (fixedRightWidth)
+        setRightVertexArray();
+    else
+        resetRightVertexArray();
     setRightTextureArray(texture_2Usize, texture_2Vsize);
-    setLeftVertexArray();
+    if (fixedLeftWidth)
+        setLeftVertexArray();
+    else
+        resetLeftVertexArray();
     setLeftTextureArray(texture_2Usize, texture_2Vsize);
     resetLines();
 
@@ -1935,8 +2162,13 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
 
 int RoadBroken::getNumberOfControls()
 {
-    //return vertexArray.size() / 3 + 2;
-    return vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + 2;
+    int roadPoints = vertexArray.size() / 3;
+    int roadLines = roadPoints / 2 + 2;
+    int boardPoints = roadPoints;
+    int boardLines = roadPoints / 2;
+    int result = roadPoints + roadLines + boardPoints + boardLines;
+    return result;
+    //return vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3 + 2;
 }
 
 int RoadBroken::controlsForPoint()
@@ -2366,18 +2598,7 @@ int RoadBroken::getLayer()
 
 std::vector<vec3> RoadBroken::getCoordOfControl(int index)
 {
-   // vec3 p(0.0f, 0.0f, 0.0f);
-   // if (index >= 0 && index < getNumberOfControls())
-   // {
-   //     p.x = vertexArray[index * 3];
-   //     p.y = vertexArray[index * 3 + 1];
-   //     p.z = vertexArray[index * 3 + 2];
-   // }
     std::vector<vec3> res;
-    //res.push_back(p);
-
-
-
 
     if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6)
     {
@@ -2430,48 +2651,48 @@ std::vector<vec3> RoadBroken::getCoordOfControl(int index)
                 }
             }
             else
-            if (index >= vertexArray.size() / 3)
-            {
-                int j = index - vertexArray.size() / 3;
-                if (j < vertexArray.size() / (3 * 4))
+                if (index >= vertexArray.size() / 3)
                 {
-                    if (showRightBoard)
+                    int j = index - vertexArray.size() / 3;
+                    if (j < vertexArray.size() / (3 * 4))
                     {
-                        vec3 p(vertexArrayRight[(j * 10 + 4) * 3],
-                                vertexArrayRight[(j * 10 + 4) * 3 + 1],
-                                vertexArrayRight[(j * 10 + 4) * 3 + 2]);
-                        vec3 s(vertexArrayRight[(j * 10 + 9) * 3],
-                                vertexArrayRight[(j * 10 + 9) * 3 + 1],
-                                vertexArrayRight[(j * 10 + 9) * 3 + 2]);
-                        res.push_back(p);
-                        res.push_back(s);
+                        if (showRightBoard)
+                        {
+                            vec3 p(vertexArrayRight[(j * 10 + 4) * 3],
+                                    vertexArrayRight[(j * 10 + 4) * 3 + 1],
+                                    vertexArrayRight[(j * 10 + 4) * 3 + 2]);
+                            vec3 s(vertexArrayRight[(j * 10 + 9) * 3],
+                                    vertexArrayRight[(j * 10 + 9) * 3 + 1],
+                                    vertexArrayRight[(j * 10 + 9) * 3 + 2]);
+                            res.push_back(p);
+                            res.push_back(s);
+                        }
                     }
+                    else
+                    {
+                        if (showLeftBoard)
+                        {
+                            j -= vertexArray.size() / (3 * 4);
+                            vec3 p(vertexArrayLeft[(j * 10 + 4) * 3],
+                                    vertexArrayLeft[(j * 10 + 4) * 3 + 1],
+                                    vertexArrayLeft[(j * 10 + 4) * 3 + 2]);
+                            vec3 s(vertexArrayLeft[(j * 10 + 9) * 3],
+                                    vertexArrayLeft[(j * 10 + 9) * 3 + 1],
+                                    vertexArrayLeft[(j * 10 + 9) * 3 + 2]);
+                            res.push_back(p);
+                            res.push_back(s);
+                        }
+                    }
+
                 }
+
+
                 else
                 {
-                    if (showLeftBoard)
-                    {
-                    j -= vertexArray.size() / (3 * 4);
-                    vec3 p(vertexArrayLeft[(j * 10 + 4) * 3],
-                            vertexArrayLeft[(j * 10 + 4) * 3 + 1],
-                            vertexArrayLeft[(j * 10 + 4) * 3 + 2]);
-                    vec3 s(vertexArrayLeft[(j * 10 + 9) * 3],
-                            vertexArrayLeft[(j * 10 + 9) * 3 + 1],
-                            vertexArrayLeft[(j * 10 + 9) * 3 + 2]);
+                    vec3 p(vertexArray[index * 3],
+                            vertexArray[index * 3 + 1],
+                            vertexArray[index * 3 + 2]);
                     res.push_back(p);
-                    res.push_back(s);
-                    }
-                }
-
-            }
-
-
-                else
-                {
-                vec3 p(vertexArray[index * 3],
-                        vertexArray[index * 3 + 1],
-                        vertexArray[index * 3 + 2]);
-                res.push_back(p);
                 }
 
         }

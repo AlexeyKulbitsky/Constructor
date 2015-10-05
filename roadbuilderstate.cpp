@@ -119,7 +119,7 @@ void RoadBuilderState::mousePressEvent(QMouseEvent *pe)
                 {
                     // Переключить в состояние по умолчанию
                     roadBroken->setSelectedStatus(false);
-                    roadBroken = NULL;
+                    clear();
                     scene->setMouseTracking(false);
                     scene->setCursor(Qt::ArrowCursor);
                     clearProperties(properties);
@@ -822,6 +822,18 @@ void RoadBuilderState::clearProperties(QFormLayout *layout)
         delete child->widget();
         delete child;
     }
+}
+
+void RoadBuilderState::clear()
+{
+    roadBroken = NULL;
+    rightButtonIsPressed = false;
+    leftButtonIsPressed = false;
+    controlIsSelected = false;
+    key = -1;
+    controlIndex = -1;
+    groupIndex = -1;
+    elementIndex = -1;
 }
 
 void RoadBuilderState::setRoad(RoadBroken *roadBroken)

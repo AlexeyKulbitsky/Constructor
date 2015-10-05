@@ -13,6 +13,8 @@ public:
     SelectedState();
     SelectedState(StateManager* manager, Model* model, Scene2D* scene, QFormLayout* properties);
 
+    std::list<RoadElement*> selectedElements;
+
     virtual ~SelectedState();
     void clearProperties(QFormLayout* layout);
 private:
@@ -22,7 +24,7 @@ private:
     QFormLayout* properties;
     std::list<RoadElement*>::iterator it;
     RoadElement* selectedElement;
-    std::list<RoadElement*> selectedElements;
+
     QMenu* contextMenu;
 
     QAction* fixAction;

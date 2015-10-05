@@ -18,7 +18,7 @@ Scene2D::Scene2D(QWidget* parent) : QGLWidget(parent)
     dY = 0.0f;
     figureIsSelected = false;
     controlIsSelected = false;
-
+    drawRectStatus = false;
     rightButtonIsPressed = false;
     leftButtonIsPressed = false;
 
@@ -160,6 +160,8 @@ void Scene2D::paintGL()
     //glDisable(GL_LIGHT1);
     //glDisable(GL_LIGHTING);
 
+    if (drawRectStatus == true)
+        drawRect(rectPoint1, rectPoint2);
     glPopMatrix();
 }
 
@@ -395,6 +397,18 @@ void Scene2D::getWindowCoord(double x, double y, double z, double &wx, double &w
     wy=viewport[3]-wy;
 }
 
+void Scene2D::getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz)
+{
+    GLint viewport[4];
+    GLdouble mvmatrix[16], projmatrix[16];
+
+    glGetIntegerv(GL_VIEWPORT,viewport);
+    glGetDoublev(GL_MODELVIEW_MATRIX,mvmatrix);
+    glGetDoublev(GL_PROJECTION_MATRIX,projmatrix);
+    y = viewport[3]-y;
+    gluUnProject(x, y, z, mvmatrix, projmatrix, viewport, &wx, &wy, &wz);
+}
+
 void Scene2D::createMenu()
 {
 
@@ -429,6 +443,46 @@ void Scene2D::drawAxis()
     glVertex3f( 0.0f,  0.0f, -1.0f);
     glEnd();
     glEnable(GL_DEPTH_TEST);
+}
+
+void Scene2D::drawRect(QPoint p1, QPoint p2)
+{
+    GLdouble x1, y1, z1;
+    GLdouble x2, y2, z2;
+    getWorldCoord(p1.x(), p1.y(), 0, x1, y1, z1);
+    getWorldCoord(p2.x(), p2.y(), 0, x2, y2, z2);
+    glDisable(GL_DEPTH_TEST);
+
+    glLineWidth(1.0f);
+    glBegin(GL_LINE_STRIP);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3d(x1, y1, z1);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3d(x1, y2, z1);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3d(x2, y2, z2);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3d(x2, y1, z2);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3d(x1, y1, z1);
+    glEnd();
+
+    glPointSize(1.0f);
+    glBegin(GL_POINTS);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3d(x1, y1, z1);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3d(x1, y2, z1);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3d(x2, y2, z2);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3d(x2, y1, z2);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3d(x1, y1, z1);
+    glEnd();
+
+    glEnable(GL_DEPTH_TEST);
+    //qDebug() << "drawRect";
 }
 
 void Scene2D::dragEnterEvent(QDragEnterEvent* event)
@@ -496,6 +550,11 @@ void Scene2D::drawBackground(QPainter *painter)
     //painter->setBrush(gradient);
     //painter->drawRect(rect());
 
+}
+
+void Scene2D::setDrawRectStatus(bool status)
+{
+    drawRectStatus = status;
 }
 
 void Scene2D::activateRuler()

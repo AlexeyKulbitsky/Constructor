@@ -2,6 +2,8 @@
 #include "objfilemanager.h"
 #include "_3dsfilemanager.h"
 #include <QApplication>
+#include <GL/glu.h>
+
 DefaultState::DefaultState()
 {
     this->stateManager = NULL;
@@ -10,6 +12,8 @@ DefaultState::DefaultState()
     this->properties = NULL;
     rightButtonIsPressed = false;
     leftButtonIsPressed = false;
+    rectSelection = false;
+    selectedElementsCount = 0;
 }
 
 DefaultState::DefaultState(StateManager *manager, Model *model, Scene2D* scene, QFormLayout *properties)
@@ -20,6 +24,8 @@ DefaultState::DefaultState(StateManager *manager, Model *model, Scene2D* scene, 
     this->properties = properties;
     rightButtonIsPressed = false;
     leftButtonIsPressed = false;
+    rectSelection = false;
+    selectedElementsCount = 0;
 }
 
 
@@ -31,41 +37,8 @@ void DefaultState::mousePressEvent(QMouseEvent *pe)
     {
     case Qt::LeftButton:
         leftButtonIsPressed = true;
-        if (this->tryToSelectFigures(pe->pos(), true) == true)
-        {
-            scene->setMouseTracking(true);
-            scene->updateGL();
-
-            std::list<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
-            for(int k = 0; k < selectedIndex; ++k)
-                ++it;
-            if ((*it)->getName() == "RoadBroken")
-            {
-                stateManager->roadBuilderState->setRoad(dynamic_cast<RoadBroken*>(*it));
-                stateManager->roadBuilderState->setGroupIndex(selectedGroup);
-                stateManager->roadBuilderState->setElementIndex(selectedIndex);
-                stateManager->setState(stateManager->roadBuilderState);
-            }
-            else
-            {
-                if ((*it)->getName() == "LineBroken" ||
-                        (*it)->getName() == "Tramways" ||
-                        (*it)->getName() == "VoltageLine" ||
-                        (*it)->getName() == "DoubleVoltageLine")
-                {
-                    stateManager->lineBuilderState->setLine(dynamic_cast<LineBroken*>(*it));
-                    stateManager->lineBuilderState->setGroupIndex(selectedGroup);
-                    stateManager->lineBuilderState->setElementIndex(selectedIndex);
-                    stateManager->setState(stateManager->lineBuilderState);
-                }
-                else
-                {
-                    stateManager->setState(stateManager->selectedState);
-                }
-            }
-
-
-        }
+        scene->rectPoint1 = pe->pos();
+        rectSelection = true;
         break;
 
     case Qt::RightButton:
@@ -78,7 +51,7 @@ void DefaultState::mousePressEvent(QMouseEvent *pe)
 }
 
 void DefaultState::mouseMoveEvent(QMouseEvent *pe)
-{
+{    
     if (rightButtonIsPressed == true)
     {
         // двигать камеру
@@ -87,6 +60,15 @@ void DefaultState::mouseMoveEvent(QMouseEvent *pe)
         scene->xDelta += (GLfloat)(-1)*(pe->x()-ptrMousePosition.x())/
                 scene->width()/(scene->nSca * scene->ratio) * 2.0;
         scene->updateGL();
+    }
+    else
+    if (leftButtonIsPressed == true)
+    {
+        if (rectSelection == true)
+        {
+            scene->rectPoint2 = pe->pos();
+            scene->setDrawRectStatus(true);
+        }
     }
     ptrMousePosition = pe->pos();
     scene->updateGL();
@@ -101,6 +83,53 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
     if(pe->button() == Qt::LeftButton)
     {
         leftButtonIsPressed = false;
+        scene->setDrawRectStatus(false);
+        if (rectSelection == true)
+        {
+            if (this->tryToSelectFigures(scene->rectPoint1, pe->pos(), true) == true)
+            {
+                scene->setMouseTracking(true);
+                scene->updateGL();
+                if (selectedElementsCount == 1)
+                {
+                    std::list<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
+                    for(int k = 0; k < selectedIndex; ++k)
+                        ++it;
+                    if ((*it)->getName() == "RoadBroken")
+                    {
+                        stateManager->roadBuilderState->setRoad(dynamic_cast<RoadBroken*>(*it));
+                        stateManager->roadBuilderState->setGroupIndex(selectedGroup);
+                        stateManager->roadBuilderState->setElementIndex(selectedIndex);
+                        stateManager->setState(stateManager->roadBuilderState);
+                    }
+                    else
+                    {
+                        if ((*it)->getName() == "LineBroken" ||
+                                (*it)->getName() == "Tramways" ||
+                                (*it)->getName() == "VoltageLine" ||
+                                (*it)->getName() == "DoubleVoltageLine")
+                        {
+                            stateManager->lineBuilderState->setLine(dynamic_cast<LineBroken*>(*it));
+                            stateManager->lineBuilderState->setGroupIndex(selectedGroup);
+                            stateManager->lineBuilderState->setElementIndex(selectedIndex);
+                            stateManager->setState(stateManager->lineBuilderState);
+                        }
+                        else
+                        {
+                            stateManager->setState(stateManager->selectedState);
+                        }
+                    }
+                }
+                else
+                    if (selectedElementsCount > 1)
+                    {
+                        stateManager->setState(stateManager->selectedState);
+                    }
+
+                rectSelection = false;
+
+            }
+        }
 
     }
     ptrMousePosition = pe->pos();
@@ -696,6 +725,7 @@ bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
 
     if (hitsForFigure > 0) // есть совпадания и нет ошибок
     {
+        selectedElementsCount = hitsForFigure;
         i = selectBuffer[3] - 1; // имя фигуры верхняя фигура
         for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
         {
@@ -757,9 +787,20 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
     glLoadIdentity(); // загрузить единичную матрицу
 
     // новый объём под указателем мыши
-    gluPickMatrix((GLdouble)(mp1.x() + mp2.x())/2, (GLdouble)(viewport[3]-(mp1.y() + mp2.y())/2),
-            (GLdouble)abs(mp1.x() - mp2.x())/2, (GLdouble)abs(mp1.y() - mp2.y())/2,
-            viewport);
+   // gluPickMatrix((GLdouble)((mp1.x() + mp2.x()) / 2), (GLdouble)(viewport[3] - (mp1.y() + mp2.y()) / 2),
+   //         (GLdouble)(abs(mp2.x() - mp1.x())), (GLdouble)(abs(mp2.y() - mp1.y())),
+   //         viewport);
+
+    //qDebug () << "X1=" << mp1.x();
+    //qDebug () << "Y1=" << mp1.y();
+    //qDebug () << "X2=" << mp2.x();
+    //qDebug () << "Y2=" << mp2.y();
+
+    GLdouble width = abs(mp1.x() - mp2.x()) > 2 ? (GLdouble)(abs(mp1.x() - mp2.x())) : 2.0;
+    GLdouble height = abs(mp1.y() - mp2.y()) > 2 ? (GLdouble)(abs(mp1.y() - mp2.y())) : 2.0;
+    gluPickMatrix((GLdouble)((mp1.x() + mp2.x()) / 2), (GLdouble)(viewport[3] - (mp1.y() + mp2.y()) / 2),
+                width, height,
+                viewport);
     // мировое окно
     if (scene->width() >= scene->height())
         glOrtho(-1.0/ratio, 1.0/ratio, -1.0, 1.0, -10.0, 1.0);
@@ -794,8 +835,11 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
         }
     }
 
-    hitsForFigure=glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
+    hitsForFigure = glRenderMode(GL_RENDER);
 
+    selectedElementsCount = hitsForFigure;
+
+    qDebug() << "Hits: " << hitsForFigure;
     if (hitsForFigure > 0) // есть совпадания и нет ошибок
     {
         // Если выделена одна фигура
@@ -806,12 +850,18 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
             {
                 if (i < model->getGroup(j).size())
                 {
-                    stateManager->selectedState->setSelectedElement(i, j);
 
-                    std::list<RoadElement*>::iterator it = model->getGroup(j).begin();
-                    for(int k = 0; k < i; ++k)
+                    selectedGroup = j;
+                    selectedIndex = i;
+                    std::list<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
+                    for(int k = 0; k < selectedIndex; ++k)
                         ++it;
-                    stateManager->selectedState->setSelectedElement(*it);
+                    if ((*it)->getName() != "RoadBroken")
+                    {
+                        stateManager->selectedState->setSelectedElement(i, j);
+                        stateManager->selectedState->setSelectedElement(*it);
+                    }
+
                     (*it)->setSelectedStatus(true);
                     (*it)->getProperties(properties, scene);
                     scene->setCursor(Qt::SizeAllCursor);
@@ -828,24 +878,25 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
         }
         else
         {
-            for (int hitNumber = 0; hitNumber < hitsForFigure; ++hitNumber)
+            for (int hitNumber = 1; hitNumber <= hitsForFigure; ++hitNumber)
             {
                 i = selectBuffer[hitNumber * 4 - 1] - 1; // имя фигуры верхняя фигура
                 for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
                 {
                     if (i < model->getGroup(j).size())
                     {
-                        //stateManager->selectedState->setSelectedElement(i, j);
-                        stateManager->multiSelectedState->addSelectedElementToTheGroup(i, j);
-                        std::list<RoadElement*>::iterator it = model->getGroup(j).begin();
-                        for(int k = 0; k < i; ++k)
+                        selectedGroup = j;
+                        selectedIndex = i;
+                        std::list<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
+                        for(int k = 0; k < selectedIndex; ++k)
                             ++it;
+                        if ((*it)->getName() != "RoadBroken" && hitNumber == 1)
+                        {
+                            stateManager->selectedState->setSelectedElement(i, j);
+                            stateManager->selectedState->setSelectedElement(*it);
+                        }
                         (*it)->setSelectedStatus(true);
-                        scene->setCursor(Qt::SizeAllCursor);
-                        glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
-                        glPopMatrix(); // извлечь матрицу из стека матриц
-                        scene->updateGL(); // обновить изображение
-                        return true;
+                        stateManager->selectedState->selectedElements.push_back(*it);
                     }
                     else
                     {
@@ -853,8 +904,20 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
                     }
                 }
             }
+
+            scene->setCursor(Qt::SizeAllCursor);
+            glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
+            glPopMatrix(); // извлечь матрицу из стека матриц
+            scene->updateGL(); // обновить изображение
+            return true;
         }
+
+        glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
+        glPopMatrix(); // извлечь матрицу из стека матриц
+        scene->updateGL(); // обновить изображение
+        return false;
     }
+
 
     glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
     glPopMatrix(); // извлечь матрицу из стека матриц
@@ -873,6 +936,53 @@ void DefaultState::keyReleaseEvent(QKeyEvent *pe)
 QString DefaultState::getName()
 {
     return "DefaultState";
+}
+
+void DefaultState::drawRect(QPoint p1, QPoint p2)
+{
+    GLdouble x1, y1, z1;
+    GLdouble x2, y2, z2;
+    getWorldCoord(p1.x(), p1.y(), 0, x1, y1, z1);
+    getWorldCoord(p2.x(), p2.y(), 0, x2, y2, z2);
+    glLineWidth(5.0f);
+    glDisable(GL_DEPTH_TEST);
+    glBegin(GL_LINES);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3d(x1, y1, z1);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3d(x1, y2, z1);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3d(x2, y2, z2);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3d(x2, y1, z2);
+    glEnd();
+    glEnable(GL_DEPTH_TEST);
+    //qDebug() << "drawRect";
+}
+
+void DefaultState::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)
+{
+    GLint viewport[4];
+    GLdouble mvmatrix[16], projmatrix[16];
+
+    glGetIntegerv(GL_VIEWPORT,viewport);
+    glGetDoublev(GL_MODELVIEW_MATRIX,mvmatrix);
+    glGetDoublev(GL_PROJECTION_MATRIX,projmatrix);
+
+    gluProject(x, y, z, mvmatrix, projmatrix, viewport, &wx, &wy, &wz);
+    wy=viewport[3]-wy;
+}
+
+void DefaultState::getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz)
+{
+    GLint viewport[4];
+    GLdouble mvmatrix[16], projmatrix[16];
+
+    glGetIntegerv(GL_VIEWPORT,viewport);
+    glGetDoublev(GL_MODELVIEW_MATRIX,mvmatrix);
+    glGetDoublev(GL_PROJECTION_MATRIX,projmatrix);
+    y - viewport[3]-y;
+    gluUnProject(x, y, z, mvmatrix, projmatrix, viewport, &wx, &wy, &wz);
 }
 
 

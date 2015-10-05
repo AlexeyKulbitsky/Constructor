@@ -64,6 +64,7 @@ protected:
     float leftBoardWidth;
     bool showRightBoard;
     bool showLeftBoard;
+    bool fixedRightWidth, fixedLeftWidth;
     GLfloat red, green, blue, alpha;
     GLfloat x1, y1, x2, y2;
     GLfloat width;
@@ -97,10 +98,12 @@ public:
     void setTextureArray(float textureUsize, float textureVsize);
 
     void setRightVertexArray();
+    void resetRightVertexArray();
     void setRightTextureArray(float textureUsize, float textureVsize);
     void setRightIndexArray();
 
     void setLeftVertexArray();
+    void resetLeftVertexArray();
     void setLeftTextureArray(float textureUsize, float textureVsize);
     void setLeftIndexArray();
 
