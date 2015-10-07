@@ -52,6 +52,7 @@ public:
     void setAngleVertexArray();
     void setAngleColorArray(float red, float green, float blue);
     void setAngleIndexArray();
+    void calculateAngle();
 
 signals:
     void leftLengthChanged(double value);

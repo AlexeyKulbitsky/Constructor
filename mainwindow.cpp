@@ -18,35 +18,22 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    //propertiesToolBar = new QToolBar(this);
-    //this->addToolBar(Qt::RightToolBarArea, propertiesToolBar);
-    properties = new QFormLayout();
-    QWidget *wid = new QWidget();
+
+    QScrollArea *scroll = new QScrollArea(this);
+    QWidget *wid = new QWidget(this);
+    properties = new QFormLayout(wid);
+
     wid->setLayout(properties);
-    QScrollArea *scroll = new QScrollArea();
+
     scroll->setWidget(wid);
     scroll->setWidgetResizable(true);
-    scroll->setAlignment(Qt::AlignVCenter);
-
-    //QScrollBar *scroll = new QScrollBar(Qt::Vertical, wid);
-
-
-    //scroll->viewport()->setBackgroundRole(QPalette::Dark);
-    //scroll->viewport()->setAutoFillBackground(true);
-    //scroll->show();
-    //propertiesToolBar->addWidget(scroll);
-
-
+    //scroll->setAlignment(Qt::AlignVCenter);
     propertiesWidget = new QDockWidget("Инспектор");
-    propertiesWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    //properties->addWidget(propertiesWidget);
-   // propertiesWidget->setLayout(properties);
+    propertiesWidget->setFeatures(QDockWidget::DockWidgetMovable |
+                                  QDockWidget::DockWidgetFloatable);
     propertiesWidget->setWidget(scroll);
     addDockWidget(Qt::RightDockWidgetArea, propertiesWidget);
-    //addDockWidget(Qt::BottomDockWidgetArea, scroll);
-    //propertiesToolBar->setLayout(properties);
-    //properties->addWidget(propertiesToolBar);
-    //ui->properties->addWidget(propertiesToolBar);
+
     model = new Model();
     createActions();
     createMenu();
@@ -80,8 +67,23 @@ MainWindow::MainWindow(QWidget *parent) :
         toolBox->removeItem(toolBox->count()-1);
     }
 
-    ui->scrollAreaToolBox->setWidget(toolBox);
-    ui->scrollAreaToolBox->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    QScrollArea* scrollAreaToolBox = new QScrollArea();
+    scrollAreaToolBox->setWidgetResizable(true);
+    scrollAreaToolBox->setWidget(toolBox);
+    scrollAreaToolBox->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scrollAreaToolBox->show();
+    QVBoxLayout* toolLayout = new QVBoxLayout();
+    QComboBox* itemsComboBox = new QComboBox();
+    toolLayout->addWidget(itemsComboBox);
+    toolLayout->addWidget(scrollAreaToolBox);
+    QWidget* toolBoxWidget = new QWidget();
+    toolBoxWidget->setLayout(toolLayout);
+
+    tools = new QDockWidget("Элементы");
+    tools->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    tools->setWidget(scrollAreaToolBox);
+    addDockWidget(Qt::LeftDockWidgetArea, tools);
     /*
     QScrollArea *scrollAreaToolBox = new QScrollArea();
     scrollAreaToolBox->setWidget(ui->toolBox);

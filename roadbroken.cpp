@@ -153,6 +153,27 @@ void RoadBroken::setVertexArray(QVector<GLfloat> &vertexArray)
     }
 }
 
+void RoadBroken::resetVertexArray(float dx, float dy, bool right)
+{
+    int i = right ? 0 : 1;
+    int delta = right ? 1 : -1;
+    for (; i < vertexArray.size() / 3; i += 2)
+    {
+        float x1 = vertexArray[(i + delta) * 3];
+        float y1 = vertexArray[(i + delta) * 3 + 1];
+        float x2 = vertexArray[i * 3];
+        float y2 = vertexArray[i * 3 + 1];
+        float dx1 = x2 - x1;
+        float dy1 = y2 - y1;
+        float r1 = sqrt(dx1*dx1 + dy1*dy1);
+        float r = (dx*dx1 + dy*dy1) / r1;
+        float dX = dx1 / r1 * r;
+        float dY = dy1 / r1 * r;
+        vertexArray[i * 3] += dX;
+        vertexArray[i * 3 + 1] += dY;
+    }
+}
+
 void RoadBroken::setColorArray(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
 {
     if (colorArray.size() != vertexArray.size() / 3 * 4)
@@ -545,6 +566,25 @@ void RoadBroken::resetLeftVertexArray()
             vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3] += dx;
             vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3 + 1] += dy;
         }
+    }
+}
+
+void RoadBroken::resetLeftVertexArray(float dx, float dy)
+{
+    for (int i = 1; i < vertexArray.size() / 3; i += 2)
+    {
+        float x1 = vertexArray[i * 3];
+        float y1 = vertexArray[i * 3 + 1];
+        float x2 = vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3];
+        float y2 = vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3 + 1];
+        float dx1 = x2 - x1;
+        float dy1 = y2 - y1;
+        float r1 = sqrt(dx1*dx1 + dy1*dy1);
+        float r = (dx*dx1 + dy*dy1) / r1;
+        float dX = dx1 / r1 * r;
+        float dY = dy1 / r1 * r;
+        vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3] += dX;
+        vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3 + 1] += dY;
     }
 }
 
@@ -1043,6 +1083,25 @@ void RoadBroken::resetRightVertexArray()
             vertexArrayRight[(i / 2 * 5 + 4) * 3] += dx;
             vertexArrayRight[(i / 2 * 5 + 4) * 3 + 1] += dy;
         }
+    }
+}
+
+void RoadBroken::resetRightVertexArray(float dx, float dy)
+{
+    for (int i = 0; i < vertexArray.size() / 3; i += 2)
+    {
+        float x1 = vertexArray[i * 3];
+        float y1 = vertexArray[i * 3 + 1];
+        float x2 = vertexArrayRight[(i / 2 * 5 + 4) * 3];
+        float y2 = vertexArrayRight[(i / 2 * 5 + 4) * 3 + 1];
+        float dx1 = x2 - x1;
+        float dy1 = y2 - y1;
+        float r1 = sqrt(dx1*dx1 + dy1*dy1);
+        float r = (dx*dx1 + dy*dy1) / r1;
+        float dX = dx1 / r1 * r;
+        float dY = dy1 / r1 * r;
+        vertexArrayRight[(i / 2 * 5 + 4) * 3] += dX;
+        vertexArrayRight[(i / 2 * 5 + 4) * 3 + 1] += dY;
     }
 }
 
@@ -1727,6 +1786,8 @@ void RoadBroken::drawSelectionFrame()
     glPointSize(10.0);
     glDrawElements(GL_POINTS, indexArrayForSelection.size(), GL_UNSIGNED_BYTE, indexArrayForSelection.begin());
 
+
+
     if (showRightBoard)
     {
         glLineWidth(5.0f);
@@ -2011,6 +2072,15 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
             if (index >= vertexArray.size() / 3 + vertexArray.size() / 3 + vertexArray.size() / 6)
             {
                 // Изменение линий дороги
+                int j = index - vertexArray.size() / 3 - vertexArray.size() / 3 - vertexArray.size() / 6;
+                if (j < vertexArray.size() / (3 * 4))
+                {
+                    resetVertexArray(dx, dy, true);
+                }
+                else
+                {
+                    resetVertexArray(dx, dy, false);
+                }
             }
             else
             {
@@ -2019,6 +2089,7 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
                     int j = index - vertexArray.size() / 3 - vertexArray.size() / 3;
                     if (j < vertexArray.size() / (3 * 4))
                     {
+                        /*
                         float x0 = vertexArrayRight[(j * 10 + 4) * 3];
                         float y0 = vertexArrayRight[(j * 10 + 4) * 3 + 1];
                         float x1 = vertexArrayRight[(j * 10 + 9) * 3];
@@ -2031,10 +2102,13 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
                         float factor = sa < 0 ? -1 : 1;
                         rightBoardWidth += dr * sin(angle) * factor;
                         emit rightBoardWidthChanged(rightBoardWidth);
+                        */
+                        resetRightVertexArray(dx, dy);
                     }
                     else
                     {
                         j -= vertexArray.size() / (3 * 4);
+                        /*
                         float x0 = vertexArrayLeft[(j * 10 + 4) * 3];
                         float y0 = vertexArrayLeft[(j * 10 + 4) * 3 + 1];
                         float x1 = vertexArrayLeft[(j * 10 + 9) * 3];
@@ -2046,6 +2120,8 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
                         float factor = sa < 0 ? 1 : -1;
                         leftBoardWidth += dr * sin(angle) * factor;
                         emit leftBoardWidthChanged(leftBoardWidth);
+                        */
+                        resetLeftVertexArray(dx, dy);
                     }
                 }
                 else
@@ -2269,7 +2345,7 @@ void RoadBroken::getProperties(QFormLayout *layout, QGLWidget* render)
     }
 
     QPushButton *addLineButton = new QPushButton("+");
-    StepDialog *stepDialog = new StepDialog();
+
     connect(stepDialog, SIGNAL(lineTypeChanged(int)), this, SLOT(setLineType(int)));
     connect(stepDialog, SIGNAL(rightSideChanged(bool)), this, SLOT(setRightSide(bool)));
     connect(stepDialog, SIGNAL(stepChanged(double)), this, SLOT(setStep(double)));
@@ -2704,4 +2780,24 @@ std::vector<vec3> RoadBroken::getCoordOfControl(int index)
 
 void RoadBroken::clear()
 {
+}
+
+
+void RoadBroken::clearProperties(QLayout *layout)
+{
+    disconnect(stepDialog, SIGNAL(lineTypeChanged(int)), this, SLOT(setLineType(int)));
+    disconnect(stepDialog, SIGNAL(rightSideChanged(bool)), this, SLOT(setRightSide(bool)));
+    disconnect(stepDialog, SIGNAL(stepChanged(double)), this, SLOT(setStep(double)));
+    disconnect(stepDialog, SIGNAL(beginStepChanged(double)), this, SLOT(setBeginStep(double)));
+    disconnect(stepDialog, SIGNAL(endStepChanged(double)), this, SLOT(setEndStep(double)));
+    disconnect(stepDialog, SIGNAL(beginSideChanged(bool)), this, SLOT(setBeginSide(bool)));
+    disconnect(stepDialog, SIGNAL(beginRoundingChanged(bool)), this, SLOT(setBeginRounding(bool)));
+    disconnect(stepDialog, SIGNAL(endRoundingChanged(bool)), this, SLOT(setEndRounding(bool)));
+    disconnect(stepDialog, SIGNAL(splitZoneWidthChanged(double)), this, SLOT(setSplitZoneWidth(double)));
+    disconnect(stepDialog, SIGNAL(accepted()), this, SLOT(addLine()));
+    while(QLayoutItem* child = layout->takeAt(0))
+    {
+        delete child->widget();
+        delete child;
+    }
 }

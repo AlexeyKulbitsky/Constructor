@@ -89,6 +89,8 @@ protected:
     float x1, y1, x2, y2;
     float xP1, yP1, xP2, yP2;
     float width, length;
+    float rightWidth;
+    float leftWidth;
     float rightBoardWidth, leftBoardWidth;
     float size;
     int layer;
@@ -147,9 +149,13 @@ signals:
     void linesChanged(QFormLayout* layout, QGLWidget* render);
     void rightBoardWidthChanged(double width);
     void leftBoardWidthChanged(double width);
+    void rightWidthChanged(double width);
+    void leftWidthChanged(double width);
 
 public slots:
     void setWidth(double width);
+    void setRightWidth(double width);
+    void setLeftWidth(double width);
     void setLength(double length);
     void setRightBoardShowStatus(bool status);
     void setLeftBoardShowStatus(bool status);
@@ -178,6 +184,10 @@ public slots:
     // RoadElement interface
 public:
     virtual std::vector<vec3> getCoordOfControl(int index);
+
+    // RoadElement interface
+public:
+    virtual void clearProperties(QLayout *layout);
 };
 
 #endif // ROADSIMPLE_H

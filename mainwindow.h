@@ -26,6 +26,7 @@ public:
     void createToolBar();
 
     QDockWidget *propertiesWidget;
+    QDockWidget *tools;
     QToolBar *propertiesToolBar;
     QFormLayout *properties;
     QLineEdit* ed;

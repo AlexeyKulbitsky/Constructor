@@ -80,12 +80,16 @@ void SelectedState::mousePressEvent(QMouseEvent *pe)
                         for (std::list<RoadElement*>::iterator it = selectedElements.begin();
                              it != selectedElements.end();
                              ++it)
+
                             (*it)->setSelectedStatus(false);
+
                         selectedElements.clear();
                         selectedElement->setSelectedStatus(false);
+                        selectedElement->clearProperties(properties);
                         selectedElement = NULL;
                         keyboardKey = 0;
                         clear();
+
                         clearProperties(properties);
                         scene->setMouseTracking(false);
                         scene->setCursor(Qt::ArrowCursor);
@@ -106,6 +110,7 @@ void SelectedState::mousePressEvent(QMouseEvent *pe)
                     (*it)->setSelectedStatus(false);
                 selectedElements.clear();
                 selectedElement->setSelectedStatus(false);
+                selectedElement->clearProperties(properties);
                 selectedElement = NULL;
                 keyboardKey = 0;
                 clear();
@@ -641,6 +646,7 @@ SelectedState::~SelectedState()
 
 void SelectedState::clearProperties(QFormLayout *layout)
 {
+
     while(QLayoutItem* child = layout->takeAt(0))
     {
         delete child->widget();

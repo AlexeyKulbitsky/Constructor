@@ -117,7 +117,7 @@ void LineBuilderState::mousePressEvent(QMouseEvent *pe)
                 {
                     // Переключить в состояние по умолчанию
                     lineBroken->setSelectedStatus(false);
-                    lineBroken = NULL;
+                    clear();
                     scene->setMouseTracking(false);
                     scene->setCursor(Qt::ArrowCursor);
                     clearProperties(properties);
@@ -517,6 +517,21 @@ void LineBuilderState::setGroupIndex(int index)
 void LineBuilderState::setElementIndex(int index)
 {
     elementIndex = index;
+}
+
+void LineBuilderState::clear()
+{
+    lineBroken = NULL;
+    lineBuilder = NULL;
+    ptrMousePosition;
+    rightButtonIsPressed = false;
+    leftButtonIsPressed = false;
+    controlIndex = 1;
+    groupIndex = -1;
+    elementIndex = 1;
+    controlIsSelected = false;
+    key = -1;
+    linking = false;
 }
 
 LineBuilderState::~LineBuilderState()

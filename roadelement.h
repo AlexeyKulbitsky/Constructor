@@ -153,6 +153,24 @@ public:
     virtual QString getName() { return name; }
     virtual QJsonObject getJSONInfo() {  QJsonObject a; return a;}
     virtual void getProperties(QFormLayout* layout, QGLWidget* render = 0) = 0;
+    virtual void clearProperties(QLayout* layout)
+    {
+        /*
+        QLayoutItem *item;
+        while((layout->count() > 0)) {
+            item = layout->itemAt(0);
+            if (item->layout()) {
+                clearProperties(item->layout());
+                delete item->layout();
+            }
+            if (item->widget()) {
+                delete item->widget();
+            }
+            delete item;
+        }
+        */
+    }
+
     virtual bool isFixed() = 0;
     virtual void addElement(RoadElement* element){}
     virtual void deleteElement(int index){}
@@ -161,13 +179,17 @@ public:
     virtual ~RoadElement(){}
     virtual int getLayer() = 0;
     virtual void clear() = 0;
-
+    virtual void setStepDialog(StepDialog* dialog)
+    {
+        if (dialog)
+        stepDialog = dialog;
+    }
 public slots:
     virtual bool setFixed(bool fixed) = 0;
 
 protected:
     QString name;
-
+    StepDialog* stepDialog;
 public:
     //static QMap<QString, int> texturesPool;
 };

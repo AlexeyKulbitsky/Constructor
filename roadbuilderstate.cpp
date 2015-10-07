@@ -119,6 +119,7 @@ void RoadBuilderState::mousePressEvent(QMouseEvent *pe)
                 {
                     // Переключить в состояние по умолчанию
                     roadBroken->setSelectedStatus(false);
+                    roadBroken->clearProperties(properties);
                     clear();
                     scene->setMouseTracking(false);
                     scene->setCursor(Qt::ArrowCursor);

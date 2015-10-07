@@ -15,7 +15,6 @@ Intersection::Intersection(float x, float y)
 {
 
     layer = 0;
-    //RoadSimple(float x1, float y1, float x2, float y2, float width, QString source_1, QString source_2, float textureSize_1, float textureSize_2, QString name, int layer);
     float r = 10.0f;
     for (int i = 0; i < 4; ++i)
     {
@@ -60,7 +59,8 @@ Intersection::Intersection(float x, float y)
                                  QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
                                  QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
                                  10);
-        QObject::connect(curve, SIGNAL(angleChanged(double)), this, SLOT(setAngle(double)));
+        //QObject::connect(curve, SIGNAL(angleChanged(double)), this, SLOT(setAngle(double)));
+        curve->setBoardShowStatus(false);
         showBoardStatus.push_back(false);
         curve->setSelectedStatus(false);
         curves.push_back(curve);
@@ -302,6 +302,24 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
         if (index != roads[i]->getNumberOfControls())
         {
             roads[i]->resizeByControl(index, dx, dy, x, y);
+            calculateRoadIntersections();
+            // Если дорогу повернули
+            calculateRoadForRounding(i);
+            calculateRoadForAngle(i);
+
+
+            switch (index)
+            {
+            case 2:
+                break;
+            case 3:
+                break;
+            case 5:
+                break;
+            default:
+                break;
+            }
+
             if (index == 8)
             {
                 float width = roads[i]->getRightBoardWidth();
@@ -366,9 +384,6 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
                     a2 = t2.y - t1.y;
                     b2 = t1.x - t2.x;
                     c2 = t1.y * (t2.x - t1.x) - t1.x * (t2.y - t1.y);
-
-
-
                     float x1Temp;
                     float y1Temp;
 
@@ -464,6 +479,8 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
             roads[i]->setVertexArray(x1Res, y1Res, x2Res, y2Res, width);
             roads[i]->setTextureArray();
 
+            calculateRoadForRounding(i);
+            calculateRoadForAngle(i);
         }
     calculateRoadIntersections();
     calculateRoundings();
@@ -495,6 +512,7 @@ void Intersection::changeColorOfSelectedControl(int index)
 
 void Intersection::getProperties(QFormLayout *layout, QGLWidget *render)
 {
+    /*
     this->layout = layout;
     this->render = render;
     while(QLayoutItem* child = layout->takeAt(0))
@@ -502,14 +520,10 @@ void Intersection::getProperties(QFormLayout *layout, QGLWidget *render)
         delete child->widget();
         delete child;
     }
-
-    QScrollArea *scrollArea = new QScrollArea();
-    scrollArea->setWidget(layout->widget());
-    //scrollBar->setW;
-    //QWidget* vp = new QWidget(formArea);
-    //formArea->setWidget(vp);
-    //vp->setLayout(layout);
-    //layout->setSizeConstraint(QFormLayout::SetFixedSize);
+    */
+    //clearProperties(layout);
+    //QScrollArea *scrollArea = new QScrollArea();
+    //scrollArea->setWidget(layout->widget());
 
     QCheckBox *fixedCheckBox = new QCheckBox();
     fixedCheckBox->setChecked(fixed);
@@ -536,16 +550,7 @@ void Intersection::getProperties(QFormLayout *layout, QGLWidget *render)
         layout->addRow("Ширина", widthDoubleSpinBox);
         QPushButton *addLinePushButton = new QPushButton("+");
 
-        StepDialog *stepDialog = new StepDialog();
-        /*
-        connect(stepDialog, SIGNAL(lineTypeChanged(int)), roads[i], SLOT(setLineType(int)));
-        connect(stepDialog, SIGNAL(rightSideChanged(bool)), roads[i], SLOT(setRightSide(bool)));
-        connect(stepDialog, SIGNAL(stepChanged(double)), roads[i], SLOT(setStep(double)));
-        connect(stepDialog, SIGNAL(beginStepChanged(double)), roads[i], SLOT(setBeginStep(double)));
-        connect(stepDialog, SIGNAL(endStepChanged(double)), roads[i], SLOT(setEndStep(double)));
-        connect(addLinePushButton, SIGNAL(clicked(bool)), stepDialog, SLOT(exec()));
-        connect(stepDialog, SIGNAL(accepted()), roads[i], SLOT(addLine()));
-        */
+        //StepDialog *stepDialog = new StepDialog();
         connect(stepDialog, SIGNAL(lineTypeChanged(int)), roads[i], SLOT(setLineType(int)));
         connect(stepDialog, SIGNAL(rightSideChanged(bool)), roads[i], SLOT(setRightSide(bool)));
         connect(stepDialog, SIGNAL(stepChanged(double)), roads[i], SLOT(setStep(double)));
@@ -597,24 +602,25 @@ void Intersection::getProperties(QFormLayout *layout, QGLWidget *render)
         QObject::connect(showBoardCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
 
         QDoubleSpinBox *angleDoubleSpinBox = new QDoubleSpinBox();
+        angleDoubleSpinBox->setObjectName(QString::number(i));
         angleDoubleSpinBox->setMinimum(0.0);
         angleDoubleSpinBox->setMaximum(720.0);
         angleDoubleSpinBox->setValue(curves[i]->angleRounding);
         connect(curves[i], SIGNAL(angleChanged(double)), angleDoubleSpinBox, SLOT(setValue(double)));
-        connect(angleDoubleSpinBox, SIGNAL(valueChanged(double)), curves[i], SLOT(setAngle(double)));
-
+        connect(angleDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setAngle(double)));
+        //connect(curves[i], SIGNAL(angleChanged(double)), this, SLOT(setAngle(double)));
+        if (render)
+        {
+            connect(rightLengthDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+            connect(leftLengthDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+            connect(angleDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+        }
         layout->addRow("Закругление " + QString::number(i + 1), showBoardCheckBox);
         //layout->addRow("Отобразить", showBoardCheckBox);
         layout->addRow("Левая сторона", leftLengthDoubleSpinBox);
         layout->addRow("Правая сторона", rightLengthDoubleSpinBox);
-        //layout->addRow("Угол", angleDoubleSpinBox);
+        layout->addRow("Угол", angleDoubleSpinBox);
     }
-    //QWidget *baseArea = new QWidget();
-    // baseArea->setLayout(layout);
-    // QScrollArea* formArea = new QScrollArea(baseArea);
-    //formArea->set;
-
-    //formArea->setLayout(layout);
 
 }
 
@@ -641,6 +647,133 @@ void Intersection::setRoadsTextures()
             roads[i]->setTextureArray();
         }
 
+    }
+}
+
+float Intersection::calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4)
+{
+        /*
+        vec2 p1 = roads[i]->getAxisPoint_1();
+        vec2 p2 = roads[i]->getAxisPoint_2();
+        int j = i == (roads.size() - 1) ? 0 : i + 1;
+        vec2 p3 = roads[j]->getAxisPoint_1();
+        vec2 p4 = roads[j]->getAxisPoint_2();
+        */
+        float dx1 = p2.x - p1.x;
+        float dy1 = p2.y - p1.y;
+        float r1 = sqrt(dx1*dx1 + dy1*dy1);
+        float dx2 = p4.x - p3.x;
+        float dy2 = p4.y - p3.y;
+        float r2 = sqrt(dx2*dx2 + dy2*dy2);
+        float angle = acos((dx1*dx2 + dy1*dy2) / (r1 * r2));
+        float res = dx1*dy2 - dx2*dy1;
+        float pi = 3.14159265f;
+        if (res < 0)
+            angle = 2.0f * pi - angle;
+        return angle;
+
+}
+
+void Intersection::calculateRoadForAngle(int i)
+{
+    vec2 p1 = roads[i]->getAxisPoint_1();
+    vec2 p2 = roads[i]->getAxisPoint_2();
+    int j = i == (roads.size() - 1) ? 0 : i + 1;
+    vec2 p3 = roads[j]->getAxisPoint_1();
+    vec2 p4 = roads[j]->getAxisPoint_2();
+    float angle = calculateAngle(p1, p2, p3, p4);
+    float pi = 3.14159265f;
+    if (angle > pi)
+    {
+        float dx1 = p2.x - p1.x;
+        float dy1 = p2.y - p1.y;
+        float r1 = sqrt(dx1*dx1 + dy1*dy1);
+        float dx2 = p4.x - p3.x;
+        float dy2 = p4.y - p3.y;
+        float r2 = sqrt(dx2*dx2 + dy2*dy2);
+
+        float dx = dx2 / r2 * r1;
+        float dy = dy2 / r2 * r1;
+        roads[i]->setCoordForAxisPoint(1, p1.x - dx, p1.y - dy);
+        roads[i]->setVertexArray();
+        roads[i]->setTextureArray();
+    }
+
+
+    j = i == 0 ? roads.size() - 1 : i - 1;
+    p3 = roads[j]->getAxisPoint_1();
+    p4 = roads[j]->getAxisPoint_2();
+    angle = calculateAngle(p3, p4, p1, p2);
+    if (angle > pi)
+    {
+        float dx1 = p2.x - p1.x;
+        float dy1 = p2.y - p1.y;
+        float r1 = sqrt(dx1*dx1 + dy1*dy1);
+        float dx2 = p4.x - p3.x;
+        float dy2 = p4.y - p3.y;
+        float r2 = sqrt(dx2*dx2 + dy2*dy2);
+
+        float dx = dx2 / r2 * r1;
+        float dy = dy2 / r2 * r1;
+        roads[i]->setCoordForAxisPoint(1, p1.x - dx, p1.y - dy);
+        roads[i]->setVertexArray();
+        roads[i]->setTextureArray();
+    }
+}
+
+void Intersection::calculateRoadForRounding(int i)
+{
+    // Левая сторона рукава
+    vec3 p1 = roads[i]->getCoordOfPoint(1);
+    vec3 p2 = roads[i]->getCoordOfPoint(2);
+    float dx1 = p2.x - p1.x;
+    float dy1 = p2.y - p1.y;
+    float r1 = sqrt(dx1*dx1 + dy1*dy1);
+    int j = i == (roads.size() - 1) ? 0 : i + 1;
+    vec3 p3 = roads[j]->getCoordOfPoint(0);
+    vec3 p4 = roads[j]->getCoordOfPoint(3);
+    float dx2 = p4.x - p3.x;
+    float dy2 = p4.y - p3.y;
+    float r2 = sqrt(dx2*dx2 + dy2*dy2);
+    float leftLength = curves[i]->getLeftLength();
+    float rightLength = curves[i]->getRightLength();
+    float dx, dy;
+    if (r1 < rightLength)
+    {
+        dx = dx1 / r1 * (rightLength - r1);
+        dy = dy1 / r1 * (rightLength - r1);
+        roads[i]->resizeByControl(5, dx, dy, p2.x, p2.y);
+    }
+    if (r2 < leftLength)
+    {
+        dx = dx2 / r2 * (r2 - leftLength);
+        dy = dy2 / r2 * (r2 - leftLength);
+        roads[i]->resizeByControl(5, dx, dy, p2.x, p2.y);
+    }
+    p1 = roads[i]->getCoordOfPoint(0);
+    p2 = roads[i]->getCoordOfPoint(3);
+    dx1 = p2.x - p1.x;
+    dy1 = p2.y - p1.y;
+    r1 = sqrt(dx1*dx1 + dy1*dy1);
+    j = i == 0 ? roads.size() - 1 : i - 1;
+    p3 = roads[j]->getCoordOfPoint(1);
+    p4 = roads[j]->getCoordOfPoint(2);
+    dx2 = p4.x - p3.x;
+    dy2 = p4.y - p3.y;
+    r2 = sqrt(dx2*dx2 + dy2*dy2);
+    leftLength = curves[i]->getLeftLength();
+    rightLength = curves[i]->getRightLength();
+    if (r1 < leftLength)
+    {
+        dx = dx1 / r1 * (leftLength - r1);
+        dy = dy1 / r1 * (leftLength - r1);
+        roads[i]->resizeByControl(5, dx, dy, p2.x, p2.y);
+    }
+    if (r2 < rightLength)
+    {
+        dx = dx2 / r2 * (r2 - rightLength);
+        dy = dy2 / r2 * (r2 - rightLength);
+        roads[i]->resizeByControl(5, dx, dy, p2.x, p2.y);
     }
 }
 
@@ -727,6 +860,8 @@ void Intersection::calculateRoadIntersections()
         roads[i]->resetLines();
     setTextureArray(texture1USize, texture1VSize);
     //emit intersectionsChanged();
+
+
 }
 
 void Intersection::calculateRoundings()
@@ -756,12 +891,10 @@ void Intersection::calculateRoundings()
         dy = rightLength * (p1.y - p0.y) / rightR;
 
         curves[i]->setCoordForPoint(2, p0.x + dx, p0.y + dy, p0.z);
-
-        curves[i]->setVertexArray();
-        curves[i]->setTextureArray();
-        curves[i]->setVertexArrayBoard();
-        curves[i]->setTextureArrayBoard(curves[i]->texture2USize, curves[i]->texture2VSize);
         curves[i]->setAngleVertexArray();
+        curves[i]->calculateAngle();
+        //curves[i]->setAngle(curves[i]->angleRounding);
+
     }
 }
 
@@ -988,20 +1121,27 @@ void Intersection::recalculateRoads()
 
 void Intersection::setAngle(double angle)
 {
-    Curve * curve = qobject_cast<Curve*>(sender());
-    int i;
+    int i = qobject_cast<QDoubleSpinBox*>(sender())->objectName().toInt();
+   // Curve * curve = qobject_cast<Curve*>(sender());
+    Curve * curve = curves[i];
     for (i = 0; i < curves.size(); ++i)
+    {
         if (curves[i] == curve)
             break;
-    vec3 p1 = curves[i]->getCoordOfPoint(0);
-    vec3 p2 = curves[i]->getCoordOfPoint(1);
+    }
+    curve->setAngle(angle);
+    vec3 p1 = curve->getCoordOfPoint(0);
+    vec3 p2 = curve->getCoordOfPoint(1);
     float xCenter = p1.x;
     float yCenter = p1.y;
 
     float xLeft = p2.x;
     float yLeft = p2.y;
 
-    float r = sqrt((xLeft - xCenter)*(xLeft - xCenter) + (yLeft - yCenter)*(yLeft - yCenter));
+    float dx = xLeft - xCenter;
+    float dy = yLeft - yCenter;
+
+    float r = sqrt(dx*dx + dy*dy);
 
     vec2 s1, s2;
     RoadSimple* road;
@@ -1016,17 +1156,32 @@ void Intersection::setAngle(double angle)
 
     s1 = road->getAxisPoint_1();
     s2 = road->getAxisPoint_2();
+    float dx1 = s2.x - s1.x;
+    float dy1 = s2.y - s1.y;
+    float r1 = sqrt(dx1*dx1 + dy1*dy1);
+    road->setCoordForAxisPoint(1, s1.x + dx / r * r1, s1.y + dy / r * r1);
+    /*
+    float an = acos(dx / r);
+    if (dy < 0)
+        an = 2.0f * 3.1415926f - an;
 
     float r1 = sqrt((s2.x - s1.x)*(s2.x - s1.x) + (s2.y - s1.y)*(s2.y - s1.y));
-    float x = s1.x + (p2.x - p1.x) / r * r1;
-    float y = s1.y + (p2.y - p1.y) / r * r1;
+    float x = s1.x + r1 * cos(an);
+    float y = s1.y + r1 * sin(an);
 
     road->setCoordForAxisPoint(1, x, y);
+    */
     road->setVertexArray();
     road->setTextureArray();
     road->setTextureArrayBoard();
 
     recalculateRoads();
+
+}
+
+void Intersection::setAngle(double angle, int index)
+{
+
 }
 
 void Intersection::deleteLine()
@@ -1047,4 +1202,29 @@ bool Intersection::setFixed(bool fixed)
 
 void Intersection::clear()
 {
+}
+
+
+void Intersection::clearProperties(QLayout *layout)
+{
+    for (int i = 0; i < roads.size(); ++i)
+    {
+        disconnect(stepDialog, SIGNAL(lineTypeChanged(int)), roads[i], SLOT(setLineType(int)));
+        disconnect(stepDialog, SIGNAL(rightSideChanged(bool)), roads[i], SLOT(setRightSide(bool)));
+        disconnect(stepDialog, SIGNAL(stepChanged(double)), roads[i], SLOT(setStep(double)));
+        disconnect(stepDialog, SIGNAL(beginStepChanged(double)), roads[i], SLOT(setBeginStep(double)));
+        disconnect(stepDialog, SIGNAL(endStepChanged(double)), roads[i], SLOT(setEndStep(double)));
+        disconnect(stepDialog, SIGNAL(beginSideChanged(bool)), roads[i], SLOT(setBeginSide(bool)));
+        disconnect(stepDialog, SIGNAL(beginRoundingChanged(bool)), roads[i], SLOT(setBeginRounding(bool)));
+        disconnect(stepDialog, SIGNAL(endRoundingChanged(bool)), roads[i], SLOT(setEndRounding(bool)));
+        disconnect(stepDialog, SIGNAL(splitZoneWidthChanged(double)), roads[i], SLOT(setSplitZoneWidth(double)));
+        disconnect(stepDialog, SIGNAL(differentDirectionsChanged(bool)), roads[i], SLOT(setDifferentDirections(bool)));
+        disconnect(stepDialog, SIGNAL(accepted()), roads[i], SLOT(addLine()));
+        disconnect(stepDialog, SIGNAL(accepted()), this, SLOT(addLine()));
+    }
+    while(QLayoutItem* child = layout->takeAt(0))
+    {
+        delete child->widget();
+        delete child;
+    }
 }

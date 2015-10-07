@@ -94,16 +94,19 @@ protected:
 public:
     void setVertexArray(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, GLfloat width);
     void setVertexArray(QVector<GLfloat>& vertexArray);
+    void resetVertexArray(float dx, float dy, bool right);
     void setColorArray(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
     void setTextureArray(float textureUsize, float textureVsize);
 
     void setRightVertexArray();
     void resetRightVertexArray();
+    void resetRightVertexArray(float dx, float dy);
     void setRightTextureArray(float textureUsize, float textureVsize);
     void setRightIndexArray();
 
     void setLeftVertexArray();
     void resetLeftVertexArray();
+    void resetLeftVertexArray(float dx, float dy);
     void setLeftTextureArray(float textureUsize, float textureVsize);
     void setLeftIndexArray();
 
@@ -171,6 +174,10 @@ public slots:
 
     virtual void getProperties(QFormLayout *layout, QGLWidget* render = 0);
 
+
+    // RoadElement interface
+public:
+    virtual void clearProperties(QLayout *layout);
 };
 
 #endif // ROADBROKEN_H

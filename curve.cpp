@@ -11,8 +11,8 @@ Curve::Curve(float xCenter, float yCenter, float zCenter,
              QString texture_2, float texture_2Usize, float texture_2Vsize,
              int numberOfSides)
 {
-    qDebug() << texture_1;
-    qDebug() << texture_2;
+    //qDebug() << texture_1;
+    //qDebug() << texture_2;
     this->numberOfSides = numberOfSides;
     controlPoints[0] = xCenter;
     controlPoints[1] = yCenter;
@@ -51,11 +51,12 @@ Curve::Curve(float xCenter, float yCenter, float zCenter,
     setAngleVertexArray();
     setAngleColorArray(1.0f, 0.0f, 0.0f);
     setAngleIndexArray();
+    calculateAngle();
     fixed = selected = false;
     showBoard = true;
     layer = 0;
-    qDebug() << "New Curve";
-    qDebug() << "Vertex Size: " << vertexArray.size() / 3;
+    //qDebug() << "New Curve";
+    //qDebug() << "Vertex Size: " << vertexArray.size() / 3;
 }
 
 Curve::~Curve()
@@ -81,7 +82,7 @@ void Curve::drawFigure(QGLWidget *render)
     {
         if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
         {
-            qDebug() << "Index " << indexOfSelectedControl;
+            //qDebug() << "Index " << indexOfSelectedControl;
             drawControlElement(indexOfSelectedControl, 5.0f, 10.0);
         }
         for (int i = 0; i < 4; ++i)
@@ -344,9 +345,10 @@ void Curve::resizeByControl(int index, float dx, float dy, float x, float y)
         setVertexArrayBoard();
         setTextureArrayBoard(texture2USize, texture2VSize);
         setAngleVertexArray();
+        calculateAngle();
         emit leftLengthChanged(leftLength);
         emit rightLengthChanged(rightLength);
-        emit angleChanged(angleRounding);
+        //emit angleChanged(angleRounding);
     }
         break;
     case 1:
@@ -358,8 +360,9 @@ void Curve::resizeByControl(int index, float dx, float dy, float x, float y)
         setVertexArrayBoard();
         setTextureArrayBoard(texture2USize, texture2VSize);
         setAngleVertexArray();
+        calculateAngle();
         emit leftLengthChanged(leftLength);
-        emit angleChanged(angleRounding);
+        //emit angleChanged(angleRounding);
     }
         break;
     case 2:
@@ -371,8 +374,9 @@ void Curve::resizeByControl(int index, float dx, float dy, float x, float y)
         setVertexArrayBoard();
         setTextureArrayBoard(texture2USize, texture2VSize);
         setAngleVertexArray();
+        calculateAngle();
         emit rightLengthChanged(rightLength);
-        emit angleChanged(angleRounding);
+        //emit angleChanged(angleRounding);
     }
         break;
     case 3:
@@ -517,71 +521,6 @@ void Curve::setVertexArray()
     float y2 = (c * aRight - cRight * a) / (bRight * a - b * aRight);
     float x2 = (-1.0f) * (b * y2 + c) / a;
 
-    /*
-    float kLeft, kLeftP;
-    if ((xLeft - xCenter) == 0)
-    {
-        kLeft = kLeftP = 0.0f;
-    }
-    else
-    {
-        kLeft = (yLeft - yCenter) / (xLeft - xCenter);
-        kLeftP = (-1.0f) / kLeft;
-    }
-    float bLeft = yLeft - xLeft * kLeft;
-    float bLeftP = yLeft - xLeft * kLeftP;
-
-    float kRight, kRightP;
-    if ((xRight - xCenter) == 0)
-    {
-        kRight = kRightP = 0.0f;
-    }
-    else
-    {
-        kRight = (yRight - yCenter) / (xRight - xCenter);
-        kRightP = (-1.0f) / kRight;
-    }
-    float bRight = yRight - xRight * kRight;
-    float bRightP = yRight - xRight * kRightP;
-
-    float x, y;
-    float kHord, kHordP;
-    if ((xRight - xLeft) == 0)
-    {
-        kHord = kHordP = 0.0f;
-    }
-    else
-    {
-        kHord = (yRight - yLeft) / (xRight - xLeft);
-        kHordP = (-1.0f) / kHord;
-    }
-    float bHord = (yRight + yLeft) / 2.0f - kHord * (xRight + xLeft) / 2.0f;
-    float bHordP = (yRight + yLeft) / 2.0f - kHordP * (xRight + xLeft) / 2.0f;
-
-    float x1, y1;
-    if (yLeft == yCenter)
-    {
-        x1 = xLeft;
-    }
-    else
-    {
-        x1 = (bHordP - bLeftP) / (kLeftP - kHordP);
-    }
-    y1 = kHordP * x1 + bHordP;
-
-    float x2, y2;
-    if (yRight == yCenter)
-    {
-        x2 = xRight;
-    }
-    else
-    {
-        x2 = (bHordP - bRightP) / (kRightP - kHordP);
-
-    }
-    y2 = kHordP * x2 + bHordP;
-
-    */
     float r1 = sqrt((x1 - xLeft)*(x1 - xLeft) + (y1 - yLeft)*(y1 - yLeft));
     float r2 = sqrt((x2 - xRight)*(x2 - xRight) + (y2 - yRight)*(y2 - yRight));
 
@@ -610,8 +549,6 @@ void Curve::setVertexArray()
     }
     this->angle1 = angle1;
     this->angle2 = angle2;
-
-
     this->radius = r;
     this->xRadius = x;
     this->yRadius = y;
@@ -633,21 +570,6 @@ void Curve::setVertexArray()
         vertexArray.push_back(y + dy);
         vertexArray.push_back(0.0f);
     }
-
-    /*
-    float rLeft = sqrt((xLeft - xCenter)*(xLeft - xCenter) + (yLeft - yCenter)*(yLeft - yCenter));
-    float rRight = sqrt((xRight - xCenter)*(xRight - xCenter) + (yRight - yCenter)*(yRight - yCenter));
-
-    angle1 = acos((xRight - xCenter) / r);
-    if ((yRight - yCenter) <= 0)
-        angle1 = 2.0f * pi - angle1;
-    angle2 = acos((xLeft - xCenter) / r);
-    if ((yLeft - yCenter) <= 0)
-        angle2 = 2.0f * pi - angle2;
-
-    */
-    //this->angle = (angle2 - angle1) * 180.0 / pi;
-
 }
 
 void Curve::setTextureArray()
@@ -936,12 +858,14 @@ void Curve::setCoordForPoint(int index, float x, float y, float z)
     setTextureArray();
     setVertexArrayBoard();
     setTextureArrayBoard(texture2USize, texture2VSize);
+    setAngleVertexArray();
+    //calculateAngle();
 }
 
 vec3 Curve::getCoordOfPoint(int index)
 {
     //assert(index > 0 && index < 3);
-    if (index > 0 && index < 3)
+    if (index >= 0 && index < 3)
     {
     vec3 p(controlPoints[index * 3], controlPoints[index * 3 + 1], controlPoints[index * 3 + 2]);
     return p;
@@ -1029,6 +953,7 @@ void Curve::setAngleVertexArray()
         angleVertexArray.push_back(0.11f);
     }
     angleRounding = (angle2 - angle1) * 180.0 / pi;
+       // emit angleChanged(angleRounding);
 }
 
 void Curve::setAngleColorArray(float red, float green, float blue)
@@ -1051,6 +976,56 @@ void Curve::setAngleIndexArray()
     }
 }
 
+void Curve::calculateAngle()
+{
+    float pi = 3.1415926f;
+
+    float xCenter = controlPoints[0];
+    float yCenter = controlPoints[1];
+    float zCenter = controlPoints[2];
+
+    float xLeft = controlPoints[3];
+    float yLeft = controlPoints[4];
+    float zLeft = controlPoints[5];
+
+    float xRight = controlPoints[6];
+    float yRight = controlPoints[7];
+    float zRight = controlPoints[8];
+
+    float dxLeft = xLeft - xCenter;
+    float dyLeft = yLeft - yCenter;
+    float dxRight = xRight - xCenter;
+    float dyRight = yRight - yCenter;
+    float r1 = sqrt(dxLeft * dxLeft + dyLeft * dyLeft);
+    float r2 = sqrt(dxRight * dxRight + dyRight * dyRight);
+
+    float dx = xRight - xCenter;
+    float dy = yRight - yCenter;
+    float r = sqrt(dx * dx + dy * dy);
+    float angle1 = acos(dx / r);
+    if (dy <= 0)
+        angle1 = 2.0f * pi - angle1;
+
+    dx = xLeft - xCenter;
+    dy = yLeft - yCenter;
+    r = sqrt(dx * dx + dy * dy);
+    float angle2 = acos(dx / r);
+    if (dy <= 0)
+        angle2 = 2.0f * pi - angle2;
+
+    if (angle1 > angle2)
+    {
+        angle2 += 2.0f * pi;
+    }
+    float temp = angleRounding;
+    angleRounding = (angle2 - angle1) * 180.0 / pi;
+    if (temp != angleRounding)
+        emit angleChanged(angleRounding);
+    else
+        angleRounding = temp;
+
+}
+
 bool Curve::setFixed(bool fixed)
 {
     this->fixed = fixed;
@@ -1058,10 +1033,9 @@ bool Curve::setFixed(bool fixed)
 
 void Curve::setLeftLength(double length)
 {
-    //if (abs(this->leftLength - length) < 0.0001f)
+
     if (this->leftLength == length)
         return;
-
     float x1 = controlPoints[0];
     float y1 = controlPoints[1];
     float x2 = controlPoints[3];
@@ -1074,13 +1048,11 @@ void Curve::setLeftLength(double length)
     setVertexArray();
     setTextureArray();
     this->leftLength = length;
-    //leftLength = floor(length / 0.01 + 0.5) * 0.01;
     emit leftLengthChanged(length);
 }
 
 void Curve::setRightLength(double length)
 {
-    //if (abs(this->rightLength - length) < 0.0001f)
     if (this->rightLength == length)
         return;
 
@@ -1096,7 +1068,6 @@ void Curve::setRightLength(double length)
     setVertexArray();
     setTextureArray();
     this->rightLength = length;
-    //rightLength = floor(length / 0.01 + 0.5) * 0.01;
     emit rightLengthChanged(length);
 }
 
@@ -1121,8 +1092,7 @@ void Curve::setBoardShowStatus(bool status)
 void Curve::setAngle(double angle)
 {
 
-    float pi = 3.1415926f;
-    //(angle2 - angle1) * 180.0 / pi;
+    float pi = 3.14159265f;
 
     if (angleRounding == angle)
         return;
@@ -1179,9 +1149,7 @@ void Curve::setAngle(double angle)
     setVertexArrayBoard();
     setTextureArrayBoard(texture2USize, texture2VSize);
     setIndexArrayBoard();
-
     setAngleVertexArray();
-
     emit angleChanged(angleRounding);
 
 }

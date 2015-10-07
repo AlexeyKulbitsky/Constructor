@@ -204,6 +204,10 @@ public:
     // RoadElement interface
 public:
     virtual std::vector<vec3> getCoordOfControl(int index);
+
+    // RoadElement interface
+public:
+    virtual void clearProperties(QLayout *layout);
 };
 
 #endif // ROUNDING

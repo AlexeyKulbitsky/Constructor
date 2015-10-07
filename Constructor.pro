@@ -52,7 +52,8 @@ SOURCES += main.cpp\
     curve.cpp \
     splitzone.cpp \
     voltageline.cpp \
-    doublevoltageline.cpp
+    doublevoltageline.cpp \
+    lmath.cpp
 
 
 
@@ -102,7 +103,8 @@ HEADERS  += mainwindow.h\
     curve.h \
     splitzone.h \
     voltageline.h \
-    doublevoltageline.h
+    doublevoltageline.h \
+    lmath.h
 
 
 

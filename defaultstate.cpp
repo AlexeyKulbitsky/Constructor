@@ -274,8 +274,8 @@ void DefaultState::dropEvent(QDropEvent *event)
         //model->getGroup(0).push_back(new RoundingRoad(x, y, 10, 0, 90,
         //                                              x, y, 16, 0, 90,
         //                                              50, "RoundingRoad", 0));
-        model->getGroup(0).push_back(new RoundingRoad(x, y, 50, 0, 90,
-                                                      x, y, 56, 0, 90,
+        model->getGroup(0).push_back(new RoundingRoad(x, y, 10, 0, 90,
+                                                      x, y, 16, 0, 90,
                                                       20, "RoundingRoad", 0,
                                                       QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
                                                       QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f));
@@ -863,7 +863,9 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
                     }
 
                     (*it)->setSelectedStatus(true);
+                    (*it)->setStepDialog(stateManager->stepDialog);
                     (*it)->getProperties(properties, scene);
+
                     scene->setCursor(Qt::SizeAllCursor);
                     glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
                     glPopMatrix(); // извлечь матрицу из стека матриц

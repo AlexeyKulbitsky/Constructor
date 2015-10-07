@@ -16,7 +16,7 @@ public:
     std::list<RoadElement*> selectedElements;
 
     virtual ~SelectedState();
-    void clearProperties(QFormLayout* layout);
+    void clearProperties(QFormLayout *layout);
 private:
     StateManager* stateManager;
     Model* model;

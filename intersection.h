@@ -31,6 +31,9 @@ public:
     virtual bool isFixed();
     virtual int getLayer();
     void setRoadsTextures();
+    float calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4);
+    void calculateRoadForAngle(int i);
+    void calculateRoadForRounding(int i);
 
 signals:
     void intersectionsChanged();
@@ -55,6 +58,7 @@ public slots:
     void recalculateRoads();
 
     void setAngle(double angle);
+    void setAngle(double angle, int index);
     void deleteLine();
     void addLine();
 
@@ -82,6 +86,10 @@ private:
     // RoadElement interface
 public:
     virtual void clear();
+
+    // RoadElement interface
+public:
+    virtual void clearProperties(QLayout *layout);
 };
 
 #endif // INTERSECTION_H

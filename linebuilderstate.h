@@ -67,7 +67,7 @@ public:
     void clearProperties(QFormLayout* layout);
     void setGroupIndex(int index);
     void setElementIndex(int index);
-
+    void clear();
 public:
     bool useColor;
 

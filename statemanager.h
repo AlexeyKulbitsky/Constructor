@@ -28,6 +28,7 @@ class RoadBuilderState;
 
 #include "_3dsfilemanager.h"
 #include "objfilemanager.h"
+#include "stepdialog.h"
 
 class StateManager : public QObject
 {
@@ -52,6 +53,8 @@ public:
     RulerState* rulerState;
     LineBuilderState* lineBuilderState;
     RoadBuilderState* roadBuilderState;
+
+    StepDialog* stepDialog;
 
     _3DsFileManager* fileManager3DS;
     OBJFileManager* fileManagerOBJ;
