@@ -144,8 +144,7 @@ void RoundingRoad::setVertexArray(float x1, float y1, float nearRadius, float an
     vertexArrayNear.clear();
     for (int i = 0; i <= numberOfSides; ++i)
     {
-        //float angle = 2.0 * 3.1415926 * float(i) / float(numberOfSides);
-        float angle = (angel1NearRadius + (angel2NearRadius - angel1NearRadius) * float(i) / float(numberOfSides)) * 3.1415926 / 180.0f;
+        float angle = (angel1NearRadius + (angel2NearRadius - angel1NearRadius) * float(i) / float(numberOfSides)) * 3.14159265f / 180.0f;
         float dx = nearRadius * cosf(angle);
         float dy = nearRadius * sinf(angle);
         vertexArray.push_back(x1 + dx);
@@ -840,7 +839,7 @@ void RoundingRoad::drawControlElement(int index, float lineWidth, float pointSiz
         // Правая угловая точка внутреннего радиуса
     {
         int i = 0;
-        glPointSize(pointSize + 10.0f);
+        glPointSize(pointSize + 5.0f);
         glBegin(GL_POINTS);
         glColor3f(1.0f, 0.0f, 0.0f);
         glVertex3f(vertexArray[i * 3],
@@ -853,7 +852,7 @@ void RoundingRoad::drawControlElement(int index, float lineWidth, float pointSiz
         // Левая угловая точка внутреннего радиуса
     {
         int i = numberOfVertices - 2;
-        glPointSize(pointSize + 10.0f);
+        glPointSize(pointSize + 5.0f);
         glBegin(GL_POINTS);
         glColor3f(1.0f, 0.0f, 0.0f);
         glVertex3f(vertexArray[i * 3],
@@ -866,7 +865,7 @@ void RoundingRoad::drawControlElement(int index, float lineWidth, float pointSiz
         // Правая угловая точка наружного радиуса
     {
         int i = 1;
-        glPointSize(pointSize + 10.0f);
+        glPointSize(pointSize + 5.0f);
         glBegin(GL_POINTS);
         glColor3f(0.0f, 0.0f, 1.0f);
         glVertex3f(vertexArray[i * 3],
@@ -879,7 +878,7 @@ void RoundingRoad::drawControlElement(int index, float lineWidth, float pointSiz
         // Левая угловая точка наружного радиуса
     {
         int i = numberOfVertices - 1;
-        glPointSize(pointSize + 10.0f);
+        glPointSize(pointSize + 5.0f);
         glBegin(GL_POINTS);
         glColor3f(0.0f, 0.0f, 1.0f);
         glVertex3f(vertexArray[i * 3],
@@ -1077,7 +1076,10 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
         float r1 = sqrt(dx1*dx1 + dy1*dy1);
         float dx2 = x3 - x2;
         float dy2 = y3 - y2;
-        float angle = acos((dx1*dx2 + dy1*dy2) / (r1 * nearRadius));
+        float t = (dx1*dx2 + dy1*dy2) / (r1 * nearRadius);
+        if (t > 1 || t < -1)
+            t = 1.0f;
+        float angle = acos(t);
         float res = dx2*dy1 - dx1*dy2;
         float factor = res > 0 ? 1.0f : -1.0f;
         angle = factor * angle * 180.0f / pi;
@@ -1099,7 +1101,10 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
         float r1 = sqrt(dx1*dx1 + dy1*dy1);
         float dx2 = x3 - x2;
         float dy2 = y3 - y2;
-        float angle = acos((dx1*dx2 + dy1*dy2) / (r1 * nearRadius));
+        float t = (dx1*dx2 + dy1*dy2) / (r1 * nearRadius);
+        if (t > 1 || t < -1)
+            t = 1.0f;
+        float angle = acos(t);
         float res = dx2*dy1 - dx1*dy2;
         float factor = res > 0 ? 1.0f : -1.0f;
         angle = factor * angle * 180.0f / pi;
@@ -1121,7 +1126,10 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
         float r1 = sqrt(dx1*dx1 + dy1*dy1);
         float dx2 = x3 - x2;
         float dy2 = y3 - y2;
-        float angle = acos((dx1*dx2 + dy1*dy2) / (r1 * farRadius));
+        float t = (dx1*dx2 + dy1*dy2) / (r1 * farRadius);
+        if (t > 1 || t < -1)
+            t = 1.0f;
+        float angle = acos(t);
         float res = dx2*dy1 - dx1*dy2;
         float factor = res > 0 ? 1.0f : -1.0f;
         angle = factor * angle * 180.0f / pi;
@@ -1143,7 +1151,10 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
         float r1 = sqrt(dx1*dx1 + dy1*dy1);
         float dx2 = x3 - x2;
         float dy2 = y3 - y2;
-        float angle = acos((dx1*dx2 + dy1*dy2) / (r1 * farRadius));
+        float t = (dx1*dx2 + dy1*dy2) / (r1 * farRadius);
+        if (t > 1 || t < -1)
+            t = 1.0f;
+        float angle = acos(t);
         float res = dx2*dy1 - dx1*dy2;
         float factor = res > 0 ? 1.0f : -1.0f;
         angle = factor * angle * 180.0f / pi;
@@ -1218,96 +1229,95 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
         break;
 
     case 10:
-    {
-        int i = 0;
-        float x1 = vertexArray[i * 3];
-        float y1 = vertexArray[i * 3 + 1];
+    {        
+        float pi = 3.14159265f;
+        float x1 = x + dx;
+        float y1 = y + dy;
         float x2 = xCenterNearRadius;
         float y2 = yCenterNearRadius;
-        float x3 = x1 + dx;
-        float y3 = y1 + dy;
-        float dx1 = x1 - x2;
-        float dy1 = y1 - y2;
-        float r1 = nearRadius;
-        float dx2 = x3 - x2;
-        float dy2 = y3 - y2;
-        float r2 = sqrt(dx2*dx2 + dy2*dy2);
-        float pi = 3.14159265f;
-        float angle1 = angel1NearRadius;
-        float angle2 = acos(dx2 / r2);
-        if (dy2 < 0)
-            angle2 = 2.0f * pi - angle2;
-        float angle = angle2 - angle1;
-        angle = angle * 180.0f / pi;
-        setAngel_1_NearRadius(angel1NearRadius + angle);
-
-        i = 1;
-        x1 = vertexArray[i * 3];
-        y1 = vertexArray[i * 3 + 1];
-        x2 = xCenterFarRadius;
-        y2 = yCenterFarRadius;
-        x3 = y1 + dx;
-        y3 = y1 + dy;
-        dx1 = x1 - x2;
-        dy1 = y1 - y2;
-        r1 = farRadius;
-        dx2 = x3 - x2;
-        dy2 = y3 - y2;
-        r2 = sqrt(dx2*dx2 + dy2*dy2);
-        angle1 = angel1FarRadius;
-        angle2 = acos(dx2 / r2);
-        if (dy2 < 0)
-            angle2 = 2.0f * pi - angle2;
-        angle = angle2 - angle1;
-        angle = angle * 180.0f / pi;
-        setAngel_1_FarRadius(angel1FarRadius + angle);
-
-    }
-        break;
-    case 11:
-    {
-        int i = numberOfVertices - 2;
-        float pi = 3.14159265f;
-        float x1 = x;
-        float y1 = y;
-        float x2 = xCenterNearRadius;
-        float y2 = yCenterNearRadius;
-        float x3 = x + dx;
-        float y3 = y + dy;
+        float x3 = x;
+        float y3 = y;
         float dx1 = x1 - x2;
         float dy1 = y1 - y2;
         float r1 = sqrt(dx1*dx1 + dy1*dy1);
         float dx2 = x3 - x2;
         float dy2 = y3 - y2;
         float r2 = sqrt(dx2*dx2 + dy2*dy2);
-        float angle1 = acos(dx1 / r1);
-        if (dy1 < 0)
-            angle1 = 2.0f * pi - angle1;
-        float angle2 = acos(dx2 / r2);
-        if (dy2 < 0)
-            angle2 = 2.0f * pi - angle2;
-        float angle = (angle2 - angle1) * 180.0f / pi;
-        qDebug() << "Near angle" << angle;
-        setAngel_2_NearRadius(angel2NearRadius + angle);
+        float t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
+        if (t > 1 || t < -1)
+            t = 1.0f;
+        float angle = acos(t);
+        float res = dx2*dy1 - dx1*dy2;
+        float factor = res > 0 ? 1.0f : -1.0f;
+        angle = factor * angle * 180.0f / pi;
+        setAngel_1_NearRadius(angel1NearRadius + angle);
 
-
-        i = numberOfVertices - 1;
+        x1 = x + dx;
+        y1 = y + dy;
         x2 = xCenterFarRadius;
         y2 = yCenterFarRadius;
+        x3 = x;
+        y3 = y;
         dx1 = x1 - x2;
         dy1 = y1 - y2;
         r1 = sqrt(dx1*dx1 + dy1*dy1);
         dx2 = x3 - x2;
         dy2 = y3 - y2;
         r2 = sqrt(dx2*dx2 + dy2*dy2);
-        angle1 = acos(dx1 / r1);
-        if (dy1 < 0)
-            angle1 = 2.0f * pi - angle1;
-        angle2 = acos(dx2 / r2);
-        if (dy2 < 0)
-            angle2 = 2.0f * pi - angle2;
-        angle = (angle2 - angle1) * 180.0f / pi;
-        qDebug() << "Far angle" << angle;
+        t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
+        if (t > 1 || t < -1)
+            t = 1.0f;
+        angle = acos(t);
+        res = dx2*dy1 - dx1*dy2;
+        factor = res > 0 ? 1.0f : -1.0f;
+        angle = factor * angle * 180.0f / pi;
+        setAngel_1_FarRadius(angel1FarRadius + angle);
+
+    }
+        break;
+    case 11:
+    {
+        float pi = 3.14159265f;
+        float x1 = x + dx;
+        float y1 = y + dy;
+        float x2 = xCenterNearRadius;
+        float y2 = yCenterNearRadius;
+        float x3 = x;
+        float y3 = y;
+        float dx1 = x1 - x2;
+        float dy1 = y1 - y2;
+        float r1 = sqrt(dx1*dx1 + dy1*dy1);
+        float dx2 = x3 - x2;
+        float dy2 = y3 - y2;
+        float r2 = sqrt(dx2*dx2 + dy2*dy2);
+        float t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
+        if (t > 1 || t < -1)
+            t = 1.0f;
+        float angle = acos(t);
+        float res = dx2*dy1 - dx1*dy2;
+        float factor = res > 0 ? 1.0f : -1.0f;
+        angle = factor * angle * 180.0f / pi;
+        setAngel_2_NearRadius(angel2NearRadius + angle);
+
+        x1 = x + dx;
+        y1 = y + dy;
+        x2 = xCenterFarRadius;
+        y2 = yCenterFarRadius;
+        x3 = x;
+        y3 = y;
+        dx1 = x1 - x2;
+        dy1 = y1 - y2;
+        r1 = sqrt(dx1*dx1 + dy1*dy1);
+        dx2 = x3 - x2;
+        dy2 = y3 - y2;
+        r2 = sqrt(dx2*dx2 + dy2*dy2);
+        t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
+        if (t > 1 || t < -1)
+            t = 1.0f;
+        angle = acos(t);
+        res = dx2*dy1 - dx1*dy2;
+        factor = res > 0 ? 1.0f : -1.0f;
+        angle = factor * angle * 180.0f / pi;
         setAngel_2_FarRadius(angel2FarRadius + angle);
     }
         break;
@@ -1383,7 +1393,7 @@ void RoundingRoad::getProperties(QFormLayout *layout, QGLWidget* render)
     angel_1_NearRadiusSpinBox->setMinimum(-10000.0);
     QDoubleSpinBox* angel_2_NearRadiusSpinBox = new QDoubleSpinBox();
     angel_2_NearRadiusSpinBox->setMaximum(10000.0);
-    angel_1_NearRadiusSpinBox->setMinimum(-10000.0);
+    angel_2_NearRadiusSpinBox->setMinimum(-10000.0);
 
     QDoubleSpinBox* angel_1_FarRadiusSpinBox = new QDoubleSpinBox();
     angel_1_FarRadiusSpinBox->setMaximum(10000.0);

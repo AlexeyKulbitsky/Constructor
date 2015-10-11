@@ -142,6 +142,7 @@ void SelectedState::mouseMoveEvent(QMouseEvent *pe)
         scene->xDelta += (GLfloat)(-1)*(pe->x()-ptrMousePosition.x())/
                 scene->width()/(scene->nSca * scene->ratio) * 2.0;
         scene->updateGL();
+        ptrMousePosition = pe->pos();
     }
     else
     {
@@ -163,6 +164,7 @@ void SelectedState::mouseMoveEvent(QMouseEvent *pe)
                 selectedElement->resizeByControl(controlIndex, dX, dY, x, y);
                 scene->updateGL();
                 model->setModified(true);
+                ptrMousePosition = pe->pos();
             }
             else
             {
@@ -176,6 +178,7 @@ void SelectedState::mouseMoveEvent(QMouseEvent *pe)
                     selectedElement->move(dX, dY);
                     scene->updateGL();
                     model->setModified(true);
+                    ptrMousePosition = pe->pos();
                 }
             }
         }
@@ -205,7 +208,7 @@ void SelectedState::mouseMoveEvent(QMouseEvent *pe)
             }
         }
     }
-    ptrMousePosition = pe->pos();
+
 }
 
 void SelectedState::mouseReleaseEvent(QMouseEvent *pe)

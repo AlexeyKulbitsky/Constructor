@@ -12,6 +12,8 @@
 #include "stepdialog.h"
 #include <QMap>
 #include "texturemanager.h"
+//#include "model.h"
+class Model;
 
 struct vec3
 {
@@ -154,6 +156,7 @@ public:
     virtual QJsonObject getJSONInfo() {  QJsonObject a; return a;}
     virtual void getProperties(QFormLayout* layout, QGLWidget* render = 0) = 0;
     virtual void clearProperties(QLayout* layout)
+
     {
         /*
         QLayoutItem *item;
@@ -170,7 +173,7 @@ public:
         }
         */
     }
-
+    virtual void setModel(Model* model){ this->model = model; }
     virtual bool isFixed() = 0;
     virtual void addElement(RoadElement* element){}
     virtual void deleteElement(int index){}
@@ -190,6 +193,8 @@ public slots:
 protected:
     QString name;
     StepDialog* stepDialog;
+    Model* model;
+
 public:
     //static QMap<QString, int> texturesPool;
 };

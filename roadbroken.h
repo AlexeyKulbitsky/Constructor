@@ -128,6 +128,7 @@ public:
     virtual void drawControlElement(int index, float lineWidth, float pointSize);
     virtual QCursor getCursorForControlElement(int index);
     virtual void resizeByControl(int index, float dx, float dy, float x, float y);
+    void resizeByControl(int index, float dx, float dy, float x, float y, int keyBoardKey);
     virtual int getNumberOfControls();
     virtual int controlsForPoint();
     virtual void changeColorOfSelectedControl(int index);

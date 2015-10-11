@@ -53,6 +53,10 @@ public:
     void setAngleColorArray(float red, float green, float blue);
     void setAngleIndexArray();
     void calculateAngle();
+    bool calculateLinesIntersection(float a1, float b1, float c1,
+                                    float a2, float b2, float c2,
+                                    float& x, float& y);
+    void calculateControlsForAngle(int index);
 
 signals:
     void leftLengthChanged(double value);

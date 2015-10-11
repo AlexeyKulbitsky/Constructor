@@ -607,7 +607,7 @@ void LineBroken::drawControlElement(int index, float lineWidth, float pointSize)
     glColor3f(1.0f, 1.0f, 1.0f);
     glVertex3f(vertexArrayForAxis[index * 3],
             vertexArrayForAxis[index * 3 + 1],
-            vertexArrayForAxis[index * 3 + 2]);
+            vertexArrayForAxis[index * 3 + 2] + 0.05f);
     glEnd();
 }
 

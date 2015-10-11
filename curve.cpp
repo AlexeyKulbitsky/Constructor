@@ -38,7 +38,7 @@ Curve::Curve(float xCenter, float yCenter, float zCenter,
     //textureID[1] = getTextures(texture_2);
     this->texture2USize = texture_2Usize;
     this->texture2VSize = texture_2Vsize;
-
+    angleRounding = 0.0f;
     this->boardWidth = 2.75f;
     setVertexArray();
     setTextureArray();
@@ -340,6 +340,7 @@ void Curve::resizeByControl(int index, float dx, float dy, float x, float y)
     {
         controlPoints[0] += dx;
         controlPoints[1] += dy;
+        calculateControlsForAngle(index);
         setVertexArray();
         setTextureArray();
         setVertexArrayBoard();
@@ -355,6 +356,7 @@ void Curve::resizeByControl(int index, float dx, float dy, float x, float y)
     {
         controlPoints[3] += dx;
         controlPoints[4] += dy;
+        calculateControlsForAngle(index);
         setVertexArray();
         setTextureArray();
         setVertexArrayBoard();
@@ -369,6 +371,7 @@ void Curve::resizeByControl(int index, float dx, float dy, float x, float y)
     {
         controlPoints[6] += dx;
         controlPoints[7] += dy;
+        calculateControlsForAngle(index);
         setVertexArray();
         setTextureArray();
         setVertexArrayBoard();
@@ -487,39 +490,69 @@ void Curve::clear()
 void Curve::setVertexArray()
 {
     vertexArray.clear();
-    float pi = 3.1415926;
+    float pi = 3.14159265f;
 
     float xCenter = controlPoints[0];
     float yCenter = controlPoints[1];
     float zCenter = controlPoints[2];
-
     float xLeft = controlPoints[3];
     float yLeft = controlPoints[4];
     float zLeft = controlPoints[5];
-
     float xRight = controlPoints[6];
     float yRight = controlPoints[7];
     float zRight = controlPoints[8];
 
+    if (angleRounding >= 180.0f)
+    {
+
+        //vertexArray.push_back(xCenter);
+        //vertexArray.push_back(yCenter);
+        //vertexArray.push_back(zCenter);
+        vertexArray.push_back(xLeft);
+        vertexArray.push_back(yLeft);
+        vertexArray.push_back(zLeft);
+        vertexArray.push_back(xRight);
+        vertexArray.push_back(yRight);
+        vertexArray.push_back(zRight);
+        leftLength = sqrt((xLeft - xCenter)*(xLeft - xCenter) + (yLeft - yCenter)*(yLeft - yCenter));
+        rightLength = sqrt((xRight - xCenter)*(xRight - xCenter) + (yRight - yCenter)*(yRight - yCenter));
+        //this->angle1 = angle1;
+        //this->angle2 = angle2;
+        //this->radius = 0.0f;
+        //this->xRadius = 0.0f;
+        //this->yRadius = 0.0f;
+        return;
+    }
     float aLeft = xLeft - xCenter;
     float bLeft = yLeft - yCenter;
-    float cLeft = (-1.0f)*(xLeft * aLeft + yLeft * bLeft);
+    //float cLeft = (-1.0f)*(xLeft * aLeft + yLeft * bLeft);
+    float cLeft = (-1.0f)*(xLeft * (xLeft - xCenter) + yLeft * (yLeft - yCenter));
 
     float aRight = xRight - xCenter;
     float bRight = yRight - yCenter;
-    float cRight = (-1.0f)*(xRight * aRight + yRight * bRight);
+    float cRight = (-1.0f)*(xRight * (xRight - xCenter) + yRight * (yRight - yCenter));
 
     float a = xRight - xLeft;
     float b = yRight - yLeft;
-    float c = (-1.0f)*((xRight + xLeft) / 2.0f * a + (yRight + yLeft) / 2.0f * b);
+    float c = (-1.0f)*((xRight + xLeft) / 2.0f * (xRight - xLeft) +
+                       (yRight + yLeft) / 2.0f * (yRight - yLeft));
+    float x1 = 0.0f, y1 = 0.0f, x2 = 0.0f, y2 = 0.0f;
 
+    if (a != 0.0f)
+    {
+        y1 = (c * aLeft - cLeft * a) / (bLeft * a - b * aLeft);
+        x1 = (-1.0f) * (b * y1 + c) / a;
 
+        y2 = (c * aRight - cRight * a) / (bRight * a - b * aRight);
+        x2 = (-1.0f) * (b * y2 + c) / a;
+    }
+    else
+    {
+        y1 = y2 = (yRight + yLeft) / 2.0f;
+        x1 = (-1.0f) * (bLeft * y1 + cLeft) / aLeft;
+        x2 = (-1.0f) * (bRight * y2 + cRight) / aRight;
+    }
 
-    float y1 = (c * aLeft - cLeft * a) / (bLeft * a - b * aLeft);
-    float x1 = (-1.0f) * (b * y1 + c) / a;
-
-    float y2 = (c * aRight - cRight * a) / (bRight * a - b * aRight);
-    float x2 = (-1.0f) * (b * y2 + c) / a;
 
     float r1 = sqrt((x1 - xLeft)*(x1 - xLeft) + (y1 - yLeft)*(y1 - yLeft));
     float r2 = sqrt((x2 - xRight)*(x2 - xRight) + (y2 - yRight)*(y2 - yRight));
@@ -532,15 +565,25 @@ void Curve::setVertexArray()
     float dx = xRight - x;
     float dy = yRight - y;
     float r = sqrt(dx * dx + dy * dy);
-    float angle2 = acos(dx / r);
-    if (dy <= 0)
+    float t = dx / r;
+    if (t > 1.0f)
+        t = 1.0f;
+    if (t < -1.0f)
+        t = -1.0f;
+    float angle2 = acos(t);
+    if (dy < 0)
         angle2 = 2.0f * pi - angle2;
 
     dx = xLeft - x;
     dy = yLeft - y;
     r = sqrt(dx * dx + dy * dy);
-    float angle1 = acos(dx / r);
-    if (dy <= 0)
+    t = dx / r;
+    if (t > 1.0f)
+        t = 1.0f;
+    if (t < -1.0f)
+        t = -1.0f;
+    float angle1 = acos(t);
+    if (dy < 0)
         angle1 = 2.0f * pi - angle1;
 
     if (angle1 > angle2)
@@ -559,6 +602,9 @@ void Curve::setVertexArray()
     vertexArray.push_back(xCenter);
     vertexArray.push_back(yCenter);
     vertexArray.push_back(zCenter);
+    //qDebug() << "---------------";
+    //qDebug() << "A1 = " << angle1 * 180.0f / 3.14159265f;
+    //qDebug() << "A2 = " << angle2 * 180.0f / 3.14159265f;
 
     for (int i = 0; i <= numberOfSides; ++i)
     {
@@ -600,6 +646,10 @@ void Curve::setTextureArray()
         float dy1 = y2 - y;
         float r = sqrt(dx1*dx1 + dy1*dy1);
         float cosAngle = (dx*dx1 + dy*dy1)/(R*r);
+        if (cosAngle > 1.0f)
+            cosAngle = 1.0f;
+        if (cosAngle < -1.0f)
+            cosAngle = -1.0f;
         float sinAngle = sqrt(1 - cosAngle * cosAngle);
 
         textureArray.push_back(r * sinAngle);
@@ -854,6 +904,8 @@ void Curve::setCoordForPoint(int index, float x, float y, float z)
     controlPoints[index * 3] = x;
     controlPoints[index * 3 + 1] = y;
     controlPoints[index * 3 + 2] = z;
+
+    calculateControlsForAngle(index);
     setVertexArray();
     setTextureArray();
     setVertexArrayBoard();
@@ -1024,6 +1076,181 @@ void Curve::calculateAngle()
     else
         angleRounding = temp;
 
+}
+
+bool Curve::calculateLinesIntersection(float a1, float b1, float c1,
+                                       float a2, float b2, float c2,
+                                       float &x, float &y)
+{
+    // Проходит через начало координат
+    if (c1 == 0.0f && a1 != 0.0f && b1 != 0.0f)
+    {
+        if (a2 != 0.0f || b2 != 0.0f)
+        {
+            x = (b1 * c2) / (a1 * b2 - a2 * b1);
+            y = (-1.0f) * a1 * x / b1;
+            return true;
+        }
+        else
+            return false;
+
+    }
+    else
+    // Параллельна Ох
+    if (a1 == 0.0f && b1 != 0.0f && c1 != 0.0f)
+    {
+        if (a2 != 0.0f)
+        {
+            y = (-1.0f) * c1 / b1;
+            x = (-1.0f) * (b2 * y + c2) / a2;
+            return true;
+        }
+        else
+            return false;
+    }
+    else
+    // Параллельна Оу
+    if (b1 == 0.0f && a1 != 0.0f && c1 != 0.0f)
+    {
+        if (b2 != 0.0f)
+        {
+            x = (-1.0f) * c1 / a1;
+            y = (-1.0f) * (a2 * x + c2) / b2;
+            return true;
+        }
+        else
+            return false;
+    }
+    else
+    // Совпадает с Оу
+    if (b1 == 0.0f && c1 == 0.0f && a1 != 0.0f)
+    {
+        if (b2 != 0.0f)
+        {
+            x = 0.0f;
+            y = (-1.0f) * c2 / b2;
+            return true;
+        }
+        else
+            return false;
+    }
+    else
+    // Совпадает с Ох
+    if (a1 == 0.0f && c1 == 0.0f && b1 != 0.0f)
+    {
+        if (a2 != 0.0f)
+        {
+            y = 0.0f;
+            x = (-1.0f) * c2 / a2;
+            return true;
+        }
+        else
+            return false;
+    }
+    else
+    if (a1 != 0.0f && c1 != 0.0f && b1 != 0.0f)
+    {
+        // Проходит через начало координат
+        if (c2 == 0.0f && a2 != 0.0f && b2 != 0.0f)
+        {
+                x = (b2 * c1) / (a2 * b1 - a1 * b2);
+                y = (-1.0f) * a2 * x / b2;
+                return true;
+
+        }
+        else
+        // Параллельна Ох
+        if (a2 == 0.0f && b2 != 0.0f && c2 != 0.0f)
+        {
+                y = (-1.0f) * c2 / b2;
+                x = (-1.0f) * (b1 * y + c1) / a1;
+                return true;
+        }
+        else
+        // Параллельна Оу
+        if (b2 == 0.0f && a2 != 0.0f && c2 != 0.0f)
+        {
+                x = (-1.0f) * c2 / a2;
+                y = (-1.0f) * (a1 * x + c1) / b1;
+                return true;
+        }
+        else
+        // Совпадает с Оу
+        if (b2 == 0.0f && c2 == 0.0f && a2 != 0.0f)
+        {
+                x = 0.0f;
+                y = (-1.0f) * c1 / b1;
+                return true;
+        }
+        else
+        // Совпадает с Ох
+        if (a2 == 0.0f && c2 == 0.0f && b2 != 0.0f)
+        {
+                y = 0.0f;
+                x = (-1.0f) * c1 / a1;
+                return true;
+
+        }
+        else
+        if (a2 != 0.0f && c2 != 0.0f && b2 != 0.0f)
+        {
+            y = (c1 * a2 - c2 * a1) / (b2 * a1 - b1 * a2);
+            x = (-1.0f) * (b1 * y - c1) / a1;
+            return true;
+        }
+        else
+            return false;
+    }
+
+
+    return false;
+}
+
+void Curve::calculateControlsForAngle(int index)
+{
+    float pi = 3.14159265f;
+    float xCenter = controlPoints[0];
+    float yCenter = controlPoints[1];
+
+    float xLeft = controlPoints[3];
+    float yLeft = controlPoints[4];
+
+    float xRight = controlPoints[6];
+    float yRight = controlPoints[7];
+
+    float dxLeft = xLeft - xCenter;
+    float dyLeft = yLeft - yCenter;
+    float rLeft = sqrt(dxLeft*dxLeft + dyLeft*dyLeft);
+    float dxRight = xRight - xCenter;
+    float dyRight = yRight - yCenter;
+    float rRight = sqrt(dxRight*dxRight + dyRight*dyRight);
+    float alpha1 = acos(dxRight / rRight);
+    if (dyRight < 0)
+        alpha1 = 2.0f * pi - alpha1;
+    float alpha2 = acos(dxLeft / rLeft);
+    if (dyLeft < 0)
+        alpha2 = 2.0f * pi - alpha2;
+    float res = alpha2 - alpha1;
+    if (res >= pi)
+    {
+        switch (index)
+        {
+        case 0:
+            break;
+        case 1:
+            controlPoints[3] = xCenter + rLeft * cos(alpha1 + pi);
+            controlPoints[4] = yCenter + rLeft * sin(alpha1 + pi);
+            angleRounding  = 180.0f;
+            break;
+        case 2:
+            controlPoints[6] = xCenter + rRight * cos(alpha2 - pi);
+            controlPoints[7] = yCenter + rRight * sin(alpha2 - pi);
+            angleRounding  = 180.0f;
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 bool Curve::setFixed(bool fixed)

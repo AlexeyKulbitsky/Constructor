@@ -43,3 +43,9 @@ int TextureManager::getID(QString texture)
         textureMap[texture] = getTextureID(texture);
     return textureMap[texture];
 }
+
+void TextureManager::addTexture(QString textureSource)
+{
+    if (!textureMap.contains(textureSource))
+        textureMap[textureSource] = getTextureID(textureSource);
+}

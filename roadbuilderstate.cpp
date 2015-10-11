@@ -174,7 +174,18 @@ void RoadBuilderState::mouseMoveEvent(QMouseEvent *pe)
                     float y = (GLdouble)(scene->height() -  ptrMousePosition.y())/
                             scene->width()/(scene->nSca * scene->ratio) * 2.0;
 
-                    roadBroken->resizeByControl(controlIndex, dX, dY, x, y);
+                    switch (key)
+                    {
+                    case Qt::Key_Shift:
+                    {
+                        roadBroken->resizeByControl(controlIndex, dX, dY, x, y, key);
+                    }
+                        break;
+                    default:
+                        roadBroken->resizeByControl(controlIndex, dX, dY, x, y);
+                        break;
+                    }
+
                     scene->updateGL();
                 }
                 else

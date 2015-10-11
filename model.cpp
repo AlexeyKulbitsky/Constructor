@@ -1,4 +1,5 @@
 #include "model.h"
+#include <QApplication>
 
 Model::Model(QObject *parent) : QObject(parent)
 {
@@ -9,6 +10,8 @@ Model::Model(QObject *parent) : QObject(parent)
         group[i].elements.clear();
     }
     modified = false;
+    //TextureManager::getInstance()->addTexture(QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg");
+    //TextureManager::getInstance()->addTexture(QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg");
 }
 
 void Model::addElement(RoadElement *element, int groupIndex)

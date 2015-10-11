@@ -37,9 +37,8 @@ public:
     }
 
     int getTextureID(QString textureSource);
-
     int getID(QString texture);
-
+    void addTexture(QString textureSource);
 
 };
 

@@ -2,6 +2,7 @@
 #include <QCheckBox>
 #include <QDoubleSpinBox>
 #include <QApplication>
+#include "model.h"
 
 RoadBroken::RoadBroken()
 {
@@ -247,9 +248,14 @@ void RoadBroken::setLeftVertexArray()
             float dx = x0 - x1;
             float dy = y0 - y1;
             float r01 = sqrt(dx*dx + dy*dy);
-            float pi = 3.1415926f;
-            float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
-                               sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
+            float pi = 3.14159265f;
+            float t = (dx * (x2 - x0) + dy * (y2 - y0))/
+                    sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0)));
+            if (t > 1.0f)
+                t = 1.0f;
+            if (t < -1.0f)
+                t = -1.0f;
+            float angle = acos(t);
             vertexArrayLeft.push_back(x0);
             vertexArrayLeft.push_back(y0);
             vertexArrayLeft.push_back(z0);
@@ -292,9 +298,14 @@ void RoadBroken::setLeftVertexArray()
                 float dx = x0 - x1;
                 float dy = y0 - y1;
                 float r01 = sqrt(dx*dx + dy*dy);
-                float pi = 3.1415926f;
-                float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
-                                   sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
+                float pi = 3.14159265f;
+                float t = (dx * (x2 - x0) + dy * (y2 - y0))/
+                        sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0)));
+                if (t > 1.0f)
+                    t = 1.0f;
+                if (t < -1.0f)
+                    t = -1.0f;
+                float angle = acos(t);
 
                 vertexArrayLeft.push_back(x0);
                 vertexArrayLeft.push_back(y0);
@@ -408,9 +419,14 @@ void RoadBroken::setLeftVertexArray()
                         float dx = x0 - x1;
                         float dy = y0 - y1;
                         float r01 = sqrt(dx*dx + dy*dy);
-                        float pi = 3.1415926f;
-                        float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
-                                           sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
+                        float pi = 3.14159265f;
+                        float t = (dx * (x2 - x0) + dy * (y2 - y0))/
+                                sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0)));
+                        if (t > 1.0f)
+                            t = 1.0f;
+                        if (t < -1.0f)
+                            t = -1.0f;
+                        float angle = acos(t);
 
                         vertexArrayLeft.push_back(x0);
                         vertexArrayLeft.push_back(y0);
@@ -459,17 +475,31 @@ void RoadBroken::setLeftVertexArray()
 
                 float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
                 float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
-                float alpha = (acos(num / den))/2.0f;
+                float t = num / den;
+                if (t > 1.0f)
+                    t = 1.0f;
+                if (t < -1.0f)
+                    t = -1.0f;
+                float alpha = (acos(t))/2.0f;
                 float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
-                float pi = 3.1415926f;
+                float pi = 3.14159265f;
                 if(sa < 0) // Точка находится справа
                 {
                     alpha = pi - alpha;
                 }
 
-
-                float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
-                if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
+                t = (x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                if (t > 1.0f)
+                    t = 1.0f;
+                if (t < -1.0f)
+                    t = -1.0f;
+                float beta = acos(t);
+                t = (y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                if (t > 1.0f)
+                    t = 1.0f;
+                if (t < -1.0f)
+                    t = -1.0f;
+                if (asin(t) < 0)
                 {
                     beta *= -1.0f;
                 }
@@ -763,8 +793,13 @@ void RoadBroken::setRightVertexArray()
             float dy = y0 - y1;
             float r01 = sqrt(dx*dx + dy*dy);
             float pi = 3.1415926f;
-            float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
-                               sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
+            float t = (dx * (x2 - x0) + dy * (y2 - y0))/
+                    sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0)));
+            if (t > 1.0f)
+                t = 1.0f;
+            if (t < -1.0f)
+                t = -1.0f;
+            float angle = acos(t);
 
             vertexArrayRight.push_back(x0);
             vertexArrayRight.push_back(y0);
@@ -809,9 +844,14 @@ void RoadBroken::setRightVertexArray()
                 float dx = x0 - x1;
                 float dy = y0 - y1;
                 float r01 = sqrt(dx*dx + dy*dy);
-                float pi = 3.1415926f;
-                float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
-                                   sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
+                float pi = 3.14159265f;
+                float t = (dx * (x2 - x0) + dy * (y2 - y0))/
+                        sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0)));
+                if (t > 1.0f)
+                    t = 1.0f;
+                if (t < -1.0f)
+                    t = -1.0f;
+                float angle = acos(t);
 
                 vertexArrayRight.push_back(x0);
                 vertexArrayRight.push_back(y0);
@@ -927,9 +967,14 @@ void RoadBroken::setRightVertexArray()
                         float dx = x0 - x1;
                         float dy = y0 - y1;
                         float r01 = sqrt(dx*dx + dy*dy);
-                        float pi = 3.1415926f;
-                        float angle = acos((dx * (x2 - x0) + dy * (y2 - y0))/
-                                           sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0))));
+                        float pi = 3.14159265f;
+                        float t = (dx * (x2 - x0) + dy * (y2 - y0))/
+                                sqrt((dx*dx + dy*dy)*((x2 - x0)*(x2 - x0) + (y2 - y0)*(y2 - y0)));
+                        if (t > 1.0f)
+                            t = 1.0f;
+                        if (t < -1.0f)
+                            t = -1.0f;
+                        float angle = acos(t);
 
                         vertexArrayRight.push_back(x0);
                         vertexArrayRight.push_back(y0);
@@ -976,17 +1021,31 @@ void RoadBroken::setRightVertexArray()
                     }
                 float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
                 float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
-                float alpha = (acos(num / den))/2.0f;
+                float t = num / den;
+                if (t > 1.0f)
+                    t = 1.0f;
+                if (t < -1.0f)
+                    t = -1.0f;
+                float alpha = (acos(t))/2.0f;
                 float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
-                float pi = 3.1415926f;
+                float pi = 3.14159265f;
                 if(sa < 0) // Точка находится справа
                 {
                     alpha = pi - alpha;
                 }
 
-
-                float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
-                if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
+                t = (x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                if (t > 1.0f)
+                    t = 1.0f;
+                if (t < -1.0f)
+                    t = -1.0f;
+                float beta = acos(t);
+                t = (y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                if (t > 1.0f)
+                    t = 1.0f;
+                if (t < -1.0f)
+                    t = -1.0f;
+                if (asin(t) < 0)
                 {
                     beta *= -1.0f;
                 }
@@ -1707,6 +1766,8 @@ bool RoadBroken::isSelected()
 void RoadBroken::setSelectedStatus(bool status)
 {
     selected = status;
+    for (int i = 0; i < lines.size(); ++i)
+        lines[i].line->setSelectedStatus(status);
 }
 
 void RoadBroken::drawFigure(QGLWidget* render)
@@ -1786,7 +1847,8 @@ void RoadBroken::drawSelectionFrame()
     glPointSize(10.0);
     glDrawElements(GL_POINTS, indexArrayForSelection.size(), GL_UNSIGNED_BYTE, indexArrayForSelection.begin());
 
-
+    drawControlElement(vertexArray.size() / 3, 5.0f, 10.0f);
+    drawControlElement(vertexArray.size() / 3 + 1, 5.0f, 10.0f);
 
     if (showRightBoard)
     {
@@ -1875,7 +1937,11 @@ void RoadBroken::move(float dx, float dy, float dz)
 
 void RoadBroken::drawControlElement(int index, float lineWidth, float pointSize)
 {   
-    if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3)
+    int linesControlsCount = 0;
+    for (int i = 0; i < lines.size(); ++i)
+        linesControlsCount += lines[i].line->getNumberOfControls();
+
+    if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3 + 2 + linesControlsCount)
     {
         glLineWidth(lineWidth);
         glBegin(GL_LINES);
@@ -1890,7 +1956,7 @@ void RoadBroken::drawControlElement(int index, float lineWidth, float pointSize)
         glEnd();
         return;
     }
-    if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3 + 1)
+    if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3 + 1 + 2 + linesControlsCount)
     {
         int j = vertexArray.size() / 3 - 2;
         glLineWidth(lineWidth);
@@ -1906,9 +1972,9 @@ void RoadBroken::drawControlElement(int index, float lineWidth, float pointSize)
         glEnd();
         return;
     }
-    if (index >= vertexArray.size() / 3 + vertexArray.size() / 3 + vertexArray.size() / 6)
+    if (index >= vertexArray.size() / 3 + vertexArray.size() / 3 + vertexArray.size() / 6 + 2 + linesControlsCount)
     {
-        int j = index - vertexArray.size() / 3 - vertexArray.size() / 3 - vertexArray.size() / 6;
+        int j = index - vertexArray.size() / 3 - vertexArray.size() / 3 - vertexArray.size() / 6 - 2 - linesControlsCount;
         if (j < vertexArray.size() / (3 * 4))
         {
             glLineWidth(lineWidth);
@@ -1945,10 +2011,10 @@ void RoadBroken::drawControlElement(int index, float lineWidth, float pointSize)
         return;
     }
 
-    if (index >= vertexArray.size() / 3 + vertexArray.size() / 3)
+    if (index >= vertexArray.size() / 3 + vertexArray.size() / 3  + 2 + linesControlsCount)
     {
 
-        int j = index - vertexArray.size() / 3 - vertexArray.size() / 3;
+        int j = index - vertexArray.size() / 3 - vertexArray.size() / 3 - 2 - linesControlsCount;
         if (j < vertexArray.size() / (3 * 4))
         {
             if (showRightBoard)
@@ -1993,12 +2059,12 @@ void RoadBroken::drawControlElement(int index, float lineWidth, float pointSize)
 
 
 
-    if (index >= vertexArray.size() / 3)
+    if (index >= vertexArray.size() / 3 + 2 + linesControlsCount)
     {
-        int j = index - vertexArray.size() / 3;
+        int j = index - vertexArray.size() / 3 - 2 - linesControlsCount;
         if (j % 2 == 0)
         {
-            glPointSize(pointSize + 20.f);
+            glPointSize(pointSize);
             glBegin(GL_POINTS);
             glColor3f(0.0f, 1.0f, 0.0f);
             glVertex3f(vertexArrayRight[(j / 2 * 5 + 4) * 3],
@@ -2008,7 +2074,7 @@ void RoadBroken::drawControlElement(int index, float lineWidth, float pointSize)
         }
         else
         {
-            glPointSize(pointSize + 20.f);
+            glPointSize(pointSize);
             glBegin(GL_POINTS);
             glColor3f(0.0f, 1.0f, 0.0f);
             glVertex3f(vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3],
@@ -2017,6 +2083,63 @@ void RoadBroken::drawControlElement(int index, float lineWidth, float pointSize)
             glEnd();
         }
         return;
+    }
+    else
+    if (index >= vertexArray.size() / 3 + linesControlsCount)
+    {
+        int j = index - vertexArray.size() / 3 - linesControlsCount;
+        switch (j)
+        {
+        case 0:
+        {
+            int k = 0;
+            glPointSize(pointSize);
+            glBegin(GL_POINTS);
+            glColor3f(1.0f, 1.0f, 1.0f);
+            glVertex3f((vertexArray[k * 3] + vertexArray[(k + 1) * 3]) / 2.0f,
+                    (vertexArray[k * 3 + 1] + vertexArray[(k + 1) * 3 + 1]) / 2.0f,
+                    (vertexArray[k * 3 + 2] + vertexArray[(k + 1) * 3 + 2]) / 2.0f);
+            glEnd();
+        }
+            break;
+        case 1:
+        {
+            int k = vertexArray.size() / 3 - 2;
+            glPointSize(pointSize);
+            glBegin(GL_POINTS);
+            glColor3f(1.0f, 1.0f, 1.0f);
+            glVertex3f((vertexArray[k * 3] + vertexArray[(k + 1) * 3]) / 2.0f,
+                    (vertexArray[k * 3 + 1] + vertexArray[(k + 1) * 3 + 1]) / 2.0f,
+                    (vertexArray[k * 3 + 2] + vertexArray[(k + 1) * 3 + 2]) / 2.0f);
+            glEnd();
+        }
+            break;
+        default:
+            break;
+        }
+
+    }
+    else
+    if (index >= vertexArray.size() / 3)
+    {
+        int count = index - vertexArray.size() / 3;
+        int j = -1;
+        for (int i = 0; i < lines.size(); ++i)
+        {
+            if (count >= lines[i].line->getNumberOfControls())
+            {
+                count -= lines[i].line->getNumberOfControls();
+            }
+            else
+            {
+                j = i;
+                break;
+            }
+        }
+        if (j >=0)
+        {
+            lines[j].line->drawControlElement(count, lineWidth, pointSize);
+        }
     }
     else
     {
@@ -2037,42 +2160,75 @@ void RoadBroken::drawControlElement(int index, float lineWidth, float pointSize)
 
 QCursor RoadBroken::getCursorForControlElement(int index)
 {
-    return Qt::CrossCursor;
+
+
+    int linesControlsCount = 0;
+    for (int i = 0; i < lines.size(); ++i)
+        linesControlsCount += lines[i].line->getNumberOfControls();
+
+    if (index >= vertexArray.size() / 3)
+        return Qt::CrossCursor;
+    else
+        return Qt::CrossCursor;
 }
 
 void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y)
 {
+    int linesControlsCount = 0;
+    for (int i = 0; i < lines.size(); ++i)
+        linesControlsCount += lines[i].line->getNumberOfControls();
+
     if (fixed)
     {
         return;
     }
-    if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3)
+    if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3 + 2 + linesControlsCount)
     {
-        vertexArray[0] += dx;
-        vertexArray[1] += dy;
-
-        vertexArray[3] += dx;
-        vertexArray[4] += dy;
+        float x1 = vertexArray[0];
+        float y1 = vertexArray[1];
+        float x2 = vertexArray[3];
+        float y2 = vertexArray[4];
+        float dx1 = x1 - x2;
+        float dy1 = y1 - y2;
+        float dx2 = 5.0f;
+        float dy2 = (-1.0f) * (dx1*dx2) / dy1;
+        float r = sqrt(dx2*dx2 + dy2*dy2);
+        float dr = (dx*dx2 + dy*dy2) / r;
+        float dxRes = dx2 / r * dr;
+        float dyRes = dy2 / r * dr;
+        vertexArray[0] += dxRes;
+        vertexArray[1] += dyRes;
+        vertexArray[3] += dxRes;
+        vertexArray[4] += dyRes;
     }
     else
     {
-        if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3 + 1)
+        if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3 + 1 + 2 + linesControlsCount)
         {
             int j = vertexArray.size() / 3 - 2;
-
-            vertexArray[j * 3] += dx;
-            vertexArray[j * 3 + 1] += dy;
-
-            vertexArray[(j + 1) * 3] += dx;
-            vertexArray[(j + 1) * 3 + 1] += dy;
-
+            float x1 = vertexArray[j * 3];
+            float y1 = vertexArray[j * 3 + 1];
+            float x2 = vertexArray[(j + 1) * 3];
+            float y2 = vertexArray[(j + 1) * 3 + 1];
+            float dx1 = x1 - x2;
+            float dy1 = y1 - y2;
+            float dx2 = 5.0f;
+            float dy2 = (-1.0f) * (dx1*dx2) / dy1;
+            float r = sqrt(dx2*dx2 + dy2*dy2);
+            float dr = (dx*dx2 + dy*dy2) / r;
+            float dxRes = dx2 / r * dr;
+            float dyRes = dy2 / r * dr;
+            vertexArray[j * 3] += dxRes;
+            vertexArray[j * 3 + 1] += dyRes;
+            vertexArray[(j + 1) * 3] += dxRes;
+            vertexArray[(j + 1) * 3 + 1] += dyRes;
         }
 
             else
-            if (index >= vertexArray.size() / 3 + vertexArray.size() / 3 + vertexArray.size() / 6)
+            if (index >= vertexArray.size() / 3 + vertexArray.size() / 3 + vertexArray.size() / 6 + 2 + linesControlsCount)
             {
                 // Изменение линий дороги
-                int j = index - vertexArray.size() / 3 - vertexArray.size() / 3 - vertexArray.size() / 6;
+                int j = index - vertexArray.size() / 3 - vertexArray.size() / 3 - vertexArray.size() / 6 - 2 - linesControlsCount;
                 if (j < vertexArray.size() / (3 * 4))
                 {
                     resetVertexArray(dx, dy, true);
@@ -2084,61 +2240,45 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
             }
             else
             {
-                if (index >= vertexArray.size() / 3 + vertexArray.size() / 3)
+                if (index >= vertexArray.size() / 3 + vertexArray.size() / 3 + 2 + linesControlsCount)
                 {
-                    int j = index - vertexArray.size() / 3 - vertexArray.size() / 3;
+                    int j = index - vertexArray.size() / 3 - vertexArray.size() / 3 - 2 - linesControlsCount;
                     if (j < vertexArray.size() / (3 * 4))
                     {
-                        /*
-                        float x0 = vertexArrayRight[(j * 10 + 4) * 3];
-                        float y0 = vertexArrayRight[(j * 10 + 4) * 3 + 1];
-                        float x1 = vertexArrayRight[(j * 10 + 9) * 3];
-                        float y1 = vertexArrayRight[(j * 10 + 9) * 3 + 1];
-                        float pi = 3.1415926f;
-                        float angle = acos((dx * (x1 - x0) + dy * (y1 - y0))/
-                                           sqrt((dx*dx + dy*dy)*((x1 - x0)*(x1 - x0) + (y1 - y0)*(y1 - y0))));
-                        float dr = sqrt(dx*dx + dy*dy);
-                        float sa = dx*(x1-x0) - dy*(x1-x0);
-                        float factor = sa < 0 ? -1 : 1;
-                        rightBoardWidth += dr * sin(angle) * factor;
-                        emit rightBoardWidthChanged(rightBoardWidth);
-                        */
                         resetRightVertexArray(dx, dy);
                     }
                     else
                     {
                         j -= vertexArray.size() / (3 * 4);
-                        /*
-                        float x0 = vertexArrayLeft[(j * 10 + 4) * 3];
-                        float y0 = vertexArrayLeft[(j * 10 + 4) * 3 + 1];
-                        float x1 = vertexArrayLeft[(j * 10 + 9) * 3];
-                        float y1 = vertexArrayLeft[(j * 10 + 9) * 3 + 1];
-                        float angle = acos((dx * (x1 - x0) + dy * (y1 - y0))/
-                                           sqrt((dx*dx + dy*dy)*((x1 - x0)*(x1 - x0) + (y1 - y0)*(y1 - y0))));
-                        float dr = sqrt(dx*dx + dy*dy);
-                        float sa = dx*(x1-x0) - dy*(x1-x0);
-                        float factor = sa < 0 ? 1 : -1;
-                        leftBoardWidth += dr * sin(angle) * factor;
-                        emit leftBoardWidthChanged(leftBoardWidth);
-                        */
                         resetLeftVertexArray(dx, dy);
                     }
                 }
                 else
 
-                    if (index >= vertexArray.size() / 3)
+                    if (index >= vertexArray.size() / 3 + 2 + linesControlsCount)
                     {
                         // Изменение точек тротуара
-                        int j = index - vertexArray.size() / 3;
+                        int j = index - vertexArray.size() / 3 - 2 - linesControlsCount;
                         if (j % 2 == 0)
                         {
-                            vertexArrayRight[(j / 2 * 5 + 4) * 3] += dx;
-                            vertexArrayRight[(j / 2 * 5 + 4) * 3 + 1] += dy;
                             float x1 = vertexArrayRight[(j / 2 * 5 + 4) * 3];
                             float y1 = vertexArrayRight[(j / 2 * 5 + 4) * 3 + 1];
-                            float x2 = vertexArrayRight[j / 2 * 5 * 3];
-                            float y2 = vertexArrayRight[j / 2 * 5 * 3 + 1];
-                            float r = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+                            float x2 = vertexArray[j * 3];
+                            float y2 = vertexArray[j * 3 + 1];
+                            float dx1 = x1 - x2;
+                            float dy1 = y1 - y2;
+                            float r = sqrt(dx1*dx1 + dy1*dy1);
+                            float dr = (dx*dx1 + dy*dy1) / r;
+                            float dxRes = dx1 / r * dr;
+                            float dyRes = dy1 / r * dr;
+
+                            vertexArrayRight[(j / 2 * 5 + 4) * 3] += dxRes;
+                            vertexArrayRight[(j / 2 * 5 + 4) * 3 + 1] += dyRes;
+                            x1 = vertexArrayRight[(j / 2 * 5 + 4) * 3];
+                            y1 = vertexArrayRight[(j / 2 * 5 + 4) * 3 + 1];
+                            x2 = vertexArrayRight[j / 2 * 5 * 3];
+                            y2 = vertexArrayRight[j / 2 * 5 * 3 + 1];
+                            r = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 
                             vertexArrayRight[(j / 2 * 5 + 2) * 3] = x2 + (x1 - x2) / r * 0.03f;
                             vertexArrayRight[(j / 2 * 5 + 2) * 3 + 1] = y2 + (y1 - y2) / r * 0.03f;
@@ -2149,8 +2289,8 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
                             if (j != 0 && j != (vertexArray.size() / 3 - 2))
                             {
                                 j = (j % 4) == 0 ? j - 2 : j + 2;
-                                vertexArrayRight[(j / 2 * 5 + 4) * 3] += dx;
-                                vertexArrayRight[(j / 2 * 5 + 4) * 3 + 1] += dy;
+                                vertexArrayRight[(j / 2 * 5 + 4) * 3] += dxRes;
+                                vertexArrayRight[(j / 2 * 5 + 4) * 3 + 1] += dyRes;
 
                                 vertexArrayRight[(j / 2 * 5 + 2) * 3] = x2 + (x1 - x2) / r * 0.03f;
                                 vertexArrayRight[(j / 2 * 5 + 2) * 3 + 1] = y2 + (y1 - y2) / r * 0.03f;
@@ -2165,13 +2305,24 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
                         }
                         else
                         {
-                            vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3] += dx;
-                            vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3 + 1] += dy;
                             float x1 = vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3];
                             float y1 = vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3 + 1];
-                            float x2 = vertexArrayLeft[(j - 1) / 2 * 5 * 3];
-                            float y2 = vertexArrayLeft[(j - 1) / 2 * 5 * 3 + 1];
-                            float r = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+                            float x2 = vertexArray[j * 3];
+                            float y2 = vertexArray[j * 3 + 1];
+                            float dx1 = x1 - x2;
+                            float dy1 = y1 - y2;
+                            float r = sqrt(dx1*dx1 + dy1*dy1);
+                            float dr = (dx*dx1 + dy*dy1) / r;
+                            float dxRes = dx1 / r * dr;
+                            float dyRes = dy1 / r * dr;
+
+                            vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3] += dxRes;
+                            vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3 + 1] += dyRes;
+                            x1 = vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3];
+                            y1 = vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3 + 1];
+                            x2 = vertexArrayLeft[(j - 1) / 2 * 5 * 3];
+                            y2 = vertexArrayLeft[(j - 1) / 2 * 5 * 3 + 1];
+                            r = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 
                             vertexArrayLeft[((j - 1) / 2 * 5 + 2) * 3] = x2 + (x1 - x2) / r * 0.03f;
                             vertexArrayLeft[((j - 1) / 2 * 5 + 2) * 3 + 1] = y2 + (y1 - y2) / r * 0.03f;
@@ -2181,8 +2332,8 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
                             if (j != 1 && j != (vertexArray.size() / 3 - 1))
                             {
                                 j = ((j - 1) % 4) == 0 ? j - 2 : j + 2;
-                                vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3] += dx;
-                                vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3 + 1] += dy;
+                                vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3] += dxRes;
+                                vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3 + 1] += dyRes;
 
                                 vertexArrayLeft[((j - 1) / 2 * 5 + 2) * 3] = x2 + (x1 - x2) / r * 0.03f;
                                 vertexArrayLeft[((j - 1) / 2 * 5 + 2) * 3 + 1] = y2 + (y1 - y2) / r * 0.03f;
@@ -2196,11 +2347,126 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
 
                     }
                 else
+                    if (index >= vertexArray.size() / 3 + linesControlsCount)
+                    {
+                        int j = index - vertexArray.size() / 3 - linesControlsCount;
+                        float X1 = 0.0f, X2 = 0.0f, X3 = 0.0f,
+                                Y1 = 0.0f, Y2 = 0.0f, Y3 = 0.0f;
+                        switch (j)
+                        {
+                        case 0:
+                        {
+                            int k = 0;
+                            X1 = (vertexArray[k * 3] + vertexArray[(k + 1) * 3]) / 2.0f;
+                            Y1 = (vertexArray[k * 3 + 1] + vertexArray[(k + 1) * 3 + 1]) / 2.0f;
+                            k = vertexArray.size() / 3 - 2;
+                            X2 = (vertexArray[k * 3] + vertexArray[(k + 1) * 3]) / 2.0f;
+                            Y2 = (vertexArray[k * 3 + 1] + vertexArray[(k + 1) * 3 + 1]) / 2.0f;
+                        }
+                            break;
+                        case 1:
+                        {
+                            int k = vertexArray.size() / 3 - 2;
+                            X1 = (vertexArray[k * 3] + vertexArray[(k + 1) * 3]) / 2.0f;
+                            Y1 = (vertexArray[k * 3 + 1] + vertexArray[(k + 1) * 3 + 1]) / 2.0f;
+                            k = 0;
+                            X2 = (vertexArray[k * 3] + vertexArray[(k + 1) * 3]) / 2.0f;
+                            Y2 = (vertexArray[k * 3 + 1] + vertexArray[(k + 1) * 3 + 1]) / 2.0f;
+                        }
+                            break;
+                        default:
+                            break;
+                        }
+
+                        X3 = X1 + dx;
+                        Y3 = Y1 + dy;
+                        float dx1 = X1 - X2;
+                        float dy1 = Y1 - Y2;
+                        float r1 = sqrt(dx1*dx1 + dy1*dy1);
+                        float dx2 = X3 - X2;
+                        float dy2 = Y3 - Y2;
+                        float r2 = sqrt(dx2*dx2 + dy2*dy2);
+                        float pi = 3.14159265f;
+                        float angle1 = acos(dx1 / r1);
+                        if (dy1 < 0)
+                            angle1 = 2.0f * pi - angle1;
+                        float angle2 = acos(dx2 / r2);
+                        if (dy2 < 0)
+                            angle2 = 2.0f * pi - angle2;
+                        float angle = angle2 - angle1;
+                        for (int i = 0; i < vertexArray.size() / 3; ++i)
+                        {
+                            vertexArray[i * 3] -= X2;
+                            vertexArray[i * 3 + 1] -= Y2;
+                            float tx = vertexArray[i * 3];
+                            float ty = vertexArray[i * 3 + 1];
+                            vertexArray[i * 3] = tx * cos(angle) - ty * sin(angle);
+                            vertexArray[i * 3 + 1] = tx * sin(angle) + ty * cos(angle);
+                            vertexArray[i * 3] += X2;
+                            vertexArray[i * 3 + 1] += Y2;
+                        }
+                        for (int i = 0; i < vertexArrayRight.size() / 3; ++i)
+                        {
+                            vertexArrayRight[i * 3] -= X2;
+                            vertexArrayRight[i * 3 + 1] -= Y2;
+                            float tx = vertexArrayRight[i * 3];
+                            float ty = vertexArrayRight[i * 3 + 1];
+                            vertexArrayRight[i * 3] = tx * cos(angle) - ty * sin(angle);
+                            vertexArrayRight[i * 3 + 1] = tx * sin(angle) + ty * cos(angle);
+                            vertexArrayRight[i * 3] += X2;
+                            vertexArrayRight[i * 3 + 1] += Y2;
+                        }
+                        for (int i = 0; i < vertexArrayLeft.size() / 3; ++i)
+                        {
+                            vertexArrayLeft[i * 3] -= X2;
+                            vertexArrayLeft[i * 3 + 1] -= Y2;
+                            float tx = vertexArrayLeft[i * 3];
+                            float ty = vertexArrayLeft[i * 3 + 1];
+                            vertexArrayLeft[i * 3] = tx * cos(angle) - ty * sin(angle);
+                            vertexArrayLeft[i * 3 + 1] = tx * sin(angle) + ty * cos(angle);
+                            vertexArrayLeft[i * 3] += X2;
+                            vertexArrayLeft[i * 3 + 1] += Y2;
+                        }
+                    }
+                else
+                if (index >= vertexArray.size() / 3)
+                {
+                    int count = index - vertexArray.size() / 3;
+                    int j = -1;
+                    for (int i = 0; i < lines.size(); ++i)
+                    {
+                        if (count >= lines[i].line->getNumberOfControls())
+                        {
+                            count -= lines[i].line->getNumberOfControls();
+                        }
+                        else
+                        {
+                            j = i;
+                            break;
+                        }
+                    }
+                    if (j >=0)
+                    {
+                        lines[j].line->resizeByControl(count, dx, dy, x, y);
+                    }
+                }
+                else
 
                 {
+                        float x1 = vertexArray[index * 3];
+                        float y1 = vertexArray[index * 3 + 1];
+                        int j = index % 2 ? index - 1 : index + 1;
+                        float x2 = vertexArray[j * 3];
+                        float y2 = vertexArray[j * 3 + 1];
+                        float dx1 = x1 - x2;
+                        float dy1 = y1 - y2;
+                        float r = sqrt(dx1*dx1 + dy1*dy1);
+                        float dr = (dx*dx1 + dy*dy1) / r;
+                        float dxRes = dx1 / r * dr;
+                        float dyRes = dy1 / r * dr;
                     // Изменение узловых точек
-                    vertexArray[index * 3] += dx;
-                    vertexArray[index * 3 + 1] += dy;
+                    vertexArray[index * 3] += dxRes;
+                    vertexArray[index * 3 + 1] += dyRes;
 
                     if (index != 0 && index != 1 &&
                             (index != vertexArray.size() / 3 - 1) &&
@@ -2213,8 +2479,8 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
                         else
                             index += index % 4 == 1 ? -2 : 2;
 
-                        vertexArray[index * 3] += dx;
-                        vertexArray[index * 3 + 1] += dy;
+                        vertexArray[index * 3] += dxRes;
+                        vertexArray[index * 3 + 1] += dyRes;
                     }
                 }
             }
@@ -2222,14 +2488,241 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
 
 
     setTextureArray(texture_1Usize, texture_1Vsize);
-    if (fixedRightWidth)
-        setRightVertexArray();
-    else
+    //if (fixedRightWidth)
+    //    setRightVertexArray();
+    //else
         resetRightVertexArray();
     setRightTextureArray(texture_2Usize, texture_2Vsize);
-    if (fixedLeftWidth)
-        setLeftVertexArray();
+    //if (fixedLeftWidth)
+    //    setLeftVertexArray();
+    //else
+        resetLeftVertexArray();
+    setLeftTextureArray(texture_2Usize, texture_2Vsize);
+    //resetLines();
+
+}
+
+void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y, int keyBoardKey)
+{
+    if (fixed)
+    {
+        return;
+    }
+    if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3 + 2)
+    {
+        switch (keyBoardKey)
+        {
+        case Qt::Key_Shift:
+        {
+            // Первый торец
+            vertexArray[0] += dx;
+            vertexArray[1] += dy;
+
+            vertexArray[3] += dx;
+            vertexArray[4] += dy;
+        }
+            break;
+        default:
+            break;
+        }
+    }
     else
+    {
+        if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3 + 1 + 2)
+        {
+            int j = vertexArray.size() / 3 - 2;
+            switch (keyBoardKey)
+            {
+            case Qt::Key_Shift:
+            {
+                // Второй торец
+                int j = vertexArray.size() / 3 - 2;
+
+                vertexArray[j * 3] += dx;
+                vertexArray[j * 3 + 1] += dy;
+
+                vertexArray[(j + 1) * 3] += dx;
+                vertexArray[(j + 1) * 3 + 1] += dy;
+            }
+                break;
+            default:
+                break;
+            }
+        }
+
+            else
+            if (index >= vertexArray.size() / 3 + vertexArray.size() / 3 + vertexArray.size() / 6 + 2)
+            {
+                /*
+                // Изменение линий дороги
+                int j = index - vertexArray.size() / 3 - vertexArray.size() / 3 - vertexArray.size() / 6;
+                if (j < vertexArray.size() / (3 * 4))
+                {
+                    resetVertexArray(dx, dy, true);
+                }
+                else
+                {
+                    resetVertexArray(dx, dy, false);
+                }
+                */
+            }
+            else
+            {
+                if (index >= vertexArray.size() / 3 + vertexArray.size() / 3 + 2)
+                {
+                    /*
+                    int j = index - vertexArray.size() / 3 - vertexArray.size() / 3;
+                    if (j < vertexArray.size() / (3 * 4))
+                    {
+                        resetRightVertexArray(dx, dy);
+                    }
+                    else
+                    {
+                        j -= vertexArray.size() / (3 * 4);
+
+                        resetLeftVertexArray(dx, dy);
+                    }
+                    */
+                }
+                else
+
+                    if (index >= vertexArray.size() / 3 + 2)
+                    {
+                        // Изменение точек тротуара
+                        int j = index - vertexArray.size() / 3 - 2;
+                        if (j % 2 == 0)
+                        {
+                            switch (keyBoardKey)
+                            {
+                            case Qt::Key_Shift:
+                            {
+                                vertexArrayRight[(j / 2 * 5 + 4) * 3] += dx;
+                                vertexArrayRight[(j / 2 * 5 + 4) * 3 + 1] += dy;
+                                float x1 = vertexArrayRight[(j / 2 * 5 + 4) * 3];
+                                float y1 = vertexArrayRight[(j / 2 * 5 + 4) * 3 + 1];
+                                float x2 = vertexArrayRight[j / 2 * 5 * 3];
+                                float y2 = vertexArrayRight[j / 2 * 5 * 3 + 1];
+                                float r = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+
+                                vertexArrayRight[(j / 2 * 5 + 2) * 3] = x2 + (x1 - x2) / r * 0.03f;
+                                vertexArrayRight[(j / 2 * 5 + 2) * 3 + 1] = y2 + (y1 - y2) / r * 0.03f;
+
+                                vertexArrayRight[(j / 2 * 5 + 3) * 3] = x2 + (x1 - x2) / r * 0.25f;
+                                vertexArrayRight[(j / 2 * 5 + 3) * 3 + 1] = y2 + (y1 - y2) / r * 0.25f;
+
+                                if (j != 0 && j != (vertexArray.size() / 3 - 2))
+                                {
+                                    j = (j % 4) == 0 ? j - 2 : j + 2;
+                                    vertexArrayRight[(j / 2 * 5 + 4) * 3] += dx;
+                                    vertexArrayRight[(j / 2 * 5 + 4) * 3 + 1] += dy;
+
+                                    vertexArrayRight[(j / 2 * 5 + 2) * 3] = x2 + (x1 - x2) / r * 0.03f;
+                                    vertexArrayRight[(j / 2 * 5 + 2) * 3 + 1] = y2 + (y1 - y2) / r * 0.03f;
+
+                                    vertexArrayRight[(j / 2 * 5 + 3) * 3] = x2 + (x1 - x2) / r * 0.25f;
+                                    vertexArrayRight[(j / 2 * 5 + 3) * 3 + 1] = y2 + (y1 - y2) / r * 0.25f;
+                                }
+
+
+                                fixedRightWidth = false;
+                            }
+                                break;
+                            default:
+                                break;
+                            }
+
+                        }
+                        else
+                        {
+                            switch (keyBoardKey)
+                            {
+                            case Qt::Key_Shift:
+                            {
+                                // Изменение узловых точек
+                                vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3] += dx;
+                                vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3 + 1] += dy;
+                                float x1 = vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3];
+                                float y1 = vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3 + 1];
+                                float x2 = vertexArrayLeft[(j - 1) / 2 * 5 * 3];
+                                float y2 = vertexArrayLeft[(j - 1) / 2 * 5 * 3 + 1];
+                                float r = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+
+                                vertexArrayLeft[((j - 1) / 2 * 5 + 2) * 3] = x2 + (x1 - x2) / r * 0.03f;
+                                vertexArrayLeft[((j - 1) / 2 * 5 + 2) * 3 + 1] = y2 + (y1 - y2) / r * 0.03f;
+
+                                vertexArrayLeft[((j - 1) / 2 * 5 + 3) * 3] = x2 + (x1 - x2) / r * 0.25f;
+                                vertexArrayLeft[((j - 1) / 2 * 5 + 3) * 3 + 1] = y2 + (y1 - y2) / r * 0.25f;
+                                if (j != 1 && j != (vertexArray.size() / 3 - 1))
+                                {
+                                    j = ((j - 1) % 4) == 0 ? j - 2 : j + 2;
+                                    vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3] += dx;
+                                    vertexArrayLeft[((j - 1) / 2 * 5 + 4) * 3 + 1] += dy;
+
+                                    vertexArrayLeft[((j - 1) / 2 * 5 + 2) * 3] = x2 + (x1 - x2) / r * 0.03f;
+                                    vertexArrayLeft[((j - 1) / 2 * 5 + 2) * 3 + 1] = y2 + (y1 - y2) / r * 0.03f;
+
+                                    vertexArrayLeft[((j - 1) / 2 * 5 + 3) * 3] = x2 + (x1 - x2) / r * 0.25f;
+                                    vertexArrayLeft[((j - 1) / 2 * 5 + 3) * 3 + 1] = y2 + (y1 - y2) / r * 0.25f;
+                                }
+
+                                fixedLeftWidth = false;
+                            }
+                                break;
+                            default:
+                                break;
+                            }
+                        }
+
+                    }
+                else
+                if (index >= vertexArray.size() / 3)
+                {
+                    // Точки для поворота
+                    resizeByControl(index, dx, dy, x, y);
+                }
+                else
+
+                {
+                        switch (keyBoardKey)
+                        {
+                        case Qt::Key_Shift:
+                        {
+                            vertexArray[index * 3] += dx;
+                            vertexArray[index * 3 + 1] += dy;
+
+                            if (index != 0 && index != 1 &&
+                                    (index != vertexArray.size() / 3 - 1) &&
+                                    (index != vertexArray.size() / 3 - 2))
+                            {
+                                if (index % 2 == 0)
+                                {
+                                    index += index % 4 == 0 ? -2 : 2;
+                                }
+                                else
+                                    index += index % 4 == 1 ? -2 : 2;
+
+                                vertexArray[index * 3] += dx;
+                                vertexArray[index * 3 + 1] += dy;
+                            }
+                        }
+                            break;
+                        default:
+                            break;
+                        }
+
+
+                }
+            }
+        }
+    setTextureArray(texture_1Usize, texture_1Vsize);
+   // if (fixedRightWidth)
+   //     setRightVertexArray();
+   // else
+        resetRightVertexArray();
+    setRightTextureArray(texture_2Usize, texture_2Vsize);
+   // if (fixedLeftWidth)
+   //     setLeftVertexArray();
+   // else
         resetLeftVertexArray();
     setLeftTextureArray(texture_2Usize, texture_2Vsize);
     resetLines();
@@ -2242,8 +2735,11 @@ int RoadBroken::getNumberOfControls()
     int roadLines = roadPoints / 2 + 2;
     int boardPoints = roadPoints;
     int boardLines = roadPoints / 2;
-    int result = roadPoints + roadLines + boardPoints + boardLines;
-    return result;
+    int result = roadPoints + roadLines + boardPoints + boardLines + 2;
+    int linesControlsCount = 0;
+    for (int i = 0; i < lines.size(); ++i)
+        linesControlsCount += lines[i].line->getNumberOfControls();
+    return result + linesControlsCount;
     //return vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3 + 2;
 }
 
@@ -2408,8 +2904,11 @@ void RoadBroken::addLine(float step, QString textureSource, float textureSize, f
     }
     else
     {
-        line.line = new LineBroken(lineWidth, lineVertexArray, size, textureSource, textureSize, "LineBroken", 1,
-                                   QString("Линия №") + QString::number(lines.size() + 1));
+        LineBroken* lineBroken = new LineBroken(lineWidth, lineVertexArray, size, textureSource, textureSize, "LineBroken", 1,
+                                                QString("Линия №") + QString::number(lines.size() + 1));
+        line.line = lineBroken;
+        model->getGroup(1).push_back(lineBroken);
+
     }
     qDebug() << "Creted line";
     line.lineWidth = lineWidth;
@@ -2578,38 +3077,149 @@ void RoadBroken::drawMeasurements(QGLWidget *render)
     GLdouble x, y, z;
     GLdouble wx, wy, wz;
     QFont shrift = QFont("Times", 8, QFont::Black);
-    float x1, x2, y1, y2;
-    float dr;
+    float x1, x2, x3, x4, xR, xL, xL1, xR1,
+            y1, y2, y3, y4, yR, yL, yR1, yL1;
+    float dr, dr1, dr2, drR, drL, drR1, drL1;
 
     glEnable(GL_LINE_STIPPLE);
-    for (int i = 0; i < vertexArray.size() / 3 - 1; i += 2)
+    for (int i = 0; i < vertexArray.size() / 3 - 1; i += 4)
     {
+        if (i % 4 != 0)
+            continue;
         x1 = vertexArray[i * 3];
         y1 = vertexArray[i * 3 + 1];
         x2 = vertexArray[(i + 1) * 3];
         y2 = vertexArray[(i + 1) * 3 + 1];
-
+        x3 = vertexArray[(i + 2) * 3];
+        y3 = vertexArray[(i + 2) * 3 + 1];
+        x4 = vertexArray[(i + 3) * 3];
+        y4 = vertexArray[(i + 3) * 3 + 1];
+        xR = vertexArrayRight[(i / 2 * 5 + 4) * 3];
+        yR = vertexArrayRight[(i / 2 * 5 + 4) * 3 + 1];
+        xR1 = vertexArrayRight[((i + 2) / 2 * 5 + 4) * 3];
+        yR1 = vertexArrayRight[((i + 2) / 2 * 5 + 4) * 3 + 1];
+        xL = vertexArrayLeft[(i / 2 * 5 + 4) * 3];
+        yL = vertexArrayLeft[(i / 2 * 5 + 4) * 3 + 1];
+        xL1 = vertexArrayLeft[((i + 2) / 2 * 5 + 4) * 3];
+        yL1 = vertexArrayLeft[((i + 2) / 2 * 5 + 4) * 3 + 1];
         dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
-
+        dr1 = sqrt((x3 - x1)*(x3 - x1) + (y3 - y1)*(y3 - y1));
+        dr2 = sqrt((x4 - x2)*(x4 - x2) + (y4 - y2)*(y4 - y2));
+        drR = sqrt((x1 - xR)*(x1 - xR) + (y1 - yR)*(y1 - yR));
+        drL = sqrt((x2 - xL)*(x2 - xL) + (y2 - yL)*(y2 - yL));
+        drR1 = sqrt((xR1 - xR)*(xR1 - xR) + (yR1 - yR)*(yR1 - yR));
+        drL1 = sqrt((xL1 - xL)*(xL1 - xL) + (yL1 - yL)*(yL1 - yL));
         if (i >= 2 && i < vertexArray.size() / 3  - 2)
         {
             glLineStipple(1, 0x0FFF);
             glLineWidth(1.5f);
 
             glBegin(GL_LINES);
-            glColor3f(1.0f, 1.0f, 1.0f);
-            glVertex3f(x1, y1, 0.3f);
 
             glColor3f(1.0f, 1.0f, 1.0f);
+            glVertex3f(x1, y1, 0.3f);
+            glColor3f(1.0f, 1.0f, 1.0f);
             glVertex3f(x2, y2, 0.3f);
+
+            glColor3f(0.0f, 1.0f, 0.0f);
+            glVertex3f(x1, y1, 0.3f);
+            glColor3f(0.0f, 1.0f, 0.0f);
+            glVertex3f(xR, yR, 0.3f);
+
+            glColor3f(0.0f, 1.0f, 0.0f);
+            glVertex3f(x2, y2, 0.3f);
+            glColor3f(0.0f, 1.0f, 0.0f);
+            glVertex3f(xL, yL, 0.3f);
+
             glEnd();
+
+
         }
         x = (x1 + x2) / 2.0f;
         y = (y1 + y2) / 2.0f;
         z = 0.0f;
         getWindowCoord(x, y, z, wx, wy, wz);
         glColor3f(1.0f, 1.0f, 1.0f);
-        render->renderText(wx, wy, QString("%1").arg(dr), shrift);
+        render->renderText(wx, wy, QString("%1").arg(dr, 0, 'f', 2), shrift);
+
+
+        x = (x1 + x3) / 2.0f;
+        y = (y1 + y3) / 2.0f;
+        z = 0.0f;
+        getWindowCoord(x, y, z, wx, wy, wz);
+        glColor3f(1.0f, 1.0f, 1.0f);
+        render->renderText(wx, wy, QString("%1").arg(dr1, 0, 'f', 2), shrift);
+
+        x = (x2 + x4) / 2.0f;
+        y = (y2 + y4) / 2.0f;
+        z = 0.0f;
+        getWindowCoord(x, y, z, wx, wy, wz);
+        glColor3f(1.0f, 1.0f, 1.0f);
+        render->renderText(wx, wy, QString("%1").arg(dr2, 0, 'f', 2), shrift);
+
+        x = (x1 + xR) / 2.0f;
+        y = (y1 + yR) / 2.0f;
+        z = 0.0f;
+        getWindowCoord(x, y, z, wx, wy, wz);
+        glColor3f(0.0f, 1.0f, 0.0f);
+        render->renderText(wx, wy, QString("%1").arg(drR, 0, 'f', 2), shrift);
+
+        x = (x2 + xL) / 2.0f;
+        y = (y2 + yL) / 2.0f;
+        z = 0.0f;
+        getWindowCoord(x, y, z, wx, wy, wz);
+        glColor3f(0.0f, 1.0f, 0.0f);
+        render->renderText(wx, wy, QString("%1").arg(drL, 0, 'f', 2), shrift);
+
+        x = (xL1 + xL) / 2.0f;
+        y = (yL1 + yL) / 2.0f;
+        z = 0.0f;
+        getWindowCoord(x, y, z, wx, wy, wz);
+        glColor3f(0.0f, 1.0f, 0.0f);
+        render->renderText(wx, wy, QString("%1").arg(drL1, 0, 'f', 2), shrift);
+
+        x = (xR1 + xR) / 2.0f;
+        y = (yR1 + yR) / 2.0f;
+        z = 0.0f;
+        getWindowCoord(x, y, z, wx, wy, wz);
+        glColor3f(0.0f, 1.0f, 0.0f);
+        render->renderText(wx, wy, QString("%1").arg(drR1, 0, 'f', 2), shrift);
+
+        if (i == vertexArray.size() / 3 - 4)
+        {
+            x1 = vertexArray[(i + 2) * 3];
+            y1 = vertexArray[(i + 2) * 3 + 1];
+            x2 = vertexArray[(i + 3) * 3];
+            y2 = vertexArray[(i + 3) * 3 + 1];
+            xR = vertexArrayRight[((i + 2) / 2 * 5 + 4) * 3];
+            yR = vertexArrayRight[((i + 2) / 2 * 5 + 4) * 3 + 1];
+            xL = vertexArrayLeft[((i + 2) / 2 * 5 + 4) * 3];
+            yL = vertexArrayLeft[((i + 2) / 2 * 5 + 4) * 3 + 1];
+            drR = sqrt((x1 - xR)*(x1 - xR) + (y1 - yR)*(y1 - yR));
+            drL = sqrt((x2 - xL)*(x2 - xL) + (y2 - yL)*(y2 - yL));
+            dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+
+            x = (x2 + xL) / 2.0f;
+            y = (y2 + yL) / 2.0f;
+            z = 0.0f;
+            getWindowCoord(x, y, z, wx, wy, wz);
+            glColor3f(0.0f, 1.0f, 0.0f);
+            render->renderText(wx, wy, QString("%1").arg(drL, 0, 'f', 2), shrift);
+
+            x = (x1 + xR) / 2.0f;
+            y = (y1 + yR) / 2.0f;
+            z = 0.0f;
+            getWindowCoord(x, y, z, wx, wy, wz);
+            glColor3f(0.0f, 1.0f, 0.0f);
+            render->renderText(wx, wy, QString("%1").arg(drR, 0, 'f', 2), shrift);
+
+            x = (x1 + x2) / 2.0f;
+            y = (y1 + y2) / 2.0f;
+            z = 0.0f;
+            getWindowCoord(x, y, z, wx, wy, wz);
+            glColor3f(1.0f, 1.0f, 1.0f);
+            render->renderText(wx, wy, QString("%1").arg(dr, 0, 'f', 2), shrift);
+        }
 
     }
     glDisable(GL_LINE_STIPPLE);

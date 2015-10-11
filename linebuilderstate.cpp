@@ -89,7 +89,9 @@ void LineBuilderState::mousePressEvent(QMouseEvent *pe)
             if (this->tryToSelectControlsInSelectedFigure(ptrMousePosition) == true)
             {
                 controlIsSelected = true;
-                if (key == Qt::Key_Control)
+                switch (key)
+                {
+                case Qt::Key_Control:
                 {
                     if (controlIndex == lineBroken->getNumberOfControls() - 1)
                     {
@@ -102,6 +104,10 @@ void LineBuilderState::mousePressEvent(QMouseEvent *pe)
                             lineBroken->addBreak(true);
                             controlIndex = 0;
                         }
+                }
+                    break;
+                default:
+                    break;
                 }
                 scene->setCursor(lineBroken->getCursorForControlElement(controlIndex));
                 scene->updateGL();
@@ -170,6 +176,7 @@ void LineBuilderState::mouseMoveEvent(QMouseEvent *pe)
                             scene->width()/(scene->nSca * scene->ratio) * 2.0;
                     float y = (GLdouble)(scene->height() -  ptrMousePosition.y())/
                             scene->width()/(scene->nSca * scene->ratio) * 2.0;
+
 
                     lineBroken->resizeByControl(controlIndex, dX, dY, x, y);
                     scene->updateGL();

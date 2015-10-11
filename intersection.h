@@ -33,7 +33,7 @@ public:
     void setRoadsTextures();
     float calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4);
     void calculateRoadForAngle(int i);
-    void calculateRoadForRounding(int i);
+    void calculateRoadForRounding(int i, int index);
 
 signals:
     void intersectionsChanged();

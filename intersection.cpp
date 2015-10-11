@@ -304,23 +304,35 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
             roads[i]->resizeByControl(index, dx, dy, x, y);
             calculateRoadIntersections();
             // Если дорогу повернули
-            calculateRoadForRounding(i);
+            calculateRoadForRounding(i, index);
             calculateRoadForAngle(i);
 
 
             switch (index)
             {
+                // Поворот
             case 2:
                 break;
+                // Поворот
             case 3:
                 break;
+                // Поворот
             case 5:
+                break;
+                // Удлинение
+            case 7:
+                break;
+                // Уширение
+            case 8:
+                break;
+                // Уширение
+            case 9:
                 break;
             default:
                 break;
             }
 
-            if (index == 8)
+            if (index == 10)
             {
                 float width = roads[i]->getRightBoardWidth();
                 if (i == 0)
@@ -336,7 +348,7 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
 
             }
             else
-                if (index == 9)
+                if (index == 11)
                 {
                     float width = roads[i]->getLeftBoardWidth();
                     if (i == roads.size() - 1)
@@ -479,8 +491,8 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
             roads[i]->setVertexArray(x1Res, y1Res, x2Res, y2Res, width);
             roads[i]->setTextureArray();
 
-            calculateRoadForRounding(i);
-            calculateRoadForAngle(i);
+            //calculateRoadForRounding(i, index);
+            //calculateRoadForAngle(i);
         }
     calculateRoadIntersections();
     calculateRoundings();
@@ -721,7 +733,7 @@ void Intersection::calculateRoadForAngle(int i)
     }
 }
 
-void Intersection::calculateRoadForRounding(int i)
+void Intersection::calculateRoadForRounding(int i, int index)
 {
     // Левая сторона рукава
     vec3 p1 = roads[i]->getCoordOfPoint(1);
@@ -742,13 +754,13 @@ void Intersection::calculateRoadForRounding(int i)
     {
         dx = dx1 / r1 * (rightLength - r1);
         dy = dy1 / r1 * (rightLength - r1);
-        roads[i]->resizeByControl(5, dx, dy, p2.x, p2.y);
+        roads[i]->resizeByControl(index, dx, dy, p2.x, p2.y);
     }
     if (r2 < leftLength)
     {
         dx = dx2 / r2 * (r2 - leftLength);
         dy = dy2 / r2 * (r2 - leftLength);
-        roads[i]->resizeByControl(5, dx, dy, p2.x, p2.y);
+        roads[i]->resizeByControl(index, dx, dy, p2.x, p2.y);
     }
     p1 = roads[i]->getCoordOfPoint(0);
     p2 = roads[i]->getCoordOfPoint(3);
@@ -767,13 +779,13 @@ void Intersection::calculateRoadForRounding(int i)
     {
         dx = dx1 / r1 * (leftLength - r1);
         dy = dy1 / r1 * (leftLength - r1);
-        roads[i]->resizeByControl(5, dx, dy, p2.x, p2.y);
+        roads[i]->resizeByControl(index, dx, dy, p2.x, p2.y);
     }
     if (r2 < rightLength)
     {
         dx = dx2 / r2 * (r2 - rightLength);
         dy = dy2 / r2 * (r2 - rightLength);
-        roads[i]->resizeByControl(5, dx, dy, p2.x, p2.y);
+        roads[i]->resizeByControl(index, dx, dy, p2.x, p2.y);
     }
 }
 
@@ -1116,7 +1128,7 @@ void Intersection::recalculateRoads()
     setRoadsTextures();
     setVertexArray();
     setTextureArray(texture1USize, texture1VSize);
-    qDebug() << "Intersection::recalculateRoads()";
+    //qDebug() << "Intersection::recalculateRoads()";
 }
 
 void Intersection::setAngle(double angle)
