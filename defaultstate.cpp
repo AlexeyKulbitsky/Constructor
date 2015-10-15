@@ -86,6 +86,46 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
         scene->setDrawRectStatus(false);
         if (rectSelection == true)
         {
+
+            if (abs(scene->rectPoint1.x() - pe->pos().x()) <= 5 &&
+                abs(scene->rectPoint1.y() - pe->pos().y()) <= 5)
+            {
+                if (this->tryToSelectFigures(pe->pos(), true) == true)
+                {
+                    scene->setMouseTracking(true);
+                    scene->updateGL();
+                    std::list<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
+                    for(int k = 0; k < selectedIndex; ++k)
+                        ++it;
+                    if ((*it)->getName() == "RoadBroken")
+                    {
+                        stateManager->roadBuilderState->setRoad(dynamic_cast<RoadBroken*>(*it));
+                        stateManager->roadBuilderState->setGroupIndex(selectedGroup);
+                        stateManager->roadBuilderState->setElementIndex(selectedIndex);
+                        stateManager->setState(stateManager->roadBuilderState);
+                    }
+                    else
+                    {
+                        if ((*it)->getName() == "LineBroken" ||
+                                (*it)->getName() == "Tramways" ||
+                                (*it)->getName() == "VoltageLine" ||
+                                (*it)->getName() == "DoubleVoltageLine")
+                        {
+                            stateManager->lineBuilderState->setLine(dynamic_cast<LineBroken*>(*it));
+                            stateManager->lineBuilderState->setGroupIndex(selectedGroup);
+                            stateManager->lineBuilderState->setElementIndex(selectedIndex);
+                            stateManager->setState(stateManager->lineBuilderState);
+                        }
+                        else
+                        {
+                            stateManager->setState(stateManager->selectedState);
+                        }
+                    }
+                    rectSelection = false;
+                }
+            }
+            else
+
             if (this->tryToSelectFigures(scene->rectPoint1, pe->pos(), true) == true)
             {
                 scene->setMouseTracking(true);
@@ -789,15 +829,13 @@ bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
                 }
 
                 (*it)->setSelectedStatus(true);
+                (*it)->setStepDialog(stateManager->stepDialog);
                 (*it)->getProperties(properties, scene);
+
                 scene->setCursor(Qt::SizeAllCursor);
                 glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
                 glPopMatrix(); // извлечь матрицу из стека матриц
                 scene->updateGL(); // обновить изображение
-                //if ((*it)->getName() == "RoadBroken")
-                //{
-                //     stateManager->setState(stateManager->roadBuilderState);
-                // }
                 return true;
             }
             else

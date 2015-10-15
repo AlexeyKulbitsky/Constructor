@@ -136,7 +136,11 @@ void Scene2D::paintGL()
             it != model->getGroup(i).end(); ++it)
         {
             if ((*it)->isSelected() == true)
+            {
+                glDisable(GL_DEPTH_TEST);
                 (*it)->drawMeasurements(this);
+                glEnable(GL_DEPTH_TEST);
+            }
         }
         }
 

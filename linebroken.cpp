@@ -506,9 +506,20 @@ void LineBroken::drawFigure(QGLWidget* render)
         glColorPointer(4, GL_FLOAT, 0, ColorArray.begin());
         glDrawElements(GL_TRIANGLES, IndexArray.size(), GL_UNSIGNED_BYTE, IndexArray.begin());
     }
-    //qDebug() << "LineBroken: vertices: " << VertexArray.size() / 3;
-    //for (int i = 0; i < VertexArray.size(); ++i)
-    //    qDebug() << VertexArray[i];
+    if (selected == true)
+    {
+        glDisable(GL_DEPTH_TEST);
+        // Если фигуры выбрана - изменяем цвет заливки
+        setColorArray(0.7f, 0.7f, 0.7f, alpha);
+        drawSelectionFrame();
+
+
+        glVertexPointer(3, GL_FLOAT, 0, vertexArrayForAxis.begin());
+        glColorPointer(3, GL_FLOAT, 0, colorArrayForAxis.begin());
+        glDrawElements(GL_LINE_STRIP, indexArrayForAxis.size(), GL_UNSIGNED_BYTE, indexArrayForAxis.begin());
+
+        glEnable(GL_DEPTH_TEST);
+    }
 }
 
 
@@ -864,4 +875,21 @@ std::vector<vec3> LineBroken::getCoordOfControl(int index)
             vertexArrayForAxis[index * 3 + 2]);
     res.push_back(p);
     return res;
+}
+
+void LineBroken::rotate(float angle, float x, float y, float z)
+{
+    for (int i = 0; i < vertexArrayForAxis.size() / 3; ++i)
+    {
+        vertexArrayForAxis[i * 3] -= x;
+        vertexArrayForAxis[i * 3 + 1] -= y;
+        float tx = vertexArrayForAxis[i * 3];
+        float ty = vertexArrayForAxis[i * 3 + 1];
+        vertexArrayForAxis[i * 3] = tx * cos(angle) - ty * sin(angle);
+        vertexArrayForAxis[i * 3 + 1] = tx * sin(angle) + ty * cos(angle);
+        vertexArrayForAxis[i * 3] += x;
+        vertexArrayForAxis[i * 3 + 1] += y;
+    }
+    setVertexArray(this->width, vertexArrayForAxis.begin(), vertexArrayForAxis.size());
+    setTextureArray();
 }

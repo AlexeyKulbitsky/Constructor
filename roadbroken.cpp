@@ -1656,6 +1656,7 @@ void RoadBroken::addBreak(bool front)
             vertexArrayLeft.push_front(tempLeft[i]);
         }
 
+
     }
     else
     {
@@ -1718,8 +1719,21 @@ void RoadBroken::addBreak(bool front)
 
     setIndexArrayForSelectionFrame();
     setColorArrayForSelectionFrame(1.0f, 1.0f, 1.0f);
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].lineType == 6)
+        {
+            SplitZone* splitZone = dynamic_cast<SplitZone*>(lines[i].line);
+            splitZone->addBreak(front);
+        }
+        else
+        {
+            LineBroken* line = dynamic_cast<LineBroken*>(lines[i].line);
+            line->addBreak(front);
+        }
 
-    resetLines();
+    }
+    //resetLines();
 
 }
 
@@ -1774,21 +1788,9 @@ void RoadBroken::drawFigure(QGLWidget* render)
 {
     if (selected == true)
     {
-        if (indexOfSelectedControl >= 0)
-        {
-
-            //glLineWidth(2.0);
-            //glPointSize(5.0);
-            // drawControlElement(indexOfSelectedControl, 2.0, 5.0);
-        }
         // Если фигуры выбрана - изменяем цвет заливки
         setColorArray(0.7f, 0.7f, 0.7f, alpha);
         drawSelectionFrame();
-        //for (int i = 0; i < getNumberOfControls(); ++i)
-        //    drawControlElement(i, 5.0f, 10.0f);
-        // glColor3d(0.3, 0.7, 0.1);
-
-
     }
     else
     {
@@ -1796,8 +1798,6 @@ void RoadBroken::drawFigure(QGLWidget* render)
         setColorArray(red, green, blue, alpha);
 
     }
-    //qDebug() << "vertices " << vertexArrayRight.size()/3;
-    //qDebug() << "textures " << textureArrayRight.size()/2;
     glDisableClientState(GL_COLOR_ARRAY);
     glEnable(GL_TEXTURE_2D);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -1831,6 +1831,15 @@ void RoadBroken::drawFigure(QGLWidget* render)
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisable(GL_TEXTURE_2D);
     glEnableClientState(GL_COLOR_ARRAY);
+
+    if (selected == true)
+    {
+        glDisable(GL_DEPTH_TEST);
+        // Если фигуры выбрана - изменяем цвет заливки
+        setColorArray(0.7f, 0.7f, 0.7f, alpha);
+        drawSelectionFrame();
+        glEnable(GL_DEPTH_TEST);
+    }
 }
 
 void RoadBroken::drawSelectionFrame()
@@ -1847,8 +1856,12 @@ void RoadBroken::drawSelectionFrame()
     glPointSize(10.0);
     glDrawElements(GL_POINTS, indexArrayForSelection.size(), GL_UNSIGNED_BYTE, indexArrayForSelection.begin());
 
-    drawControlElement(vertexArray.size() / 3, 5.0f, 10.0f);
-    drawControlElement(vertexArray.size() / 3 + 1, 5.0f, 10.0f);
+    int linesControlsCount = 0;
+    for (int i = 0; i < lines.size(); ++i)
+        linesControlsCount += lines[i].line->getNumberOfControls();
+
+    drawControlElement(vertexArray.size() / 3 + linesControlsCount, 5.0f, 10.0f);
+    drawControlElement(vertexArray.size() / 3 + linesControlsCount + 1, 5.0f, 10.0f);
 
     if (showRightBoard)
     {
@@ -2095,7 +2108,7 @@ void RoadBroken::drawControlElement(int index, float lineWidth, float pointSize)
             int k = 0;
             glPointSize(pointSize);
             glBegin(GL_POINTS);
-            glColor3f(1.0f, 1.0f, 1.0f);
+            glColor3f(0.0f, 1.0f, 0.0f);
             glVertex3f((vertexArray[k * 3] + vertexArray[(k + 1) * 3]) / 2.0f,
                     (vertexArray[k * 3 + 1] + vertexArray[(k + 1) * 3 + 1]) / 2.0f,
                     (vertexArray[k * 3 + 2] + vertexArray[(k + 1) * 3 + 2]) / 2.0f);
@@ -2107,7 +2120,7 @@ void RoadBroken::drawControlElement(int index, float lineWidth, float pointSize)
             int k = vertexArray.size() / 3 - 2;
             glPointSize(pointSize);
             glBegin(GL_POINTS);
-            glColor3f(1.0f, 1.0f, 1.0f);
+            glColor3f(0.0f, 1.0f, 0.0f);
             glVertex3f((vertexArray[k * 3] + vertexArray[(k + 1) * 3]) / 2.0f,
                     (vertexArray[k * 3 + 1] + vertexArray[(k + 1) * 3 + 1]) / 2.0f,
                     (vertexArray[k * 3 + 2] + vertexArray[(k + 1) * 3 + 2]) / 2.0f);
@@ -2200,6 +2213,20 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
         vertexArray[1] += dyRes;
         vertexArray[3] += dxRes;
         vertexArray[4] += dyRes;
+        for (int i = 0; i < lines.size(); ++i)
+        {
+            if (lines[i].lineType == 6)
+            {
+                SplitZone* splitZone = dynamic_cast<SplitZone*>(lines[i].line);
+                splitZone->resizeByControl(0, dxRes, dyRes, x, y);
+            }
+            else
+            {
+                LineBroken* line = dynamic_cast<LineBroken*>(lines[i].line);
+                line->resizeByControl(0, dxRes, dyRes, x, y);
+            }
+
+        }
     }
     else
     {
@@ -2222,6 +2249,20 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
             vertexArray[j * 3 + 1] += dyRes;
             vertexArray[(j + 1) * 3] += dxRes;
             vertexArray[(j + 1) * 3 + 1] += dyRes;
+            for (int i = 0; i < lines.size(); ++i)
+            {
+                if (lines[i].lineType == 6)
+                {
+                    SplitZone* splitZone = dynamic_cast<SplitZone*>(lines[i].line);
+                    splitZone->resizeByControl(splitZone->getNumberOfControls() - 3, dxRes, dyRes, x, y);
+                }
+                else
+                {
+                    LineBroken* line = dynamic_cast<LineBroken*>(lines[i].line);
+                    line->resizeByControl(line->getNumberOfControls() - 3, dxRes, dyRes, x, y);
+                }
+
+            }
         }
 
             else
@@ -2426,6 +2467,20 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
                             vertexArrayLeft[i * 3 + 1] = tx * sin(angle) + ty * cos(angle);
                             vertexArrayLeft[i * 3] += X2;
                             vertexArrayLeft[i * 3 + 1] += Y2;
+                        }
+                        for (int i = 0; i < lines.size(); ++i)
+                        {
+                            if (lines[i].lineType == 6)
+                            {
+                                SplitZone* splitZone = dynamic_cast<SplitZone*>(lines[i].line);
+                                splitZone->rotate(angle, X2, Y2, 0.0f);
+                            }
+                            else
+                            {
+                                LineBroken* line = dynamic_cast<LineBroken*>(lines[i].line);
+                                line->rotate(angle, X2, Y2, 0.0f);
+                            }
+
                         }
                     }
                 else
@@ -2896,8 +2951,10 @@ void RoadBroken::addLine(float step, QString textureSource, float textureSize, f
     LineBrokenLinkedToRoadBroken line;
     if (lineType == 6)
     {
-        line.line = new SplitZone(lineVertexArray, size, splitZoneWidth, beginRounding, endRounding,
-                                  QString("Линия №") + QString::number(lines.size() + 1));
+        SplitZone* splitZone = new SplitZone(lineVertexArray, size, splitZoneWidth, beginRounding, endRounding,
+                                        QString("Линия №") + QString::number(lines.size() + 1));
+        line.line = splitZone;
+        model->getGroup(1).push_back(splitZone);
         line.splitZoneWidth = splitZoneWidth;
         line.beginRounding = beginRounding;
         line.endRounding = endRounding;
@@ -2987,6 +3044,15 @@ void RoadBroken::deleteLine()
     if (!b) return;
     qDebug() << "delete line " << b->text();
     int i = b->text().toInt() - 1;
+    for (std::list<RoadElement*>::iterator it = model->getGroup(1).begin();
+         it != model->getGroup(1).end(); ++it)
+    {
+        if (lines[i].line == (*it))
+        {
+            model->getGroup(1).erase(it);
+            break;
+        }
+    }
     delete lines[i].line;
     lines.remove(i);
     for (int i = 0; i < lines.size(); ++i)

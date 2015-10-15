@@ -128,7 +128,11 @@ void Intersection::drawFigure(QGLWidget *render)
             roads[i + 1]->setRightBoardShowStatus(curves[i]->getBoardShowStatus());
 
         if (curves[i]->isSelected())
+        {
+            glDisable(GL_DEPTH_TEST);
             curves[i]->drawSelectionFrame();
+            glEnable(GL_DEPTH_TEST);
+        }
         curves[i]->drawFigure(render);
     }
 
@@ -136,7 +140,9 @@ void Intersection::drawFigure(QGLWidget *render)
     {
         if (roads[i]->isSelected())
         {
+            glDisable(GL_DEPTH_TEST);
             roads[i]->drawSelectionFrame();
+            glEnable(GL_DEPTH_TEST);
         }
         roads[i]->drawFigure();
     }

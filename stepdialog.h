@@ -25,10 +25,12 @@ private:
     QVBoxLayout *defaultLayout;
     QVBoxLayout *stopLineLayout;
     QVBoxLayout *splitZoneLayout;
+    QVBoxLayout *tramWaysLayout;
 
     void setDefaultLayout();
     void setStopLineLayout();
     void setSplitZoneLayout();
+    void setTramwaysLayout();
 
 public:
     bool rightSide;
@@ -41,6 +43,7 @@ public:
     int lineType;
     double beginStep;
     double endStep;
+    bool singleWay;
 
 signals:
     void rightSideChanged(bool status);
@@ -53,6 +56,7 @@ signals:
     void beginRoundingChanged(bool status);
     void endRoundingChanged(bool status);
     void splitZoneWidthChanged(double value);
+    void singleWayChanged(bool status);
 
 public slots:
     void setRightSide(bool status);
@@ -67,6 +71,7 @@ public slots:
     void setBeginRoundingStatus(bool status);
     void setEndRoundingStatus(bool status);
     void setSplitZoneWidth(double width);
+    void setSingleWay(bool status);
 };
 
 #endif // STEPDIALOG_H

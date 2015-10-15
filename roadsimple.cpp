@@ -652,6 +652,15 @@ void RoadSimple::drawFigure(QGLWidget* render)
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, IndexArray);
     }
 
+    if (selected == true)
+    {
+        glDisable(GL_DEPTH_TEST);
+        // Если фигуры выбрана - изменяем цвет заливки
+        setColorArray(0.7f, 0.7f, 0.7f, alpha);
+        drawSelectionFrame();
+        glEnable(GL_DEPTH_TEST);
+    }
+
 }
 
 

@@ -113,7 +113,7 @@ RoundingRoad::RoundingRoad(float x1, float y1, float nearRadius, float angel1Nea
     this->farRadius = farRadius;
 
     this->numberOfSides = numberOfSides;
-
+    this->indexOfSelectedControl = -1;
     selected = false;
     fixed = false;
     connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
@@ -682,6 +682,17 @@ void RoundingRoad::drawFigure(QGLWidget* render)
     glDisable(GL_TEXTURE_2D);
     glEnableClientState(GL_COLOR_ARRAY);
 
+    if (selected == true)
+    {
+        glDisable(GL_DEPTH_TEST);
+        setColorArray(0.7f, 0.7f, 0.7f);
+        drawSelectionFrame();
+        if (render)
+        {
+            //drawMeasurements(render);
+        }
+        glEnable(GL_DEPTH_TEST);
+    }
 
 }
 
@@ -891,7 +902,7 @@ void RoundingRoad::drawControlElement(int index, float lineWidth, float pointSiz
         // Дуга внутреннего радиуса
 
     {
-        glLineWidth(lineWidth + 5.0f);
+        glLineWidth(lineWidth);
         glBegin(GL_LINE_STRIP);
         for (int i = 0; i < vertexArray.size() / 3; i += 2)
         {
@@ -910,7 +921,7 @@ void RoundingRoad::drawControlElement(int index, float lineWidth, float pointSiz
         // Дуга наружного радиуса
 
     {
-        glLineWidth(lineWidth + 5.0f);
+        glLineWidth(lineWidth);
         glBegin(GL_LINE_STRIP);
         for (int i = 1; i < vertexArray.size() / 3; i += 2)
         {
@@ -1325,7 +1336,7 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
     default:
         break;
     }
-
+    resetLines();
 }
 
 int RoundingRoad::getNumberOfControls()
@@ -1842,19 +1853,74 @@ void RoundingRoad::resetLines()
             factor = -1.0f;
         }
         radius += factor * lines[i].step;
-        int size = (numberOfSides + 1) * 3;
-        float *lineVertexArray = new float[size];
 
+
+        QVector<float> vertices;
+        bool beginStepReleased = false, endStepReleased = false;
         for (int i = 0; i <= numberOfSides; ++i)
         {
             //float angle = 2.0 * 3.1415926 * float(i) / float(numberOfSides);
             float angle = (angel_1 + (angel_2 - angel_1) * float(i) / float(numberOfSides)) * 3.1415926 / 180.0f;
             float dx = radius * cosf(angle);
             float dy = radius * sinf(angle);
+            float dr;
+
+            if (!beginStepReleased)
+            {
+                if ((angle - angel_1 * 3.1415926 / 180.0f)*radius > beginStep)
+                {
+                    dx = radius * cosf(angel_1 * 3.1415926 / 180.0f + beginStep / radius);
+                    dy = radius * sinf(angel_1 * 3.1415926 / 180.0f + beginStep / radius);
+                    vertices.push_back(x + dx);
+                    vertices.push_back(y + dy);
+                    vertices.push_back(0.001f);
+                    beginStepReleased = true;
+                    //qDebug() << "Begin step...";
+                }
+            }
+            else
+                if ((angel_2 * 3.1415926 / 180.0f - angle)*radius > endStep)
+                {
+                    vertices.push_back(x + dx);
+                    vertices.push_back(y + dy);
+                    vertices.push_back(0.001f);
+                    //qDebug() << "Middle part...";
+                }
+
+                else
+                {
+                    dx = radius * cosf(angel_2 * 3.1415926 / 180.0f - endStep / radius);
+                    dy = radius * sinf(angel_2 * 3.1415926 / 180.0f - endStep / radius);
+                    vertices.push_back(x + dx);
+                    vertices.push_back(y + dy);
+                    vertices.push_back(0.001f);
+                    //.qDebug() << "End step...";
+                    break;
+                }
+
+        }
+
+
+        int size = vertices.size();
+        float *lineVertexArray = new float[size];
+        for (int i = 0; i < vertices.size(); ++i)
+            lineVertexArray[i] = vertices[i];
+
+        /*
+        int size = (numberOfSides + 1) * 3;
+        float *lineVertexArray = new float[size];
+
+        for (int i = 0; i <= numberOfSides; ++i)
+        {
+            //float angle = 2.0 * 3.1415926 * float(i) / float(numberOfSides);
+            float angle = (angel_1 + (angel_2 - angel_1) * float(i) / float(numberOfSides)) * 3.14159265f / 180.0f;
+            float dx = radius * cosf(angle);
+            float dy = radius * sinf(angle);
             lineVertexArray[i * 3] = x + dx;
             lineVertexArray[i * 3 + 1] = y + dy;
             lineVertexArray[i * 3 + 2] = 0.001f;
         }
+        */
         if (lines[i].lineType == 6)
         {
             SplitZone *splitZone = dynamic_cast<SplitZone*>(lines[i].line);

@@ -13,13 +13,13 @@ StepDialog(QWidget *parent):QDialog(parent)
     differentDirections = true;
     beginStep = 0.0;
     endStep = 0.0;
-
+    singleWay = true;
     layout = new QStackedLayout();
 
     setDefaultLayout();
     setSplitZoneLayout();
     setStopLineLayout();
-
+    setTramwaysLayout();
     setLayout(layout);
 
 }
@@ -36,6 +36,7 @@ void StepDialog::setDefaultLayout()
     lineTypeComboBox->addItem("Двойная прерывистая");
     lineTypeComboBox->addItem("Разделительная зона");
     lineTypeComboBox->addItem("Стоп-линия");
+    lineTypeComboBox->addItem("Трамвайные пути");
     connect(lineTypeComboBox, SIGNAL(activated(int)), this, SLOT(setLineType(int)));
 
     QHBoxLayout *lineTypeLayout = new QHBoxLayout();
@@ -128,6 +129,7 @@ void StepDialog::setStopLineLayout()
     lineTypeComboBox->addItem("Двойная прерывистая");
     lineTypeComboBox->addItem("Разделительная зона");
     lineTypeComboBox->addItem("Стоп-линия");
+    lineTypeComboBox->addItem("Трамвайные пути");
     connect(lineTypeComboBox, SIGNAL(activated(int)), this, SLOT(setLineType(int)));
 
     QHBoxLayout *lineTypeLayout = new QHBoxLayout();
@@ -209,6 +211,7 @@ void StepDialog::setSplitZoneLayout()
     lineTypeComboBox->addItem("Двойная прерывистая");
     lineTypeComboBox->addItem("Разделительная зона");
     lineTypeComboBox->addItem("Стоп-линия");
+    lineTypeComboBox->addItem("Трамвайные пути");
     connect(lineTypeComboBox, SIGNAL(activated(int)), this, SLOT(setLineType(int)));
 
     QHBoxLayout *lineTypeLayout = new QHBoxLayout();
@@ -303,6 +306,90 @@ void StepDialog::setSplitZoneLayout()
     layout->addWidget(widget);
 }
 
+void StepDialog::setTramwaysLayout()
+{
+    QLabel *lineTypeLabel = new QLabel("Тип линии");
+    QComboBox *lineTypeComboBox = new QComboBox();
+    lineTypeComboBox->addItem("Сплошная");
+    lineTypeComboBox->addItem("Прерывистая");
+    lineTypeComboBox->addItem("Двойная сплошная");
+    lineTypeComboBox->addItem("Двойная прерывистая/сплошная левая");
+    lineTypeComboBox->addItem("Двойная прерывистая/сплошная правая");
+    lineTypeComboBox->addItem("Двойная прерывистая");
+    lineTypeComboBox->addItem("Разделительная зона");
+    lineTypeComboBox->addItem("Стоп-линия");
+    lineTypeComboBox->addItem("Трамвайные пути");
+    connect(lineTypeComboBox, SIGNAL(activated(int)), this, SLOT(setLineType(int)));
+
+    QHBoxLayout *lineTypeLayout = new QHBoxLayout();
+    lineTypeLayout->addWidget(lineTypeLabel);
+    lineTypeLayout->addWidget(lineTypeComboBox);
+
+
+    QPushButton *okPushButton = new QPushButton("OK");
+    connect(okPushButton, SIGNAL(clicked(bool)), this, SLOT(buttonClicked()));
+    QPushButton *cancelPushButton = new QPushButton("Cancel");
+    connect(cancelPushButton, SIGNAL(clicked(bool)), this, SLOT(close()));
+    QHBoxLayout *buttonsLayout = new QHBoxLayout();
+    buttonsLayout->addWidget(okPushButton);
+    buttonsLayout->addWidget(cancelPushButton);
+
+
+    QRadioButton *singleWayRadioButton = new QRadioButton("В одном направлении");
+    QRadioButton *doubleWayRadioButton = new QRadioButton("В двух направлениях");
+    connect(singleWayRadioButton, SIGNAL(toggled(bool)), this, SLOT(setSingleWay(bool)));
+    singleWayRadioButton->setChecked(true);
+    QLabel* waysStepLabel = new QLabel("Расстояние между осями");
+    QDoubleSpinBox* waysStepSpinBox = new QDoubleSpinBox();
+    waysStepSpinBox->setMinimum(0.0);
+    waysStepSpinBox->setValue(0.0);
+    connect(doubleWayRadioButton, SIGNAL(toggled(bool)), waysStepSpinBox, SLOT(setEnabled(bool)));
+    QHBoxLayout* waysStepLayout = new QHBoxLayout();
+    waysStepLayout->addWidget(waysStepLabel);
+    waysStepLayout->addWidget(waysStepSpinBox);
+    QVBoxLayout* singleDoubleLayout = new QVBoxLayout();
+    singleDoubleLayout->addWidget(singleWayRadioButton);
+    singleDoubleLayout->addWidget(doubleWayRadioButton);
+    singleDoubleLayout->addLayout(waysStepLayout);
+    QGroupBox* singleDoubleGroupBox = new QGroupBox();
+    singleDoubleGroupBox->setLayout(singleDoubleLayout);
+
+    QRadioButton *leftSideRadioButton = new QRadioButton("Привязать к левой стороне");
+    QRadioButton *rightSideRadioButton = new QRadioButton("Привязать к правой стороне");
+    connect(rightSideRadioButton, SIGNAL(toggled(bool)), this, SLOT(setRightSide(bool)));
+    rightSideRadioButton->setChecked(true);
+
+
+
+    QLabel *lineStepLabel = new QLabel("Отступ");
+    QDoubleSpinBox *lineStepDoubleSpinBox = new QDoubleSpinBox();
+    lineStepDoubleSpinBox->setMinimum(0.0f);
+    connect(lineStepDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setStep(double)));
+
+    QHBoxLayout *lineStepLayout = new QHBoxLayout();
+    lineStepLayout->addWidget(lineStepLabel);
+    lineStepLayout->addWidget(lineStepDoubleSpinBox);
+
+
+    QVBoxLayout *leftRightLayout = new QVBoxLayout();
+    leftRightLayout->addWidget(rightSideRadioButton);
+    leftRightLayout->addWidget(leftSideRadioButton);
+    leftRightLayout->addLayout(lineStepLayout);
+    QGroupBox *tramwaysGroupBox = new QGroupBox();
+    tramwaysGroupBox->setLayout(leftRightLayout);
+
+
+    tramWaysLayout = new QVBoxLayout();
+    tramWaysLayout->addLayout(lineTypeLayout);
+    tramWaysLayout->addWidget(singleDoubleGroupBox);
+    tramWaysLayout->addWidget(tramwaysGroupBox);
+    tramWaysLayout->addLayout(buttonsLayout);
+
+    QWidget *widget = new QWidget();
+    widget->setLayout(tramWaysLayout);
+    layout->addWidget(widget);
+}
+
 void StepDialog::setRightSide(bool status)
 {
     if (rightSide == status)
@@ -344,6 +431,9 @@ void StepDialog::setLineType(int type)
         break;
     case 7:
         layout->setCurrentIndex(2);
+        break;
+    case 8:
+        layout->setCurrentIndex(3);
         break;
     default:
         if (type >=0 && type <6)
@@ -452,5 +542,13 @@ void StepDialog::setSplitZoneWidth(double width)
     splitZoneWidth = width;
     emit splitZoneWidthChanged(splitZoneWidth);
     qDebug() << "StepDialog::splitZoneWidth" << splitZoneWidth;
+}
+
+void StepDialog::setSingleWay(bool status)
+{
+    if (singleWay == status)
+        return;
+    singleWay = status;
+    emit singleWayChanged(status);
 }
 

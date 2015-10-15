@@ -55,6 +55,7 @@ private:
 
     GLfloat *lineAxisArray;
     int size;
+    QVector<GLfloat> axisArray;
     float lineWidth;
     vec3 p1, p2, p3, p4;
     vec3 line1_p1, line1_p2, line2_p1, line2_p2;
@@ -65,9 +66,13 @@ public:
     void calculateLine(vec3 p1, vec3 p2, float width);
     void calculateLine(float *pointsArray, int size,
                        float width);
+    void calculateLine(QVector<GLfloat>& pointsArray, float width);
+
     float getWidth();
     void setDescription(const QString &description);
     void drawDescription(QGLWidget* render = 0, float red = 1.0f, float green = 1.0f, float blue = 1.0f);
+    void rotate(float angle, float x, float y, float z);
+    void addBreak(bool front);
 };
 
 #endif // SPLITZONE_H

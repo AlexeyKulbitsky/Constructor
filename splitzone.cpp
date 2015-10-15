@@ -86,17 +86,21 @@ void SplitZone::setSelectedStatus(bool status)
 
 void SplitZone::drawFigure(QGLWidget *render)
 {
-    if (selected)
-        drawSelectionFrame();
-    line->drawFigure(render);
 
+    line->drawFigure(render);
+    if (selected)
+    {
+        glDisable(GL_DEPTH_TEST);
+        drawSelectionFrame();
+        glEnable(GL_DEPTH_TEST);
+    }
     //qDebug() << "SplitZone: drawFigure()";
 }
 
 void SplitZone::drawSelectionFrame()
 {
     for (int i = 0; i < getNumberOfControls(); ++i)
-        drawControlElement(i,2.0f,5.0f);
+        drawControlElement(i, 2.0f, 5.0f);
 }
 
 void SplitZone::drawMeasurements(QGLWidget *render)
@@ -160,11 +164,17 @@ void SplitZone::move(float dx, float dy, float dz)
     p4.y += dy;
     pBegin.y += dy;
     pEnd.y += dy;
+    for (int i = 0; i < axisArray.size() / 3; ++i)
+    {
+        axisArray[i * 3] += dx;
+        axisArray[i * 3 + 1] += dy;
+    }
 
 }
 
 void SplitZone::drawControlElement(int index, float lineWidth, float pointSize)
 {
+    /*
     switch (index)
     {
     case 0:
@@ -214,6 +224,22 @@ void SplitZone::drawControlElement(int index, float lineWidth, float pointSize)
     default:
         break;
     }
+    */
+
+    if (index >= axisArray.size() / 3)
+    {
+
+    }
+    else
+    {
+        glPointSize(pointSize + 5.0f);
+        glBegin(GL_POINTS);
+        glColor3f(0.0f, 0.0f, 0.0f);
+        glVertex3f(axisArray[index * 3],
+                axisArray[index * 3 + 1],
+                axisArray[index * 3 + 2]);
+        glEnd();
+    }
 }
 
 QCursor SplitZone::getCursorForControlElement(int index)
@@ -223,6 +249,7 @@ QCursor SplitZone::getCursorForControlElement(int index)
 
 void SplitZone::resizeByControl(int index, float dx, float dy, float x, float y)
 {
+    /*
     switch (index)
     {
     case 0:
@@ -271,11 +298,25 @@ void SplitZone::resizeByControl(int index, float dx, float dy, float x, float y)
     default:
         break;
     }
+    */
+
+    if (index >= axisArray.size() / 3)
+    {
+
+    }
+    else
+    {
+        axisArray[index * 3] += dx;
+        axisArray[index * 3 + 1] += dy;
+        calculateLine(axisArray, width);
+        line->setVertexArray(lineWidth, lineAxisArray, size);
+    }
 }
 
 int SplitZone::getNumberOfControls()
 {
-    return 4;
+    //return 4;
+    return axisArray.size() / 3 + 2;
 }
 
 int SplitZone::controlsForPoint()
@@ -326,6 +367,14 @@ bool SplitZone::setFixed(bool fixed)
 void SplitZone::calculateLine(vec3 p1, vec3 p2, float width)
 {
 
+    if (axisArray.size() != 6)
+        axisArray.resize(6);
+    axisArray[0] = p1.x;
+    axisArray[1] = p1.y;
+    axisArray[2] = p1.z;
+    axisArray[3] = p2.x;
+    axisArray[4] = p2.y;
+    axisArray[5] = p2.z;
     xCenter = (p1.x + p2.x) / 2.0f;
     yCenter = (p1.y + p2.y) / 2.0f;
     float r = sqrt((p1.x - p2.x)*(p1.x - p2.x) + (p1.y - p2.y)*(p1.y - p2.y));
@@ -536,7 +585,12 @@ void SplitZone::calculateLine(vec3 p1, vec3 p2, float width)
 void SplitZone::calculateLine(float *pointsArray, int size, float width)
 {
     QVector<GLfloat> lineAxis;
-
+    if (axisArray.size() != size)
+        axisArray.resize(size);
+    for (int i = 0; i < size; ++i)
+    {
+        axisArray[i] = pointsArray[i];
+    }
     xCenter = pointsArray[size / 6 * 3];
     yCenter = pointsArray[size / 6 * 3 + 1];
     for (int i = 0; i < size / 3; ++i)
@@ -786,6 +840,264 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
 
 }
 
+void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
+{
+    QVector<GLfloat> lineAxis;
+    int size = pointsArray.size();
+    if (axisArray.size() != size)
+        axisArray.resize(size);
+    for (int i = 0; i < size; ++i)
+    {
+        axisArray[i] = pointsArray[i];
+    }
+    xCenter = pointsArray[size / 6 * 3];
+    yCenter = pointsArray[size / 6 * 3 + 1];
+    for (int i = 0; i < size / 3; ++i)
+    {
+        // Если теукщий индекс - начало осевой линии,
+        // то строим перпендикуляр
+        if (i == 0)
+        {
+            float x1 = pointsArray[i * 3];
+            float y1 = pointsArray[i * 3 + 1];
+            float x2 = pointsArray[(i + 1) * 3];
+            float y2 = pointsArray[(i + 1) * 3 + 1];
+
+            float r = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+            float xR1, yR1, xR2, yR2;
+            float pi = 3.1415926f;
+            float alpha = acos((x1 - x2) / r);
+
+            if ((y1 - y2) < 0)
+                alpha = 2.0f * pi - alpha;
+
+            float alpha1 = alpha - pi / 2.0f;
+            if (alpha1 < 0)
+                alpha1 = 2.0f * pi + alpha1;
+            float alpha2 = alpha1 + pi;
+            float r1 = width / 2.0f;
+
+            if (beginRounding)
+            {
+                xR1 = x1 + ((x2 - x1) / r) * (width / 2.0f);
+                yR1 = y1 + ((y2 - y1) / r) * (width / 2.0f);
+                int numberOfSides = 10;
+                for (int i = 0; i <= numberOfSides; ++i)
+                {
+                    float angle = alpha1 + (alpha2 - alpha1) / numberOfSides * float(i);
+                    float dx = r1 * cos(angle);
+                    float dy = r1 * sin(angle);
+                    lineAxis.push_back(xR1  + dx);
+                    lineAxis.push_back(yR1 + dy);
+                    lineAxis.push_back(0.02f);
+                }
+            }
+            else
+            {
+                lineAxis.push_back(x1  + r1 * cos(alpha2));
+                lineAxis.push_back(y1 + r1 * sin(alpha2));
+                lineAxis.push_back(0.02f);
+            }
+        }
+        else
+        {   // Если теукщий индекс - конец осевой линии,
+            // то строим перпендикуляр
+            if (i == size / 3 - 1)
+            {
+                float x2 = pointsArray[i * 3];
+                float y2 = pointsArray[i * 3 + 1];
+                float x1 = pointsArray[(i - 1) * 3];
+                float y1 = pointsArray[(i - 1) * 3 + 1];
+                float r = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+                float xR1, yR1, xR2, yR2;
+                float pi = 3.1415926f;
+                float alpha = acos((x1 - x2) / r);
+
+                if ((y1 - y2) < 0)
+                    alpha = 2.0f * pi - alpha;
+                float alpha1 = alpha - pi / 2.0f;
+                if (alpha1 < 0)
+                    alpha1 = 2.0f * pi + alpha1;
+                float alpha2 = alpha1 + pi;
+                float r1 = width / 2.0f;
+                alpha1 = alpha2;
+                alpha2 += pi;
+                if (endRounding)
+                {
+                    xR1 = x2 + ((x1 - x2) / r) * (width / 2.0f);
+                    yR1 = y2 + ((y1 - y2) / r) * (width / 2.0f);
+                    int numberOfSides = 10;
+                    for (int i = 0; i <= numberOfSides; ++i)
+                    {
+                        float angle = alpha1 + (alpha2 - alpha1) / numberOfSides * float(i);
+                        float dx = r1 * cos(angle);
+                        float dy = r1 * sin(angle);
+                        lineAxis.push_back(xR1  + dx);
+                        lineAxis.push_back(yR1 + dy);
+                        lineAxis.push_back(0.02f);
+                    }
+                }
+                else
+                {
+                    lineAxis.push_back(x2  + r1 * cos(alpha1));
+                    lineAxis.push_back(y2 + r1 * sin(alpha1));
+                    lineAxis.push_back(0.02f);
+                    lineAxis.insert(0,0.02f);
+                    lineAxis.insert(0,y2 + r1 * sin(alpha2));
+                    lineAxis.insert(0,x2  + r1 * cos(alpha2));
+                    //lineAxis.push_back(x2  + r1 * cos(alpha2));
+                    //lineAxis.push_back(y2 + r1 * sin(alpha2));
+                    //lineAxis.push_back(0.02f);
+                }
+            }
+            else
+            {
+
+                float x1 = pointsArray[(i - 1) * 3];
+                float y1 = pointsArray[(i - 1) * 3 + 1];
+                float x2 = pointsArray[i * 3];
+                float y2 = pointsArray[i * 3 + 1];
+                float x3 = pointsArray[(i + 1) * 3];
+                float y3 = pointsArray[(i + 1) * 3 + 1];
+                float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
+                float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                float alpha = (acos(num / den))/2.0f;
+                float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
+                float pi = 3.1415926f;
+                if(sa < 0) // Точка находится справа
+                {
+                    alpha = pi - alpha;
+                }
+
+
+                float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
+                if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
+                {
+                    beta *= -1.0f;
+                }
+                float r1 = width / 2.0f;
+                float hamma = alpha + beta;
+                float dx = (r1 / sin(alpha)) * cos(hamma);
+                float dy = (r1 / sin(alpha)) * sin(hamma);
+
+                lineAxis.push_back(x2 - dx);
+                lineAxis.push_back(y2 - dy);
+                lineAxis.push_back(0.02f);
+
+
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////
+    int counter = 3;
+    for (int i = size / 3 - 2; i >= 0; --i)
+    {
+        // Если теукщий индекс - начало осевой линии,
+        // то строим перпендикуляр
+        if (i == 0)
+        {
+            if (!beginRounding)
+            {
+                float x1 = pointsArray[i * 3];
+                float y1 = pointsArray[i * 3 + 1];
+                float x2 = pointsArray[(i + 1) * 3];
+                float y2 = pointsArray[(i + 1) * 3 + 1];
+
+                float r = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+                float xR1, yR1, xR2, yR2;
+                float pi = 3.1415926f;
+                float alpha = acos((x1 - x2) / r);
+
+                if ((x1 - x2) < 0)
+                    alpha = 2.0f * pi - alpha;
+                float alpha1 = alpha - pi / 2.0f;
+                if (alpha1 < 0)
+                    alpha1 = 2.0f * pi + alpha1;
+                float alpha2 = alpha1 + pi;
+                float r1 = width / 2.0f;
+
+                lineAxis.push_back(x1 + r1 * cos(alpha1));
+                lineAxis.push_back(y1 + r1 * sin(alpha1));
+                lineAxis.push_back(0.02f);
+            }
+            else
+            {
+                if (endRounding)
+                {
+                float x1 = lineAxis[0];
+                float y1 = lineAxis[1];
+                float z1 = lineAxis[2];
+                lineAxis.push_back(x1);
+                lineAxis.push_back(y1);
+                lineAxis.push_back(z1);
+                }
+            }
+
+        }
+        // Если теукщий индекс - конец осевой линии,
+        // то строим перпендикуляр
+
+        else
+        {
+            float x1 = pointsArray[(i - 1) * 3];
+            float y1 = pointsArray[(i - 1) * 3 + 1];
+            float x2 = pointsArray[i * 3];
+            float y2 = pointsArray[i * 3 + 1];
+            float x3 = pointsArray[(i + 1) * 3];
+            float y3 = pointsArray[(i + 1) * 3 + 1];
+            float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
+            float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+            float alpha = (acos(num / den))/2.0f;
+            float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
+            float pi = 3.1415926f;
+            if(sa < 0) // Точка находится справа
+            {
+                alpha = pi - alpha;
+            }
+
+
+            float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
+            if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
+            {
+                beta *= -1.0f;
+            }
+            float r1 = width / 2.0f;
+            float hamma = alpha + beta;
+            float dx = (r1 / sin(alpha)) * cos(hamma);
+            float dy = (r1 / sin(alpha)) * sin(hamma);
+
+            if (!endRounding)
+            {
+                lineAxis.insert(counter,0.02f);
+                lineAxis.insert(counter,y2 + dy);
+                lineAxis.insert(counter,x2 + dx);
+                counter += 3;
+            }
+            else
+            {
+                lineAxis.push_back(x2 + dx);
+                lineAxis.push_back(y2 + dy);
+                lineAxis.push_back(0.02f);
+            }
+
+        }
+
+    }
+
+    this->size = lineAxis.size();
+    lineAxisArray = new GLfloat[this->size];
+    for (int i = 0; i < this->size; ++i)
+        lineAxisArray[i] = lineAxis[i];
+
+    if (line != NULL)
+    {
+        line->setVertexArrayForAxis(lineAxisArray, this->size);
+        line->setVertexArray(lineWidth,lineAxisArray, this->size);
+        line->setTextureArray();
+    }
+}
+
 float SplitZone::getWidth()
 {
     return width;
@@ -810,4 +1122,130 @@ void SplitZone::drawDescription(QGLWidget *render, float red, float green, float
         getWindowCoord(x, y, z, wx, wy, wz);
         render->renderText(wx + 5, wy + 5, description, shrift);
     }
+}
+
+void SplitZone::rotate(float angle, float x, float y, float z)
+{
+    line->rotate(angle, x, y, z);
+    float tx = 0.0f, ty = 0.0f;
+    for (int i = 0; i < axisArray.size() / 3; ++i)
+    {
+        axisArray[i * 3] -= x;
+        axisArray[i * 3 + 1] -= y;
+        tx = axisArray[i * 3];
+        ty = axisArray[i * 3 + 1];
+        axisArray[i * 3] = tx * cos(angle) - ty * sin(angle);
+        axisArray[i * 3 + 1] = tx * sin(angle) + ty * cos(angle);
+        axisArray[i * 3] += x;
+        axisArray[i * 3 + 1] += y;
+    }
+    p1.x -= x;
+    p1.y -= y;
+    tx = p1.x;
+    ty = p1.y;
+    p1.x = tx * cos(angle) - ty * sin(angle);
+    p1.y = tx * sin(angle) + ty * cos(angle);
+    p1.x += x;
+    p1.y += y;
+
+    p2.x -= x;
+    p2.y -= y;
+    tx = p2.x;
+    ty = p2.y;
+    p2.x = tx * cos(angle) - ty * sin(angle);
+    p2.y = tx * sin(angle) + ty * cos(angle);
+    p2.x += x;
+    p2.y += y;
+
+    p3.x -= x;
+    p3.y -= y;
+    tx = p3.x;
+    ty = p3.y;
+    p3.x = tx * cos(angle) - ty * sin(angle);
+    p3.y = tx * sin(angle) + ty * cos(angle);
+    p3.x += x;
+    p3.y += y;
+
+    p4.x -= x;
+    p4.y -= y;
+    tx = p4.x;
+    ty = p4.y;
+    p4.x = tx * cos(angle) - ty * sin(angle);
+    p4.y = tx * sin(angle) + ty * cos(angle);
+    p4.x += x;
+    p4.y += y;
+
+    line1_p1.x -= x;
+    line1_p1.y -= y;
+    tx = line1_p1.x;
+    ty = line1_p1.y;
+    line1_p1.x = tx * cos(angle) - ty * sin(angle);
+    line1_p1.y = tx * sin(angle) + ty * cos(angle);
+    line1_p1.x += x;
+    line1_p1.y += y;
+
+    line1_p2.x -= x;
+    line1_p2.y -= y;
+    tx = line1_p2.x;
+    ty = line1_p2.y;
+    line1_p2.x = tx * cos(angle) - ty * sin(angle);
+    line1_p2.y = tx * sin(angle) + ty * cos(angle);
+    line1_p2.x += x;
+    line1_p2.y += y;
+
+    line2_p1.x -= x;
+    line2_p1.y -= y;
+    tx = line2_p1.x;
+    ty = line2_p1.y;
+    line2_p1.x = tx * cos(angle) - ty * sin(angle);
+    line2_p1.y = tx * sin(angle) + ty * cos(angle);
+    line2_p1.x += x;
+    line2_p1.y += y;
+
+    line2_p2.x -= x;
+    line2_p2.y -= y;
+    tx = line2_p2.x;
+    ty = line2_p2.y;
+    line2_p2.x = tx * cos(angle) - ty * sin(angle);
+    line2_p2.y = tx * sin(angle) + ty * cos(angle);
+    line2_p2.x += x;
+    line2_p2.y += y;
+
+    xCenter -= x;
+    yCenter -= y;
+    tx = xCenter;
+    ty = yCenter;
+    xCenter = tx * cos(angle) - ty * sin(angle);
+    yCenter = tx * sin(angle) + ty * cos(angle);
+    xCenter += x;
+    yCenter += y;
+}
+
+void SplitZone::addBreak(bool front)
+{
+    float x, y, z;
+    if (front)
+    {
+        x = axisArray[0];
+        y = axisArray[1];
+        z = axisArray[2];
+        axisArray.push_front(z);
+        axisArray.push_front(y);
+        axisArray.push_front(x);
+
+    }
+    else
+    {
+        int size = axisArray.size();
+        x = axisArray[size - 3];
+        y = axisArray[size - 2];
+        z = axisArray[size - 1];
+        axisArray.push_back(x);
+        axisArray.push_back(y);
+        axisArray.push_back(z);
+    }
+    calculateLine(axisArray, width);
+    line->setVertexArray(lineWidth, lineAxisArray, size);
+    line->setTextureArray();
+    line->setIndexArray();
 }

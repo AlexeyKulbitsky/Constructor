@@ -124,6 +124,7 @@ public:
     // RoadElement interface
 public:
     virtual std::vector<vec3> getCoordOfControl(int index);
+    void rotate(float angle, float x, float y, float z);
 };
 
 #endif // LINEBROKEN_H
