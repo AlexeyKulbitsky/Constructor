@@ -13,11 +13,34 @@ public:
               bool beginRounding,
               bool endRounding,
               QString description = '\0');
+    SplitZone(float *pointsArray, int size,
+              float width,
+              bool beginRounding,
+              bool endRounding,
+              int type,
+              double height,
+              QString texture_1,
+              float texture1USize, float texture1VSize,
+              QString texture_2,
+              float texture2USize, float texture2VSize,
+              QString description = '\0');
     SplitZone(float x1, float y1, float z1,
               float x2, float y2, float z2,
               float width,
               bool beginRounding,
               bool endRounding,
+              QString description = '\0');
+    SplitZone(float x1, float y1, float z1,
+              float x2, float y2, float z2,
+              float width,
+              bool beginRounding,
+              bool endRounding,
+              int type,
+              double height,
+              QString texture_1,
+              float texture1USize, float texture1VSize,
+              QString texture_2,
+              float texture2USize, float texture2VSize,
               QString description = '\0');
     ~SplitZone();
     // RoadElement interface
@@ -52,6 +75,7 @@ private:
     vec3 pBegin, pEnd;
     vec3 pPerpBegin, pPerpEnd;
     float width;
+    int numberOfSides;
 
     GLfloat *lineAxisArray;
     int size;
@@ -61,12 +85,35 @@ private:
     vec3 line1_p1, line1_p2, line2_p1, line2_p2;
     QString description;
     float xCenter, yCenter;
+    int type;
+    float height;
+
+    QVector<GLfloat> boardVertexArray;
+    QVector<GLfloat> boardTextureArray;
+    QVector<GLuint> boardIndexArray;
+    QVector<GLfloat> vertexArray;
+    QVector<GLfloat> textureArray;
+    QVector<GLuint> indexArray;
+
+    int textureID[2];
+    float texture1USize, texture1VSize;
+    float texture2USize, texture2VSize;
 
 public:
     void calculateLine(vec3 p1, vec3 p2, float width);
     void calculateLine(float *pointsArray, int size,
                        float width);
+    void calculateLine(float *pointsArray, int size);
     void calculateLine(QVector<GLfloat>& pointsArray, float width);
+
+    void reset();
+    void setBoardVertexArray();
+    void setBoardTextureArray(float textureUsize, float textureVsize);
+    void setBoardIndexArray();
+
+    void setVertexArray();
+    void setTextureArray(float textureUSize, float textureVSize);
+    void setIndexArray();
 
     float getWidth();
     void setDescription(const QString &description);

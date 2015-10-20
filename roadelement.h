@@ -182,11 +182,13 @@ public:
     virtual ~RoadElement(){}
     virtual int getLayer() = 0;
     virtual void clear() = 0;
+    virtual void rotate(float angle, float x, float y, float z) {}
     virtual void setStepDialog(StepDialog* dialog)
     {
         if (dialog)
         stepDialog = dialog;
     }
+    virtual void deleteLine(RoadElement* line){}
 public slots:
     virtual bool setFixed(bool fixed) = 0;
 

@@ -53,7 +53,8 @@ SOURCES += main.cpp\
     splitzone.cpp \
     voltageline.cpp \
     doublevoltageline.cpp \
-    lmath.cpp
+    lmath.cpp \
+    railway.cpp
 
 
 
@@ -104,7 +105,8 @@ HEADERS  += mainwindow.h\
     splitzone.h \
     voltageline.h \
     doublevoltageline.h \
-    lmath.h
+    lmath.h \
+    railway.h
 
 
 

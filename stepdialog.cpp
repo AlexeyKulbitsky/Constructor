@@ -14,6 +14,9 @@ StepDialog(QWidget *parent):QDialog(parent)
     beginStep = 0.0;
     endStep = 0.0;
     singleWay = true;
+    axisStep = 0.0;
+    splitZoneHeight = 0.1;
+    splitZoneType = 0;
     layout = new QStackedLayout();
 
     setDefaultLayout();
@@ -218,6 +221,29 @@ void StepDialog::setSplitZoneLayout()
     lineTypeLayout->addWidget(lineTypeLabel);
     lineTypeLayout->addWidget(lineTypeComboBox);
 
+    QLabel *splitZoneTypeLabel = new QLabel("Тип разделительной зоны");
+    QComboBox *splitZoneTypeComboBox = new QComboBox();
+    splitZoneTypeComboBox->addItem("Разметка");
+    splitZoneTypeComboBox->addItem("Газон");
+    splitZoneTypeComboBox->addItem("Тротуар");
+    connect(splitZoneTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setSplitZoneType(int)));
+
+    QHBoxLayout *splitZoneTypeLayout = new QHBoxLayout();
+    splitZoneTypeLayout->addWidget(splitZoneTypeLabel);
+    splitZoneTypeLayout->addWidget(splitZoneTypeComboBox);
+
+    QDoubleSpinBox* splitZoneHeightSpinBox = new QDoubleSpinBox();
+    splitZoneHeightSpinBox->setMinimum(0.0);
+    splitZoneHeightSpinBox->setValue(splitZoneHeight);
+    splitZoneHeightSpinBox->setEnabled(false);
+    connect(splitZoneHeightSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setSplitZoneHeight(double)));
+    connect(this, SIGNAL(splitZoneHeightEnabledChanged(bool)), splitZoneHeightSpinBox, SLOT(setEnabled(bool)));
+
+    QLabel* splitZoneHeightLabel = new QLabel("Высота");
+
+    QHBoxLayout* splitZoneHeightLayout = new QHBoxLayout();
+    splitZoneHeightLayout->addWidget(splitZoneHeightLabel);
+    splitZoneHeightLayout->addWidget(splitZoneHeightSpinBox);
 
     QPushButton *okPushButton = new QPushButton("OK");
     connect(okPushButton, SIGNAL(clicked(bool)), this, SLOT(buttonClicked()));
@@ -298,6 +324,8 @@ void StepDialog::setSplitZoneLayout()
 
     splitZoneLayout = new QVBoxLayout();
     splitZoneLayout->addLayout(lineTypeLayout);
+    splitZoneLayout->addLayout(splitZoneTypeLayout);
+    splitZoneLayout->addLayout(splitZoneHeightLayout);
     splitZoneLayout->addWidget(defaultGroupBox);
     splitZoneLayout->addLayout(buttonsLayout);
 
@@ -343,7 +371,9 @@ void StepDialog::setTramwaysLayout()
     QDoubleSpinBox* waysStepSpinBox = new QDoubleSpinBox();
     waysStepSpinBox->setMinimum(0.0);
     waysStepSpinBox->setValue(0.0);
+    waysStepSpinBox->setEnabled(false);
     connect(doubleWayRadioButton, SIGNAL(toggled(bool)), waysStepSpinBox, SLOT(setEnabled(bool)));
+    connect(waysStepSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setAxisStep(double)));
     QHBoxLayout* waysStepLayout = new QHBoxLayout();
     waysStepLayout->addWidget(waysStepLabel);
     waysStepLayout->addWidget(waysStepSpinBox);
@@ -479,6 +509,8 @@ void StepDialog::buttonClicked()
         emit beginRoundingChanged(beginRounding);
         emit endRoundingChanged(endRounding);
         emit splitZoneWidthChanged(splitZoneWidth);
+        emit splitZoneTypeChanged(splitZoneType);
+        emit splitZoneHeightChanged(splitZoneHeight);
         //qDebug() << "SplitZone";
     }
         break;
@@ -491,6 +523,17 @@ void StepDialog::buttonClicked()
         emit beginStepChanged(beginStep);
         emit endStepChanged(endStep);
 
+    }
+        break;
+    case 8:
+    {
+        emit rightSideChanged(rightSide);
+        emit stepChanged(step);
+        emit lineTypeChanged(lineType);
+        emit singleWayChanged(singleWay);
+        emit axisStepChanged(axisStep);
+        emit endStepChanged(endStep);
+        emit beginStepChanged(beginStep);
     }
         break;
     default:
@@ -550,5 +593,33 @@ void StepDialog::setSingleWay(bool status)
         return;
     singleWay = status;
     emit singleWayChanged(status);
+}
+
+void StepDialog::setAxisStep(double step)
+{
+    if (axisStep == step)
+        return;
+    axisStep = step;
+    emit axisStepChanged(step);
+}
+
+void StepDialog::setSplitZoneHeight(double value)
+{
+    if (splitZoneHeight == value)
+        return;
+    splitZoneHeight = value;
+    emit splitZoneHeightChanged(value);
+}
+
+void StepDialog::setSplitZoneType(int type)
+{
+    if (splitZoneType == type)
+        return;
+    splitZoneType = type;
+    emit splitZoneTypeChanged(type);
+    if (type >= 0 && type < 3 && type != 0)
+        emit splitZoneHeightEnabledChanged(true);
+    else
+        emit splitZoneHeightEnabledChanged(false);
 }
 

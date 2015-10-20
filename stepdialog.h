@@ -44,6 +44,9 @@ public:
     double beginStep;
     double endStep;
     bool singleWay;
+    double axisStep;
+    double splitZoneHeight;
+    int splitZoneType;
 
 signals:
     void rightSideChanged(bool status);
@@ -57,6 +60,10 @@ signals:
     void endRoundingChanged(bool status);
     void splitZoneWidthChanged(double value);
     void singleWayChanged(bool status);
+    void axisStepChanged(double step);
+    void splitZoneHeightChanged(double value);
+    void splitZoneTypeChanged(int type);
+    void splitZoneHeightEnabledChanged(bool status);
 
 public slots:
     void setRightSide(bool status);
@@ -72,6 +79,9 @@ public slots:
     void setEndRoundingStatus(bool status);
     void setSplitZoneWidth(double width);
     void setSingleWay(bool status);
+    void setAxisStep(double step);
+    void setSplitZoneHeight(double value);
+    void setSplitZoneType(int type);
 };
 
 #endif // STEPDIALOG_H

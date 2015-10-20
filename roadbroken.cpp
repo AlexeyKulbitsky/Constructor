@@ -106,6 +106,28 @@ RoadBroken::RoadBroken(float x1, float y1, float x2, float y2, float width,
     connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
 }
 
+RoadBroken::~RoadBroken()
+{
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        for (int i = 0; i < lines.size(); ++i)
+        {
+            for (std::list<RoadElement*>::iterator it = model->getGroup(1).begin();
+                 it != model->getGroup(1).end(); ++it)
+            {
+                if (lines[i].line == (*it))
+                {
+                    model->getGroup(1).erase(it);
+                    break;
+                }
+            }
+            delete lines[i].line;
+        }
+        delete lines[i].line;
+    }
+    lines.clear();
+}
+
 void RoadBroken::setVertexArray(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, GLfloat width)
 {
     this->width = width;
@@ -2254,7 +2276,7 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
                 if (lines[i].lineType == 6)
                 {
                     SplitZone* splitZone = dynamic_cast<SplitZone*>(lines[i].line);
-                    splitZone->resizeByControl(splitZone->getNumberOfControls() - 3, dxRes, dyRes, x, y);
+                    splitZone->resizeByControl(splitZone->getNumberOfControls() - 1, dxRes, dyRes, x, y);
                 }
                 else
                 {
@@ -2854,6 +2876,7 @@ QJsonObject RoadBroken::getJSONInfo()
 
 void RoadBroken::getProperties(QFormLayout *layout, QGLWidget* render)
 {
+    clearProperties(layout);
     this->layout = layout;
     this->render = render;
     while(QLayoutItem* child = layout->takeAt(0))
@@ -2907,6 +2930,10 @@ void RoadBroken::getProperties(QFormLayout *layout, QGLWidget* render)
     connect(stepDialog, SIGNAL(endRoundingChanged(bool)), this, SLOT(setEndRounding(bool)));
     connect(stepDialog, SIGNAL(splitZoneWidthChanged(double)), this, SLOT(setSplitZoneWidth(double)));
     connect(stepDialog, SIGNAL(differentDirectionsChanged(bool)), this, SLOT(setDifferentDirections(bool)));
+    connect(stepDialog, SIGNAL(singleWayChanged(bool)), this, SLOT(setSingleWay(bool)));
+    connect(stepDialog, SIGNAL(axisStepChanged(double)), this, SLOT(setAxisStep(double)));
+    connect(stepDialog, SIGNAL(splitZoneTypeChanged(int)), this, SLOT(setSplitZoneType(int)));
+    connect(stepDialog, SIGNAL(splitZoneHeightChanged(double)), this, SLOT(setSplitZoneHeight(double)));
     connect(addLineButton, SIGNAL(clicked(bool)), stepDialog, SLOT(exec()));
     connect(stepDialog, SIGNAL(accepted()), this, SLOT(addLine()));
 
@@ -2938,36 +2965,147 @@ bool RoadBroken::isFixed()
 void RoadBroken::addLine(float step, QString textureSource, float textureSize, float lineWidth, int lineType, bool rightSide)
 {
 
-    QVector<float> axisArray;
 
-    getVertexArrayForLineAxis(axisArray,rightSide,step,beginStep,endStep);
-
-    int size = axisArray.size();
-    float *lineVertexArray = new float[size];
-    for (int i = 0; i < size; ++i)
-        lineVertexArray[i] = axisArray[i];
 
     qDebug() << "Got axis array, size: " << size / 3;
     LineBrokenLinkedToRoadBroken line;
+    if (lineType == 8)
+    {
+        if (singleWay)
+        {
+            QVector<float> axisArray;
+            getVertexArrayForLineAxis(axisArray,rightSide,step,beginStep,endStep);
+            int size = axisArray.size();
+            float *lineVertexArray = new float[size];
+            for (int i = 0; i < size; ++i)
+                lineVertexArray[i] = axisArray[i];
+
+            LineBroken* lineBroken = new LineBroken(lineWidth, lineVertexArray, size, textureSource, textureSize, "LineBroken", 1,
+                                                    QString("Линия №") + QString::number(lines.size() + 1));
+            line.line = lineBroken;
+            model->getGroup(1).push_back(lineBroken);
+            delete[] lineVertexArray;
+            lineVertexArray = NULL;
+        }
+        else
+        {
+            QVector<float> axisArray;
+            getVertexArrayForLineAxis(axisArray,rightSide,step + axisStep / 2.0,beginStep,endStep);
+            int size = axisArray.size();
+            float *lineVertexArray = new float[size];
+            for (int i = 0; i < size; ++i)
+                lineVertexArray[i] = axisArray[i];
+
+            //LineBrokenLinkedToRoadBroken line1;
+
+            LineBroken* lineBroken = new LineBroken(lineWidth, lineVertexArray, size, textureSource, textureSize, "LineBroken", 1,
+                                                    QString("Линия №") + QString::number(lines.size() + 1));
+            line.line = lineBroken;
+            model->getGroup(1).push_back(lineBroken);
+
+            line.lineWidth = lineWidth;
+            line.step = step;
+            line.rightSide = rightSide;
+            line.lineType = lineType;
+            line.textureSource = textureSource;
+            line.beginStep = beginStep;
+            line.endStep = endStep;
+            line.line->setSelectedStatus(false);
+            lines.push_back(line);
+
+            lineBroken = NULL;
+            axisArray.clear();
+            getVertexArrayForLineAxis(axisArray,rightSide,step - axisStep / 2.0,beginStep,endStep);
+            for (int i = 0; i < size; ++i)
+                lineVertexArray[i] = axisArray[i];
+            lineBroken = new LineBroken(lineWidth, lineVertexArray, size, textureSource, textureSize, "LineBroken", 1,
+                                                                QString("Линия №") + QString::number(lines.size() + 1));
+            line.line = lineBroken;
+            model->getGroup(1).push_back(lineBroken);
+
+            delete[] lineVertexArray;
+            lineVertexArray = NULL;
+        }
+
+    }
+    else
     if (lineType == 6)
     {
-        SplitZone* splitZone = new SplitZone(lineVertexArray, size, splitZoneWidth, beginRounding, endRounding,
-                                        QString("Линия №") + QString::number(lines.size() + 1));
+        QVector<float> axisArray;
+        getVertexArrayForLineAxis(axisArray,rightSide,step,beginStep,endStep);
+        int size = axisArray.size();
+        float *lineVertexArray = new float[size];
+        for (int i = 0; i < size; ++i)
+            lineVertexArray[i] = axisArray[i];
+
+        SplitZone* splitZone;
+        switch (splitZoneType)
+        {
+        case 0:
+        {
+            splitZone = new SplitZone(lineVertexArray, size, splitZoneWidth, beginRounding, endRounding,
+                                            QString("Линия №") + QString::number(lines.size() + 1));
+        }
+            break;
+        case 1:
+        {
+            splitZone = new SplitZone(lineVertexArray, size,
+                                      splitZoneWidth, beginRounding, endRounding,
+                                      splitZoneType,
+                                      splitZoneHeight,
+                                      QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                      0.25f, 6.0f,
+                                      QApplication::applicationDirPath() + "/models/city_roads/grass.jpg",
+                                      3.0f, 3.0f,
+                                      QString("Линия №") + QString::number(lines.size() + 1));
+        }
+            break;
+        case 2:
+        {
+            splitZone = new SplitZone(lineVertexArray, size,
+                                      splitZoneWidth, beginRounding, endRounding,
+                                      splitZoneType,
+                                      splitZoneHeight,
+                                      QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                      0.25f, 6.0f,
+                                      QApplication::applicationDirPath() + "/models/city_roads/nr_07S.jpg",
+                                      6.0f, 6.0f,
+                                      QString("Линия №") + QString::number(lines.size() + 1));
+        }
+            break;
+        default:
+            break;
+        }
+
+
         line.line = splitZone;
         model->getGroup(1).push_back(splitZone);
         line.splitZoneWidth = splitZoneWidth;
         line.beginRounding = beginRounding;
         line.endRounding = endRounding;
+
+        delete[] lineVertexArray;
+        lineVertexArray = NULL;
     }
     else
     {
+        QVector<float> axisArray;
+        getVertexArrayForLineAxis(axisArray,rightSide,step,beginStep,endStep);
+        int size = axisArray.size();
+        float *lineVertexArray = new float[size];
+        for (int i = 0; i < size; ++i)
+            lineVertexArray[i] = axisArray[i];
+
         LineBroken* lineBroken = new LineBroken(lineWidth, lineVertexArray, size, textureSource, textureSize, "LineBroken", 1,
                                                 QString("Линия №") + QString::number(lines.size() + 1));
         line.line = lineBroken;
         model->getGroup(1).push_back(lineBroken);
 
+        delete[] lineVertexArray;
+        lineVertexArray = NULL;
+
     }
-    qDebug() << "Creted line";
+    qDebug() << "Created line";
     line.lineWidth = lineWidth;
     line.step = step;
     line.rightSide = rightSide;
@@ -2977,8 +3115,6 @@ void RoadBroken::addLine(float step, QString textureSource, float textureSize, f
     line.endStep = endStep;
     line.line->setSelectedStatus(false);
     lines.push_back(line);
-    delete[] lineVertexArray;
-    lineVertexArray = NULL;
 
     emit linesChanged(layout, render);
 }
@@ -3013,6 +3149,12 @@ void RoadBroken::addLine()
     case 5:
         textSource = QApplication::applicationDirPath() + "/models/city_roads/d_inter.png";
         lWidth = 0.25f;
+        break;
+    case 8:
+        textSource = QString(":/textures/tramways.png");
+        lWidth = 1.5f;
+        addLine(step, textSource, 1.5f, lWidth, lineType, rightSide);
+        return;
         break;
     default:
         break;
@@ -3135,6 +3277,26 @@ void RoadBroken::setEndRounding(bool status)
 void RoadBroken::setDifferentDirections(bool status)
 {
     differentDirections = status;
+}
+
+void RoadBroken::setSingleWay(bool status)
+{
+    singleWay = status;
+}
+
+void RoadBroken::setAxisStep(double step)
+{
+    axisStep = step;
+}
+
+void RoadBroken::setSplitZoneType(int type)
+{
+    splitZoneType = type;
+}
+
+void RoadBroken::setSplitZoneHeight(double height)
+{
+    splitZoneHeight = height;
 }
 
 
@@ -3476,4 +3638,20 @@ void RoadBroken::clearProperties(QLayout *layout)
         delete child->widget();
         delete child;
     }
+}
+
+
+void RoadBroken::deleteLine(RoadElement *line)
+{
+    int index = -1;
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].line == line)
+        {
+            index = i;
+            break;
+        }
+    }
+    if (index >=0)
+        lines.remove(index);
 }

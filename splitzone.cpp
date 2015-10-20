@@ -13,6 +13,8 @@ SplitZone::SplitZone(float *pointsArray, int size,
                      bool endRounding,
                      QString description)
 {
+
+    lineAxisArray = NULL;
     this->description = description;
     this->name = "SplitZone";
     line = NULL;
@@ -21,16 +23,99 @@ SplitZone::SplitZone(float *pointsArray, int size,
     this->width = width;
     lineWidth = 0.15f;
     selected = fixed = false;
-    this->beginRounding = beginRounding;
-    this->endRounding = endRounding;
     calculateLine(pointsArray,size,width);
     lineWidth = 0.15f;
     this->layer = 1;
     this->width = width;
+    this->type = 0;
+    this->height = 0.0f;
     line = new LineBroken(lineWidth,lineAxisArray,this->size,
                           QApplication::applicationDirPath() + "/models/city_roads/solid.png", 6.0f,
                           "LineBroken", 1);
     selected = fixed = false;
+}
+
+SplitZone::SplitZone(float *pointsArray, int size,
+                     float width,
+                     bool beginRounding,
+                     bool endRounding,
+                     int type,
+                     double height,
+                     QString texture_1,
+                     float texture1USize, float texture1VSize,
+                     QString texture_2,
+                     float texture2USize, float texture2VSize,
+                     QString description)
+{
+    this->type = type;
+    this->height = height;
+    lineAxisArray = NULL;
+    switch (type)
+    {
+    case 0:
+    {
+        SplitZone(pointsArray, size,
+                  width,
+                  beginRounding,
+                  endRounding,
+                  description);
+    }
+        break;
+    case 1:
+    {
+        this->description = description;
+        this->name = "SplitZone";
+        line = NULL;
+        this->beginRounding = beginRounding;
+        this->endRounding = endRounding;
+        this->width = width;
+        selected = fixed = false;
+        calculateLine(pointsArray,size,width);
+        this->layer = 1;
+        this->height = height;
+        textureID[0] = TextureManager::getInstance()->getID(texture_1);
+        textureID[1] = TextureManager::getInstance()->getID(texture_2);
+        this->texture1USize = texture1USize;
+        this->texture1VSize = texture1VSize;
+        this->texture2USize = texture2USize;
+        this->texture2VSize = texture2VSize;
+        setBoardVertexArray();
+        setBoardTextureArray(texture1USize, texture1VSize);
+        setBoardIndexArray();
+        setVertexArray();
+        setTextureArray(texture2USize, texture2VSize);
+        setIndexArray();
+    }
+        break;
+    case 2:
+    {
+        this->description = description;
+        this->name = "SplitZone";
+        line = NULL;
+        this->beginRounding = beginRounding;
+        this->endRounding = endRounding;
+        this->width = width;
+        selected = fixed = false;
+        calculateLine(pointsArray,size,width);
+        this->layer = 1;
+        this->height = height;
+        textureID[0] = TextureManager::getInstance()->getID(texture_1);
+        textureID[1] = TextureManager::getInstance()->getID(texture_2);
+        this->texture1USize = texture1USize;
+        this->texture1VSize = texture1VSize;
+        this->texture2USize = texture2USize;
+        this->texture2VSize = texture2VSize;
+        setBoardVertexArray();
+        setBoardTextureArray(texture1USize, texture1VSize);
+        setBoardIndexArray();
+        setVertexArray();
+        setTextureArray(texture2USize, texture2VSize);
+        setIndexArray();
+    }
+        break;
+    default:
+        break;
+    }
 }
 
 SplitZone::SplitZone(float x1, float y1, float z1,
@@ -40,6 +125,9 @@ SplitZone::SplitZone(float x1, float y1, float z1,
                      bool endRounding,
                      QString description)
 {
+    lineAxisArray = NULL;
+    this->type = 0;
+    this->height = 0.0f;
     this->description = description;
     this->name = "SplitZone";
     this->layer = 1;
@@ -61,6 +149,107 @@ SplitZone::SplitZone(float x1, float y1, float z1,
                           QApplication::applicationDirPath() + "/models/city_roads/solid.png", 6.0f,
                           "LineBroken", 1);
     selected = fixed = false;
+}
+
+SplitZone::SplitZone(float x1, float y1, float z1,
+                     float x2, float y2, float z2,
+                     float width,
+                     bool beginRounding,
+                     bool endRounding,
+                     int type,
+                     double height,
+                     QString texture_1,
+                     float texture1USize, float texture1VSize,
+                     QString texture_2,
+                     float texture2USize, float texture2VSize,
+                     QString description)
+{
+    this->type = type;
+    this->height = height;
+    lineAxisArray = NULL;
+    switch (type)
+    {
+    case 0:
+        SplitZone(x1, y1, z1,
+                  x2, y2, z2,
+                  width,
+                  beginRounding,
+                  endRounding,
+                  description);
+        break;
+    case 1:
+    {
+        this->description = description;
+        this->name = "SplitZone";
+        line = NULL;
+        this->beginRounding = beginRounding;
+        this->endRounding = endRounding;
+        this->width = width;
+        selected = fixed = false;
+        pBegin.x = x1;
+        pBegin.y = y1;
+        pBegin.z = z1;
+        pEnd.x = x2;
+        pEnd.y = y2;
+        pEnd.z = z2;
+        this->beginRounding = beginRounding;
+        this->endRounding = endRounding;
+        this->width = width;
+        calculateLine(pBegin,pEnd,width);
+        this->layer = 1;
+        this->height = height;
+        textureID[0] = TextureManager::getInstance()->getID(texture_1);
+        textureID[1] = TextureManager::getInstance()->getID(texture_2);
+        this->texture1USize = texture1USize;
+        this->texture1VSize = texture1VSize;
+        this->texture2USize = texture2USize;
+        this->texture2VSize = texture2VSize;
+        setBoardVertexArray();
+        setBoardTextureArray(texture1USize, texture1VSize);
+        setBoardIndexArray();
+        setVertexArray();
+        setTextureArray(texture2USize, texture2VSize);
+        setIndexArray();
+    }
+        break;
+    case 2:
+    {
+        this->description = description;
+        this->name = "SplitZone";
+        line = NULL;
+        this->beginRounding = beginRounding;
+        this->endRounding = endRounding;
+        this->width = width;
+        selected = fixed = false;
+        pBegin.x = x1;
+        pBegin.y = y1;
+        pBegin.z = z1;
+        pEnd.x = x2;
+        pEnd.y = y2;
+        pEnd.z = z2;
+        this->beginRounding = beginRounding;
+        this->endRounding = endRounding;
+        this->width = width;
+        calculateLine(pBegin,pEnd,width);
+        this->layer = 1;
+        this->height = height;
+        textureID[0] = TextureManager::getInstance()->getID(texture_1);
+        textureID[1] = TextureManager::getInstance()->getID(texture_2);
+        this->texture1USize = texture1USize;
+        this->texture1VSize = texture1VSize;
+        this->texture2USize = texture2USize;
+        this->texture2VSize = texture2VSize;
+        setBoardVertexArray();
+        setBoardTextureArray(texture1USize, texture1VSize);
+        setBoardIndexArray();
+        setVertexArray();
+        setTextureArray(texture2USize, texture2VSize);
+        setIndexArray();
+    }
+        break;
+    default:
+        break;
+    }
 }
 
 SplitZone::~SplitZone()
@@ -86,8 +275,85 @@ void SplitZone::setSelectedStatus(bool status)
 
 void SplitZone::drawFigure(QGLWidget *render)
 {
+    //qDebug() << "AxisPoints: " << axisArray.size() / 3;
 
-    line->drawFigure(render);
+    switch (type)
+    {
+    case 0:
+    {
+        line->drawFigure(render);
+    }
+        break;
+    case 1:
+    {
+        glDisableClientState(GL_COLOR_ARRAY);
+        glEnable(GL_TEXTURE_2D);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+        glBindTexture(GL_TEXTURE_2D, textureID[0]);
+        glVertexPointer(3, GL_FLOAT, 0, boardVertexArray.begin());
+        glTexCoordPointer(2, GL_FLOAT, 0, boardTextureArray.begin());
+        glDrawElements(GL_TRIANGLES, boardIndexArray.size(), GL_UNSIGNED_INT, boardIndexArray.begin());
+
+        glBindTexture(GL_TEXTURE_2D, textureID[1]);
+        glVertexPointer(3, GL_FLOAT, 0, vertexArray.begin());
+        glTexCoordPointer(2, GL_FLOAT, 0, textureArray.begin());
+        glDrawElements(GL_TRIANGLES, indexArray.size(), GL_UNSIGNED_INT, indexArray.begin());
+
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisable(GL_TEXTURE_2D);
+        glEnableClientState(GL_COLOR_ARRAY);
+
+        //qDebug() << "vertixes: " << boardVertexArray.size() / 3;
+        //qDebug() << "textures: " << boardTextureArray.size() / 3;
+        //qDebug() << "indices: " << boardIndexArray.size() / 3;
+
+    }
+        break;
+    case 2:
+    {
+        glDisableClientState(GL_COLOR_ARRAY);
+        glEnable(GL_TEXTURE_2D);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+        glBindTexture(GL_TEXTURE_2D, textureID[0]);
+        glVertexPointer(3, GL_FLOAT, 0, boardVertexArray.begin());
+        glTexCoordPointer(2, GL_FLOAT, 0, boardTextureArray.begin());
+        glDrawElements(GL_TRIANGLES, boardIndexArray.size(), GL_UNSIGNED_INT, boardIndexArray.begin());
+
+        glBindTexture(GL_TEXTURE_2D, textureID[1]);
+        glVertexPointer(3, GL_FLOAT, 0, vertexArray.begin());
+        glTexCoordPointer(2, GL_FLOAT, 0, textureArray.begin());
+        glDrawElements(GL_TRIANGLES, indexArray.size(), GL_UNSIGNED_INT, indexArray.begin());
+
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisable(GL_TEXTURE_2D);
+        glEnableClientState(GL_COLOR_ARRAY);
+
+        //qDebug() << "vertixes: " << boardVertexArray.size() / 3;
+        //qDebug() << "textures: " << boardTextureArray.size() / 2;
+        //qDebug() << "indices: " << boardIndexArray.size() / 3;
+        //qDebug() << "axis: " << size / 3;
+
+    }
+        break;
+    default:
+        break;
+    }
+    /*
+    glDisable(GL_DEPTH_TEST);
+    glLineWidth(2.0f);
+    glBegin(GL_LINE_STRIP);
+    for (int i = 0; i < size / 3; ++i)
+    {
+        glColor3f(0.0f, 0.0f, 0.0f);
+        glVertex3f(lineAxisArray[i * 3],
+                lineAxisArray[i * 3 + 1],
+                lineAxisArray[i * 3 + 2]);
+    }
+    glEnd();
+    glEnable(GL_DEPTH_TEST);
+    */
     if (selected)
     {
         glDisable(GL_DEPTH_TEST);
@@ -145,11 +411,16 @@ void SplitZone::drawMeasurements(QGLWidget *render)
 
 void SplitZone::move(float dx, float dy, float dz)
 {
-    line->move(dx, dy, dz);
+
     for (int i = 0; i < size / 3; ++i)
     {
         this->lineAxisArray[i * 3] += dx;
         this->lineAxisArray[i * 3 + 1] += dy;
+    }
+    for (int i = 0; i < axisArray.size() / 3; ++i)
+    {
+        axisArray[i * 3] += dx;
+        axisArray[i * 3 + 1] += dy;
     }
     p1.x += dx;
     p2.x += dx;
@@ -164,82 +435,56 @@ void SplitZone::move(float dx, float dy, float dz)
     p4.y += dy;
     pBegin.y += dy;
     pEnd.y += dy;
-    for (int i = 0; i < axisArray.size() / 3; ++i)
+
+    switch (type)
     {
-        axisArray[i * 3] += dx;
-        axisArray[i * 3 + 1] += dy;
+    case 0:
+        line->move(dx, dy, dz);
+        break;
+    case 1:
+    {
+        for (int i = 0; i < boardVertexArray.size() / 3; ++i)
+        {
+            boardVertexArray[i * 3] += dx;
+            boardVertexArray[i * 3 + 1] += dy;
+        }
+        for (int i = 0; i < vertexArray.size() / 3; ++i)
+        {
+            vertexArray[i * 3] += dx;
+            vertexArray[i * 3 + 1] += dy;
+        }
+    }
+        break;
+    case 2:
+    {
+        for (int i = 0; i < boardVertexArray.size() / 3; ++i)
+        {
+            boardVertexArray[i * 3] += dx;
+            boardVertexArray[i * 3 + 1] += dy;
+        }
+        for (int i = 0; i < vertexArray.size() / 3; ++i)
+        {
+            vertexArray[i * 3] += dx;
+            vertexArray[i * 3 + 1] += dy;
+        }
+    }
+        break;
+    default:
+        break;
     }
 
 }
 
 void SplitZone::drawControlElement(int index, float lineWidth, float pointSize)
 {
-    /*
-    switch (index)
-    {
-    case 0:
-    {
-        glLineWidth(lineWidth);
-        glBegin(GL_LINES);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(p1.x, p1.y, p1.z);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(p2.x, p2.y, p2.z);
-        glEnd();
-    }
-        break;
-    case 1:
-    {
-        glLineWidth(lineWidth);
-        glBegin(GL_LINES);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(p3.x, p3.y, p3.z);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(p4.x, p4.y, p4.z);
-        glEnd();
-    }
-        break;
-    case 2:
-    {
-        glLineWidth(lineWidth);
-        glBegin(GL_LINES);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(p2.x, p2.y, p2.z);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(p3.x, p3.y, p3.z);
-        glEnd();
-    }
-        break;
-    case 3:
-    {
-        glLineWidth(lineWidth);
-        glBegin(GL_LINES);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(p4.x, p4.y, p4.z);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(p1.x, p1.y, p1.z);
-        glEnd();
-    }
-        break;
-    default:
-        break;
-    }
-    */
-
-    if (index >= axisArray.size() / 3)
-    {
-
-    }
-    else
-    {
-        glPointSize(pointSize + 5.0f);
-        glBegin(GL_POINTS);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(axisArray[index * 3],
+    glPointSize(pointSize + 5.0f);
+    glBegin(GL_POINTS);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(axisArray[index * 3],
                 axisArray[index * 3 + 1],
                 axisArray[index * 3 + 2]);
-        glEnd();
-    }
+    glEnd();
+
 }
 
 QCursor SplitZone::getCursorForControlElement(int index)
@@ -249,74 +494,43 @@ QCursor SplitZone::getCursorForControlElement(int index)
 
 void SplitZone::resizeByControl(int index, float dx, float dy, float x, float y)
 {
-    /*
-    switch (index)
-    {
-    case 0:
-    {
-        pBegin.x += dx;
-        pBegin.y += dy;
-        delete []lineAxisArray;
-        calculateLine(pBegin, pEnd, width);
-        line->setVertexArray(lineWidth, lineAxisArray, size);
-
-    }
-        break;
-    case 1:
-    {
-        pEnd.x += dx;
-        pEnd.y += dy;
-        delete []lineAxisArray;
-        calculateLine(pBegin, pEnd, width);
-        line->setVertexArray(lineWidth, lineAxisArray, size);
-    }
-        break;
-    case 2:
-    {
-        float dr = ((pPerpEnd.x - pPerpBegin.x)*dx + (pPerpEnd.y - pPerpBegin.y)*dy)/
-                sqrt((pPerpEnd.x - pPerpBegin.x)*(pPerpEnd.x - pPerpBegin.x) +
-                     (pPerpEnd.y - pPerpBegin.y)*(pPerpEnd.y - pPerpBegin.y));
-
-        delete []lineAxisArray;
-        width += dr * 2.0f;
-        calculateLine(pBegin, pEnd, width);
-        line->setVertexArray(lineWidth, lineAxisArray, size);
-    }
-        break;
-    case 3:
-    {
-        float dr = ((pPerpBegin.x - pPerpEnd.x)*dx + (pPerpBegin.y - pPerpEnd.y)*dy)/
-                sqrt((pPerpBegin.x - pPerpEnd.x)*(pPerpBegin.x - pPerpEnd.x) +
-                     (pPerpBegin.y - pPerpEnd.y)*(pPerpBegin.y - pPerpEnd.y));
-
-        delete []lineAxisArray;
-        width += dr * 2.0f;
-        calculateLine(pBegin, pEnd, width);
-        line->setVertexArray(lineWidth, lineAxisArray, size);
-    }
-        break;
-    default:
-        break;
-    }
-    */
-
-    if (index >= axisArray.size() / 3)
-    {
-
-    }
-    else
-    {
         axisArray[index * 3] += dx;
         axisArray[index * 3 + 1] += dy;
         calculateLine(axisArray, width);
-        line->setVertexArray(lineWidth, lineAxisArray, size);
-    }
+
+        switch (type)
+        {
+        case 0:
+            line->setVertexArray(lineWidth, lineAxisArray, size);
+            break;
+        case 1:
+        {
+            setBoardVertexArray();
+            setBoardTextureArray(texture1USize, texture1VSize);
+            setVertexArray();
+            setTextureArray(texture2USize, texture2VSize);
+
+        }
+            break;
+        case 2:
+        {
+            setBoardVertexArray();
+            setBoardTextureArray(texture1USize, texture1VSize);
+            setVertexArray();
+            setTextureArray(texture2USize, texture2VSize);
+
+        }
+            break;
+        default:
+            break;
+        }
+
 }
 
 int SplitZone::getNumberOfControls()
 {
     //return 4;
-    return axisArray.size() / 3 + 2;
+    return axisArray.size() / 3;
 }
 
 int SplitZone::controlsForPoint()
@@ -367,6 +581,8 @@ bool SplitZone::setFixed(bool fixed)
 void SplitZone::calculateLine(vec3 p1, vec3 p2, float width)
 {
 
+
+
     if (axisArray.size() != 6)
         axisArray.resize(6);
     axisArray[0] = p1.x;
@@ -389,7 +605,7 @@ void SplitZone::calculateLine(vec3 p1, vec3 p2, float width)
         alpha1 = 2.0f * pi + alpha1;
     float alpha2 = alpha1 + pi;
 
-    int numberOfSides = 10;
+    numberOfSides = 10;
     float r1 = width / 2.0f;
 
     pPerpBegin.x = (p2.x + p1.x) / 2.0f + r1 * cos(alpha1);
@@ -570,6 +786,11 @@ void SplitZone::calculateLine(vec3 p1, vec3 p2, float width)
             }
 
     this->size = lineAxis.size();
+    if (lineAxisArray != NULL)
+    {
+        delete lineAxisArray;
+        lineAxisArray = NULL;
+    }
     lineAxisArray = new GLfloat[this->size];
     for (int i = 0; i < this->size; ++i)
         lineAxisArray[i] = lineAxis[i];
@@ -584,6 +805,7 @@ void SplitZone::calculateLine(vec3 p1, vec3 p2, float width)
 
 void SplitZone::calculateLine(float *pointsArray, int size, float width)
 {
+
     QVector<GLfloat> lineAxis;
     if (axisArray.size() != size)
         axisArray.resize(size);
@@ -622,7 +844,7 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
             {
                 xR1 = x1 + ((x2 - x1) / r) * (width / 2.0f);
                 yR1 = y1 + ((y2 - y1) / r) * (width / 2.0f);
-                int numberOfSides = 10;
+                numberOfSides = 10;
                 for (int i = 0; i <= numberOfSides; ++i)
                 {
                     float angle = alpha1 + (alpha2 - alpha1) / numberOfSides * float(i);
@@ -667,7 +889,7 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
                 {
                     xR1 = x2 + ((x1 - x2) / r) * (width / 2.0f);
                     yR1 = y2 + ((y1 - y2) / r) * (width / 2.0f);
-                    int numberOfSides = 10;
+                    numberOfSides = 10;
                     for (int i = 0; i <= numberOfSides; ++i)
                     {
                         float angle = alpha1 + (alpha2 - alpha1) / numberOfSides * float(i);
@@ -758,8 +980,8 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
                 float alpha2 = alpha1 + pi;
                 float r1 = width / 2.0f;
 
-                lineAxis.push_back(x1 + r1 * cos(alpha1));
-                lineAxis.push_back(y1 + r1 * sin(alpha1));
+                lineAxis.push_back(x1 - r1 * cos(alpha1));
+                lineAxis.push_back(y1 - r1 * sin(alpha1));
                 lineAxis.push_back(0.02f);
             }
             else
@@ -827,6 +1049,11 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
     }
 
     this->size = lineAxis.size();
+    if (lineAxisArray != NULL)
+    {
+        delete lineAxisArray;
+        lineAxisArray = NULL;
+    }
     lineAxisArray = new GLfloat[this->size];
     for (int i = 0; i < this->size; ++i)
         lineAxisArray[i] = lineAxis[i];
@@ -840,8 +1067,14 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
 
 }
 
+void SplitZone::calculateLine(float *pointsArray, int size)
+{
+    calculateLine(pointsArray, size, this->width);
+}
+
 void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
 {
+
     QVector<GLfloat> lineAxis;
     int size = pointsArray.size();
     if (axisArray.size() != size)
@@ -881,7 +1114,7 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
             {
                 xR1 = x1 + ((x2 - x1) / r) * (width / 2.0f);
                 yR1 = y1 + ((y2 - y1) / r) * (width / 2.0f);
-                int numberOfSides = 10;
+                numberOfSides = 10;
                 for (int i = 0; i <= numberOfSides; ++i)
                 {
                     float angle = alpha1 + (alpha2 - alpha1) / numberOfSides * float(i);
@@ -926,7 +1159,7 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
                 {
                     xR1 = x2 + ((x1 - x2) / r) * (width / 2.0f);
                     yR1 = y2 + ((y1 - y2) / r) * (width / 2.0f);
-                    int numberOfSides = 10;
+                    numberOfSides = 10;
                     for (int i = 0; i <= numberOfSides; ++i)
                     {
                         float angle = alpha1 + (alpha2 - alpha1) / numberOfSides * float(i);
@@ -1086,6 +1319,11 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
     }
 
     this->size = lineAxis.size();
+    if (lineAxisArray != NULL)
+    {
+        delete lineAxisArray;
+        lineAxisArray = NULL;
+    }
     lineAxisArray = new GLfloat[this->size];
     for (int i = 0; i < this->size; ++i)
         lineAxisArray[i] = lineAxis[i];
@@ -1095,6 +1333,471 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
         line->setVertexArrayForAxis(lineAxisArray, this->size);
         line->setVertexArray(lineWidth,lineAxisArray, this->size);
         line->setTextureArray();
+    }
+}
+
+void SplitZone::reset()
+{
+    switch (type)
+    {
+    case 0:
+        line->setVertexArrayForAxis(lineAxisArray, this->size);
+        line->setVertexArray(lineWidth,lineAxisArray, this->size);
+        line->setTextureArray();
+        break;
+    case 1:
+        setBoardVertexArray();
+        setBoardTextureArray(texture1USize, texture1VSize);
+        setBoardIndexArray();
+        setVertexArray();
+        setTextureArray(texture2USize, texture2VSize);
+        setIndexArray();
+        break;
+    case 2:
+        setBoardVertexArray();
+        setBoardTextureArray(texture1USize, texture1VSize);
+        setBoardIndexArray();
+        setVertexArray();
+        setTextureArray(texture2USize, texture2VSize);
+        setIndexArray();
+        break;
+    default:
+        break;
+    }
+}
+
+void SplitZone::setBoardVertexArray()
+{
+    boardVertexArray.clear();
+    for (int i = 0; i < size / 3; ++i)
+    {
+        if (i == 0)
+        {
+            float r = 0.25f;
+            float x1 = lineAxisArray[i * 3];
+            float y1 = lineAxisArray[i * 3 + 1];
+            float x2 = lineAxisArray[(i + 1) * 3];
+            float y2 = lineAxisArray[(i + 1) * 3 + 1];
+            float dx = sqrt(r*r*(y2-y1)*(y2-y1)/((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1)));
+            float dy = sqrt(r*r/(1 + (y2-y1)*(y2-y1)/((x2-x1)*(x2-x1))));
+            if (x1 > x2 && y1 > y2)
+            {
+                dx *= -1.0f;
+                dy *= -1.0f;
+            }
+            if (x1 <= x2 && y1 >= y2)
+            {
+                dx *= -1.0f;
+
+            }
+            if (x1 >= x2 && y1 <= y2)
+            {
+                dy *= -1.0f;
+
+            }
+
+            boardVertexArray.push_back(x1);
+            boardVertexArray.push_back(y1);
+            boardVertexArray.push_back(0.0f);
+
+            boardVertexArray.push_back(x1);
+            boardVertexArray.push_back(y1);
+            boardVertexArray.push_back(height - 0.02f);
+
+            boardVertexArray.push_back(x1 - dx / r * 0.03f);
+            boardVertexArray.push_back(y1 + dy / r * 0.03f);
+            boardVertexArray.push_back(height);
+
+            boardVertexArray.push_back(x1 - dx);
+            boardVertexArray.push_back(y1 + dy);
+            boardVertexArray.push_back(height);
+        }
+        else
+        if (i == size / 3 - 1)
+        {
+            float r = 0.25f;
+            float x1 = lineAxisArray[i * 3];
+            float y1 = lineAxisArray[i * 3 + 1];
+            float x2 = lineAxisArray[(i - 1) * 3];
+            float y2 = lineAxisArray[(i - 1) * 3 + 1];
+            float dx = sqrt(r*r*(y2-y1)*(y2-y1)/((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1)));
+            float dy = sqrt(r*r/(1 + (y2-y1)*(y2-y1)/((x2-x1)*(x2-x1))));
+            if (x1 > x2 && y1 > y2)
+            {
+                dx *= -1.0f;
+                dy *= -1.0f;
+            }
+            if (x1 <= x2 && y1 >= y2)
+            {
+                dx *= -1.0f;
+
+            }
+            if (x1 >= x2 && y1 <= y2)
+            {
+                dy *= -1.0f;
+
+            }
+
+            boardVertexArray.push_back(x1);
+            boardVertexArray.push_back(y1);
+            boardVertexArray.push_back(0.0f);
+
+            boardVertexArray.push_back(x1);
+            boardVertexArray.push_back(y1);
+            boardVertexArray.push_back(height - 0.02f);
+
+            boardVertexArray.push_back(x1 + dx / r * 0.03f);
+            boardVertexArray.push_back(y1 - dy / r * 0.03f);
+            boardVertexArray.push_back(height);
+
+            boardVertexArray.push_back(x1 + dx);
+            boardVertexArray.push_back(y1 - dy);
+            boardVertexArray.push_back(height);
+        }
+        else
+        {
+            float r = 0.25f;
+            float x1 = lineAxisArray[(i - 1) * 3];
+            float y1 = lineAxisArray[(i - 1) * 3 + 1];
+            float x2 = lineAxisArray[i * 3];
+            float y2 = lineAxisArray[i * 3 + 1];
+            float x3 = lineAxisArray[(i + 1) * 3];
+            float y3 = lineAxisArray[(i + 1) * 3 + 1];
+            float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
+            float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+            float t = num / den;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float alpha = (acos(t))/2.0f;
+            float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
+            float pi = 3.1415926f;
+            if(sa < 0) // Точка находится справа
+            {
+                alpha = pi - alpha;
+            }
+
+            t = (x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float beta = acos(t);
+            t = (y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            if (asin(t) < 0)
+            {
+                beta *= -1.0f;
+            }
+            float hamma = alpha + beta;
+            float dx = (r / sin(alpha)) * cos(hamma);
+            float dy = (r / sin(alpha)) * sin(hamma);
+
+            boardVertexArray.push_back(x2);
+            boardVertexArray.push_back(y2);
+            boardVertexArray.push_back(0.0f);
+
+            boardVertexArray.push_back(x2);
+            boardVertexArray.push_back(y2);
+            boardVertexArray.push_back(height - 0.02f);
+
+            boardVertexArray.push_back(x2 + dx / r * 0.03f);
+            boardVertexArray.push_back(y2 + dy / r * 0.03f);
+            boardVertexArray.push_back(height);
+
+            boardVertexArray.push_back(x2 + dx);
+            boardVertexArray.push_back(y2 + dy);
+            boardVertexArray.push_back(height);
+
+            boardVertexArray.push_back(x2);
+            boardVertexArray.push_back(y2);
+            boardVertexArray.push_back(0.0f);
+
+            boardVertexArray.push_back(x2);
+            boardVertexArray.push_back(y2);
+            boardVertexArray.push_back(height - 0.02f);
+
+            boardVertexArray.push_back(x2 + dx / r * 0.03f);
+            boardVertexArray.push_back(y2 + dy / r * 0.03f);
+            boardVertexArray.push_back(height);
+
+            boardVertexArray.push_back(x2 + dx);
+            boardVertexArray.push_back(y2 + dy);
+            boardVertexArray.push_back(height);
+        }
+    }
+}
+
+void SplitZone::setBoardTextureArray(float textureUsize, float textureVsize)
+{
+    boardTextureArray.clear();
+    for (int i = 0; i < boardVertexArray.size() / 3 - 4; i += 8)
+    {
+        float x0 = boardVertexArray[i * 3];
+        float y0 = boardVertexArray[i * 3 + 1];
+        float x1 = boardVertexArray[(i + 1) * 3];
+        float y1 = boardVertexArray[(i + 1) * 3 + 1];
+        float x2 = boardVertexArray[(i + 2) * 3];
+        float y2 = boardVertexArray[(i + 2) * 3 + 1];
+        float x3 = boardVertexArray[(i + 3) * 3];
+        float y3 = boardVertexArray[(i + 3) * 3 + 1];
+        float x4 = boardVertexArray[(i + 4) * 3];
+        float y4 = boardVertexArray[(i + 4) * 3 + 1];
+        float x5 = boardVertexArray[(i + 5) * 3];
+        float y5 = boardVertexArray[(i + 5) * 3 + 1];
+        float x6 = boardVertexArray[(i + 6) * 3];
+        float y6 = boardVertexArray[(i + 6) * 3 + 1];
+        float x7 = boardVertexArray[(i + 7) * 3];
+        float y7 = boardVertexArray[(i + 7) * 3 + 1];
+        float pi = 3.14159265f;
+
+        boardTextureArray.push_back(0.0f);
+        boardTextureArray.push_back(0.0f);
+
+        float r1 = sqrt((x4 - x0) * (x4 - x0) + (y4 - y0) * (y4 - y0));
+
+        float factor;
+
+        if (x4 == x0 && y4 == y0)
+            factor = 0.0f;
+        else
+            factor = ((x4 - x0) * (x1 - x0) + (y4 - y0) * (y1 - y0))/r1;
+
+        boardTextureArray.push_back(0.08f);
+        boardTextureArray.push_back(factor/textureVsize);
+
+        if (x4 == x0 && y4 == y0)
+            factor = 0.0f;
+        else
+            factor = ((x4 - x0) * (x2 - x0) + (y4 - y0) * (y2 - y0))/r1;
+
+        boardTextureArray.push_back(0.09f);
+        boardTextureArray.push_back(factor/textureVsize);
+
+        if (x4 == x0 && y4 == y0)
+            factor = 0.0f;
+        else
+            factor = ((x4 - x0) * (x3 - x0) + (y4 - y0) * (y3 - y0))/r1;
+
+        boardTextureArray.push_back(1.0f);
+        boardTextureArray.push_back(factor/textureVsize);
+
+
+        //////////////////////////////////////////////////////////////
+
+        boardTextureArray.push_back(0.0f);
+        boardTextureArray.push_back(r1 / textureVsize);
+
+        if (x4 == x0 && y4 == y0)
+            factor = 0.0f;
+        else
+            factor = ((x4 - x0) * (x5 - x0) + (y4 - y0) * (y5 - y0))/r1;
+
+        boardTextureArray.push_back(0.08f);
+        boardTextureArray.push_back(r1 / textureVsize);
+
+        if (x4 == x0 && y4 == y0)
+            factor = 0.0f;
+        else
+            factor = ((x4 - x0) * (x6 - x0) + (y4 - y0) * (y6 - y0))/r1;
+
+        boardTextureArray.push_back(0.09f);
+        boardTextureArray.push_back(factor / textureVsize);
+
+        if (x4 == x0 && y4 == y0)
+            factor = 0.0f;
+        else
+            factor = ((x4 - x0) * (x7 - x0) + (y4 - y0) * (y7 - y0))/r1;
+
+        boardTextureArray.push_back(1.0f);
+        boardTextureArray.push_back(factor / textureVsize);
+    }
+}
+
+void SplitZone::setBoardIndexArray()
+{
+    boardIndexArray.clear();
+    for (int i = 0; i < boardVertexArray.size() / 3; i += 8)
+    {
+        boardIndexArray.push_back(i);
+        boardIndexArray.push_back(i + 4);
+        boardIndexArray.push_back(i + 5);
+
+        boardIndexArray.push_back(i);
+        boardIndexArray.push_back(i + 5);
+        boardIndexArray.push_back(i + 1);
+
+        boardIndexArray.push_back(i + 1);
+        boardIndexArray.push_back(i + 5);
+        boardIndexArray.push_back(i + 6);
+
+        boardIndexArray.push_back(i + 1);
+        boardIndexArray.push_back(i + 6);
+        boardIndexArray.push_back(i + 2);
+
+        boardIndexArray.push_back(i + 2);
+        boardIndexArray.push_back(i + 6);
+        boardIndexArray.push_back(i + 7);
+
+        boardIndexArray.push_back(i + 2);
+        boardIndexArray.push_back(i + 7);
+        boardIndexArray.push_back(i + 3);
+    }
+}
+
+void SplitZone::setVertexArray()
+{    
+    vertexArray.clear();
+    if ((!beginRounding && endRounding) || (beginRounding && !endRounding))
+    {
+        /*
+        int count = boardVertexArray.size() / 3;
+        for (int i = 0; i < count / 2; i += 8)
+        {
+            vertexArray.push_back(boardVertexArray[(i + 3) * 3]);
+            vertexArray.push_back(boardVertexArray[(i + 3) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[(i + 3) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[(i + 7) * 3]);
+            vertexArray.push_back(boardVertexArray[(i + 7) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[(i + 7) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[(count - i - 1) * 3]);
+            vertexArray.push_back(boardVertexArray[(count - i - 1) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[(count - i - 1) * 3 + 2]);
+
+            vertexArray.push_back(boardVertexArray[(count - i - 1) * 3]);
+            vertexArray.push_back(boardVertexArray[(count - i - 1) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[(count - i - 1) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[(i + 7) * 3]);
+            vertexArray.push_back(boardVertexArray[(i + 7) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[(i + 7) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[(count - i - 5) * 3]);
+            vertexArray.push_back(boardVertexArray[(count - i - 5) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[(count - i - 5) * 3 + 2]);
+
+        }
+        */
+        int i = numberOfSides / 2;
+        vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3]);
+        vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3 + 1]);
+        vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3 + 2]);
+        vertexArray.push_back(boardVertexArray[((i + 1) * 8 + 3) * 3]);
+        vertexArray.push_back(boardVertexArray[((i + 1) * 8 + 3) * 3 + 1]);
+        vertexArray.push_back(boardVertexArray[((i + 1) * 8 + 3) * 3 + 2]);
+        vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3]);
+        vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3 + 1]);
+        vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3 + 2]);
+
+        for (i = numberOfSides / 2 - 1; i > 0; --i)
+        {
+            vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3]);
+            vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[((numberOfSides - i) * 8 + 3) * 3]);
+            vertexArray.push_back(boardVertexArray[((numberOfSides - i) * 8 + 3) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[((numberOfSides - i) * 8 + 3) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3]);
+            vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3 + 2]);
+
+            vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3]);
+            vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[((numberOfSides - i) * 8 + 3) * 3]);
+            vertexArray.push_back(boardVertexArray[((numberOfSides - i) * 8 + 3) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[((numberOfSides - i) * 8 + 3) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[((numberOfSides - i - 1) * 8 + 3) * 3]);
+            vertexArray.push_back(boardVertexArray[((numberOfSides - i - 1) * 8 + 3) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[((numberOfSides - i - 1) * 8 + 3) * 3 + 2]);
+        }
+    }
+    else
+    if (beginRounding && endRounding)
+    {
+
+        for (int i = 2; i <= numberOfSides; ++i)
+        {
+            vertexArray.push_back(boardVertexArray[(i * 0 + 3) * 3]);
+            vertexArray.push_back(boardVertexArray[(i * 0 + 3) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[(i * 0 + 3) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3]);
+            vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3]);
+            vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3 + 2]);
+
+        }
+
+        int count = boardVertexArray.size() / 3;
+        for (int i = numberOfSides * 8; i < boardVertexArray.size() / 6 + numberOfSides * 4; i += 8)
+        {
+            vertexArray.push_back(boardVertexArray[(i + 3) * 3]);
+            vertexArray.push_back(boardVertexArray[(i + 3) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[(i + 3) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[(i + 7) * 3]);
+            vertexArray.push_back(boardVertexArray[(i + 7) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[(i + 7) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[(count - i - 1 + numberOfSides * 8) * 3]);
+            vertexArray.push_back(boardVertexArray[(count - i - 1 + numberOfSides * 8) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[(count - i - 1 + numberOfSides * 8) * 3 + 2]);
+
+            vertexArray.push_back(boardVertexArray[(count - i - 1 + numberOfSides * 8) * 3]);
+            vertexArray.push_back(boardVertexArray[(count - i - 1 + numberOfSides * 8) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[(count - i - 1 + numberOfSides * 8) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[(i + 7) * 3]);
+            vertexArray.push_back(boardVertexArray[(i + 7) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[(i + 7) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[(count - i - 5 + numberOfSides * 8) * 3]);
+            vertexArray.push_back(boardVertexArray[(count - i - 5 + numberOfSides * 8) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[(count - i - 5 + numberOfSides * 8) * 3 + 2]);
+
+        }
+    }
+
+}
+
+void SplitZone::setTextureArray(float textureUSize, float textureVSize)
+{
+    textureArray.clear();
+
+    textureArray.push_back(0.0f);
+    textureArray.push_back(0.0f);
+
+    float x1, y1;
+    float x2, y2;
+    float r1;
+    x1 = vertexArray[0];
+    y1 = vertexArray[1];
+    x2 = vertexArray[3];
+    y2 = vertexArray[4];
+    r1 = sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
+
+    textureArray.push_back(r1 / textureUSize);
+    textureArray.push_back(0.0f);
+
+    for (int i = 2; i < vertexArray.size() / 3; ++i)
+    {
+        float x3 = vertexArray[i * 3];
+        float y3 = vertexArray[i * 3 + 1];
+        float r2 = sqrt((x3 - x1)*(x3 - x1) + (y3 - y1)*(y3 - y1));
+        float angle = acos(((x3 - x1)*(x2 - x1) + (y3 - y1)*(y2 - y1))/(r1 * r2));
+        float dU = r2 * cos(angle);
+        float dV = r2 * sin(angle);
+        textureArray.push_back(dU / textureUSize);
+        textureArray.push_back(dV / textureVSize);
+    }
+}
+
+void SplitZone::setIndexArray()
+{
+    indexArray.clear();
+    for (int i = 0; i < vertexArray.size() / 3; ++i)
+    {
+        indexArray.push_back(i);
     }
 }
 
@@ -1126,7 +1829,6 @@ void SplitZone::drawDescription(QGLWidget *render, float red, float green, float
 
 void SplitZone::rotate(float angle, float x, float y, float z)
 {
-    line->rotate(angle, x, y, z);
     float tx = 0.0f, ty = 0.0f;
     for (int i = 0; i < axisArray.size() / 3; ++i)
     {
@@ -1219,33 +1921,145 @@ void SplitZone::rotate(float angle, float x, float y, float z)
     yCenter = tx * sin(angle) + ty * cos(angle);
     xCenter += x;
     yCenter += y;
+
+    switch (type)
+    {
+    case 0:
+        line->rotate(angle, x, y, z);
+        break;
+    case 1:
+    {
+        for (int i = 0; i < boardVertexArray.size() / 3; ++i)
+        {
+            boardVertexArray[i * 3] -= x;
+            boardVertexArray[i * 3 + 1] -= y;
+            tx = boardVertexArray[i * 3];
+            ty = boardVertexArray[i * 3 + 1];
+            boardVertexArray[i * 3] = tx * cos(angle) - ty * sin(angle);
+            boardVertexArray[i * 3 + 1] = tx * sin(angle) + ty * cos(angle);
+            boardVertexArray[i * 3] += x;
+            boardVertexArray[i * 3 + 1] += y;
+        }
+        for (int i = 0; i < vertexArray.size() / 3; ++i)
+        {
+            vertexArray[i * 3] -= x;
+            vertexArray[i * 3 + 1] -= y;
+            tx = vertexArray[i * 3];
+            ty = vertexArray[i * 3 + 1];
+            vertexArray[i * 3] = tx * cos(angle) - ty * sin(angle);
+            vertexArray[i * 3 + 1] = tx * sin(angle) + ty * cos(angle);
+            vertexArray[i * 3] += x;
+            vertexArray[i * 3 + 1] += y;
+        }
+    }
+        break;
+    case 2:
+        break;
+    default:
+        break;
+    }
 }
 
 void SplitZone::addBreak(bool front)
 {
-    float x, y, z;
-    if (front)
+    switch (type)
     {
-        x = axisArray[0];
-        y = axisArray[1];
-        z = axisArray[2];
-        axisArray.push_front(z);
-        axisArray.push_front(y);
-        axisArray.push_front(x);
+    case 0:
+    {
+        float x, y, z;
+        if (front)
+        {
+            x = axisArray[0];
+            y = axisArray[1];
+            z = axisArray[2];
+            axisArray.push_front(z);
+            axisArray.push_front(y);
+            axisArray.push_front(x);
 
+        }
+        else
+        {
+            int size = axisArray.size();
+            x = axisArray[size - 3];
+            y = axisArray[size - 2];
+            z = axisArray[size - 1];
+            axisArray.push_back(x);
+            axisArray.push_back(y);
+            axisArray.push_back(z);
+        }
+        calculateLine(axisArray, width);
+        line->setVertexArray(lineWidth, lineAxisArray, size);
+        line->setTextureArray();
+        line->setIndexArray();
     }
-    else
+        break;
+    case 1:
     {
-        int size = axisArray.size();
-        x = axisArray[size - 3];
-        y = axisArray[size - 2];
-        z = axisArray[size - 1];
-        axisArray.push_back(x);
-        axisArray.push_back(y);
-        axisArray.push_back(z);
+        float x, y, z;
+        if (front)
+        {
+            x = axisArray[0];
+            y = axisArray[1];
+            z = axisArray[2];
+            axisArray.push_front(z);
+            axisArray.push_front(y);
+            axisArray.push_front(x);
+
+        }
+        else
+        {
+            int size = axisArray.size();
+            x = axisArray[size - 3];
+            y = axisArray[size - 2];
+            z = axisArray[size - 1];
+            axisArray.push_back(x);
+            axisArray.push_back(y);
+            axisArray.push_back(z);
+        }
+        calculateLine(axisArray, width);
+        setBoardVertexArray();
+        setBoardTextureArray(texture1USize, texture1VSize);
+        setBoardIndexArray();
+        setVertexArray();
+        setTextureArray(texture2USize, texture2VSize);
+        setIndexArray();
     }
-    calculateLine(axisArray, width);
-    line->setVertexArray(lineWidth, lineAxisArray, size);
-    line->setTextureArray();
-    line->setIndexArray();
+        break;
+    case 2:
+    {
+        float x, y, z;
+        if (front)
+        {
+            x = axisArray[0];
+            y = axisArray[1];
+            z = axisArray[2];
+            axisArray.push_front(z);
+            axisArray.push_front(y);
+            axisArray.push_front(x);
+
+        }
+        else
+        {
+            int size = axisArray.size();
+            x = axisArray[size - 3];
+            y = axisArray[size - 2];
+            z = axisArray[size - 1];
+            axisArray.push_back(x);
+            axisArray.push_back(y);
+            axisArray.push_back(z);
+        }
+        calculateLine(axisArray, width);
+        setBoardVertexArray();
+        setBoardTextureArray(texture1USize, texture1VSize);
+        setBoardIndexArray();
+        setVertexArray();
+        setTextureArray(texture2USize, texture2VSize);
+        setIndexArray();
+    }
+        break;
+    default:
+        break;
+    }
+
+
 }

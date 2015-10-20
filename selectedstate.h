@@ -58,6 +58,7 @@ public:
     void setSelectedElement(RoadElement* element);
 
 private:
+    bool tryToSelectFigures(QPoint mp, std::list<RoadElement *> &elements);
     bool tryToSelectFigures(QPoint mp);
     bool tryToSelectAllFigures(QPoint mp);
     bool tryToSelectControlsInSelectedFigure(QPoint mp);

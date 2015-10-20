@@ -1,6 +1,7 @@
 #include "roundingroad.h"
 #include <QApplication>
 #include "roundingcrossroad.h"
+#include "model.h"
 
 RoundingRoad::RoundingRoad()
 {
@@ -121,6 +122,21 @@ RoundingRoad::RoundingRoad(float x1, float y1, float nearRadius, float angel1Nea
 
 RoundingRoad::~RoundingRoad()
 {
+
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        for (std::list<RoadElement*>::iterator it = model->getGroup(1).begin();
+             it != model->getGroup(1).end(); ++it)
+        {
+            if (lines[i].line == (*it))
+            {
+                model->getGroup(1).erase(it);
+                break;
+            }
+        }
+        delete lines[i].line;
+    }
+    lines.clear();
 
     delete []indexArrayForSelection;
     delete []colorArrayForSelection;
@@ -622,6 +638,13 @@ void RoundingRoad::setFarTextureArray(float textUsize, float textVsize)
     }
 }
 
+void RoundingRoad::setSelectedStatus(bool status)
+{
+    selected = status;
+    for (int i = 0; i < lines.size(); ++i)
+        lines[i].line->setSelectedStatus(status);
+}
+
 void RoundingRoad::drawFigure(QGLWidget* render)
 {
 
@@ -712,7 +735,7 @@ void RoundingRoad::drawSelectionFrame()
     glLineWidth(2.0);
     glDrawElements(GL_LINES, numberOfVertices * 2, GL_UNSIGNED_BYTE, indexArrayForSelection);
     */
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < getNumberOfControls(); ++i)
     {
         drawControlElement(i, 2.0f, 5.0f);
     }
@@ -841,209 +864,233 @@ void RoundingRoad::move(float dx, float dy, float dz)
 
 void RoundingRoad::drawControlElement(int index, float lineWidth, float pointSize)
 {
-    switch (index)
-    {
+    int linesCount = 0;
+    for (int i = 0; i < lines.size(); ++i)
+        linesCount += lines[i].line->getNumberOfControls();
 
+    if (index >= linesCount)
+    {
+        index -= linesCount;
 
-
-    case 0:
-        // Правая угловая точка внутреннего радиуса
-    {
-        int i = 0;
-        glPointSize(pointSize + 5.0f);
-        glBegin(GL_POINTS);
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glVertex3f(vertexArray[i * 3],
-                vertexArray[i * 3 + 1],
-                vertexArray[i * 3 + 2]);
-        glEnd();
-    }
-        break;
-    case 1:
-        // Левая угловая точка внутреннего радиуса
-    {
-        int i = numberOfVertices - 2;
-        glPointSize(pointSize + 5.0f);
-        glBegin(GL_POINTS);
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glVertex3f(vertexArray[i * 3],
-                vertexArray[i * 3 + 1],
-                vertexArray[i * 3 + 2]);
-        glEnd();
-    }
-        break;
-    case 2:
-        // Правая угловая точка наружного радиуса
-    {
-        int i = 1;
-        glPointSize(pointSize + 5.0f);
-        glBegin(GL_POINTS);
-        glColor3f(0.0f, 0.0f, 1.0f);
-        glVertex3f(vertexArray[i * 3],
-                vertexArray[i * 3 + 1],
-                vertexArray[i * 3 + 2]);
-        glEnd();
-    }
-        break;
-    case 3:
-        // Левая угловая точка наружного радиуса
-    {
-        int i = numberOfVertices - 1;
-        glPointSize(pointSize + 5.0f);
-        glBegin(GL_POINTS);
-        glColor3f(0.0f, 0.0f, 1.0f);
-        glVertex3f(vertexArray[i * 3],
-                vertexArray[i * 3 + 1],
-                vertexArray[i * 3 + 2]);
-        glEnd();
-    }
-        break;
-    case 4:
-        // Дуга внутреннего радиуса
-
-    {
-        glLineWidth(lineWidth);
-        glBegin(GL_LINE_STRIP);
-        for (int i = 0; i < vertexArray.size() / 3; i += 2)
+        switch (index)
         {
+
+        case 0:
+            // Правая угловая точка внутреннего радиуса
+        {
+            int i = 0;
+            glPointSize(pointSize + 5.0f);
+            glBegin(GL_POINTS);
             glColor3f(1.0f, 0.0f, 0.0f);
             glVertex3f(vertexArray[i * 3],
                     vertexArray[i * 3 + 1],
                     vertexArray[i * 3 + 2]);
+            glEnd();
         }
-        glEnd();
-
-    }
-
-        break;
-
-    case 5:
-        // Дуга наружного радиуса
-
-    {
-        glLineWidth(lineWidth);
-        glBegin(GL_LINE_STRIP);
-        for (int i = 1; i < vertexArray.size() / 3; i += 2)
+            break;
+        case 1:
+            // Левая угловая точка внутреннего радиуса
         {
+            int i = numberOfVertices - 2;
+            glPointSize(pointSize + 5.0f);
+            glBegin(GL_POINTS);
+            glColor3f(1.0f, 0.0f, 0.0f);
+            glVertex3f(vertexArray[i * 3],
+                    vertexArray[i * 3 + 1],
+                    vertexArray[i * 3 + 2]);
+            glEnd();
+        }
+            break;
+        case 2:
+            // Правая угловая точка наружного радиуса
+        {
+            int i = 1;
+            glPointSize(pointSize + 5.0f);
+            glBegin(GL_POINTS);
             glColor3f(0.0f, 0.0f, 1.0f);
             glVertex3f(vertexArray[i * 3],
                     vertexArray[i * 3 + 1],
                     vertexArray[i * 3 + 2]);
+            glEnd();
         }
-        glEnd();
-    }
+            break;
+        case 3:
+            // Левая угловая точка наружного радиуса
+        {
+            int i = numberOfVertices - 1;
+            glPointSize(pointSize + 5.0f);
+            glBegin(GL_POINTS);
+            glColor3f(0.0f, 0.0f, 1.0f);
+            glVertex3f(vertexArray[i * 3],
+                    vertexArray[i * 3 + 1],
+                    vertexArray[i * 3 + 2]);
+            glEnd();
+        }
+            break;
+        case 4:
+            // Дуга внутреннего радиуса
 
-        break;
-    case 6:
-        // Центр окружности внутреннего радиуса
-    {
-        int i = 0;
-        glPointSize(pointSize + 5.0f);
-        glBegin(GL_POINTS);
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glVertex3f(xCenterNearRadius,
-                   yCenterNearRadius,
-                   vertexArray[i * 3 + 2]);
-        glEnd();
-    }
-        break;
-    case 7:
-        // Центр окружности наружного радиуса
-    {
-        int i = 0;
-        glPointSize(pointSize + 5.0f);
-        glBegin(GL_POINTS);
-        glColor3f(0.0f, 0.0f, 1.0f);
-        glVertex3f(xCenterFarRadius,
-                   yCenterFarRadius,
-                   vertexArray[i * 3 + 2]);
-        glEnd();
-    }
-        break;
-    case 8:
-    {
-        if (showNearBoard)
         {
             glLineWidth(lineWidth);
-            glBegin(GL_LINES);
-            for (int i = 0; i < vertexArrayNear.size() / 3; i += 10)
+            glBegin(GL_LINE_STRIP);
+            for (int i = 0; i < vertexArray.size() / 3; i += 2)
             {
-                glColor3f(0.0f, 1.0f, 0.0f);
-                glVertex3f(vertexArrayNear[(i + 4)*3], vertexArrayNear[(i + 4)*3 + 1], vertexArrayNear[(i + 4)*3 + 2]);
-                glColor3f(0.0f, 1.0f, 0.0f);
-                glVertex3f(vertexArrayNear[(i + 9)*3], vertexArrayNear[(i + 9)*3 + 1], vertexArrayNear[(i + 9)*3 + 2]);
+                glColor3f(1.0f, 0.0f, 0.0f);
+                glVertex3f(vertexArray[i * 3],
+                        vertexArray[i * 3 + 1],
+                        vertexArray[i * 3 + 2]);
+            }
+            glEnd();
+
+        }
+
+            break;
+
+        case 5:
+            // Дуга наружного радиуса
+
+        {
+            glLineWidth(lineWidth);
+            glBegin(GL_LINE_STRIP);
+            for (int i = 1; i < vertexArray.size() / 3; i += 2)
+            {
+                glColor3f(0.0f, 0.0f, 1.0f);
+                glVertex3f(vertexArray[i * 3],
+                        vertexArray[i * 3 + 1],
+                        vertexArray[i * 3 + 2]);
             }
             glEnd();
         }
-    }
-        break;
-    case 9:
-    {
-        if (showFarBoard)
+
+            break;
+        case 6:
+            // Центр окружности внутреннего радиуса
         {
-            glLineWidth(lineWidth);
-            glBegin(GL_LINES);
-            for (int i = 0; i < vertexArrayFar.size() / 3; i += 10)
-            {
-                glColor3f(0.0f, 1.0f, 0.0f);
-                glVertex3f(vertexArrayFar[(i + 4)*3], vertexArrayFar[(i + 4)*3 + 1], vertexArrayFar[(i + 4)*3 + 2]);
-                glColor3f(0.0f, 1.0f, 0.0f);
-                glVertex3f(vertexArrayFar[(i + 9)*3], vertexArrayFar[(i + 9)*3 + 1], vertexArrayFar[(i + 9)*3 + 2]);
-            }
+            int i = 0;
+            glPointSize(pointSize + 5.0f);
+            glBegin(GL_POINTS);
+            glColor3f(1.0f, 0.0f, 0.0f);
+            glVertex3f(xCenterNearRadius,
+                       yCenterNearRadius,
+                       vertexArray[i * 3 + 2]);
             glEnd();
         }
-    }
-        break;
+            break;
+        case 7:
+            // Центр окружности наружного радиуса
+        {
+            int i = 0;
+            glPointSize(pointSize + 5.0f);
+            glBegin(GL_POINTS);
+            glColor3f(0.0f, 0.0f, 1.0f);
+            glVertex3f(xCenterFarRadius,
+                       yCenterFarRadius,
+                       vertexArray[i * 3 + 2]);
+            glEnd();
+        }
+            break;
+        case 8:
+        {
+            if (showNearBoard)
+            {
+                glLineWidth(lineWidth);
+                glBegin(GL_LINES);
+                for (int i = 0; i < vertexArrayNear.size() / 3; i += 10)
+                {
+                    glColor3f(0.0f, 1.0f, 0.0f);
+                    glVertex3f(vertexArrayNear[(i + 4)*3], vertexArrayNear[(i + 4)*3 + 1], vertexArrayNear[(i + 4)*3 + 2]);
+                    glColor3f(0.0f, 1.0f, 0.0f);
+                    glVertex3f(vertexArrayNear[(i + 9)*3], vertexArrayNear[(i + 9)*3 + 1], vertexArrayNear[(i + 9)*3 + 2]);
+                }
+                glEnd();
+            }
+        }
+            break;
+        case 9:
+        {
+            if (showFarBoard)
+            {
+                glLineWidth(lineWidth);
+                glBegin(GL_LINES);
+                for (int i = 0; i < vertexArrayFar.size() / 3; i += 10)
+                {
+                    glColor3f(0.0f, 1.0f, 0.0f);
+                    glVertex3f(vertexArrayFar[(i + 4)*3], vertexArrayFar[(i + 4)*3 + 1], vertexArrayFar[(i + 4)*3 + 2]);
+                    glColor3f(0.0f, 1.0f, 0.0f);
+                    glVertex3f(vertexArrayFar[(i + 9)*3], vertexArrayFar[(i + 9)*3 + 1], vertexArrayFar[(i + 9)*3 + 2]);
+                }
+                glEnd();
+            }
+        }
+            break;
 
-    case 10:
+        case 10:
+        {
+            int i = 0;
+            glLineWidth(lineWidth + 5.0f);
+            glBegin(GL_LINES);
+            glColor3f(1.0f, 1.0f, 1.0f);
+            glVertex3f(vertexArray[i * 3],
+                    vertexArray[i * 3 + 1],
+                    vertexArray[i * 3 + 2]);
+            glColor3f(1.0f, 1.0f, 1.0f);
+            glVertex3f(vertexArray[(i + 1) * 3],
+                    vertexArray[(i + 1) * 3 + 1],
+                    vertexArray[(i + 1) * 3 + 2]);
+
+            glEnd();
+        }
+            break;
+        case 11:
+        {
+            int i = numberOfVertices - 2;
+            glLineWidth(lineWidth + 5.0f);
+            glBegin(GL_LINES);
+            glColor3f(1.0f, 1.0f, 1.0f);
+            glVertex3f(vertexArray[i * 3],
+                    vertexArray[i * 3 + 1],
+                    vertexArray[i * 3 + 2]);
+            glColor3f(1.0f, 1.0f, 1.0f);
+            glVertex3f(vertexArray[(i + 1) * 3],
+                    vertexArray[(i + 1) * 3 + 1],
+                    vertexArray[(i + 1) * 3 + 2]);
+
+            glEnd();
+        }
+            break;
+
+        default:
+        {
+            /*
+            glPointSize(pointSize);
+            glBegin(GL_POINTS);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(vertexArray[(index - 10) * 3],
+                    vertexArray[(index - 10) * 3 + 1],
+                    vertexArray[(index - 10) * 3] + 2);
+            glEnd();
+            */
+        }
+            break;
+        }
+    }
+    else
     {
-        int i = 0;
-        glLineWidth(lineWidth + 5.0f);
-        glBegin(GL_LINES);
-        glColor3f(1.0f, 1.0f, 1.0f);
-        glVertex3f(vertexArray[i * 3],
-                vertexArray[i * 3 + 1],
-                vertexArray[i * 3 + 2]);
-        glColor3f(1.0f, 1.0f, 1.0f);
-        glVertex3f(vertexArray[(i + 1) * 3],
-                vertexArray[(i + 1) * 3 + 1],
-                vertexArray[(i + 1) * 3 + 2]);
+        int i;
+        for (i = 0; i < lines.size(); ++i)
+        {
+            if (index >= lines[i].line->getNumberOfControls())
+            {
+                index -= lines[i].line->getNumberOfControls();
+            }
+            else
+            {
+                break;
+            }
+        }
+        lines[i].line->drawControlElement(index, lineWidth, pointSize);
+    }
 
-        glEnd();
-    }
-        break;
-    case 11:
-    {
-        int i = numberOfVertices - 2;
-        glLineWidth(lineWidth + 5.0f);
-        glBegin(GL_LINES);
-        glColor3f(1.0f, 1.0f, 1.0f);
-        glVertex3f(vertexArray[i * 3],
-                vertexArray[i * 3 + 1],
-                vertexArray[i * 3 + 2]);
-        glColor3f(1.0f, 1.0f, 1.0f);
-        glVertex3f(vertexArray[(i + 1) * 3],
-                vertexArray[(i + 1) * 3 + 1],
-                vertexArray[(i + 1) * 3 + 2]);
-
-        glEnd();
-    }
-        break;
-
-    default:
-    {
-        /*
-        glPointSize(pointSize);
-        glBegin(GL_POINTS);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(vertexArray[(index - 10) * 3],
-                vertexArray[(index - 10) * 3 + 1],
-                vertexArray[(index - 10) * 3] + 2);
-        glEnd();
-        */
-    }
-        break;
-    }
 
 }
 
@@ -1069,279 +1116,309 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
     factor = res < 0 ? 1 : -1;
     dr = sqrt(dx * dx + dy * dy);
 
-    switch (index)
+    int linesCount = 0;
+    for (int i = 0; i < lines.size(); ++i)
+        linesCount += lines[i].line->getNumberOfControls();
+
+    if (index >= linesCount)
     {
+        index -= linesCount;
 
-    case 0:
+        switch (index)
+        {
+
+        case 0:
+        {
+            int i = 0;
+            float pi = 3.14159265f;
+            float x1 = vertexArray[i * 3] + dx;
+            float y1 = vertexArray[i * 3 + 1] + dy;
+            float x2 = xCenterNearRadius;
+            float y2 = yCenterNearRadius;
+            float x3 = vertexArray[i * 3];
+            float y3 = vertexArray[i * 3 + 1];
+            float dx1 = x1 - x2;
+            float dy1 = y1 - y2;
+            float r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float dx2 = x3 - x2;
+            float dy2 = y3 - y2;
+            float t = (dx1*dx2 + dy1*dy2) / (r1 * nearRadius);
+            if (t > 1 || t < -1)
+                t = 1.0f;
+            float angle = acos(t);
+            float res = dx2*dy1 - dx1*dy2;
+            float factor = res > 0 ? 1.0f : -1.0f;
+            angle = factor * angle * 180.0f / pi;
+            setAngel_1_NearRadius(angel1NearRadius + angle);
+        }
+            break;
+        case 1:
+        {
+            int i = numberOfVertices - 2;
+            float pi = 3.14159265f;
+            float x1 = vertexArray[i * 3] + dx;
+            float y1 = vertexArray[i * 3 + 1] + dy;
+            float x2 = xCenterNearRadius;
+            float y2 = yCenterNearRadius;
+            float x3 = vertexArray[i * 3];
+            float y3 = vertexArray[i * 3 + 1];
+            float dx1 = x1 - x2;
+            float dy1 = y1 - y2;
+            float r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float dx2 = x3 - x2;
+            float dy2 = y3 - y2;
+            float t = (dx1*dx2 + dy1*dy2) / (r1 * nearRadius);
+            if (t > 1 || t < -1)
+                t = 1.0f;
+            float angle = acos(t);
+            float res = dx2*dy1 - dx1*dy2;
+            float factor = res > 0 ? 1.0f : -1.0f;
+            angle = factor * angle * 180.0f / pi;
+            setAngel_2_NearRadius(angel2NearRadius + angle);
+        }
+            break;
+        case 2:
+        {
+            int i = 1;
+            float pi = 3.14159265f;
+            float x1 = vertexArray[i * 3] + dx;
+            float y1 = vertexArray[i * 3 + 1] + dy;
+            float x2 = xCenterFarRadius;
+            float y2 = yCenterFarRadius;
+            float x3 = vertexArray[i * 3];
+            float y3 = vertexArray[i * 3 + 1];
+            float dx1 = x1 - x2;
+            float dy1 = y1 - y2;
+            float r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float dx2 = x3 - x2;
+            float dy2 = y3 - y2;
+            float t = (dx1*dx2 + dy1*dy2) / (r1 * farRadius);
+            if (t > 1 || t < -1)
+                t = 1.0f;
+            float angle = acos(t);
+            float res = dx2*dy1 - dx1*dy2;
+            float factor = res > 0 ? 1.0f : -1.0f;
+            angle = factor * angle * 180.0f / pi;
+            setAngel_1_FarRadius(angel1FarRadius + angle);
+        }
+            break;
+        case 3:
+        {
+            int i = numberOfVertices - 1;
+            float pi = 3.14159265f;
+            float x1 = vertexArray[i * 3] + dx;
+            float y1 = vertexArray[i * 3 + 1] + dy;
+            float x2 = xCenterFarRadius;
+            float y2 = yCenterFarRadius;
+            float x3 = vertexArray[i * 3];
+            float y3 = vertexArray[i * 3 + 1];
+            float dx1 = x1 - x2;
+            float dy1 = y1 - y2;
+            float r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float dx2 = x3 - x2;
+            float dy2 = y3 - y2;
+            float t = (dx1*dx2 + dy1*dy2) / (r1 * farRadius);
+            if (t > 1 || t < -1)
+                t = 1.0f;
+            float angle = acos(t);
+            float res = dx2*dy1 - dx1*dy2;
+            float factor = res > 0 ? 1.0f : -1.0f;
+            angle = factor * angle * 180.0f / pi;
+            setAngel_2_FarRadius(angel2FarRadius + angle);
+        }
+            break;
+        case 4:
+            dr = ((x - xCenterNearRadius)*dx + (y - yCenterNearRadius)*dy)/
+                    sqrt((x - xCenterNearRadius)*(x - xCenterNearRadius) + (y - yCenterNearRadius)*(y - yCenterNearRadius));
+            //this->nearRadius += factor * dr;
+            this->nearRadius += dr;
+            setVertexArray(xCenterNearRadius, yCenterNearRadius, nearRadius, angel1NearRadius, angel2NearRadius,
+                           xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
+                           numberOfSides);
+            emit nearRadiusChanged(nearRadius);
+
+            break;
+        case 5:
+            dr = ((x - xCenterFarRadius)*dx + (y - yCenterFarRadius)*dy)/
+                    sqrt((x - xCenterFarRadius)*(x - xCenterFarRadius) + (y - yCenterFarRadius)*(y - yCenterFarRadius));
+            //this->nearRadius += factor * dr;
+            this->farRadius += dr;
+            setVertexArray(xCenterNearRadius, yCenterNearRadius, nearRadius, angel1NearRadius, angel2NearRadius,
+                           xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
+                           numberOfSides);
+            emit farRadiusChanged(farRadius);
+
+            break;
+        case 6:
+            xCenterNearRadius += dx;
+            yCenterNearRadius += dy;
+            setVertexArray(xCenterNearRadius, yCenterNearRadius, nearRadius, angel1NearRadius, angel2NearRadius,
+                           xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
+                           numberOfSides);
+            setTextureArray(texture_1Usize,texture_1Vsize);
+            setNearTextureArray(texture_2Usize,texture_2Vsize);
+            setFarTextureArray(texture_2Usize,texture_2Vsize);
+            //resetLines();
+            emit nearRadiusChanged(nearRadius);
+            break;
+        case 7:
+            xCenterFarRadius += dx;
+            yCenterFarRadius += dy;
+            setVertexArray(xCenterNearRadius, yCenterNearRadius, nearRadius, angel1NearRadius, angel2NearRadius,
+                           xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
+                           numberOfSides);
+            setTextureArray(texture_1Usize,texture_1Vsize);
+            setNearTextureArray(texture_2Usize,texture_2Vsize);
+            setFarTextureArray(texture_2Usize,texture_2Vsize);
+            //resetLines();
+            emit farRadiusChanged(farRadius);
+            break;
+        case 8:
+            dr = ((x - xCenterNearRadius)*dx + (y - yCenterNearRadius)*dy)/
+                    sqrt((x - xCenterNearRadius)*(x - xCenterNearRadius) + (y - yCenterNearRadius)*(y - yCenterNearRadius));
+            nearBoardWidth -= dr;
+            setVertexArray(xCenterNearRadius, yCenterNearRadius, nearRadius, angel1NearRadius, angel2NearRadius,
+                           xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
+                           numberOfSides);
+            setNearTextureArray(texture_2Usize,texture_2Vsize);
+            emit nearBoardWidthChanged(nearBoardWidth);
+            break;
+        case 9:
+            dr = ((x - xCenterFarRadius)*dx + (y - yCenterFarRadius)*dy)/
+                    sqrt((x - xCenterFarRadius)*(x - xCenterFarRadius) + (y - yCenterFarRadius)*(y - yCenterFarRadius));
+            farBoardWidth += dr;
+            setVertexArray(xCenterNearRadius, yCenterNearRadius, nearRadius, angel1NearRadius, angel2NearRadius,
+                           xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
+                           numberOfSides);
+            setFarTextureArray(texture_2Usize,texture_2Vsize);
+            emit farBoardWidthChanged(farBoardWidth);
+            break;
+
+        case 10:
+        {
+            float pi = 3.14159265f;
+            float x1 = x + dx;
+            float y1 = y + dy;
+            float x2 = xCenterNearRadius;
+            float y2 = yCenterNearRadius;
+            float x3 = x;
+            float y3 = y;
+            float dx1 = x1 - x2;
+            float dy1 = y1 - y2;
+            float r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float dx2 = x3 - x2;
+            float dy2 = y3 - y2;
+            float r2 = sqrt(dx2*dx2 + dy2*dy2);
+            float t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
+            if (t > 1 || t < -1)
+                t = 1.0f;
+            float angle = acos(t);
+            float res = dx2*dy1 - dx1*dy2;
+            float factor = res > 0 ? 1.0f : -1.0f;
+            angle = factor * angle * 180.0f / pi;
+            setAngel_1_NearRadius(angel1NearRadius + angle);
+
+            x1 = x + dx;
+            y1 = y + dy;
+            x2 = xCenterFarRadius;
+            y2 = yCenterFarRadius;
+            x3 = x;
+            y3 = y;
+            dx1 = x1 - x2;
+            dy1 = y1 - y2;
+            r1 = sqrt(dx1*dx1 + dy1*dy1);
+            dx2 = x3 - x2;
+            dy2 = y3 - y2;
+            r2 = sqrt(dx2*dx2 + dy2*dy2);
+            t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
+            if (t > 1 || t < -1)
+                t = 1.0f;
+            angle = acos(t);
+            res = dx2*dy1 - dx1*dy2;
+            factor = res > 0 ? 1.0f : -1.0f;
+            angle = factor * angle * 180.0f / pi;
+            setAngel_1_FarRadius(angel1FarRadius + angle);
+
+        }
+            break;
+        case 11:
+        {
+            float pi = 3.14159265f;
+            float x1 = x + dx;
+            float y1 = y + dy;
+            float x2 = xCenterNearRadius;
+            float y2 = yCenterNearRadius;
+            float x3 = x;
+            float y3 = y;
+            float dx1 = x1 - x2;
+            float dy1 = y1 - y2;
+            float r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float dx2 = x3 - x2;
+            float dy2 = y3 - y2;
+            float r2 = sqrt(dx2*dx2 + dy2*dy2);
+            float t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
+            if (t > 1 || t < -1)
+                t = 1.0f;
+            float angle = acos(t);
+            float res = dx2*dy1 - dx1*dy2;
+            float factor = res > 0 ? 1.0f : -1.0f;
+            angle = factor * angle * 180.0f / pi;
+            setAngel_2_NearRadius(angel2NearRadius + angle);
+
+            x1 = x + dx;
+            y1 = y + dy;
+            x2 = xCenterFarRadius;
+            y2 = yCenterFarRadius;
+            x3 = x;
+            y3 = y;
+            dx1 = x1 - x2;
+            dy1 = y1 - y2;
+            r1 = sqrt(dx1*dx1 + dy1*dy1);
+            dx2 = x3 - x2;
+            dy2 = y3 - y2;
+            r2 = sqrt(dx2*dx2 + dy2*dy2);
+            t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
+            if (t > 1 || t < -1)
+                t = 1.0f;
+            angle = acos(t);
+            res = dx2*dy1 - dx1*dy2;
+            factor = res > 0 ? 1.0f : -1.0f;
+            angle = factor * angle * 180.0f / pi;
+            setAngel_2_FarRadius(angel2FarRadius + angle);
+        }
+            break;
+
+        default:
+            break;
+        }
+    }
+    else
     {
-        int i = 0;
-        float pi = 3.14159265f;
-        float x1 = vertexArray[i * 3] + dx;
-        float y1 = vertexArray[i * 3 + 1] + dy;
-        float x2 = xCenterNearRadius;
-        float y2 = yCenterNearRadius;
-        float x3 = vertexArray[i * 3];
-        float y3 = vertexArray[i * 3 + 1];
-        float dx1 = x1 - x2;
-        float dy1 = y1 - y2;
-        float r1 = sqrt(dx1*dx1 + dy1*dy1);
-        float dx2 = x3 - x2;
-        float dy2 = y3 - y2;
-        float t = (dx1*dx2 + dy1*dy2) / (r1 * nearRadius);
-        if (t > 1 || t < -1)
-            t = 1.0f;
-        float angle = acos(t);
-        float res = dx2*dy1 - dx1*dy2;
-        float factor = res > 0 ? 1.0f : -1.0f;
-        angle = factor * angle * 180.0f / pi;
-        setAngel_1_NearRadius(angel1NearRadius + angle);
+        int i;
+        for (i = 0; i < lines.size(); ++i)
+        {
+            if (index >= lines[i].line->getNumberOfControls())
+            {
+                index -= lines[i].line->getNumberOfControls();
+            }
+            else
+            {
+                break;
+            }
+        }
+        lines[i].line->resizeByControl(index, dx, dy, x, y);
     }
-        break;
-    case 1:
-    {
-        int i = numberOfVertices - 2;
-        float pi = 3.14159265f;
-        float x1 = vertexArray[i * 3] + dx;
-        float y1 = vertexArray[i * 3 + 1] + dy;
-        float x2 = xCenterNearRadius;
-        float y2 = yCenterNearRadius;
-        float x3 = vertexArray[i * 3];
-        float y3 = vertexArray[i * 3 + 1];
-        float dx1 = x1 - x2;
-        float dy1 = y1 - y2;
-        float r1 = sqrt(dx1*dx1 + dy1*dy1);
-        float dx2 = x3 - x2;
-        float dy2 = y3 - y2;
-        float t = (dx1*dx2 + dy1*dy2) / (r1 * nearRadius);
-        if (t > 1 || t < -1)
-            t = 1.0f;
-        float angle = acos(t);
-        float res = dx2*dy1 - dx1*dy2;
-        float factor = res > 0 ? 1.0f : -1.0f;
-        angle = factor * angle * 180.0f / pi;
-        setAngel_2_NearRadius(angel2NearRadius + angle);
-    }
-        break;
-    case 2:
-    {
-        int i = 1;
-        float pi = 3.14159265f;
-        float x1 = vertexArray[i * 3] + dx;
-        float y1 = vertexArray[i * 3 + 1] + dy;
-        float x2 = xCenterFarRadius;
-        float y2 = yCenterFarRadius;
-        float x3 = vertexArray[i * 3];
-        float y3 = vertexArray[i * 3 + 1];
-        float dx1 = x1 - x2;
-        float dy1 = y1 - y2;
-        float r1 = sqrt(dx1*dx1 + dy1*dy1);
-        float dx2 = x3 - x2;
-        float dy2 = y3 - y2;
-        float t = (dx1*dx2 + dy1*dy2) / (r1 * farRadius);
-        if (t > 1 || t < -1)
-            t = 1.0f;
-        float angle = acos(t);
-        float res = dx2*dy1 - dx1*dy2;
-        float factor = res > 0 ? 1.0f : -1.0f;
-        angle = factor * angle * 180.0f / pi;
-        setAngel_1_FarRadius(angel1FarRadius + angle);
-    }
-        break;
-    case 3:
-    {
-        int i = numberOfVertices - 1;
-        float pi = 3.14159265f;
-        float x1 = vertexArray[i * 3] + dx;
-        float y1 = vertexArray[i * 3 + 1] + dy;
-        float x2 = xCenterFarRadius;
-        float y2 = yCenterFarRadius;
-        float x3 = vertexArray[i * 3];
-        float y3 = vertexArray[i * 3 + 1];
-        float dx1 = x1 - x2;
-        float dy1 = y1 - y2;
-        float r1 = sqrt(dx1*dx1 + dy1*dy1);
-        float dx2 = x3 - x2;
-        float dy2 = y3 - y2;
-        float t = (dx1*dx2 + dy1*dy2) / (r1 * farRadius);
-        if (t > 1 || t < -1)
-            t = 1.0f;
-        float angle = acos(t);
-        float res = dx2*dy1 - dx1*dy2;
-        float factor = res > 0 ? 1.0f : -1.0f;
-        angle = factor * angle * 180.0f / pi;
-        setAngel_2_FarRadius(angel2FarRadius + angle);
-    }
-        break;
-    case 4:
-        dr = ((x - xCenterNearRadius)*dx + (y - yCenterNearRadius)*dy)/
-                sqrt((x - xCenterNearRadius)*(x - xCenterNearRadius) + (y - yCenterNearRadius)*(y - yCenterNearRadius));
-        //this->nearRadius += factor * dr;
-        this->nearRadius += dr;
-        setVertexArray(xCenterNearRadius, yCenterNearRadius, nearRadius, angel1NearRadius, angel2NearRadius,
-                       xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
-                       numberOfSides);
-        emit nearRadiusChanged(nearRadius);
 
-        break;
-    case 5:
-        dr = ((x - xCenterFarRadius)*dx + (y - yCenterFarRadius)*dy)/
-                sqrt((x - xCenterFarRadius)*(x - xCenterFarRadius) + (y - yCenterFarRadius)*(y - yCenterFarRadius));
-        //this->nearRadius += factor * dr;
-        this->farRadius += dr;
-        setVertexArray(xCenterNearRadius, yCenterNearRadius, nearRadius, angel1NearRadius, angel2NearRadius,
-                       xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
-                       numberOfSides);
-        emit farRadiusChanged(farRadius);
-
-        break;
-    case 6:
-        xCenterNearRadius += dx;
-        yCenterNearRadius += dy;
-        setVertexArray(xCenterNearRadius, yCenterNearRadius, nearRadius, angel1NearRadius, angel2NearRadius,
-                       xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
-                       numberOfSides);
-        setTextureArray(texture_1Usize,texture_1Vsize);
-        setNearTextureArray(texture_2Usize,texture_2Vsize);
-        setFarTextureArray(texture_2Usize,texture_2Vsize);
-        resetLines();
-        emit nearRadiusChanged(nearRadius);
-        break;
-    case 7:
-        xCenterFarRadius += dx;
-        yCenterFarRadius += dy;
-        setVertexArray(xCenterNearRadius, yCenterNearRadius, nearRadius, angel1NearRadius, angel2NearRadius,
-                       xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
-                       numberOfSides);
-        setTextureArray(texture_1Usize,texture_1Vsize);
-        setNearTextureArray(texture_2Usize,texture_2Vsize);
-        setFarTextureArray(texture_2Usize,texture_2Vsize);
-        resetLines();
-        emit farRadiusChanged(farRadius);
-        break;
-    case 8:
-        dr = ((x - xCenterNearRadius)*dx + (y - yCenterNearRadius)*dy)/
-                sqrt((x - xCenterNearRadius)*(x - xCenterNearRadius) + (y - yCenterNearRadius)*(y - yCenterNearRadius));
-        nearBoardWidth -= dr;
-        setVertexArray(xCenterNearRadius, yCenterNearRadius, nearRadius, angel1NearRadius, angel2NearRadius,
-                       xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
-                       numberOfSides);
-        setNearTextureArray(texture_2Usize,texture_2Vsize);
-        emit nearBoardWidthChanged(nearBoardWidth);
-        break;
-    case 9:
-        dr = ((x - xCenterFarRadius)*dx + (y - yCenterFarRadius)*dy)/
-                sqrt((x - xCenterFarRadius)*(x - xCenterFarRadius) + (y - yCenterFarRadius)*(y - yCenterFarRadius));
-        farBoardWidth += dr;
-        setVertexArray(xCenterNearRadius, yCenterNearRadius, nearRadius, angel1NearRadius, angel2NearRadius,
-                       xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
-                       numberOfSides);
-        setFarTextureArray(texture_2Usize,texture_2Vsize);
-        emit farBoardWidthChanged(farBoardWidth);
-        break;
-
-    case 10:
-    {        
-        float pi = 3.14159265f;
-        float x1 = x + dx;
-        float y1 = y + dy;
-        float x2 = xCenterNearRadius;
-        float y2 = yCenterNearRadius;
-        float x3 = x;
-        float y3 = y;
-        float dx1 = x1 - x2;
-        float dy1 = y1 - y2;
-        float r1 = sqrt(dx1*dx1 + dy1*dy1);
-        float dx2 = x3 - x2;
-        float dy2 = y3 - y2;
-        float r2 = sqrt(dx2*dx2 + dy2*dy2);
-        float t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
-        if (t > 1 || t < -1)
-            t = 1.0f;
-        float angle = acos(t);
-        float res = dx2*dy1 - dx1*dy2;
-        float factor = res > 0 ? 1.0f : -1.0f;
-        angle = factor * angle * 180.0f / pi;
-        setAngel_1_NearRadius(angel1NearRadius + angle);
-
-        x1 = x + dx;
-        y1 = y + dy;
-        x2 = xCenterFarRadius;
-        y2 = yCenterFarRadius;
-        x3 = x;
-        y3 = y;
-        dx1 = x1 - x2;
-        dy1 = y1 - y2;
-        r1 = sqrt(dx1*dx1 + dy1*dy1);
-        dx2 = x3 - x2;
-        dy2 = y3 - y2;
-        r2 = sqrt(dx2*dx2 + dy2*dy2);
-        t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
-        if (t > 1 || t < -1)
-            t = 1.0f;
-        angle = acos(t);
-        res = dx2*dy1 - dx1*dy2;
-        factor = res > 0 ? 1.0f : -1.0f;
-        angle = factor * angle * 180.0f / pi;
-        setAngel_1_FarRadius(angel1FarRadius + angle);
-
-    }
-        break;
-    case 11:
-    {
-        float pi = 3.14159265f;
-        float x1 = x + dx;
-        float y1 = y + dy;
-        float x2 = xCenterNearRadius;
-        float y2 = yCenterNearRadius;
-        float x3 = x;
-        float y3 = y;
-        float dx1 = x1 - x2;
-        float dy1 = y1 - y2;
-        float r1 = sqrt(dx1*dx1 + dy1*dy1);
-        float dx2 = x3 - x2;
-        float dy2 = y3 - y2;
-        float r2 = sqrt(dx2*dx2 + dy2*dy2);
-        float t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
-        if (t > 1 || t < -1)
-            t = 1.0f;
-        float angle = acos(t);
-        float res = dx2*dy1 - dx1*dy2;
-        float factor = res > 0 ? 1.0f : -1.0f;
-        angle = factor * angle * 180.0f / pi;
-        setAngel_2_NearRadius(angel2NearRadius + angle);
-
-        x1 = x + dx;
-        y1 = y + dy;
-        x2 = xCenterFarRadius;
-        y2 = yCenterFarRadius;
-        x3 = x;
-        y3 = y;
-        dx1 = x1 - x2;
-        dy1 = y1 - y2;
-        r1 = sqrt(dx1*dx1 + dy1*dy1);
-        dx2 = x3 - x2;
-        dy2 = y3 - y2;
-        r2 = sqrt(dx2*dx2 + dy2*dy2);
-        t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
-        if (t > 1 || t < -1)
-            t = 1.0f;
-        angle = acos(t);
-        res = dx2*dy1 - dx1*dy2;
-        factor = res > 0 ? 1.0f : -1.0f;
-        angle = factor * angle * 180.0f / pi;
-        setAngel_2_FarRadius(angel2FarRadius + angle);
-    }
-        break;
-
-    default:
-        break;
-    }
-    resetLines();
+    //resetLines();
 }
 
 int RoundingRoad::getNumberOfControls()
 {
-    return vertexArray.size() / 3 + 10 + 2;
+    //return vertexArray.size() / 3 + 10 + 2;
+    int linesCount = 0;
+    for (int i = 0; i < lines.size(); ++i)
+        linesCount += lines[i].line->getNumberOfControls();
+    return 12 + linesCount;
 }
 
 
@@ -1386,6 +1463,7 @@ QJsonObject RoundingRoad::getJSONInfo()
 
 void RoundingRoad::getProperties(QFormLayout *layout, QGLWidget* render)
 {
+    clearProperties(layout);
     this->layout = layout;
     this->render = render;
     while(QLayoutItem* child = layout->takeAt(0))
@@ -1492,6 +1570,10 @@ void RoundingRoad::getProperties(QFormLayout *layout, QGLWidget* render)
     connect(stepDialog, SIGNAL(endRoundingChanged(bool)), this, SLOT(setEndRounding(bool)));
     connect(stepDialog, SIGNAL(splitZoneWidthChanged(double)), this, SLOT(setSplitZoneWidth(double)));
     connect(stepDialog, SIGNAL(differentDirectionsChanged(bool)), this, SLOT(setDifferentDirections(bool)));
+    connect(stepDialog, SIGNAL(singleWayChanged(bool)), this, SLOT(setSingleWay(bool)));
+    connect(stepDialog, SIGNAL(axisStepChanged(double)), this, SLOT(setAxisStep(double)));
+    connect(stepDialog, SIGNAL(splitZoneTypeChanged(int)), this, SLOT(setSplitZoneType(int)));
+    connect(stepDialog, SIGNAL(splitZoneHeightChanged(double)), this, SLOT(setSplitZoneHeight(double)));
     connect(addLineButton, SIGNAL(clicked(bool)), stepDialog, SLOT(exec()));
     connect(stepDialog, SIGNAL(accepted()), this, SLOT(addLine()));
 
@@ -1533,7 +1615,7 @@ void RoundingRoad::setNearRadius(double nearRadius)
         setTextureArray(texture_1Usize,texture_1Vsize);
         setNearTextureArray(texture_2Usize,texture_2Vsize);
         setFarTextureArray(texture_2Usize,texture_2Vsize);
-        resetLines();
+        //resetLines();
         emit nearRadiusChanged(nearRadius);
     }
     else
@@ -1553,7 +1635,7 @@ void RoundingRoad::setAngel_1_NearRadius(double angel1)
         setTextureArray(texture_1Usize,texture_1Vsize);
         setNearTextureArray(texture_2Usize,texture_2Vsize);
         setFarTextureArray(texture_2Usize,texture_2Vsize);
-        resetLines();
+        //resetLines();
         emit angel_1_NearRadiusChanged(angel1);
     }
     else
@@ -1573,7 +1655,7 @@ void RoundingRoad::setAngel_2_NearRadius(double angel2)
         setTextureArray(texture_1Usize,texture_1Vsize);
         setNearTextureArray(texture_2Usize,texture_2Vsize);
         setFarTextureArray(texture_2Usize,texture_2Vsize);
-        resetLines();
+        //resetLines();
         emit angel_2_NearRadiusChanged(angel2);
     }
     else
@@ -1593,7 +1675,7 @@ void RoundingRoad::setFarRadius(double farRadius)
         setTextureArray(texture_1Usize,texture_1Vsize);
         setNearTextureArray(texture_2Usize,texture_2Vsize);
         setFarTextureArray(texture_2Usize,texture_2Vsize);
-        resetLines();
+        //resetLines();
         emit farRadiusChanged(farRadius);
     }
     else
@@ -1613,7 +1695,7 @@ void RoundingRoad::setAngel_1_FarRadius(double angel1)
         setTextureArray(texture_1Usize,texture_1Vsize);
         setNearTextureArray(texture_2Usize,texture_2Vsize);
         setFarTextureArray(texture_2Usize,texture_2Vsize);
-        resetLines();
+        //resetLines();
         emit angel_1_FarRadiusChanged(angel1);
     }
     else
@@ -1633,7 +1715,7 @@ void RoundingRoad::setAngel_2_FarRadius(double angel2)
         setTextureArray(texture_1Usize,texture_1Vsize);
         setNearTextureArray(texture_2Usize,texture_2Vsize);
         setFarTextureArray(texture_2Usize,texture_2Vsize);
-        resetLines();
+        //resetLines();
         emit angel_2_FarRadiusChanged(angel2);
     }
     else
@@ -1720,9 +1802,46 @@ void RoundingRoad::addLine(float step, QString textureSource, float textureSize,
 
     if (lineType == 6)
     {
-        line.line = new SplitZone(lineVertexArray, size, splitZoneWidth, beginRounding, endRounding,
-                                  QString("Линия №") + QString::number(lines.size() + 1));
-        line.splitZoneWidth = splitZoneWidth;
+        switch (splitZoneType)
+        {
+        case 0:
+        {
+            line.line = new SplitZone(lineVertexArray, size, splitZoneWidth, beginRounding, endRounding,
+                                      QString("Линия №") + QString::number(lines.size() + 1));
+            line.splitZoneWidth = splitZoneWidth;
+        }
+            break;
+        case 1:
+        {
+            line.line = new SplitZone(lineVertexArray, size, splitZoneWidth, beginRounding, endRounding,
+                                      splitZoneType,
+                                      splitZoneHeight,
+                                      QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                      0.25f, 6.0f,
+                                      QApplication::applicationDirPath() + "/models/city_roads/grass.jpg",
+                                      3.0f, 3.0f,
+                                      QString("Линия №") + QString::number(lines.size() + 1));
+            line.splitZoneWidth = splitZoneWidth;
+        }
+            break;
+        case 2:
+        {
+            line.line = new SplitZone(lineVertexArray, size, splitZoneWidth, beginRounding, endRounding,
+                                      splitZoneType,
+                                      splitZoneHeight,
+                                      QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                      0.25f, 6.0f,
+                                      QApplication::applicationDirPath() + "/models/city_roads/nr_07S.jpg",
+                                      6.0f, 6.0f,
+                                      QString("Линия №") + QString::number(lines.size() + 1));
+            line.splitZoneWidth = splitZoneWidth;
+        }
+            break;
+        default:
+            break;
+        }
+
+
     }
     else
     {
@@ -1739,6 +1858,7 @@ void RoundingRoad::addLine(float step, QString textureSource, float textureSize,
     line.endStep = endStep;
     line.beginSide = beginSide;
     line.differentDirections = differentDirections;
+    model->getGroup(1).push_back(line.line);
     line.line->setSelectedStatus(false);
     lines.push_back(line);
     delete[] lineVertexArray;
@@ -1777,6 +1897,24 @@ void RoundingRoad::addLine()
         textSource = QApplication::applicationDirPath() + "/models/city_roads/d_inter.png";
         lWidth = 0.25f;
         break;
+    case 8:
+    {
+        textSource = QString(":/textures/tramways.png");
+        lWidth = 1.5f;
+        if (singleWay)
+        {
+            addLine(step, textSource, 1.5f, lWidth, lineType, nearSide);
+        }
+        else
+        {
+            addLine(step + axisStep / 2.0, textSource, 1.5f, lWidth, lineType, nearSide);
+            addLine(step - axisStep / 2.0, textSource, 1.5f, lWidth, lineType, nearSide);
+        }
+        return;
+
+    }
+
+        break;
     default:
         break;
 
@@ -1808,6 +1946,16 @@ void RoundingRoad::deleteLine()
     if (!b) return;
     //qDebug() << "delete line " << b->text();
     int i = b->text().toInt() - 1;
+
+        for (std::list<RoadElement*>::iterator it = model->getGroup(1).begin();
+             it != model->getGroup(1).end(); ++it)
+        {
+            if (lines[i].line == (*it))
+            {
+                model->getGroup(1).erase(it);
+                break;
+            }
+        }
     delete lines[i].line;
     lines.remove(i);
     for (int i = 0; i < lines.size(); ++i)
@@ -1906,25 +2054,11 @@ void RoundingRoad::resetLines()
         for (int i = 0; i < vertices.size(); ++i)
             lineVertexArray[i] = vertices[i];
 
-        /*
-        int size = (numberOfSides + 1) * 3;
-        float *lineVertexArray = new float[size];
-
-        for (int i = 0; i <= numberOfSides; ++i)
-        {
-            //float angle = 2.0 * 3.1415926 * float(i) / float(numberOfSides);
-            float angle = (angel_1 + (angel_2 - angel_1) * float(i) / float(numberOfSides)) * 3.14159265f / 180.0f;
-            float dx = radius * cosf(angle);
-            float dy = radius * sinf(angle);
-            lineVertexArray[i * 3] = x + dx;
-            lineVertexArray[i * 3 + 1] = y + dy;
-            lineVertexArray[i * 3 + 2] = 0.001f;
-        }
-        */
         if (lines[i].lineType == 6)
         {
             SplitZone *splitZone = dynamic_cast<SplitZone*>(lines[i].line);
-            splitZone->calculateLine(lineVertexArray, size, 1.0f);
+            splitZone->calculateLine(lineVertexArray, size);
+            splitZone->reset();
             //lines[i].line = new SplitZone(lineVertexArray, size, 1.0f, true, true);
         }
         else
@@ -1977,6 +2111,26 @@ void RoundingRoad::setEndRounding(bool status)
 void RoundingRoad::setDifferentDirections(bool status)
 {
     differentDirections = status;
+}
+
+void RoundingRoad::setSingleWay(bool status)
+{
+    singleWay = status;
+}
+
+void RoundingRoad::setAxisStep(double step)
+{
+    axisStep = step;
+}
+
+void RoundingRoad::setSplitZoneType(int type)
+{
+    splitZoneType = type;
+}
+
+void RoundingRoad::setSplitZoneHeight(double height)
+{
+    splitZoneHeight = height;
 }
 
 void RoundingRoad::setShowNearBoard(bool status)
@@ -2289,4 +2443,20 @@ void RoundingRoad::clearProperties(QLayout *layout)
 {
 
     disconnect(stepDialog, 0, this, 0);
+}
+
+
+void RoundingRoad::deleteLine(RoadElement *line)
+{
+    int index = -1;
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].line == line)
+        {
+            index = i;
+            break;
+        }
+    }
+    if (index >=0)
+        lines.remove(index);
 }

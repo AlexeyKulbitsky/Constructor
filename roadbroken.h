@@ -35,7 +35,7 @@ public:
                QString texture_1, float texture_1Usize, float texture_1Vsize,
                QString texture_2, float texture_2Usize, float texture_2Vsize,
                QString name, int layer);
-
+    ~RoadBroken();
 protected:
     QVector<GLfloat> vertexArray;
     QVector<GLfloat> colorArray;
@@ -87,7 +87,10 @@ protected:
     bool endRounding;
     double splitZoneWidth;
     bool differentDirections;
-
+    double axisStep;
+    bool singleWay;
+    int splitZoneType;
+    double splitZoneHeight;
     QFormLayout* layout;
     QGLWidget* render;
 
@@ -172,13 +175,20 @@ public slots:
     void setBeginRounding(bool status);
     void setEndRounding(bool status);
     void setDifferentDirections(bool status);
-
+    void setSingleWay(bool status);
+    void setAxisStep(double step);
+    void setSplitZoneType(int type);
+    void setSplitZoneHeight(double height);
     virtual void getProperties(QFormLayout *layout, QGLWidget* render = 0);
 
 
     // RoadElement interface
 public:
     virtual void clearProperties(QLayout *layout);
+
+    // RoadElement interface
+public:
+    virtual void deleteLine(RoadElement *line);
 };
 
 #endif // ROADBROKEN_H

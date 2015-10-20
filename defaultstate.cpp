@@ -109,7 +109,8 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
                         if ((*it)->getName() == "LineBroken" ||
                                 (*it)->getName() == "Tramways" ||
                                 (*it)->getName() == "VoltageLine" ||
-                                (*it)->getName() == "DoubleVoltageLine")
+                                (*it)->getName() == "DoubleVoltageLine" ||
+                                (*it)->getName() == "RailWay")
                         {
                             stateManager->lineBuilderState->setLine(dynamic_cast<LineBroken*>(*it));
                             stateManager->lineBuilderState->setGroupIndex(selectedGroup);
@@ -343,7 +344,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[3] = x + 2.5f;
         axis[4] = y;
         axis[5] = 0.02f;
-        LineBroken* line = new LineBroken(0.1f, axis, 6, QString("LineBroken"), 1);
+        LineBroken* line = new LineBroken(0.1f, axis, 6, QApplication::applicationDirPath() + "/models/city_roads/solid.png", 6.0f, QString("LineBroken"), 1);
         line->setModel(model);
         model->getGroup(1).push_back(line);
         model->setModified(true);
@@ -357,7 +358,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[3] = x + 2.5f;
         axis[4] = y;
         axis[5] = 0.02f;
-        LineBroken* line = new LineBroken(0.1f, axis, 6, QString(":/textures/intermittent.png"), 0.8f, QString("LineBroken"), 1);
+        LineBroken* line = new LineBroken(0.1f, axis, 6, QApplication::applicationDirPath() + "/models/city_roads/inter.png", 6.0f, QString("LineBroken"), 1);
         line->setModel(model);
         model->getGroup(1).push_back(line);
         model->setModified(true);
@@ -371,7 +372,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[3] = x + 2.5f;
         axis[4] = y;
         axis[5] = 0.02f;
-        LineBroken* line = new LineBroken(0.25f, axis, 6, QString(":/textures/double_solid.png"), 1.0f, QString("LineBroken"), 1);
+        LineBroken* line = new LineBroken(0.25f, axis, 6, QApplication::applicationDirPath() + "/models/city_roads/d_solid.png", 6.0f, QString("LineBroken"), 1);
         line->setModel(model);
         model->getGroup(1).push_back(line);
         model->setModified(true);
@@ -385,7 +386,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[3] = x + 2.5f;
         axis[4] = y;
         axis[5] = 0.02f;
-        LineBroken* line = new LineBroken(0.25f, axis, 6, QString(":/textures/double_solid_intermittent.png"), 0.8f, QString("LineBroken"), 1);
+        LineBroken* line = new LineBroken(0.25f, axis, 6, QApplication::applicationDirPath() + "/models/city_roads/d_inter.png", 6.0f, QString("LineBroken"), 1);
         line->setModel(model);
         model->getGroup(1).push_back(line);
         model->setModified(true);
@@ -421,6 +422,22 @@ void DefaultState::dropEvent(QDropEvent *event)
         model->getGroup(1).push_back(railway);
         model->setModified(true);
     } else
+        if (s == "Железная дорога (Новая)")
+        {
+            float axis[6];
+            axis[0] = x - 2.5f;
+            axis[1] = y;
+            axis[2] = 0.02f;
+            axis[3] = x + 2.5f;
+            axis[4] = y;
+            axis[5] = 0.02f;
+            RailWay* railway = new RailWay(axis, 6,
+                                           QApplication::applicationDirPath() + "/models/city_roads/railway.jpg",
+                                           2.65f, 6.0f);
+            railway->setModel(model);
+            model->getGroup(1).push_back(railway);
+            model->setModified(true);
+        } else
         if (s == "Провод")
         {
             float axis[6];
@@ -491,7 +508,7 @@ void DefaultState::dropEvent(QDropEvent *event)
     if (s == "BMW M3")
     {
         RoadElementOBJ* element = new RoadElementOBJ(x, y);
-        stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/bmw_m3/").toStdString().c_str(),"bmw_m3.obj",
+        stateManager->fileManagerOBJ->loadOBJ(QApplication::applicationDirPath() + "/models/cars/bmw_m3/","bmw_m3.obj",
                              element->meshes,1.976f, element->scaleFactor);
         //fileManager->loadOBJ("models/cars/","bmw_m3.obj",
         //                     element->meshes,2.177f, element->scaleFactor);
@@ -716,7 +733,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         else
             if (lst.at(1)[lst.at(1).size() - 1] == 'j')
             {
-
+                /*
                 RoadElementOBJ* element = new RoadElementOBJ(x, y);
                 stateManager->fileManagerOBJ->loadOBJ(lst.at(0).toStdString().c_str(),
                                      lst.at(1).toStdString().c_str(),
@@ -726,7 +743,16 @@ void DefaultState::dropEvent(QDropEvent *event)
                 model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
                 model->setModified(true);
                 element->setSelectedStatus(false);
-
+                */
+                RoadElementOBJ* element = new RoadElementOBJ(x, y);
+                stateManager->fileManagerOBJ->loadOBJ(lst.at(0),
+                                     lst.at(1),
+                                     element->meshes,2.374f, element->scaleFactor, -1);
+                element->setModel(model);
+                element->scaleFactor = 1.0f;
+                model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
+                model->setModified(true);
+                element->setSelectedStatus(false);
             }
         //qDebug() << lst.at(1)[lst.at(1).size() - 1];
         //qDebug() << s.toStdString().c_str();
@@ -975,13 +1001,9 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
                         std::list<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
                         for(int k = 0; k < selectedIndex; ++k)
                             ++it;
-                        if ((*it)->getName() != "RoadBroken" && hitNumber == 1)
-                        {
-                            stateManager->selectedState->setSelectedElement(i, j);
-                            stateManager->selectedState->setSelectedElement(*it);
-                        }
                         (*it)->setSelectedStatus(true);
                         stateManager->selectedState->selectedElements.push_back(*it);
+                        break;
                     }
                     else
                     {

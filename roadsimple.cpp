@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <assert.h>
 #include "splitzone.h"
+#include "model.h"
 
 RoadSimple::RoadSimple()
 {
@@ -28,7 +29,7 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, QString name, int
     if (name == "Crosswalk")
     {
         showRightBoard = showLeftBoard = false;
-        z = 0.01f;
+        z = 0.02f;
     }
     else
     {
@@ -76,7 +77,7 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, float width, floa
     if (name == "Crosswalk")
     {
         showRightBoard = showLeftBoard = false;
-        z = 0.01f;
+        z = 0.02f;
     }
     else
     {
@@ -129,7 +130,7 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, float width,
     if (name == "Crosswalk")
     {
         showRightBoard = showLeftBoard = false;
-        z = 0.01f;
+        z = 0.02f;
     }
     else
     {
@@ -177,6 +178,15 @@ RoadSimple::~RoadSimple()
     qDebug() << "RoadSimple destructor";
     for (int i = 0; i < lines.size(); ++i)
     {
+        for (std::list<RoadElement*>::iterator it = model->getGroup(1).begin();
+             it != model->getGroup(1).end(); ++it)
+        {
+            if (lines[i].line == (*it))
+            {
+                model->getGroup(1).erase(it);
+                break;
+            }
+        }
         delete lines[i].line;
     }
     lines.clear();
@@ -848,156 +858,179 @@ void RoadSimple::move(float dx, float dy, float dz)
 
 void RoadSimple::drawControlElement(int index, float lineWidth, float pointSize)
 {
-    switch(index)
+    int lineControls = getNumberOfControls() - 12;
+    if (index >= lineControls)
     {
-    case 0:
-    {
-        glPointSize(pointSize);
-        glBegin(GL_POINTS);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(VertexArray[0][0],VertexArray[0][1],VertexArray[0][2]);
-        glEnd();
-        //qDebug() << "Point 0";
-    }
-        break;
-    case 1:
-    {
-        glPointSize(pointSize);
-        glBegin(GL_POINTS);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(VertexArray[1][0],VertexArray[1][1],VertexArray[1][2]);
-        glEnd();
-        //qDebug() << "Point 1";
-    }
-        break;
-    case 2:
-    {
-        glPointSize(pointSize);
-        glBegin(GL_POINTS);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(VertexArray[2][0],VertexArray[2][1],VertexArray[2][2]);
-        glEnd();
-        //qDebug() << "Point 2";
-    }
-        break;
-    case 3:
-    {
-        glPointSize(pointSize);
-        glBegin(GL_POINTS);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(VertexArray[3][0],VertexArray[3][1],VertexArray[3][2]);
-        glEnd();
-        //qDebug() << "Point 3";
-    }
-        break;
-    case 4:
-    {
-        glPointSize(pointSize);
-        glBegin(GL_POINTS);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(x1, y1, VertexArray[1][2]);
-        glEnd();
-    }
-        break;
-    case 5:
-    {
-        glPointSize(pointSize);
-        glBegin(GL_POINTS);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(x2, y2, VertexArray[2][2]);
-        glEnd();
-    }
-        break;
-    case 6:
-    {
-        glLineWidth(lineWidth);
-        glBegin(GL_LINES);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(VertexArray[0][0],
-                VertexArray[0][1],
-                VertexArray[0][2]);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(VertexArray[1][0],
-                VertexArray[1][1],
-                VertexArray[1][2]);
-        glEnd();
-    }
-        break;
-    case 7:
-    {
-        glLineWidth(lineWidth);
-        glBegin(GL_LINES);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(VertexArray[2][0],
-                VertexArray[2][1],
-                VertexArray[2][2]);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(VertexArray[3][0],
-                VertexArray[3][1],
-                VertexArray[3][2]);
-        glEnd();
-    }
-        break;
-    case 8:
-    {
-        glLineWidth(lineWidth);
-        glBegin(GL_LINES);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(VertexArray[0][0],
-                VertexArray[0][1],
-                VertexArray[0][2]);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(VertexArray[3][0],
-                VertexArray[3][1],
-                VertexArray[3][2]);
-        glEnd();
-    }
-        break;
-    case 9:
-    {
-        glLineWidth(lineWidth);
-        glBegin(GL_LINES);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(VertexArray[1][0],
-                VertexArray[1][1],
-                VertexArray[1][2]);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(VertexArray[2][0],
-                VertexArray[2][1],
-                VertexArray[2][2]);
-        glEnd();
-    }
-        break;
-    case 10:
-    {
-        if (showRightBoard)
-        {
-            glLineWidth(lineWidth);
-            glBegin(GL_LINES);
-            glColor3f(0.0f, 0.0f, 0.0f);
-            glVertex3f(vertexArrayRight[12],vertexArrayRight[13],vertexArrayRight[14]);
-            glVertex3f(vertexArrayRight[27],vertexArrayRight[28],vertexArrayRight[29]);
-            glEnd();
-        }
-    }
-        break;
-    case 11:
-    {
-        if (showLeftBoard)
-        {
-            glLineWidth(lineWidth);
-            glBegin(GL_LINES);
-            glColor3f(0.0f, 0.0f, 0.0f);
-            glVertex3f(vertexArrayLeft[12],vertexArrayLeft[13],vertexArrayLeft[14]);
-            glVertex3f(vertexArrayLeft[27],vertexArrayLeft[28],vertexArrayLeft[29]);
-            glEnd();
-        }
-    }
-        break;
+        index -= lineControls;
 
-    default:
-        break;
+        switch(index)
+        {
+        case 0:
+        {
+            glPointSize(pointSize);
+            glBegin(GL_POINTS);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(VertexArray[0][0],VertexArray[0][1],VertexArray[0][2]);
+            glEnd();
+            //qDebug() << "Point 0";
+        }
+            break;
+        case 1:
+        {
+            glPointSize(pointSize);
+            glBegin(GL_POINTS);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(VertexArray[1][0],VertexArray[1][1],VertexArray[1][2]);
+            glEnd();
+            //qDebug() << "Point 1";
+        }
+            break;
+        case 2:
+        {
+            glPointSize(pointSize);
+            glBegin(GL_POINTS);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(VertexArray[2][0],VertexArray[2][1],VertexArray[2][2]);
+            glEnd();
+            //qDebug() << "Point 2";
+        }
+            break;
+        case 3:
+        {
+            glPointSize(pointSize);
+            glBegin(GL_POINTS);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(VertexArray[3][0],VertexArray[3][1],VertexArray[3][2]);
+            glEnd();
+            //qDebug() << "Point 3";
+        }
+            break;
+        case 4:
+        {
+            glPointSize(pointSize);
+            glBegin(GL_POINTS);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(x1, y1, VertexArray[1][2]);
+            glEnd();
+        }
+            break;
+        case 5:
+        {
+            glPointSize(pointSize);
+            glBegin(GL_POINTS);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(x2, y2, VertexArray[2][2]);
+            glEnd();
+        }
+            break;
+        case 6:
+        {
+            glLineWidth(lineWidth);
+            glBegin(GL_LINES);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(VertexArray[0][0],
+                    VertexArray[0][1],
+                    VertexArray[0][2]);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(VertexArray[1][0],
+                    VertexArray[1][1],
+                    VertexArray[1][2]);
+            glEnd();
+        }
+            break;
+        case 7:
+        {
+            glLineWidth(lineWidth);
+            glBegin(GL_LINES);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(VertexArray[2][0],
+                    VertexArray[2][1],
+                    VertexArray[2][2]);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(VertexArray[3][0],
+                    VertexArray[3][1],
+                    VertexArray[3][2]);
+            glEnd();
+        }
+            break;
+        case 8:
+        {
+            glLineWidth(lineWidth);
+            glBegin(GL_LINES);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(VertexArray[0][0],
+                    VertexArray[0][1],
+                    VertexArray[0][2]);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(VertexArray[3][0],
+                    VertexArray[3][1],
+                    VertexArray[3][2]);
+            glEnd();
+        }
+            break;
+        case 9:
+        {
+            glLineWidth(lineWidth);
+            glBegin(GL_LINES);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(VertexArray[1][0],
+                    VertexArray[1][1],
+                    VertexArray[1][2]);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glVertex3f(VertexArray[2][0],
+                    VertexArray[2][1],
+                    VertexArray[2][2]);
+            glEnd();
+        }
+            break;
+        case 10:
+        {
+            if (showRightBoard)
+            {
+                glLineWidth(lineWidth);
+                glBegin(GL_LINES);
+                glColor3f(0.0f, 0.0f, 0.0f);
+                glVertex3f(vertexArrayRight[12],vertexArrayRight[13],vertexArrayRight[14]);
+                glVertex3f(vertexArrayRight[27],vertexArrayRight[28],vertexArrayRight[29]);
+                glEnd();
+            }
+        }
+            break;
+        case 11:
+        {
+            if (showLeftBoard)
+            {
+                glLineWidth(lineWidth);
+                glBegin(GL_LINES);
+                glColor3f(0.0f, 0.0f, 0.0f);
+                glVertex3f(vertexArrayLeft[12],vertexArrayLeft[13],vertexArrayLeft[14]);
+                glVertex3f(vertexArrayLeft[27],vertexArrayLeft[28],vertexArrayLeft[29]);
+                glEnd();
+            }
+        }
+            break;
+
+        default:
+            break;
+        }
     }
+    else
+    {
+        int i;
+        for (i = 0; i < lines.size(); ++i)
+        {
+            if (index >= lines[i].line->getNumberOfControls())
+            {
+                index -= lines[i].line->getNumberOfControls();
+            }
+            else
+            {
+                break;
+            }
+        }
+        lines[i].line->drawControlElement(index, lineWidth, pointSize);
+    }
+
 
 }
 
@@ -1008,346 +1041,374 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
     {
         return;
     }
-    switch (index)
-    {
-    case 0:
-    {
-        float X1 = VertexArray[0][0];
-        float Y1 = VertexArray[0][1];
-        float X2 = VertexArray[3][0];
-        float Y2 = VertexArray[3][1];
-        float X3 = X1 + dx;
-        float Y3 = Y1 + dy;
-        float dx1 = X1 - X2;
-        float dy1 = Y1 - Y2;
-        float r1 = sqrt(dx1*dx1 + dy1*dy1);
-        float dx2 = X3 - X2;
-        float dy2 = Y3 - Y2;
-        float r2 = sqrt(dx2*dx2 + dy2*dy2);
-        float pi = 3.14159265f;
-        float angle1 = acos(dx1 / r1);
-        if (dy1 < 0)
-            angle1 = 2.0f * pi - angle1;
-        float angle2 = acos(dx2 / r2);
-        if (dy2 < 0)
-            angle2 = 2.0f * pi - angle2;
-        float angle = angle2 - angle1;
-        //float angle = acos((dx1*dx2 + dy1*dy2) / (r1 * r2));
-        //float res = dx1*dy2 - dx2*dy1;
-        //if (res < 0)
-        //    angle *= -1.0f;
-        x1 -= X2;
-        y1 -= Y2;
-        x2 -= X2;
-        y2 -= Y2;
-        float tx = x1, ty = y1;
-        x1 = tx * cos(angle) - ty * sin(angle);
-        y1 = tx * sin(angle) + ty * cos(angle);
-        tx = x2;
-        ty = y2;
-        x2 = tx * cos(angle) - ty * sin(angle);
-        y2 = tx * sin(angle) + ty * cos(angle);
-        x1 += X2;
-        y1 += Y2;
-        x2 += X2;
-        y2 += Y2;
-        setVertexArray(x1, y1, x2, y2, width);
-        setTextureArray();
-        for (int i = 0; i < lines.size(); ++i)
-            lines[i].line->resizeByControl(index,dx,dy,x,y);
-        //emit lengthChanged(length);
-    }
-        break;
-    case 1:
-    {
-        float X1 = VertexArray[1][0];
-        float Y1 = VertexArray[1][1];
-        float X2 = VertexArray[2][0];
-        float Y2 = VertexArray[2][1];
-        float X3 = X1 + dx;
-        float Y3 = Y1 + dy;
-        float dx1 = X1 - X2;
-        float dy1 = Y1 - Y2;
-        float r1 = sqrt(dx1*dx1 + dy1*dy1);
-        float dx2 = X3 - X2;
-        float dy2 = Y3 - Y2;
-        float r2 = sqrt(dx2*dx2 + dy2*dy2);
-        float pi = 3.14159265f;
-        float angle1 = acos(dx1 / r1);
-        if (dy1 < 0)
-            angle1 = 2.0f * pi - angle1;
-        float angle2 = acos(dx2 / r2);
-        if (dy2 < 0)
-            angle2 = 2.0f * pi - angle2;
-        float angle = angle2 - angle1;
-        x1 -= X2;
-        y1 -= Y2;
-        x2 -= X2;
-        y2 -= Y2;
-        float tx = x1, ty = y1;
-        x1 = tx * cos(angle) - ty * sin(angle);
-        y1 = tx * sin(angle) + ty * cos(angle);
-        tx = x2;
-        ty = y2;
-        x2 = tx * cos(angle) - ty * sin(angle);
-        y2 = tx * sin(angle) + ty * cos(angle);
-        x1 += X2;
-        y1 += Y2;
-        x2 += X2;
-        y2 += Y2;
-        setVertexArray(x1, y1, x2, y2, width);
-        setTextureArray();
-        for (int i = 0; i < lines.size(); ++i)
-            lines[i].line->resizeByControl(index,dx,dy,x,y);
-    }
-        break;
-    case 2:
-    {
-        float X1 = VertexArray[2][0];
-        float Y1 = VertexArray[2][1];
-        float X2 = VertexArray[1][0];
-        float Y2 = VertexArray[1][1];
-        float X3 = X1 + dx;
-        float Y3 = Y1 + dy;
-        float dx1 = X1 - X2;
-        float dy1 = Y1 - Y2;
-        float r1 = sqrt(dx1*dx1 + dy1*dy1);
-        float dx2 = X3 - X2;
-        float dy2 = Y3 - Y2;
-        float r2 = sqrt(dx2*dx2 + dy2*dy2);
-        float pi = 3.14159265f;
-        float angle1 = acos(dx1 / r1);
-        if (dy1 < 0)
-            angle1 = 2.0f * pi - angle1;
-        float angle2 = acos(dx2 / r2);
-        if (dy2 < 0)
-            angle2 = 2.0f * pi - angle2;
-        float angle = angle2 - angle1;
-        x1 -= X2;
-        y1 -= Y2;
-        x2 -= X2;
-        y2 -= Y2;
-        float tx = x1, ty = y1;
-        x1 = tx * cos(angle) - ty * sin(angle);
-        y1 = tx * sin(angle) + ty * cos(angle);
-        tx = x2;
-        ty = y2;
-        x2 = tx * cos(angle) - ty * sin(angle);
-        y2 = tx * sin(angle) + ty * cos(angle);
-        x1 += X2;
-        y1 += Y2;
-        x2 += X2;
-        y2 += Y2;
-        setVertexArray(x1, y1, x2, y2, width);
-        setTextureArray();
-        for (int i = 0; i < lines.size(); ++i)
-            lines[i].line->resizeByControl(index,dx,dy,x,y);
-    }
-        break;
-    case 3:
-    {
-        float X1 = VertexArray[3][0];
-        float Y1 = VertexArray[3][1];
-        float X2 = VertexArray[0][0];
-        float Y2 = VertexArray[0][1];
-        float X3 = X1 + dx;
-        float Y3 = Y1 + dy;
-        float dx1 = X1 - X2;
-        float dy1 = Y1 - Y2;
-        float r1 = sqrt(dx1*dx1 + dy1*dy1);
-        float dx2 = X3 - X2;
-        float dy2 = Y3 - Y2;
-        float r2 = sqrt(dx2*dx2 + dy2*dy2);
-        float pi = 3.14159265f;
-        float angle1 = acos(dx1 / r1);
-        if (dy1 < 0)
-            angle1 = 2.0f * pi - angle1;
-        float angle2 = acos(dx2 / r2);
-        if (dy2 < 0)
-            angle2 = 2.0f * pi - angle2;
-        float angle = angle2 - angle1;
-        x1 -= X2;
-        y1 -= Y2;
-        x2 -= X2;
-        y2 -= Y2;
-        float tx = x1, ty = y1;
-        x1 = tx * cos(angle) - ty * sin(angle);
-        y1 = tx * sin(angle) + ty * cos(angle);
-        tx = x2;
-        ty = y2;
-        x2 = tx * cos(angle) - ty * sin(angle);
-        y2 = tx * sin(angle) + ty * cos(angle);
-        x1 += X2;
-        y1 += Y2;
-        x2 += X2;
-        y2 += Y2;
-        setVertexArray(x1, y1, x2, y2, width);
-        setTextureArray();
-        for (int i = 0; i < lines.size(); ++i)
-            lines[i].line->resizeByControl(index,dx,dy,x,y);
-    }
-        break;
-    case 4:
-    {
-        float X1 = x1;
-        float Y1 = y1;
-        float X2 = x2;
-        float Y2 = y2;
-        float X3 = X1 + dx;
-        float Y3 = Y1 + dy;
-        float dx1 = X1 - X2;
-        float dy1 = Y1 - Y2;
-        float r1 = sqrt(dx1*dx1 + dy1*dy1);
-        float dx2 = X3 - X2;
-        float dy2 = Y3 - Y2;
-        float r2 = sqrt(dx2*dx2 + dy2*dy2);
-        float pi = 3.14159265f;
-        float angle1 = acos(dx1 / r1);
-        if (dy1 < 0)
-            angle1 = 2.0f * pi - angle1;
-        float angle2 = acos(dx2 / r2);
-        if (dy2 < 0)
-            angle2 = 2.0f * pi - angle2;
-        float angle = angle2 - angle1;
-        x1 -= X2;
-        y1 -= Y2;
-        float tx = x1, ty = y1;
-        x1 = tx * cos(angle) - ty * sin(angle);
-        y1 = tx * sin(angle) + ty * cos(angle);
-        x1 += X2;
-        y1 += Y2;
-        setVertexArray(x1, y1, x2, y2, width);
-        setTextureArray();
-        for (int i = 0; i < lines.size(); ++i)
-            lines[i].line->resizeByControl(index,dx,dy,x,y);
-    }
-        break;
-    case 5:
-    {
-        float X1 = x2;
-        float Y1 = y2;
-        float X2 = x1;
-        float Y2 = y1;
-        float X3 = X1 + dx;
-        float Y3 = Y1 + dy;
-        float dx1 = X1 - X2;
-        float dy1 = Y1 - Y2;
-        float r1 = sqrt(dx1*dx1 + dy1*dy1);
-        float dx2 = X3 - X2;
-        float dy2 = Y3 - Y2;
-        float r2 = sqrt(dx2*dx2 + dy2*dy2);
-        float pi = 3.14159265f;
-        float angle1 = acos(dx1 / r1);
-        if (dy1 < 0)
-            angle1 = 2.0f * pi - angle1;
-        float angle2 = acos(dx2 / r2);
-        if (dy2 < 0)
-            angle2 = 2.0f * pi - angle2;
-        float angle = angle2 - angle1;
-        x2 -= X2;
-        y2 -= Y2;
-        float tx = x2, ty = y2;
-        x2 = tx * cos(angle) - ty * sin(angle);
-        y2 = tx * sin(angle) + ty * cos(angle);
-        x2 += X2;
-        y2 += Y2;
-        setVertexArray(x1, y1, x2, y2, width);
-        setTextureArray();
-        for (int i = 0; i < lines.size(); ++i)
-            lines[i].line->resizeByControl(index,dx,dy,x,y);
-    }
-        break;
-    case 6:
-    {
-        // Первый торец
-        float dx1 = x1 - x2;
-        float dy1 = y1 - y2;
-        float dr = (dx * dx1 + dy * dy1) / length;
-        x1 += dx1 / length * dr;
-        y1 += dy1 / length * dr;
-        setVertexArray(x1, y1, x2, y2, width);
-        setTextureArray();
-        for (int i = 0; i < lines.size(); ++i)
-            lines[i].line->resizeByControl(index,dx,dy,x,y);
-        emit lengthChanged(length);
-    }
-        break;
 
-    case 7:
+    int lineControls = getNumberOfControls() - 12;
+    if (index >= lineControls)
     {
-        // Второй торец
-        float dx1 = x2 - x1;
-        float dy1 = y2 - y1;
-        float dr = (dx * dx1 + dy * dy1) / length;
-        x2 += dx1 / length * dr;
-        y2 += dy1 / length * dr;
-        setVertexArray(x1, y1, x2, y2, width);
-        setTextureArray();
-        for (int i = 0; i < lines.size(); ++i)
-            lines[i].line->resizeByControl(index,dx,dy,x,y);
-        emit lengthChanged(length);
-    }
-        break;
+        index -= lineControls;
 
-    case 8:
-    {
-        float dr = ((xP1 - xP2)*dx + (yP1 - yP2)*dy)/
-                sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
-        float widthResult = width + dr * 2.0f > 0 ?
-                    width + dr * 2.0f :
-                    0.1f;
-        this->rightWidth += dr;
-        setVertexArray(x1, y1, x2, y2, width);
-        setTextureArray();
-        resetLines();
-        emit rightWidthChanged(rightWidth);
-        emit widthChanged(width);
-    }
-        break;
-    case 9:
-    {
-        float dr = ((xP2 - xP1)*dx + (yP2 - yP1)*dy)/
-                sqrt((xP2 - xP1)*(xP2 - xP1) + (yP2 - yP1)*(yP2 - yP1));
-        float widthResult = width + dr * 2.0f > 0 ?
-                    width + dr * 2.0f :
-                    0.1f;
-        this->leftWidth += dr;
-        setVertexArray(x1, y1, x2, y2, width);
-        setTextureArray();
-        resetLines();
-        emit leftWidthChanged(leftWidth);
-        emit widthChanged(width);
-    }
-        break;
-    case 10:
-        // Правый
-    {
-        float dr = ((xP1 - xP2)*dx + (yP1 - yP2)*dy)/
-                sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
-        rightBoardWidth += dr;
-        setVertexArray(x1,y1,x2,y2,width);
-        emit rightBoardWidthChanged(rightBoardWidth);
-    }
-        break;
-    case 11:
-    {
-        float dr = ((xP2 - xP1)*dx + (yP2 - yP1)*dy)/
-                sqrt((xP2 - xP1)*(xP2 - xP1) + (yP2 - yP1)*(yP2 - yP1));
-        leftBoardWidth += dr;
-        setVertexArray(x1,y1,x2,y2,width);
-        emit leftBoardWidthChanged(leftBoardWidth);
-    }
-        break;
+        switch (index)
+        {
+        case 0:
+        {
+            float X1 = VertexArray[0][0];
+            float Y1 = VertexArray[0][1];
+            float X2 = VertexArray[3][0];
+            float Y2 = VertexArray[3][1];
+            float X3 = X1 + dx;
+            float Y3 = Y1 + dy;
+            float dx1 = X1 - X2;
+            float dy1 = Y1 - Y2;
+            float r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float dx2 = X3 - X2;
+            float dy2 = Y3 - Y2;
+            float r2 = sqrt(dx2*dx2 + dy2*dy2);
+            float pi = 3.14159265f;
+            float angle1 = acos(dx1 / r1);
+            if (dy1 < 0)
+                angle1 = 2.0f * pi - angle1;
+            float angle2 = acos(dx2 / r2);
+            if (dy2 < 0)
+                angle2 = 2.0f * pi - angle2;
+            float angle = angle2 - angle1;
+            //float angle = acos((dx1*dx2 + dy1*dy2) / (r1 * r2));
+            //float res = dx1*dy2 - dx2*dy1;
+            //if (res < 0)
+            //    angle *= -1.0f;
+            x1 -= X2;
+            y1 -= Y2;
+            x2 -= X2;
+            y2 -= Y2;
+            float tx = x1, ty = y1;
+            x1 = tx * cos(angle) - ty * sin(angle);
+            y1 = tx * sin(angle) + ty * cos(angle);
+            tx = x2;
+            ty = y2;
+            x2 = tx * cos(angle) - ty * sin(angle);
+            y2 = tx * sin(angle) + ty * cos(angle);
+            x1 += X2;
+            y1 += Y2;
+            x2 += X2;
+            y2 += Y2;
+            setVertexArray(x1, y1, x2, y2, width);
+            setTextureArray();
+            for (int i = 0; i < lines.size(); ++i)
+                lines[i].line->rotate(angle, X2, Y2, 0.0f);
+            //emit lengthChanged(length);
+        }
+            break;
+        case 1:
+        {
+            float X1 = VertexArray[1][0];
+            float Y1 = VertexArray[1][1];
+            float X2 = VertexArray[2][0];
+            float Y2 = VertexArray[2][1];
+            float X3 = X1 + dx;
+            float Y3 = Y1 + dy;
+            float dx1 = X1 - X2;
+            float dy1 = Y1 - Y2;
+            float r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float dx2 = X3 - X2;
+            float dy2 = Y3 - Y2;
+            float r2 = sqrt(dx2*dx2 + dy2*dy2);
+            float pi = 3.14159265f;
+            float angle1 = acos(dx1 / r1);
+            if (dy1 < 0)
+                angle1 = 2.0f * pi - angle1;
+            float angle2 = acos(dx2 / r2);
+            if (dy2 < 0)
+                angle2 = 2.0f * pi - angle2;
+            float angle = angle2 - angle1;
+            x1 -= X2;
+            y1 -= Y2;
+            x2 -= X2;
+            y2 -= Y2;
+            float tx = x1, ty = y1;
+            x1 = tx * cos(angle) - ty * sin(angle);
+            y1 = tx * sin(angle) + ty * cos(angle);
+            tx = x2;
+            ty = y2;
+            x2 = tx * cos(angle) - ty * sin(angle);
+            y2 = tx * sin(angle) + ty * cos(angle);
+            x1 += X2;
+            y1 += Y2;
+            x2 += X2;
+            y2 += Y2;
+            setVertexArray(x1, y1, x2, y2, width);
+            setTextureArray();
+            for (int i = 0; i < lines.size(); ++i)
+                lines[i].line->rotate(angle, X2, Y2, 0.0f);
+        }
+            break;
+        case 2:
+        {
+            float X1 = VertexArray[2][0];
+            float Y1 = VertexArray[2][1];
+            float X2 = VertexArray[1][0];
+            float Y2 = VertexArray[1][1];
+            float X3 = X1 + dx;
+            float Y3 = Y1 + dy;
+            float dx1 = X1 - X2;
+            float dy1 = Y1 - Y2;
+            float r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float dx2 = X3 - X2;
+            float dy2 = Y3 - Y2;
+            float r2 = sqrt(dx2*dx2 + dy2*dy2);
+            float pi = 3.14159265f;
+            float angle1 = acos(dx1 / r1);
+            if (dy1 < 0)
+                angle1 = 2.0f * pi - angle1;
+            float angle2 = acos(dx2 / r2);
+            if (dy2 < 0)
+                angle2 = 2.0f * pi - angle2;
+            float angle = angle2 - angle1;
+            x1 -= X2;
+            y1 -= Y2;
+            x2 -= X2;
+            y2 -= Y2;
+            float tx = x1, ty = y1;
+            x1 = tx * cos(angle) - ty * sin(angle);
+            y1 = tx * sin(angle) + ty * cos(angle);
+            tx = x2;
+            ty = y2;
+            x2 = tx * cos(angle) - ty * sin(angle);
+            y2 = tx * sin(angle) + ty * cos(angle);
+            x1 += X2;
+            y1 += Y2;
+            x2 += X2;
+            y2 += Y2;
+            setVertexArray(x1, y1, x2, y2, width);
+            setTextureArray();
+            for (int i = 0; i < lines.size(); ++i)
+                lines[i].line->rotate(angle, X2, Y2, 0.0f);
+        }
+            break;
+        case 3:
+        {
+            float X1 = VertexArray[3][0];
+            float Y1 = VertexArray[3][1];
+            float X2 = VertexArray[0][0];
+            float Y2 = VertexArray[0][1];
+            float X3 = X1 + dx;
+            float Y3 = Y1 + dy;
+            float dx1 = X1 - X2;
+            float dy1 = Y1 - Y2;
+            float r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float dx2 = X3 - X2;
+            float dy2 = Y3 - Y2;
+            float r2 = sqrt(dx2*dx2 + dy2*dy2);
+            float pi = 3.14159265f;
+            float angle1 = acos(dx1 / r1);
+            if (dy1 < 0)
+                angle1 = 2.0f * pi - angle1;
+            float angle2 = acos(dx2 / r2);
+            if (dy2 < 0)
+                angle2 = 2.0f * pi - angle2;
+            float angle = angle2 - angle1;
+            x1 -= X2;
+            y1 -= Y2;
+            x2 -= X2;
+            y2 -= Y2;
+            float tx = x1, ty = y1;
+            x1 = tx * cos(angle) - ty * sin(angle);
+            y1 = tx * sin(angle) + ty * cos(angle);
+            tx = x2;
+            ty = y2;
+            x2 = tx * cos(angle) - ty * sin(angle);
+            y2 = tx * sin(angle) + ty * cos(angle);
+            x1 += X2;
+            y1 += Y2;
+            x2 += X2;
+            y2 += Y2;
+            setVertexArray(x1, y1, x2, y2, width);
+            setTextureArray();
+            for (int i = 0; i < lines.size(); ++i)
+                lines[i].line->rotate(angle, X2, Y2, 0.0f);
+        }
+            break;
+        case 4:
+        {
+            float X1 = x1;
+            float Y1 = y1;
+            float X2 = x2;
+            float Y2 = y2;
+            float X3 = X1 + dx;
+            float Y3 = Y1 + dy;
+            float dx1 = X1 - X2;
+            float dy1 = Y1 - Y2;
+            float r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float dx2 = X3 - X2;
+            float dy2 = Y3 - Y2;
+            float r2 = sqrt(dx2*dx2 + dy2*dy2);
+            float pi = 3.14159265f;
+            float angle1 = acos(dx1 / r1);
+            if (dy1 < 0)
+                angle1 = 2.0f * pi - angle1;
+            float angle2 = acos(dx2 / r2);
+            if (dy2 < 0)
+                angle2 = 2.0f * pi - angle2;
+            float angle = angle2 - angle1;
+            x1 -= X2;
+            y1 -= Y2;
+            float tx = x1, ty = y1;
+            x1 = tx * cos(angle) - ty * sin(angle);
+            y1 = tx * sin(angle) + ty * cos(angle);
+            x1 += X2;
+            y1 += Y2;
+            setVertexArray(x1, y1, x2, y2, width);
+            setTextureArray();
+            for (int i = 0; i < lines.size(); ++i)
+                lines[i].line->rotate(angle, X2, Y2, 0.0f);
+        }
+            break;
+        case 5:
+        {
+            float X1 = x2;
+            float Y1 = y2;
+            float X2 = x1;
+            float Y2 = y1;
+            float X3 = X1 + dx;
+            float Y3 = Y1 + dy;
+            float dx1 = X1 - X2;
+            float dy1 = Y1 - Y2;
+            float r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float dx2 = X3 - X2;
+            float dy2 = Y3 - Y2;
+            float r2 = sqrt(dx2*dx2 + dy2*dy2);
+            float pi = 3.14159265f;
+            float angle1 = acos(dx1 / r1);
+            if (dy1 < 0)
+                angle1 = 2.0f * pi - angle1;
+            float angle2 = acos(dx2 / r2);
+            if (dy2 < 0)
+                angle2 = 2.0f * pi - angle2;
+            float angle = angle2 - angle1;
+            x2 -= X2;
+            y2 -= Y2;
+            float tx = x2, ty = y2;
+            x2 = tx * cos(angle) - ty * sin(angle);
+            y2 = tx * sin(angle) + ty * cos(angle);
+            x2 += X2;
+            y2 += Y2;
+            setVertexArray(x1, y1, x2, y2, width);
+            setTextureArray();
+            for (int i = 0; i < lines.size(); ++i)
+                lines[i].line->rotate(angle, X2, Y2, 0.0f);
+        }
+            break;
+        case 6:
+        {
+            // Первый торец
+            float dx1 = x1 - x2;
+            float dy1 = y1 - y2;
+            float dr = (dx * dx1 + dy * dy1) / length;
+            x1 += dx1 / length * dr;
+            y1 += dy1 / length * dr;
+            setVertexArray(x1, y1, x2, y2, width);
+            setTextureArray();
+            for (int i = 0; i < lines.size(); ++i)
+                lines[i].line->resizeByControl(0,dx1 / length * dr,dy1 / length * dr,x,y);
+            emit lengthChanged(length);
+        }
+            break;
 
-    default:
-        break;
+        case 7:
+        {
+            // Второй торец
+            float dx1 = x2 - x1;
+            float dy1 = y2 - y1;
+            float dr = (dx * dx1 + dy * dy1) / length;
+            x2 += dx1 / length * dr;
+            y2 += dy1 / length * dr;
+            setVertexArray(x1, y1, x2, y2, width);
+            setTextureArray();
+            for (int i = 0; i < lines.size(); ++i)
+                lines[i].line->resizeByControl(1,dx1 / length * dr,dy1 / length * dr,x,y);
+            emit lengthChanged(length);
+        }
+            break;
+
+        case 8:
+        {
+            float dr = ((xP1 - xP2)*dx + (yP1 - yP2)*dy)/
+                    sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
+            float widthResult = width + dr * 2.0f > 0 ?
+                        width + dr * 2.0f :
+                        0.1f;
+            this->rightWidth += dr;
+            setVertexArray(x1, y1, x2, y2, width);
+            setTextureArray();
+            //resetLines();
+            emit rightWidthChanged(rightWidth);
+            emit widthChanged(width);
+        }
+            break;
+        case 9:
+        {
+            float dr = ((xP2 - xP1)*dx + (yP2 - yP1)*dy)/
+                    sqrt((xP2 - xP1)*(xP2 - xP1) + (yP2 - yP1)*(yP2 - yP1));
+            float widthResult = width + dr * 2.0f > 0 ?
+                        width + dr * 2.0f :
+                        0.1f;
+            this->leftWidth += dr;
+            setVertexArray(x1, y1, x2, y2, width);
+            setTextureArray();
+            //resetLines();
+            emit leftWidthChanged(leftWidth);
+            emit widthChanged(width);
+        }
+            break;
+        case 10:
+            // Правый
+        {
+            float dr = ((xP1 - xP2)*dx + (yP1 - yP2)*dy)/
+                    sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
+            rightBoardWidth += dr;
+            setVertexArray(x1,y1,x2,y2,width);
+            emit rightBoardWidthChanged(rightBoardWidth);
+        }
+            break;
+        case 11:
+        {
+            float dr = ((xP2 - xP1)*dx + (yP2 - yP1)*dy)/
+                    sqrt((xP2 - xP1)*(xP2 - xP1) + (yP2 - yP1)*(yP2 - yP1));
+            leftBoardWidth += dr;
+            setVertexArray(x1,y1,x2,y2,width);
+            emit leftBoardWidthChanged(leftBoardWidth);
+        }
+            break;
+
+        default:
+            break;
+        }
+        setTextureArray();
     }
-    setTextureArray();
+    else
+    {
+        int i;
+        for (i = 0; i < lines.size(); ++i)
+        {
+            if (index >= lines[i].line->getNumberOfControls())
+            {
+                index -= lines[i].line->getNumberOfControls();
+            }
+            else
+            {
+                break;
+            }
+        }
+        lines[i].line->resizeByControl(index, dx, dy, x, y);
+    }
+
 }
 
 int RoadSimple::getNumberOfControls()
 {
-    return 10 + 2;
+    int roadControls = 12;
+    int lineControls = 0;
+    for (int i = 0; i < lines.size(); ++i)
+        lineControls += lines[i].line->getNumberOfControls();
+    return roadControls + lineControls;
 }
 
 void RoadSimple::changeColorOfSelectedControl(int index)
@@ -1359,32 +1420,9 @@ void RoadSimple::changeColorOfSelectedControl(int index)
 
 QCursor RoadSimple::getCursorForControlElement(int index)
 {
-    switch (index)
-    {
-    // Углы для изменения размера
-    case 0:
+
         return Qt::CrossCursor;
-    case 1:
-        return Qt::CrossCursor;
-    case 2:
-        return Qt::CrossCursor;
-    case 3:
-        return Qt::CrossCursor;
-    case 4:
-        return Qt::CrossCursor;
-    case 5:
-        return Qt::CrossCursor;
-    case 6:
-        return Qt::CrossCursor;
-    case 7:
-        return Qt::CrossCursor;
-    case 8:
-        return Qt::CrossCursor;
-    case 9:
-        return Qt::CrossCursor;
-    default:
-        return Qt::ArrowCursor;
-    }
+
 }
 
 bool RoadSimple::hasPoint(GLfloat x, GLfloat y)
@@ -1461,9 +1499,17 @@ QJsonObject RoadSimple::getJSONInfo()
 
 }
 
+void RoadSimple::setSelectedStatus(bool status)
+{
+    selected = status;
+    for (int i = 0; i < lines.size(); ++i)
+        lines[i].line->setSelectedStatus(status);
+}
+
 
 void RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)
 {
+    clearProperties(layout);
     qDebug() << "Road Simple Properties";
     this->layout = layout;
     this->render = render;
@@ -1547,6 +1593,10 @@ void RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)
         connect(stepDialog, SIGNAL(endRoundingChanged(bool)), this, SLOT(setEndRounding(bool)));
         connect(stepDialog, SIGNAL(splitZoneWidthChanged(double)), this, SLOT(setSplitZoneWidth(double)));
         connect(stepDialog, SIGNAL(differentDirectionsChanged(bool)), this, SLOT(setDifferentDirections(bool)));
+        connect(stepDialog, SIGNAL(singleWayChanged(bool)), this, SLOT(setSingleWay(bool)));
+        connect(stepDialog, SIGNAL(axisStepChanged(double)), this, SLOT(setAxisStep(double)));
+        connect(stepDialog, SIGNAL(splitZoneTypeChanged(int)), this, SLOT(setSplitZoneType(int)));
+        connect(stepDialog, SIGNAL(splitZoneHeightChanged(double)), this, SLOT(setSplitZoneHeight(double)));
         connect(addLineButton, SIGNAL(clicked(bool)), stepDialog, SLOT(exec()));
         connect(stepDialog, SIGNAL(accepted()), this, SLOT(addLine()));
 
@@ -1795,7 +1845,7 @@ void RoadSimple::setWidth(double width)
         this->leftWidth += delta;
         this->width = width;
         setVertexArray(x1, y1, x2, y2, width);
-        resetLines();
+        //resetLines();
         emit widthChanged((double)width);
         emit rightWidthChanged((double)rightWidth);
         emit leftWidthChanged((double)leftWidth);
@@ -1815,7 +1865,7 @@ void RoadSimple::setRightWidth(double width)
         this->width += delta;
         this->rightWidth = width;
         setVertexArray(x1, y1, x2, y2, width);
-        resetLines();
+        //resetLines();
         emit rightWidthChanged((double)rightWidth);
         emit widthChanged((double)width);
     }
@@ -1834,7 +1884,7 @@ void RoadSimple::setLeftWidth(double width)
         this->width += delta;
         this->leftWidth = width;
         setVertexArray(x1, y1, x2, y2, width);
-        resetLines();
+        //resetLines();
         emit leftWidthChanged((double)leftWidth);
         emit widthChanged((double)width);
     }
@@ -1852,7 +1902,7 @@ void RoadSimple::setLength(double length)
         y2 = y1 + (y2 - y1) * (length / this->length);
         setVertexArray(x1, y1, x2, y2, width);
         this->length = length;
-        resetLines();
+        //resetLines();
         emit lengthChanged(length);
     }
     else
@@ -1891,49 +1941,7 @@ void RoadSimple::setLeftBoardWidth(double width)
 
 void RoadSimple::addLine(float step, QString textureSource, float textureSize, float lineWidth, int lineType, bool rightSide, float beginStep, float endStep)
 {
-    /*
-    float r = width / 2.0f;
-    float factor = rightSide ? 1 : -1;
-    float R = sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
-    float dx = sqrt(r*r*(y2-y1)*(y2-y1)/((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1)));
-    float dy = sqrt(r*r/(1 + (y2-y1)*(y2-y1)/((x2-x1)*(x2-x1))));
-    if (x1 > x2 && y1 > y2)
-    {
-        dx *= -1.0f;
-        dy *= -1.0f;
-    }
-    if (x1 < x2 && y1 > y2)
-    {
-        dx *= -1.0f;
 
-    }
-    if (x1 > x2 && y1 < y2)
-    {
-        dy *= -1.0f;
-
-    }
-    float line_x1, line_x2, line_y1, line_y2;
-
-    // Отсчет от правой стороны
-
-    if(step < r)
-    {
-        line_x1 = x1 + (x2 - x1) * beginStep / R + factor * dx * (r - step)/r;
-        line_y1 = y1 + (y2 - y1) * beginStep / R - factor * dy * (r - step)/r;
-
-        line_x2 = x2 + (x1 - x2) * endStep / R + factor * dx * (r - step)/r;
-        line_y2 = y2 + (y1 - y2) * endStep / R - factor * dy * (r - step)/r;
-
-    }
-    else
-    {
-        line_x1 = x1 + (x2 - x1) * beginStep / R - factor * dx * (step - r)/r;
-        line_y1 = y1 + (y2 - y1) * beginStep / R + factor * dy * (step - r)/r;
-
-        line_x2 = x2 + (x1 - x2) * endStep / R - factor * dx * (step - r)/r;
-        line_y2 = y2 + (y1 - y2) * endStep / R + factor * dy * (step - r)/r;
-    }
-    */
     float line_x1, line_x2, line_y1, line_y2;
     float r1;
     if (!rightSide)
@@ -1970,12 +1978,57 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
     switch (lineType)
     {
     case 6:
-        line.line = new SplitZone(line_x1, line_y1, 0.02f, line_x2, line_y2, 0.02f, splitZoneWidth, beginRounding, endRounding,
-                                  QString("Линия №") + QString::number(lines.size() + 1));
-        qDebug() << "SplitZone width:" << splitZoneWidth;
-        qDebug() << "Begin rounding:" << beginRounding;
-        qDebug() << "End rounding:" << endRounding;
+        switch (splitZoneType)
+        {
+        case 0:
+        {
+            line.line = new SplitZone(line_x1, line_y1, 0.02f, line_x2, line_y2, 0.02f, splitZoneWidth, beginRounding, endRounding,
+                                      QString("Линия №") + QString::number(lines.size() + 1));
+            qDebug() << "SplitZone width:" << splitZoneWidth;
+            qDebug() << "Begin rounding:" << beginRounding;
+            qDebug() << "End rounding:" << endRounding;
+            line.splitZoneWidth = splitZoneWidth;
+        }
+            break;
+        case 1:
+        {
+            line.line = new SplitZone(line_x1, line_y1, 0.02f,
+                                      line_x2, line_y2, 0.02f,
+                                      splitZoneWidth,
+                                      beginRounding,
+                                      endRounding,
+                                      splitZoneType,
+                                      splitZoneHeight,
+                                      QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                      0.25f, 6.0f,
+                                      QApplication::applicationDirPath() + "/models/city_roads/grass.jpg",
+                                      3.0f, 3.0f,
+                                      QString("Линия №") + QString::number(lines.size() + 1));
+            line.splitZoneWidth = splitZoneWidth;
+        }
+            break;
+        case 2:
+        {
+            line.line = new SplitZone(line_x1, line_y1, 0.02f,
+                                      line_x2, line_y2, 0.02f,
+                                      splitZoneWidth,
+                                      beginRounding,
+                                      endRounding,
+                                      splitZoneType,
+                                      splitZoneHeight,
+                                      QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                      0.25f, 6.0f,
+                                      QApplication::applicationDirPath() + "/models/city_roads/nr_07S.jpg",
+                                      6.0f, 6.0f,
+                                      QString("Линия №") + QString::number(lines.size() + 1));
+            line.splitZoneWidth = splitZoneWidth;
+        }
+            break;
+        default:
+            break;
+        }
         line.splitZoneWidth = splitZoneWidth;
+
         break;
     case 7:
     {
@@ -2088,6 +2141,14 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
                                    QString("Линия №") + QString::number(lines.size() + 1));
     }
         break;
+        /*
+    case 8:
+    {
+        line.line = new LineSimple(line_x1, line_y1, line_x2, line_y2, lineWidth, textureSource, textureSize, "LineSimple", 1,
+                                   QString("Линия №") + QString::number(lines.size() + 1));
+    }
+        break;
+        */
     default:
         line.line = new LineSimple(line_x1, line_y1, line_x2, line_y2, lineWidth, textureSource, textureSize, "LineSimple", 1,
                                    QString("Линия №") + QString::number(lines.size() + 1));
@@ -2103,6 +2164,7 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
     line.differentDirections = differentDirections;
     line.line->setSelectedStatus(false);
     lines.push_back(line);
+    model->getGroup(1).push_back(line.line);
     if (this->layout && this->render)
         emit linesChanged(layout, render);
 }
@@ -2141,6 +2203,23 @@ void RoadSimple::addLine()
     case 7:
         textSource = QApplication::applicationDirPath() + "/models/city_roads/solid.png";
         lWidth = 0.4f;
+        break;
+    case 8:
+    {
+        textSource = QString(":/textures/tramways.png");
+        lWidth = 1.5f;
+        if (!singleWay)
+        {
+            addLine(step + axisStep / 2.0, textSource, 1.5f, lWidth, lineType, rightSide, beginStep, endStep);
+            addLine(step - axisStep / 2.0, textSource, 1.5f, lWidth, lineType, rightSide, beginStep, endStep);
+            return;
+        }
+        else
+        {
+            addLine(step, textSource, 1.5f, lWidth, lineType, rightSide, beginStep, endStep);
+            return;
+        }
+    }
         break;
     default:
         break;
@@ -2200,8 +2279,18 @@ void RoadSimple::deleteLine()
     if (!b) return;
     //qDebug() << "delete line " << b->text();
     int i = b->text().toInt() - 1;
+    for (std::list<RoadElement*>::iterator it = model->getGroup(1).begin();
+         it != model->getGroup(1).end(); ++it)
+    {
+        if (lines[i].line == (*it))
+        {
+            model->getGroup(1).erase(it);
+            break;
+        }
+    }
     delete lines[i].line;
     lines.remove(i);
+
     for (int i = 0; i < lines.size(); ++i)
     {
         if (lines[i].lineType != 6)
@@ -2234,6 +2323,26 @@ void RoadSimple::setEndStep(double step)
 void RoadSimple::setSplitZoneWidth(double value)
 {
     splitZoneWidth = value;
+}
+
+void RoadSimple::setSingleWay(bool status)
+{
+    singleWay = status;
+}
+
+void RoadSimple::setAxisStep(double step)
+{
+    axisStep = step;
+}
+
+void RoadSimple::setSplitZoneType(int type)
+{
+    splitZoneType = type;
+}
+
+void RoadSimple::setSplitZoneHeight(double height)
+{
+    splitZoneHeight = height;
 }
 
 
@@ -2478,4 +2587,20 @@ void RoadSimple::clearProperties(QLayout *layout)
     }
     */
     disconnect(stepDialog, 0, this, 0);
+}
+
+
+void RoadSimple::deleteLine(RoadElement *line)
+{
+    int index = -1;
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].line == line)
+        {
+            index = i;
+            break;
+        }
+    }
+    if (index >=0)
+        lines.remove(index);
 }

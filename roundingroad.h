@@ -30,7 +30,7 @@ class RoundingRoad: public RoadElement
 public:
 
     bool isSelected() { return selected; }
-    void setSelectedStatus(bool status) { selected = status; }
+    void setSelectedStatus(bool status);
 
     void drawFigure(QGLWidget* render = 0);
     void drawSelectionFrame();
@@ -93,6 +93,10 @@ private:
     bool endRounding;
     double splitZoneWidth;
     bool differentDirections;
+    double axisStep;
+    bool singleWay;
+    int splitZoneType;
+    double splitZoneHeight;
 
     QFormLayout* layout;
     QGLWidget* render;
@@ -173,6 +177,10 @@ public slots:
     void setBeginRounding(bool status);
     void setEndRounding(bool status);
     void setDifferentDirections(bool status);
+    void setSingleWay(bool status);
+    void setAxisStep(double step);
+    void setSplitZoneType(int type);
+    void setSplitZoneHeight(double height);
 
     void setShowNearBoard(bool status);
     void setShowFarBoard(bool status);
@@ -208,6 +216,10 @@ public:
     // RoadElement interface
 public:
     virtual void clearProperties(QLayout *layout);
+
+    // RoadElement interface
+public:
+    virtual void deleteLine(RoadElement *line);
 };
 
 #endif // ROUNDING

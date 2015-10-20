@@ -183,13 +183,13 @@ void LineSimple::setVertexArray(float x1, float y1, float x2, float y2, float wi
 // Индексы каждой вершины
 void LineSimple::setColorArray(float red, float green, float blue, float alpha)
 {
-   for (int i=0; i<4; i++)
-   {
-      ColorArray[i][0]=red;
-      ColorArray[i][1]=green;
-      ColorArray[i][2]=blue;
-      ColorArray[i][3]=alpha;
-   }
+    for (int i=0; i<4; i++)
+    {
+        ColorArray[i][0]=red;
+        ColorArray[i][1]=green;
+        ColorArray[i][2]=blue;
+        ColorArray[i][3]=alpha;
+    }
 }
 
 void LineSimple::setTextureArray()
@@ -217,17 +217,17 @@ void LineSimple::setTextureArray()
 // Индексы для отрисовки фигуры
 void LineSimple::setIndexArray()
 {
-   // Порядок обхода - по часовой стрелке
+    // Порядок обхода - по часовой стрелке
 
-   // 1-ый полигон
-   IndexArray[0][0]=0;
-   IndexArray[0][1]=2;
-   IndexArray[0][2]=1;
+    // 1-ый полигон
+    IndexArray[0][0]=0;
+    IndexArray[0][1]=2;
+    IndexArray[0][2]=1;
 
-   // 2-ой полигон
-   IndexArray[1][0]=0;
-   IndexArray[1][1]=3;
-   IndexArray[1][2]=2;
+    // 2-ой полигон
+    IndexArray[1][0]=0;
+    IndexArray[1][1]=3;
+    IndexArray[1][2]=2;
 
 
 }
@@ -268,12 +268,12 @@ void LineSimple::drawFigure(QGLWidget* render)
 
             //glLineWidth(2.0);
             //glPointSize(5.0);
-           // drawControlElement(indexOfSelectedControl, 2.0, 5.0);
+            // drawControlElement(indexOfSelectedControl, 2.0, 5.0);
         }
         // Если фигуры выбрана - изменяем цвет заливки
         setColorArray(0.7f, 0.7f, 0.7f, alpha);
         drawSelectionFrame();
-       // glColor3d(0.3, 0.7, 0.1);
+        // glColor3d(0.3, 0.7, 0.1);
 
 
     }
@@ -498,7 +498,7 @@ void LineSimple::drawControlElement(int index, float lineWidth, float pointSize)
 
         */
     //    }
-  //  }
+    //  }
 
 }
 
@@ -513,8 +513,8 @@ void LineSimple::resizeByControl(int index, float dx, float dy, float x, float y
     {
     case 0:
 
-       x1 += dx;
-       y1 += dy;
+        x1 += dx;
+        y1 += dy;
         setVertexArray(x1, y1, x2, y2, width);
         emit lengthChanged(length);
         break;
@@ -522,8 +522,8 @@ void LineSimple::resizeByControl(int index, float dx, float dy, float x, float y
     case 1:
         x2 += dx;
         y2 += dy;
-         setVertexArray(x1, y1, x2, y2, width);
-         emit lengthChanged(length);
+        setVertexArray(x1, y1, x2, y2, width);
+        emit lengthChanged(length);
         break;
 
     case 2:
@@ -544,10 +544,10 @@ void LineSimple::resizeByControl(int index, float dx, float dy, float x, float y
         setVertexArray(x1, y1, x2, y2, width + dr * factor);
     }
         break;
-   default:
-       break;
+    default:
+        break;
     }
-     setTextureArray();
+    setTextureArray();
 }
 
 void LineSimple::changeColorOfSelectedControl(int index)
@@ -798,4 +798,28 @@ std::vector<vec3> LineSimple::getCoordOfControl(int index)
         break;
     }
     return res;
+}
+
+void LineSimple::rotate(float angle, float x, float y, float z)
+{
+    float tx = 0.0f, ty = 0.0f;
+    x1 -= x;
+    y1 -= y;
+    tx = x1;
+    ty = y1;
+    x1 = tx * cos(angle) - ty * sin(angle);
+    y1 = tx * sin(angle) + ty * cos(angle);
+    x1 += x;
+    y1 += y;
+
+    x2 -= x;
+    y2 -= y;
+    tx = x2;
+    ty = y2;
+    x2 = tx * cos(angle) - ty * sin(angle);
+    y2 = tx * sin(angle) + ty * cos(angle);
+    x2 += x;
+    y2 += y;
+
+    setVertexArray(x1, y1, x2, y2, width);
 }

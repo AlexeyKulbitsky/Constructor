@@ -53,6 +53,35 @@ void SelectedState::mousePressEvent(QMouseEvent *pe)
         leftButtonIsPressed = true;
         RoadElement* element = NULL;
         int index = -1;
+        if (selectedElements.size() > 0)
+        {
+            if (this->tryToSelectFigures(pe->pos(), selectedElements) == true)
+            {
+                scene->setCursor(Qt::SizeAllCursor);
+            }
+            else
+            {
+                for (std::list<RoadElement*>::iterator it = selectedElements.begin();
+                     it != selectedElements.end();
+                     ++it)
+                    (*it)->setSelectedStatus(false);
+                selectedElements.clear();
+                if (selectedElement)
+                {
+                    selectedElement->setSelectedStatus(false);
+                    selectedElement->clearProperties(properties);
+                }
+                selectedElement = NULL;
+                keyboardKey = 0;
+                clear();
+                clearProperties(properties);
+                scene->setMouseTracking(false);
+                scene->setCursor(Qt::ArrowCursor);
+                scene->updateGL();
+                stateManager->setState(stateManager->defaultState);
+            }
+        }
+        else
         if (this->tryToSelectControlsInSelectedFigure(pe->pos(), selectedElement, index) == true)
         {
             controlIsSelected = true;
@@ -134,6 +163,7 @@ void SelectedState::mousePressEvent(QMouseEvent *pe)
 
 void SelectedState::mouseMoveEvent(QMouseEvent *pe)
 {
+    qDebug() << "Selected Elements: " << selectedElements.size();
     if (rightButtonIsPressed == true)
     {
         // двигать камеру
@@ -148,6 +178,21 @@ void SelectedState::mouseMoveEvent(QMouseEvent *pe)
     {
         if (leftButtonIsPressed == true)
         {
+            if (selectedElements.size() > 0)
+            {
+                float dY = (GLfloat)(-1)*(pe->y()-ptrMousePosition.y())/
+                        scene->width()/(scene->nSca * scene->ratio) * 2.0;
+                float dX = (GLfloat)(pe->x()-ptrMousePosition.x())/
+                        scene->width()/(scene->nSca * scene->ratio) * 2.0;
+
+                for (std::list<RoadElement*>::iterator it = selectedElements.begin();
+                     it != selectedElements.end(); ++it)
+                    (*it)->move(dX, dY);
+                scene->updateGL();
+                model->setModified(true);
+                ptrMousePosition = pe->pos();
+            }
+            else
             // двигать фигуру или контролы
             if (controlIsSelected == true)
             {
@@ -185,6 +230,19 @@ void SelectedState::mouseMoveEvent(QMouseEvent *pe)
         else
         {
 
+            if (selectedElements.size() > 0)
+            {
+                if (this->tryToSelectFigures(pe->pos(), selectedElements) == true)
+                {
+                    scene->setCursor(Qt::SizeAllCursor);
+                }
+                else
+                {
+                    scene->setCursor(Qt::ArrowCursor);
+                }
+            }
+            else
+            {
             // изменять курсор в зависимости от положения мыши
             int index = -1;
             if (tryToSelectControlsInSelectedFigure(pe->pos(), selectedElement, index) == true)
@@ -194,6 +252,7 @@ void SelectedState::mouseMoveEvent(QMouseEvent *pe)
             }
             else
             {
+
                 if (tryToSelectFigures(pe->pos()) == true)
                 {
                     scene->setCursor(Qt::SizeAllCursor);
@@ -206,6 +265,7 @@ void SelectedState::mouseMoveEvent(QMouseEvent *pe)
 
                 }
             }
+        }
         }
     }
 
@@ -284,13 +344,68 @@ void SelectedState::keyPressEvent(QKeyEvent *pe)
         //break;
     case Qt::Key_Delete:
     {
+        if (selectedElements.size() > 0)
+        {
+            for (std::list<RoadElement*>::iterator i = selectedElements.begin(); i != selectedElements.end(); ++i)
+            {
+                for (int j = 0; j < model->getNumberOfGroups(); ++j)
+                {
+                for (std::list<RoadElement*>::iterator it = model->getGroup(j).begin();
+                     it != model->getGroup(j).end(); ++it)
+                {
+                    if ((*i) != (*it))
+                    {
+                        (*it)->deleteLine(*i);
+                    }
+                }
+                }
+
+
+                for (int j = 0; j < model->getNumberOfGroups(); ++j)
+                {
+
+                    bool ok = false;
+                    for (std::list<RoadElement*>::iterator it = model->getGroup(j).begin();
+                         it != model->getGroup(j).end(); ++it)
+                    {
+                        if ((*i) == (*it))
+                        {
+                            (*it)->clear();
+                            delete (*it);
+                            model->getGroup(j).erase(it);
+                            ok = true;
+                            break;
+                        }
+                    }
+                    if (ok)
+                        break;
+                }
+            }
+            selectedElements.clear();
+        }
+        else
+        {
+            std::list<RoadElement*>::iterator i = model->getGroup(groupIndex).begin();
+            for (int j = 0; j < elementIndex; ++j)
+                ++i;
+            for (int j = 0; j < model->getNumberOfGroups(); ++j)
+            {
+            for (std::list<RoadElement*>::iterator it = model->getGroup(j).begin();
+                 it != model->getGroup(j).end(); ++it)
+            {
+                if ((*i) != (*it))
+                {
+                    (*it)->deleteLine(*i);
+                }
+            }
+            }
+
+            (*i)->clear();
+            delete (*i);
+            model->getGroup(groupIndex).erase(i);
+        }
         qDebug() << "DELETE KEY";
-        std::list<RoadElement*>::iterator it = model->getGroup(groupIndex).begin();
-        for (int j = 0; j < elementIndex; ++j)
-            ++it;
-        (*it)->clear();
-        delete (*it);
-        model->getGroup(groupIndex).erase(it);
+
         clearProperties(properties);
         scene->updateGL();
         groupIndex = -1;
@@ -659,7 +774,7 @@ void SelectedState::clearProperties(QFormLayout *layout)
 
 }
 
-bool SelectedState::tryToSelectFigures(QPoint mp)
+bool SelectedState::tryToSelectFigures(QPoint mp, std::list<RoadElement*>& elements)
 {
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
     GLint viewport[4]; // декларируем матрицу поля просмотра
@@ -695,20 +810,19 @@ bool SelectedState::tryToSelectFigures(QPoint mp)
     glLoadIdentity();
 
     int i = 1;
-    glPushMatrix();
-    glScalef(nSca, nSca, nSca);
-    gluLookAt(xDelta,yDelta,0.5,
-              xDelta,yDelta,-10,
-              0,1,0);
-    glLoadName(i); // загрузить имя на вершину стека имён
 
-    glPushMatrix();
-    std::list<RoadElement*>::iterator it = model->getGroup(groupIndex).begin();
-    for (int j = 0; j < elementIndex; ++j)
-        ++it;
+    for (std::list<RoadElement*>::iterator it = elements.begin(); it != elements.end(); ++it)
+    {
+        glPushMatrix();
+        glScalef(nSca, nSca, nSca);
+        gluLookAt(xDelta,yDelta,0.5,
+                  xDelta,yDelta,-10,
+                  0,1,0);
+        glLoadName(i++); // загрузить имя на вершину стека имён
+        (*it)->drawFigure();
+        glPopMatrix();
+    }
 
-    (*it)->drawFigure();
-    glPopMatrix();
 
     hitsForFigure=glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
 
@@ -1193,4 +1307,69 @@ void SelectedState::contextMenuEvent(QContextMenuEvent *pe)
         breakAction->setVisible(true);
     }
     contextMenu->exec(pe->globalPos());
+}
+
+bool SelectedState::tryToSelectFigures(QPoint mp)
+{
+    GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
+    GLint viewport[4]; // декларируем матрицу поля просмотра
+    glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
+    GLfloat nSca = scene->nSca;
+    GLfloat xDelta = scene->xDelta;
+    GLfloat yDelta = scene->yDelta;
+    GLuint selectBuffer[40]; // буфер выбора (буфер совпадений)
+    GLint hitsForFigure = 0;
+
+    glSelectBuffer(40, selectBuffer); // использовать указанный буфер выбора
+    glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
+    glPushMatrix(); // поместить текущую матрицу в стек матриц
+    glRenderMode(GL_SELECT); // переход в режим выбора
+    glLoadIdentity(); // загрузить единичную матрицу
+
+    // новый объём под указателем мыши
+    gluPickMatrix((GLdouble)mp.x(), (GLdouble)(viewport[3]-mp.y()), 1.0, 1.0, viewport);
+    // мировое окно
+    if (scene->width() >= scene->height())
+        glOrtho(-1.0/ratio, 1.0/ratio, -1.0, 1.0, -10.0, 1.0);
+    else
+        glOrtho(-1.0, 1.0, -1.0*ratio, 1.0*ratio, -10.0, 1.0);
+
+
+    glMatrixMode(GL_MODELVIEW); // модельно-видовая матрица стала активной
+    glLoadIdentity();           // загружается единичная матрица моделирования
+
+    glInitNames(); // инициализируется и очищается стек имён
+    glPushName(0); // в стек имён помещается значение 0 (обязательно должен храниться хотя бы один элемент)
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    int i = 1;
+
+            glPushMatrix();
+            glScalef(nSca, nSca, nSca);
+            gluLookAt(xDelta,yDelta,0.5,
+                      xDelta,yDelta,-10,
+                      0,1,0);
+            glLoadName(i++); // загрузить имя на вершину стека имён
+            selectedElement->drawFigure();
+            glPopMatrix();
+
+
+    hitsForFigure=glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
+
+    if (hitsForFigure > 0) // есть совпадания и нет ошибок
+    {
+
+                glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
+                glPopMatrix(); // извлечь матрицу из стека матриц
+                //scene->updateGL(); // обновить изображение
+                return true;
+    }
+
+    glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
+    glPopMatrix(); // извлечь матрицу из стека матриц
+    //scene->updateGL(); // обновить изображение
+
+    return false;
 }

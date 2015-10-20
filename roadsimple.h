@@ -115,6 +115,10 @@ protected:
     int lineType;
     double beginStep;
     double endStep;
+    double axisStep;
+    bool singleWay;
+    int splitZoneType;
+    double splitZoneHeight;
 
     QFormLayout* layout;
     QGLWidget* render;
@@ -138,7 +142,7 @@ public:
     virtual int getLayer();
     virtual QJsonObject getJSONInfo();
     virtual bool isSelected() { return selected; }
-    virtual void setSelectedStatus(bool status) { selected = status; }
+    virtual void setSelectedStatus(bool status);
     virtual void clear();
     float getRightBoardWidth();
     float getLeftBoardWidth();
@@ -177,6 +181,10 @@ public slots:
     void setBeginStep(double step);
     void setEndStep(double step);
     void setSplitZoneWidth(double value);
+    void setSingleWay(bool status);
+    void setAxisStep(double step);
+    void setSplitZoneType(int type);
+    void setSplitZoneHeight(double height);
     virtual void getProperties(QFormLayout *layout, QGLWidget* render = 0);
     virtual bool setFixed(bool fixed);
     void resetLines();
@@ -188,6 +196,10 @@ public:
     // RoadElement interface
 public:
     virtual void clearProperties(QLayout *layout);
+
+    // RoadElement interface
+public:
+    virtual void deleteLine(RoadElement *line);
 };
 
 #endif // ROADSIMPLE_H

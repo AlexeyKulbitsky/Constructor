@@ -316,7 +316,7 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
 
             switch (index)
             {
-                // Поворот
+            // Поворот
             case 2:
                 break;
                 // Поворот
@@ -670,25 +670,25 @@ void Intersection::setRoadsTextures()
 
 float Intersection::calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4)
 {
-        /*
+    /*
         vec2 p1 = roads[i]->getAxisPoint_1();
         vec2 p2 = roads[i]->getAxisPoint_2();
         int j = i == (roads.size() - 1) ? 0 : i + 1;
         vec2 p3 = roads[j]->getAxisPoint_1();
         vec2 p4 = roads[j]->getAxisPoint_2();
         */
-        float dx1 = p2.x - p1.x;
-        float dy1 = p2.y - p1.y;
-        float r1 = sqrt(dx1*dx1 + dy1*dy1);
-        float dx2 = p4.x - p3.x;
-        float dy2 = p4.y - p3.y;
-        float r2 = sqrt(dx2*dx2 + dy2*dy2);
-        float angle = acos((dx1*dx2 + dy1*dy2) / (r1 * r2));
-        float res = dx1*dy2 - dx2*dy1;
-        float pi = 3.14159265f;
-        if (res < 0)
-            angle = 2.0f * pi - angle;
-        return angle;
+    float dx1 = p2.x - p1.x;
+    float dy1 = p2.y - p1.y;
+    float r1 = sqrt(dx1*dx1 + dy1*dy1);
+    float dx2 = p4.x - p3.x;
+    float dy2 = p4.y - p3.y;
+    float r2 = sqrt(dx2*dx2 + dy2*dy2);
+    float angle = acos((dx1*dx2 + dy1*dy2) / (r1 * r2));
+    float res = dx1*dy2 - dx2*dy1;
+    float pi = 3.14159265f;
+    if (res < 0)
+        angle = 2.0f * pi - angle;
+    return angle;
 
 }
 
@@ -741,58 +741,140 @@ void Intersection::calculateRoadForAngle(int i)
 
 void Intersection::calculateRoadForRounding(int i, int index)
 {
-    // Левая сторона рукава
-    vec3 p1 = roads[i]->getCoordOfPoint(1);
-    vec3 p2 = roads[i]->getCoordOfPoint(2);
-    float dx1 = p2.x - p1.x;
-    float dy1 = p2.y - p1.y;
-    float r1 = sqrt(dx1*dx1 + dy1*dy1);
-    int j = i == (roads.size() - 1) ? 0 : i + 1;
-    vec3 p3 = roads[j]->getCoordOfPoint(0);
-    vec3 p4 = roads[j]->getCoordOfPoint(3);
-    float dx2 = p4.x - p3.x;
-    float dy2 = p4.y - p3.y;
-    float r2 = sqrt(dx2*dx2 + dy2*dy2);
-    float leftLength = curves[i]->getLeftLength();
-    float rightLength = curves[i]->getRightLength();
-    float dx, dy;
-    if (r1 < rightLength)
+    if (index < (roads[i]->getNumberOfControls() - 12))
+        return;
+    int num = 12 - (roads[i]->getNumberOfControls() - index);
+    switch (num)
     {
-        dx = dx1 / r1 * (rightLength - r1);
-        dy = dy1 / r1 * (rightLength - r1);
-        roads[i]->resizeByControl(index, dx, dy, p2.x, p2.y);
-    }
-    if (r2 < leftLength)
+        // Повороты
+    case 2:
+    case 3:
+    case 5:
     {
-        dx = dx2 / r2 * (r2 - leftLength);
-        dy = dy2 / r2 * (r2 - leftLength);
-        roads[i]->resizeByControl(index, dx, dy, p2.x, p2.y);
+        // Левая и правая стороны соседних руковов
+        int j = i == (roads.size() - 1) ? 0 : i + 1;
+        vec3 p1 = roads[j]->getCoordOfPoint(0);
+        vec3 p2 = roads[j]->getCoordOfPoint(3);
+        float dx1 = p2.x - p1.x;
+        float dy1 = p2.y - p1.y;
+        float dx, dy;
+        float r1 = sqrt(dx1*dx1 + dy1*dy1);
+        float leftLength = curves[i]->getLeftLength();
+        if (r1 < leftLength)
+        {
+            dy = dx1 / r1 * (r1 - leftLength);
+            dx = dy1 / r1 * (r1 - leftLength);
+            roads[i]->resizeByControl(index, dx, dy, p2.x, p2.y);
+        }
+
+        j = i == 0 ? roads.size() - 1 : i - 1;
+        p1 = roads[j]->getCoordOfPoint(1);
+        p2 = roads[j]->getCoordOfPoint(2);
+        dx1 = p2.x - p1.x;
+        dy1 = p2.y - p1.y;
+        r1 = sqrt(dx1*dx1 + dy1*dy1);
+        float rightLength = curves[i]->getRightLength();
+        if (r1 < rightLength)
+        {
+            dy = dx1 / r1 * (r1 - rightLength);
+            dx = dy1 / r1 * (r1 - rightLength);
+            roads[i]->resizeByControl(index, dx, dy, p2.x, p2.y);
+        }
+
+        // Левая и правая стороны текущего рукава
+        p1 = roads[j]->getCoordOfPoint(1);
+        p2 = roads[j]->getCoordOfPoint(2);
+        dx1 = p2.x - p1.x;
+        dy1 = p2.y - p1.y;
+        r1 = sqrt(dx1*dx1 + dy1*dy1);
+        rightLength = curves[i]->getRightLength();
+        if (r1 < rightLength)
+        {
+            int j = i == (roads.size() - 1) ? 0 : i + 1;
+            vec3 p3 = roads[j]->getCoordOfPoint(0);
+            vec3 p4 = roads[j]->getCoordOfPoint(3);
+            float dx2 = p3.x - p4.x;
+            float dy2 = p3.y - p4.y;
+            float r2 = sqrt(dx2*dx2 + dy2*dy2);
+            dx = dx2 / r2 * (r1 - leftLength);
+            dy = dy2 / r2 * (r1 - leftLength);
+            roads[i]->resizeByControl(index, dx, dy, p2.x, p2.y);
+        }
     }
-    p1 = roads[i]->getCoordOfPoint(0);
-    p2 = roads[i]->getCoordOfPoint(3);
-    dx1 = p2.x - p1.x;
-    dy1 = p2.y - p1.y;
-    r1 = sqrt(dx1*dx1 + dy1*dy1);
-    j = i == 0 ? roads.size() - 1 : i - 1;
-    p3 = roads[j]->getCoordOfPoint(1);
-    p4 = roads[j]->getCoordOfPoint(2);
-    dx2 = p4.x - p3.x;
-    dy2 = p4.y - p3.y;
-    r2 = sqrt(dx2*dx2 + dy2*dy2);
-    leftLength = curves[i]->getLeftLength();
-    rightLength = curves[i]->getRightLength();
-    if (r1 < leftLength)
+        break;
+        // Торец
+    case 7:
     {
-        dx = dx1 / r1 * (leftLength - r1);
-        dy = dy1 / r1 * (leftLength - r1);
-        roads[i]->resizeByControl(index, dx, dy, p2.x, p2.y);
+        vec3 p1 = roads[i]->getCoordOfPoint(1);
+        vec3 p2 = roads[i]->getCoordOfPoint(2);
+        float dx1 = p2.x - p1.x;
+        float dy1 = p2.y - p1.y;
+        float r1 = sqrt(dx1*dx1 + dy1*dy1);
+        float dx, dy;
+        float rightLength = curves[i]->getRightLength();
+        if (r1 < rightLength)
+        {
+            dx = -1.0f * dx1 / r1 * (r1 - rightLength);
+            dy = -1.0f * dy1 / r1 * (r1 - rightLength);
+            roads[i]->resizeByControl(index, dx, dy, p2.x, p2.y);
+        }
+        float j = i == 0 ? roads.size() - 1 : i - 1;
+        vec3 p3 = roads[i]->getCoordOfPoint(0);
+        vec3 p4 = roads[i]->getCoordOfPoint(3);
+        float dx2 = p4.x - p3.x;
+        float dy2 = p4.y - p3.y;
+        float r2 = sqrt(dx2*dx2 + dy2*dy2);
+        float leftLength = curves[j]->getLeftLength();
+        if (r2 < leftLength)
+        {
+            dx = -1.0f * dx2 / r2 * (r2 - leftLength);
+            dy = -1.0f * dy2 / r2 * (r2 - leftLength);
+            roads[i]->resizeByControl(index, dx, dy, p2.x, p2.y);
+        }
     }
-    if (r2 < rightLength)
+        break;
+        // Боковые стороны
+    case 8:
     {
-        dx = dx2 / r2 * (r2 - rightLength);
-        dy = dy2 / r2 * (r2 - rightLength);
-        roads[i]->resizeByControl(index, dx, dy, p2.x, p2.y);
+        float j = i == 0 ? roads.size() - 1 : i - 1;
+        vec3 p1 = roads[j]->getCoordOfPoint(1);
+        vec3 p2 = roads[j]->getCoordOfPoint(2);
+        float dx1 = p2.x - p1.x;
+        float dy1 = p2.y - p1.y;
+        float dx, dy;
+        float r1 = sqrt(dx1*dx1 + dy1*dy1);
+        float rightLength = curves[i]->getRightLength();
+        if (r1 < rightLength)
+        {
+            dx = dx1 / r1 * (r1 - rightLength);
+            dy = dy1 / r1 * (r1 - rightLength);
+            roads[i]->resizeByControl(index, dx, dy, p2.x, p2.y);
+        }
     }
+        break;
+    case 9:
+    {
+        int j = i == (roads.size() - 1) ? 0 : i + 1;
+        vec3 p1 = roads[j]->getCoordOfPoint(0);
+        vec3 p2 = roads[j]->getCoordOfPoint(3);
+        float dx1 = p2.x - p1.x;
+        float dy1 = p2.y - p1.y;
+        float dx, dy;
+        float r1 = sqrt(dx1*dx1 + dy1*dy1);
+        float leftLength = curves[i]->getLeftLength();
+        if (r1 < leftLength)
+        {
+            dx = dx1 / r1 * (r1 - leftLength);
+            dy = dy1 / r1 * (r1 - leftLength);
+            roads[i]->resizeByControl(index, dx, dy, p2.x, p2.y);
+        }
+    }
+        break;
+dafault:
+        break;
+    }
+
+
 }
 
 void Intersection::calculateRoadIntersections()
@@ -1140,7 +1222,7 @@ void Intersection::recalculateRoads()
 void Intersection::setAngle(double angle)
 {
     int i = qobject_cast<QDoubleSpinBox*>(sender())->objectName().toInt();
-   // Curve * curve = qobject_cast<Curve*>(sender());
+    // Curve * curve = qobject_cast<Curve*>(sender());
     Curve * curve = curves[i];
     for (i = 0; i < curves.size(); ++i)
     {

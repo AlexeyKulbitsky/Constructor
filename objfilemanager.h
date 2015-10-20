@@ -42,7 +42,8 @@ public:
                  std::vector<Mesh *> &meshes, float velocity, float &scaleFactor, int axis = 0);
     bool loadOBJ(const char *folder, const char* filename, const char* textureName,
                  std::vector<Mesh *> &meshes, float velocity, float &scaleFactor, int axis = 0);
-
+    bool loadOBJ(const QString& folder, const QString& filename,
+                 std::vector<Mesh *> &meshes, float velocity, float &scaleFactor, int axis = 0);
 
 
     void readVertex(char* line);
@@ -71,6 +72,7 @@ private:
     inline void readFace(char *line);
     inline void actionsFace(char *line);
     void readMtl(char *mtlSource, std::vector<MaterialInfo*>& materials);
+    void readMtl(QString& mtlSource, std::vector<MaterialInfo*>& materials);
     void readUseMtl(char *materialName, std::vector<MaterialInfo*>& materials, Mesh *currentMesh);
     void getTexture(QString textureSource, unsigned &textureID);
     void recordverts();

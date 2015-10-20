@@ -26,6 +26,7 @@ ObjectsList::ObjectsList(QWidget *parent)
     this->addItem("Пешеходный переход");
     this->addItem("Трамвайные пути");
     this->addItem("Железная дорога");
+    this->addItem("Железная дорога (Новая)");
     this->addItem("Провод");
     this->addItem("Двойной провод");
    // this->addItem("Куб");

@@ -223,12 +223,12 @@ void LineBroken::setVertexArray(float width, float* axisVertices, int size)
                     dx *= -1.0f;
                     dy *= -1.0f;
                 }
-                if (x1 < x2 && y1 > y2)
+                if (x1 <= x2 && y1 >= y2)
                 {
                     dx *= -1.0f;
 
                 }
-                if (x1 > x2 && y1 < y2)
+                if (x1 >= x2 && y1 <= y2)
                 {
                     dy *= -1.0f;
 

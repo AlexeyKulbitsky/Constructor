@@ -23,6 +23,7 @@
 #include "splitzone.h"
 #include "voltageline.h"
 #include "doublevoltageline.h"
+#include "railway.h"
 
 struct Group
 {
