@@ -188,6 +188,13 @@ public:
         if (dialog)
         stepDialog = dialog;
     }
+    virtual void setStepDialogs(StepDialog** dialogs, int size)
+    {
+        if (!dialogs)
+            return;
+        for (int i = 0; i < size; ++i)
+            stepDialogs[i] = dialogs[i];
+    }
     virtual void deleteLine(RoadElement* line){}
 public slots:
     virtual bool setFixed(bool fixed) = 0;
@@ -195,6 +202,7 @@ public slots:
 protected:
     QString name;
     StepDialog* stepDialog;
+    StepDialog* stepDialogs[10];
     Model* model;
 
 public:

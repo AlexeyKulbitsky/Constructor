@@ -163,7 +163,7 @@ void SelectedState::mousePressEvent(QMouseEvent *pe)
 
 void SelectedState::mouseMoveEvent(QMouseEvent *pe)
 {
-    qDebug() << "Selected Elements: " << selectedElements.size();
+    //qDebug() << "Selected Elements: " << selectedElements.size();
     if (rightButtonIsPressed == true)
     {
         // двигать камеру
@@ -404,7 +404,7 @@ void SelectedState::keyPressEvent(QKeyEvent *pe)
             delete (*i);
             model->getGroup(groupIndex).erase(i);
         }
-        qDebug() << "DELETE KEY";
+        //qDebug() << "DELETE KEY";
 
         clearProperties(properties);
         scene->updateGL();
@@ -728,7 +728,7 @@ void SelectedState::dropEvent(QDropEvent *event)
         QStringList lst =  QString(event->mimeData()->data("text/plain")).split(' ');
         for (int i = 0; i < lst.size(); ++i)
         {
-            qDebug() << lst.at(i);
+            //qDebug() << lst.at(i);
         }
         //qDebug() << s.toStdString().c_str();
         fileManager->load3DS(lst.at(0).toStdString().c_str(),

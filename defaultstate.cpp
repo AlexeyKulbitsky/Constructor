@@ -747,7 +747,7 @@ void DefaultState::dropEvent(QDropEvent *event)
                 RoadElementOBJ* element = new RoadElementOBJ(x, y);
                 stateManager->fileManagerOBJ->loadOBJ(lst.at(0),
                                      lst.at(1),
-                                     element->meshes,2.374f, element->scaleFactor, -1);
+                                     element->meshes,2.374f, element->scaleFactor);
                 element->setModel(model);
                 element->scaleFactor = 1.0f;
                 model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
@@ -856,6 +856,7 @@ bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
 
                 (*it)->setSelectedStatus(true);
                 (*it)->setStepDialog(stateManager->stepDialog);
+                (*it)->setStepDialogs(stateManager->stepDialogs, 10);
                 (*it)->getProperties(properties, scene);
 
                 scene->setCursor(Qt::SizeAllCursor);
@@ -973,6 +974,7 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
 
                     (*it)->setSelectedStatus(true);
                     (*it)->setStepDialog(stateManager->stepDialog);
+                    (*it)->setStepDialogs(stateManager->stepDialogs, 10);
                     (*it)->getProperties(properties, scene);
 
                     scene->setCursor(Qt::SizeAllCursor);

@@ -36,7 +36,7 @@ class StateManager : public QObject
 public:
     explicit StateManager(QObject *parent = 0);
     StateManager(Model* model, Scene2D* scene, QFormLayout* properties);
-
+    ~StateManager();
 private:
 
     Model* model;
@@ -55,7 +55,7 @@ public:
     RoadBuilderState* roadBuilderState;
 
     StepDialog* stepDialog;
-
+    StepDialog* stepDialogs[10];
     _3DsFileManager* fileManager3DS;
     OBJFileManager* fileManagerOBJ;
 

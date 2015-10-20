@@ -104,10 +104,14 @@ void Curve::drawFigure(QGLWidget *render)
     glEnable(GL_TEXTURE_2D);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-    glBindTexture(GL_TEXTURE_2D, textureID[0]);
-    glVertexPointer(3, GL_FLOAT, 0, vertexArray.begin());
-    glTexCoordPointer(2, GL_FLOAT, 0, textureArray.begin());
-    glDrawElements(GL_TRIANGLES, indexArray.size(), GL_UNSIGNED_BYTE, indexArray.begin());
+    if (angleRounding < 180)
+    {
+        glBindTexture(GL_TEXTURE_2D, textureID[0]);
+        glVertexPointer(3, GL_FLOAT, 0, vertexArray.begin());
+        glTexCoordPointer(2, GL_FLOAT, 0, textureArray.begin());
+        glDrawElements(GL_TRIANGLES, indexArray.size(), GL_UNSIGNED_BYTE, indexArray.begin());
+    }
+
 
     if (showBoard)
     {
@@ -673,6 +677,76 @@ void Curve::setIndexArray()
 void Curve::setVertexArrayBoard()
 {
     vertexArrayBoard.clear();
+
+    if (angleRounding == 180)
+    {
+        float r = boardWidth;
+
+        float x1 = controlPoints[3];
+        float y1 = controlPoints[4];
+        float x2 = controlPoints[6];
+        float y2 = controlPoints[7];
+        float dx = sqrt(r*r*(y2-y1)*(y2-y1)/((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1)));
+        float dy = sqrt(r*r/(1 + (y2-y1)*(y2-y1)/((x2-x1)*(x2-x1))));
+        if (x1 > x2 && y1 > y2)
+        {
+            dx *= -1.0f;
+            dy *= -1.0f;
+        }
+        if (x1 < x2 && y1 > y2)
+        {
+            dx *= -1.0f;
+
+        }
+        if (x1 > x2 && y1 < y2)
+        {
+            dy *= -1.0f;
+
+        }
+        vertexArrayBoard.push_back(x1);
+        vertexArrayBoard.push_back(y1);
+        vertexArrayBoard.push_back(0.0f);
+
+        vertexArrayBoard.push_back(x1);
+        vertexArrayBoard.push_back(y1);
+        vertexArrayBoard.push_back(0.08f);
+
+        vertexArrayBoard.push_back(x1 - dx / r * 0.03f);
+        vertexArrayBoard.push_back(y1 + dy / r * 0.03f);
+        vertexArrayBoard.push_back(0.1f);
+
+        vertexArrayBoard.push_back(x1 - dx / r * 0.25f);
+        vertexArrayBoard.push_back(y1 + dy / r * 0.25f);
+        vertexArrayBoard.push_back(0.1f);
+
+        vertexArrayBoard.push_back(x1 - dx);
+        vertexArrayBoard.push_back(y1 + dy);
+        vertexArrayBoard.push_back(0.1f);
+
+        //////////////////////////////////////////
+
+        vertexArrayBoard.push_back(x2);
+        vertexArrayBoard.push_back(y2);
+        vertexArrayBoard.push_back(0.0f);
+
+        vertexArrayBoard.push_back(x2);
+        vertexArrayBoard.push_back(y2);
+        vertexArrayBoard.push_back(0.08f);
+
+        vertexArrayBoard.push_back(x2 - dx / r * 0.03f);
+        vertexArrayBoard.push_back(y2 + dy / r * 0.03f);
+        vertexArrayBoard.push_back(0.1f);
+
+        vertexArrayBoard.push_back(x2 - dx / r * 0.25f);
+        vertexArrayBoard.push_back(y2 + dy / r * 0.25f);
+        vertexArrayBoard.push_back(0.1f);
+
+        vertexArrayBoard.push_back(x2 - dx);
+        vertexArrayBoard.push_back(y2 + dy);
+        vertexArrayBoard.push_back(0.1f);
+        return;
+
+    }
     for (int i = 0; i <= numberOfSides; ++i)
     {
 
@@ -951,6 +1025,7 @@ bool Curve::getBoardShowStatus()
 
 void Curve::setAngleVertexArray()
 {
+
     angleVertexArray.clear();
     float pi = 3.1415926f;
 
@@ -1004,7 +1079,7 @@ void Curve::setAngleVertexArray()
         angleVertexArray.push_back(yCenter + dy);
         angleVertexArray.push_back(0.11f);
     }
-    angleRounding = (angle2 - angle1) * 180.0 / pi;
+    //angleRounding = (angle2 - angle1) * 180.0 / pi;
        // emit angleChanged(angleRounding);
 }
 
@@ -1030,6 +1105,7 @@ void Curve::setAngleIndexArray()
 
 void Curve::calculateAngle()
 {
+
     float pi = 3.1415926f;
 
     float xCenter = controlPoints[0];
@@ -1238,14 +1314,22 @@ void Curve::calculateControlsForAngle(int index)
         case 0:
             break;
         case 1:
+        {
+
             controlPoints[3] = xCenter + rLeft * cos(alpha1 + pi);
             controlPoints[4] = yCenter + rLeft * sin(alpha1 + pi);
             angleRounding  = 180.0f;
+
+        }
             break;
         case 2:
+        {
+
             controlPoints[6] = xCenter + rRight * cos(alpha2 - pi);
             controlPoints[7] = yCenter + rRight * sin(alpha2 - pi);
             angleRounding  = 180.0f;
+
+        }
             break;
         default:
             break;

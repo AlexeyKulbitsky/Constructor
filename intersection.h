@@ -31,9 +31,13 @@ public:
     virtual bool isFixed();
     virtual int getLayer();
     void setRoadsTextures();
+    bool calculateLinesIntersection(float a1, float b1, float c1,
+                                    float a2, float b2, float c2,
+                                    float& x, float& y);
     float calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4);
-    void calculateRoadForAngle(int i);
+    void calculateRoadForAngle(int i, int index);
     void calculateRoadForRounding(int i, int index);
+    void calculateRoadForMoving(int i, float dx, float dy);
 
 signals:
     void intersectionsChanged();
@@ -46,7 +50,7 @@ public slots:
     virtual bool setFixed(bool fixed);
     virtual void getProperties(QFormLayout *layout, QGLWidget *render);
 
-    void calculateRoadIntersections();
+    bool calculateRoadIntersections();
     void calculateRoundings();
 
     void setVertexArray();
@@ -90,6 +94,10 @@ public:
     // RoadElement interface
 public:
     virtual void clearProperties(QLayout *layout);
+
+    // RoadElement interface
+public:
+    virtual void setModel(Model *model);
 };
 
 #endif // INTERSECTION_H

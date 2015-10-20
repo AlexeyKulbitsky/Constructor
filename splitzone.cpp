@@ -1654,33 +1654,8 @@ void SplitZone::setVertexArray()
     vertexArray.clear();
     if ((!beginRounding && endRounding) || (beginRounding && !endRounding))
     {
-        /*
-        int count = boardVertexArray.size() / 3;
-        for (int i = 0; i < count / 2; i += 8)
-        {
-            vertexArray.push_back(boardVertexArray[(i + 3) * 3]);
-            vertexArray.push_back(boardVertexArray[(i + 3) * 3 + 1]);
-            vertexArray.push_back(boardVertexArray[(i + 3) * 3 + 2]);
-            vertexArray.push_back(boardVertexArray[(i + 7) * 3]);
-            vertexArray.push_back(boardVertexArray[(i + 7) * 3 + 1]);
-            vertexArray.push_back(boardVertexArray[(i + 7) * 3 + 2]);
-            vertexArray.push_back(boardVertexArray[(count - i - 1) * 3]);
-            vertexArray.push_back(boardVertexArray[(count - i - 1) * 3 + 1]);
-            vertexArray.push_back(boardVertexArray[(count - i - 1) * 3 + 2]);
-
-            vertexArray.push_back(boardVertexArray[(count - i - 1) * 3]);
-            vertexArray.push_back(boardVertexArray[(count - i - 1) * 3 + 1]);
-            vertexArray.push_back(boardVertexArray[(count - i - 1) * 3 + 2]);
-            vertexArray.push_back(boardVertexArray[(i + 7) * 3]);
-            vertexArray.push_back(boardVertexArray[(i + 7) * 3 + 1]);
-            vertexArray.push_back(boardVertexArray[(i + 7) * 3 + 2]);
-            vertexArray.push_back(boardVertexArray[(count - i - 5) * 3]);
-            vertexArray.push_back(boardVertexArray[(count - i - 5) * 3 + 1]);
-            vertexArray.push_back(boardVertexArray[(count - i - 5) * 3 + 2]);
-
-        }
-        */
-        int i = numberOfSides / 2;
+        int count = size / 3;
+        int i = count / 2;
         vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3]);
         vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3 + 1]);
         vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3 + 2]);
@@ -1691,28 +1666,37 @@ void SplitZone::setVertexArray()
         vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3 + 1]);
         vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3 + 2]);
 
-        for (i = numberOfSides / 2 - 1; i > 0; --i)
+        for (i = count / 2 - 1; i > 0; --i)
         {
             vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3]);
             vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3 + 1]);
             vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3 + 2]);
-            vertexArray.push_back(boardVertexArray[((numberOfSides - i) * 8 + 3) * 3]);
-            vertexArray.push_back(boardVertexArray[((numberOfSides - i) * 8 + 3) * 3 + 1]);
-            vertexArray.push_back(boardVertexArray[((numberOfSides - i) * 8 + 3) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[((count - i) * 8 - 5) * 3]);
+            vertexArray.push_back(boardVertexArray[((count - i) * 8 - 5) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[((count - i) * 8 - 5) * 3 + 2]);
             vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3]);
             vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3 + 1]);
             vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3 + 2]);
 
-            vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3]);
-            vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3 + 1]);
-            vertexArray.push_back(boardVertexArray[((i - 1) * 8 + 3) * 3 + 2]);
-            vertexArray.push_back(boardVertexArray[((numberOfSides - i) * 8 + 3) * 3]);
-            vertexArray.push_back(boardVertexArray[((numberOfSides - i) * 8 + 3) * 3 + 1]);
-            vertexArray.push_back(boardVertexArray[((numberOfSides - i) * 8 + 3) * 3 + 2]);
-            vertexArray.push_back(boardVertexArray[((numberOfSides - i - 1) * 8 + 3) * 3]);
-            vertexArray.push_back(boardVertexArray[((numberOfSides - i - 1) * 8 + 3) * 3 + 1]);
-            vertexArray.push_back(boardVertexArray[((numberOfSides - i - 1) * 8 + 3) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3]);
+            vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[((count - i - 1) * 8 - 5) * 3]);
+            vertexArray.push_back(boardVertexArray[((count - i - 1) * 8 - 5) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[((count - i - 1) * 8 - 5) * 3 + 2]);
+            vertexArray.push_back(boardVertexArray[((count - i) * 8 - 5) * 3]);
+            vertexArray.push_back(boardVertexArray[((count - i) * 8 - 5) * 3 + 1]);
+            vertexArray.push_back(boardVertexArray[((count - i) * 8 - 5) * 3 + 2]);
         }
+        vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3]);
+        vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3 + 1]);
+        vertexArray.push_back(boardVertexArray[(i * 8 + 3) * 3 + 2]);
+        vertexArray.push_back(boardVertexArray[((count - 2) * 8 + 3) * 3]);
+        vertexArray.push_back(boardVertexArray[((count - 2) * 8 + 3) * 3 + 1]);
+        vertexArray.push_back(boardVertexArray[((count - 2) * 8 + 3) * 3 + 2]);
+        vertexArray.push_back(boardVertexArray[((count - 2) * 8 + 7) * 3]);
+        vertexArray.push_back(boardVertexArray[((count - 2) * 8 + 7) * 3 + 1]);
+        vertexArray.push_back(boardVertexArray[((count - 2) * 8 + 7) * 3 + 2]);
     }
     else
     if (beginRounding && endRounding)

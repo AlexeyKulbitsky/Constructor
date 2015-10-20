@@ -2360,10 +2360,10 @@ void RoadSimple::drawMeasurements(QGLWidget *render)
     float x1, x2, y1, y2;
 
     // Ширина полосы
-    x1 = VertexArray[0][0];
-    y1 = VertexArray[0][1];
-    x2 = VertexArray[1][0];
-    y2 = VertexArray[1][1];
+    x1 = VertexArray[2][0];
+    y1 = VertexArray[2][1];
+    x2 = VertexArray[3][0];
+    y2 = VertexArray[3][1];
     x = (x1 + x2) / 2.0f;
     y = (y1 + y2) / 2.0f;
     z = 0.0f;
@@ -2384,6 +2384,21 @@ void RoadSimple::drawMeasurements(QGLWidget *render)
     dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
     getWindowCoord(x, y, z, wx, wy, wz);
     render->renderText(wx + 5, wy + 5, "L=" + QString("%1").arg(dr), shrift);
+
+    if (description != "\0")
+    {
+        x1 = VertexArray[1][0];
+        y1 = VertexArray[1][1];
+        x2 = VertexArray[2][0];
+        y2 = VertexArray[2][1];
+        x = (x1 + x2) / 2.0f;
+        y = (y1 + y2) / 2.0f;
+        z = 0.0f;
+        glColor3f(1.0f, 1.0f, 1.0f);
+        dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+        getWindowCoord(x, y, z, wx, wy, wz);
+        render->renderText(wx + 5, wy + 5, "L=" + QString("%1").arg(dr), shrift);
+    }
 
     if (showRightBoard)
     {

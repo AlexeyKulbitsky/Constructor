@@ -25,12 +25,25 @@ StateManager::StateManager(Model *model, Scene2D* scene, QFormLayout *properties
     lineBuilderState = new LineBuilderState(this, model, scene, properties);
     roadBuilderState = new RoadBuilderState(this, model, scene, properties);
     stepDialog = new StepDialog();
+    for (int i = 0; i < 10; ++i)
+    {
+        stepDialogs[i] = new StepDialog();
+    }
     fileManager3DS = new _3DsFileManager();
     fileManagerOBJ = new OBJFileManager(model);
     connect(rulerState, SIGNAL(rulerStatusChanged(bool)), this, SLOT(setRulerActive(bool)));
     currentState = defaultState;
     //currentState = lineBuilderState;
     //currentState = roadBuilderState;
+}
+
+StateManager::~StateManager()
+{
+    for (int i = 0; i < 10; ++i)
+    {
+        delete stepDialogs[i];
+        stepDialogs[i] = NULL;
+    }
 }
 
 void StateManager::setState(State *state)
