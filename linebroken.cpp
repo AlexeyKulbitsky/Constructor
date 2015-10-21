@@ -15,12 +15,14 @@ LineBroken::LineBroken()
     selected = 0;
     useColor = true;
     fixed = false;
+    indexOfSelectedControl = -1;
 }
 
 
 
 LineBroken::LineBroken(float width, float* axisVertices, int size, QString name, int layer)
 {
+
     this->layer = layer;
     this->name = name;
     //VertexArray = NULL;
@@ -71,6 +73,7 @@ LineBroken::LineBroken(float width, float* axisVertices, int size, QString name,
 
     selected = false;
     fixed = false;
+    indexOfSelectedControl = -1;
 }
 
 LineBroken::LineBroken(float width, float* axisVertices, int size, float red, float green, float blue, float alpha, QString name, int layer)
@@ -113,6 +116,7 @@ LineBroken::LineBroken(float width, float* axisVertices, int size, float red, fl
 
     selected = false;
     fixed = false;
+    indexOfSelectedControl = -1;
 }
 
 LineBroken::LineBroken(float width, float *axisVertices, int size, QString source, float textureSize, QString name, int layer)
@@ -149,6 +153,7 @@ LineBroken::LineBroken(float width, float *axisVertices, int size, QString sourc
 
     selected = false;
     fixed = false;
+    indexOfSelectedControl = -1;
 }
 
 LineBroken::LineBroken(float width, float *axisVertices, int size, QString source, float textureSize, QString name, int layer, QString description):
@@ -253,7 +258,12 @@ void LineBroken::setVertexArray(float width, float* axisVertices, int size)
                 float y3 = axisVertices[(i + 1) * 3 + 1];
                 float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
                 float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
-                float alpha = (acos(num / den))/2.0f;
+                float t = num / den;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float alpha = (acos(t))/2.0f;
                 float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
                 float pi = 3.1415926f;
                 if(sa < 0) // Точка находится справа
@@ -262,8 +272,18 @@ void LineBroken::setVertexArray(float width, float* axisVertices, int size)
                 }
 
 
-                float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
-                if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
+                t = (x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float beta = acos(t);
+                t = (y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                if (asin(t) < 0)
                 {
                     beta *= -1.0f;
                 }
@@ -480,7 +500,7 @@ void LineBroken::drawFigure(QGLWidget* render)
     //glVertexPointer(3, GL_FLOAT, 0, VertexArray.begin());
    // glColorPointer(4, GL_FLOAT, 0, ColorArray.begin());
    // glDrawElements(GL_TRIANGLES, IndexArray.size(), GL_UNSIGNED_BYTE, IndexArray.begin());
-   // qDebug() << "Line broken";
+   // //qDebug() << "Line broken";
 
 
     ////////////////////////////////////////////////
@@ -518,6 +538,12 @@ void LineBroken::drawFigure(QGLWidget* render)
         glColorPointer(3, GL_FLOAT, 0, colorArrayForAxis.begin());
         glDrawElements(GL_LINE_STRIP, indexArrayForAxis.size(), GL_UNSIGNED_BYTE, indexArrayForAxis.begin());
 
+
+    }
+    if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
+    {
+        glDisable(GL_DEPTH_TEST);
+        drawControlElement(indexOfSelectedControl, 5.0f, 10.0f);
         glEnable(GL_DEPTH_TEST);
     }
 }
@@ -570,7 +596,7 @@ void LineBroken::drawSelectionFrame()
 {
     if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
     {
-        //qDebug() << "Index " << indexOfSelectedControl;
+        ////qDebug() << "Index " << indexOfSelectedControl;
         drawControlElement(indexOfSelectedControl, 5.0f, 10.0);
     }
     // Боковые грани для изменения размера
@@ -678,7 +704,7 @@ void LineBroken::changeColorOfSelectedControl(int index)
 {
 
     indexOfSelectedControl = index;
-    //qDebug() << "ROAD CONTROL COLOR CHANGED";
+    ////qDebug() << "ROAD CONTROL COLOR CHANGED";
 }
 
 QCursor LineBroken::getCursorForControlElement(int index)
@@ -809,6 +835,8 @@ bool LineBroken::isFixed()
 
 void LineBroken::addBreak(bool front)
 {
+    //qDebug() << "LineBroken::addBreak " << front;
+    //qDebug() << "Axis size" << vertexArrayForAxis.size() / 3;
     float x, y, z;
     if (front)
     {

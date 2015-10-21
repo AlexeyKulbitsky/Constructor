@@ -37,12 +37,17 @@ void CompositeRoad::drawFigure(QGLWidget *render)
     {
         drawSelectionFrame();
     }
-    for (QList<RoadElement*>::iterator it = elements.begin();
-         it != elements.end();
-         ++it)
+    for (int i = 0; i < 5; ++i)
     {
-        (*it)->drawFigure(render);
+        for (QList<RoadElement*>::iterator it = elements.begin();
+             it != elements.end();
+             ++it)
+        {
+            if ((*it)->getLayer() == i)
+                (*it)->drawFigure(render);
+        }
     }
+
 }
 
 void CompositeRoad::drawSelectionFrame()

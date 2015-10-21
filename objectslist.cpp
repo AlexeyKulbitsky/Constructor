@@ -17,8 +17,10 @@ ObjectsList::ObjectsList(QWidget *parent)
     //this->addItem("Круговой перекресток");
     this->addItem("Поворот дороги");
     this->addItem("Перекресток");
-    this->addItem("Закругление");
-    this->addItem("Разделительная зона");
+    //this->addItem("Закругление");
+    this->addItem("Разделительная зона (разметка)");
+    this->addItem("Разделительная зона (газон)");
+    this->addItem("Разделительная зона (тротуар)");
     this->addItem("Сплошая");
     this->addItem("Прерывистая");
     this->addItem("Двойная сплошая");
@@ -26,9 +28,9 @@ ObjectsList::ObjectsList(QWidget *parent)
     this->addItem("Пешеходный переход");
     this->addItem("Трамвайные пути");
     this->addItem("Железная дорога");
-    this->addItem("Железная дорога (Новая)");
-    this->addItem("Провод");
-    this->addItem("Двойной провод");
+    //this->addItem("Железная дорога (Новая)");
+    //this->addItem("Провод");
+    //this->addItem("Двойной провод");
    // this->addItem("Куб");
     this->addItem("BMW M3");
     this->addItem("Audi Q7");
@@ -36,16 +38,16 @@ ObjectsList::ObjectsList(QWidget *parent)
     this->addItem("ВАЗ-2106");
     //this->addItem("Dodge_Ram_2007");
     this->addItem("Автобус ПАЗ");
-    this->addItem("Микроавтобус Ford");
-    this->addItem("Грузовик Ford");
-    this->addItem("DAF XF");
-    this->addItem("Остановка");
-    this->addItem("Здание 1");
-    this->addItem("Здание 2");
-    this->addItem("Дерево 1");
-    this->addItem("Дерево 2");
-    this->addItem("Дерево 3");
-    this->addItem("Здание");
+    //this->addItem("Микроавтобус Ford");
+    //this->addItem("Грузовик Ford");
+    //this->addItem("DAF XF");
+    //this->addItem("Остановка");
+    //this->addItem("Здание 1");
+    //this->addItem("Здание 2");
+    //this->addItem("Дерево 1");
+    //this->addItem("Дерево 2");
+    //this->addItem("Дерево 3");
+    //this->addItem("Здание");
     //this->addItem("Знак");
     //this->addItem("Человек");
     //this->addItem("");
@@ -62,7 +64,7 @@ ObjectsList::ObjectsList(QDir directory, QString fileType, QWidget *parent): QLi
 
 void ObjectsList::dropEvent(QDropEvent *event)
 {
-    //qDebug() << "This is my custom dropEvent() method!";
+    ////qDebug() << "This is my custom dropEvent() method!";
     QListWidget::dropEvent(event);
 }
 

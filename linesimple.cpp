@@ -75,7 +75,7 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, floa
 
 LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QString source, float textureSize, QString name, int layer)
 {
-    qDebug() << "LineSimple";
+    //qDebug() << "LineSimple";
     this->layer = layer;
     this->name = name;
     this->textureSize = textureSize;
@@ -89,7 +89,7 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QStr
     textureID[0] = TextureManager::getInstance()->getID(source);
     setTextureArray();
     setIndexArray();
-    qDebug() << "Texture binded";
+    //qDebug() << "Texture binded";
     this->x1 = x1;
     this->y1 = y1;
     this->x2 = x2;
@@ -105,7 +105,7 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QStr
 
 LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QString source, float textureSize, QString name, int layer, QString description)
 {
-    qDebug() << "LineSimple";
+    //qDebug() << "LineSimple";
     this->layer = layer;
     this->name = name;
     this->textureSize = textureSize;
@@ -119,7 +119,7 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QStr
     textureID[0] = TextureManager::getInstance()->getID(source);
     setTextureArray();
     setIndexArray();
-    qDebug() << "Texture binded";
+    //qDebug() << "Texture binded";
     this->x1 = x1;
     this->y1 = y1;
     this->x2 = x2;
@@ -255,7 +255,7 @@ void LineSimple::getTextures(QString source)
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     // задаём: цвет текселя полностью замещает цвет фрагмента фигуры
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    qDebug() << "Line texture: " << textureID[0];
+    //qDebug() << "Line texture: " << textureID[0];
 }
 
 void LineSimple::drawFigure(QGLWidget* render)
@@ -352,7 +352,7 @@ void LineSimple::drawSelectionFrame()
 {
     if (indexOfSelectedControl >= 0 && indexOfSelectedControl < 2)
     {
-        //qDebug() << "Index " << indexOfSelectedControl;
+        ////qDebug() << "Index " << indexOfSelectedControl;
         drawControlElement(indexOfSelectedControl, 5.0f, 10.0);
     }
     // Боковые грани для изменения размера
@@ -554,7 +554,7 @@ void LineSimple::changeColorOfSelectedControl(int index)
 {
 
     indexOfSelectedControl = index;
-    qDebug() << "ROAD CONTROL COLOR CHANGED";
+    //qDebug() << "ROAD CONTROL COLOR CHANGED";
 }
 
 QCursor LineSimple::getCursorForControlElement(int index)

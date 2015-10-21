@@ -275,7 +275,7 @@ void SplitZone::setSelectedStatus(bool status)
 
 void SplitZone::drawFigure(QGLWidget *render)
 {
-    //qDebug() << "AxisPoints: " << axisArray.size() / 3;
+    ////qDebug() << "AxisPoints: " << axisArray.size() / 3;
 
     switch (type)
     {
@@ -304,9 +304,9 @@ void SplitZone::drawFigure(QGLWidget *render)
         glDisable(GL_TEXTURE_2D);
         glEnableClientState(GL_COLOR_ARRAY);
 
-        //qDebug() << "vertixes: " << boardVertexArray.size() / 3;
-        //qDebug() << "textures: " << boardTextureArray.size() / 3;
-        //qDebug() << "indices: " << boardIndexArray.size() / 3;
+        ////qDebug() << "vertixes: " << boardVertexArray.size() / 3;
+        ////qDebug() << "textures: " << boardTextureArray.size() / 3;
+        ////qDebug() << "indices: " << boardIndexArray.size() / 3;
 
     }
         break;
@@ -330,10 +330,10 @@ void SplitZone::drawFigure(QGLWidget *render)
         glDisable(GL_TEXTURE_2D);
         glEnableClientState(GL_COLOR_ARRAY);
 
-        //qDebug() << "vertixes: " << boardVertexArray.size() / 3;
-        //qDebug() << "textures: " << boardTextureArray.size() / 2;
-        //qDebug() << "indices: " << boardIndexArray.size() / 3;
-        //qDebug() << "axis: " << size / 3;
+        ////qDebug() << "vertixes: " << boardVertexArray.size() / 3;
+        ////qDebug() << "textures: " << boardTextureArray.size() / 2;
+        ////qDebug() << "indices: " << boardIndexArray.size() / 3;
+        ////qDebug() << "axis: " << size / 3;
 
     }
         break;
@@ -360,7 +360,7 @@ void SplitZone::drawFigure(QGLWidget *render)
         drawSelectionFrame();
         glEnable(GL_DEPTH_TEST);
     }
-    //qDebug() << "SplitZone: drawFigure()";
+    ////qDebug() << "SplitZone: drawFigure()";
 }
 
 void SplitZone::drawSelectionFrame()
@@ -376,37 +376,19 @@ void SplitZone::drawMeasurements(QGLWidget *render)
     QFont shrift = QFont("Times", 8, QFont::Black);
     float x1, x2, y1, y2;
 
+    int count = axisArray.size() / 3;
     // Ширина полосы
-    x1 = p2.x;
-    y1 = p2.y;
-    x2 = p3.x;
-    y2 = p3.y;
+    x1 = axisArray[(count / 2 - 1) * 3];
+    y1 = axisArray[(count / 2 - 1) * 3 + 1];
+    x2 = axisArray[(count / 2) * 3];
+    y2 = axisArray[(count / 2) * 3 + 1];
     x = (x1 + x2) / 2.0f;
     y = (y1 + y2) / 2.0f;
     z = 0.0f;
-    glColor3f(0.0f, 1.0f, 0.0f);
-    float dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+    glColor3f(0.0f, 0.0f, 0.0f);
     getWindowCoord(x, y, z, wx, wy, wz);
-    render->renderText(wx + 5, wy + 5, "L=" + QString("%1").arg(dr), shrift);
+    render->renderText(wx, wy, "W=" + QString("%1").arg(width, 0, 'f', 2), shrift);
 
-    x1 = p1.x + (p4.x - p1.x)/4.0f;
-    y1 = p1.y + (p4.y - p1.y)/4.0f;
-    x2 = p2.x + (p3.x - p2.x)/4.0f;
-    y2 = p2.y + (p3.y - p2.y)/4.0f;
-
-    glBegin(GL_LINES);
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(x1, y1, 0.3f);
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glVertex3f(x2, y2, 0.3f);
-    glEnd();
-
-    x = (x1 + x2) / 2.0f;
-    y = (y1 + y2) / 2.0f;
-    z = 0.0f;
-    dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
-    getWindowCoord(x, y, z, wx, wy, wz);
-    render->renderText(wx + 5, wy + 5, "W=" + QString("%1").arg(dr), shrift);
 }
 
 void SplitZone::move(float dx, float dy, float dz)
@@ -544,6 +526,55 @@ void SplitZone::changeColorOfSelectedControl(int index)
 
 void SplitZone::getProperties(QFormLayout *layout, QGLWidget *render)
 {
+    clearProperties(layout);
+    while(QLayoutItem* child = layout->takeAt(0))
+    {
+        delete child->widget();
+        delete child;
+    }
+    QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
+
+    QCheckBox* fixedCheckBox = new QCheckBox();
+
+    widthSpinBox->setValue(width);
+    connect(this, SIGNAL(widthChanged(double)), widthSpinBox, SLOT(setValue(double)));
+    connect(widthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setWidth(double)));
+
+    fixedCheckBox->setChecked(fixed);
+    QObject::connect(fixedCheckBox, SIGNAL(toggled(bool)), this, SLOT(setFixed(bool)));
+
+    connect(widthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+    layout->addRow("Зафиксировать", fixedCheckBox);
+    layout->addRow("Ширина", widthSpinBox);
+
+    switch (type)
+    {
+    case 0:
+    {
+        QDoubleSpinBox* lineWidthSpinBox = new QDoubleSpinBox();
+        lineWidthSpinBox->setValue(lineWidth);
+        connect(this, SIGNAL(lineWidthChanged(double)), lineWidthSpinBox, SLOT(setValue(double)));
+        connect(lineWidthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setLineWidth(double)));
+        connect(lineWidthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+        layout->addRow("Толщина линии", lineWidthSpinBox);
+    }
+        break;
+    case 1:
+    case 2:
+    {
+        QDoubleSpinBox* heightSpinBox = new QDoubleSpinBox();
+        heightSpinBox->setValue(height);
+        connect(this, SIGNAL(heightChanged(double)), heightSpinBox, SLOT(setValue(double)));
+        connect(heightSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setHeight(double)));
+        connect(heightSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+        layout->addRow("Высота", heightSpinBox);
+    }
+        break;
+    default:
+        break;
+    }
+
+
 }
 
 bool SplitZone::isFixed()
@@ -576,6 +607,100 @@ void SplitZone::getWindowCoord(double x, double y, double z, double &wx, double 
 bool SplitZone::setFixed(bool fixed)
 {
     this->fixed = fixed;
+}
+
+void SplitZone::setHeight(double height)
+{
+    if (this->height == height)
+        return;
+    this->height = height;
+
+    switch (type)
+    {
+    case 0:
+        break;
+    case 1:
+    {
+        setBoardVertexArray();
+        setBoardTextureArray(texture1USize, texture1VSize);
+        setVertexArray();
+        setTextureArray(texture2USize, texture2VSize);
+
+    }
+        break;
+    case 2:
+    {
+        setBoardVertexArray();
+        setBoardTextureArray(texture1USize, texture1VSize);
+        setVertexArray();
+        setTextureArray(texture2USize, texture2VSize);
+
+    }
+        break;
+    default:
+        break;
+    }
+
+    emit heightChanged(width);
+}
+
+void SplitZone::setLineWidth(double value)
+{
+    if (this->lineWidth == value)
+        return;
+    this->lineWidth = value;
+
+    switch (type)
+    {
+    case 0:
+        line->setVertexArray(lineWidth, lineAxisArray, size);
+        break;
+    case 1:
+        break;
+    case 2:
+        break;
+    default:
+        break;
+    }
+    emit lineWidthChanged(value);
+}
+
+void SplitZone::setWidth(double width)
+{
+    if (this->width == width)
+        return;
+    this->width = width;
+
+    calculateLine(axisArray, width);
+
+    switch (type)
+    {
+    case 0:
+        line->setVertexArray(lineWidth, lineAxisArray, size);
+        break;
+    case 1:
+    {
+        setBoardVertexArray();
+        setBoardTextureArray(texture1USize, texture1VSize);
+        setVertexArray();
+        setTextureArray(texture2USize, texture2VSize);
+
+    }
+        break;
+    case 2:
+    {
+        setBoardVertexArray();
+        setBoardTextureArray(texture1USize, texture1VSize);
+        setVertexArray();
+        setTextureArray(texture2USize, texture2VSize);
+
+    }
+        break;
+    default:
+        break;
+    }
+
+    emit widthChanged(width);
 }
 
 void SplitZone::calculateLine(vec3 p1, vec3 p2, float width)

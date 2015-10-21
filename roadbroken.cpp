@@ -1600,7 +1600,7 @@ GLuint RoadBroken::getTextures(QString source)
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     // задаём: цвет текселя полностью замещает цвет фрагмента фигуры
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    qDebug() << "TEXTURE ID " << ID;
+    //qDebug() << "TEXTURE ID " << ID;
     return ID;
 }
 
@@ -1808,18 +1808,8 @@ void RoadBroken::setSelectedStatus(bool status)
 
 void RoadBroken::drawFigure(QGLWidget* render)
 {
-    if (selected == true)
-    {
-        // Если фигуры выбрана - изменяем цвет заливки
-        setColorArray(0.7f, 0.7f, 0.7f, alpha);
-        drawSelectionFrame();
-    }
-    else
-    {
-        // Если фигуры не выбрана - цвет заливки по умолчанию
-        setColorArray(red, green, blue, alpha);
 
-    }
+
     glDisableClientState(GL_COLOR_ARRAY);
     glEnable(GL_TEXTURE_2D);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -1849,7 +1839,7 @@ void RoadBroken::drawFigure(QGLWidget* render)
     }
 
     for (int i = 0; i < lines.size(); ++i)
-        lines[i].line->drawFigure();
+        lines[i].line->drawFigure(render);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisable(GL_TEXTURE_2D);
     glEnableClientState(GL_COLOR_ARRAY);
@@ -1860,6 +1850,13 @@ void RoadBroken::drawFigure(QGLWidget* render)
         // Если фигуры выбрана - изменяем цвет заливки
         setColorArray(0.7f, 0.7f, 0.7f, alpha);
         drawSelectionFrame();
+        glEnable(GL_DEPTH_TEST);
+
+    }
+    if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
+    {
+        glDisable(GL_DEPTH_TEST);
+        drawControlElement(indexOfSelectedControl, 5.0f, 10.0f);
         glEnable(GL_DEPTH_TEST);
     }
 }
@@ -2281,7 +2278,7 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
                 else
                 {
                     LineBroken* line = dynamic_cast<LineBroken*>(lines[i].line);
-                    line->resizeByControl(line->getNumberOfControls() - 3, dxRes, dyRes, x, y);
+                    line->resizeByControl(line->getNumberOfControls() - 1, dxRes, dyRes, x, y);
                 }
 
             }
@@ -2967,7 +2964,7 @@ void RoadBroken::addLine(float step, QString textureSource, float textureSize, f
 
 
 
-    qDebug() << "Got axis array, size: " << size / 3;
+    //qDebug() << "Got axis array, size: " << size / 3;
     LineBrokenLinkedToRoadBroken line;
     if (lineType == 8)
     {
@@ -3105,7 +3102,7 @@ void RoadBroken::addLine(float step, QString textureSource, float textureSize, f
         lineVertexArray = NULL;
 
     }
-    qDebug() << "Created line";
+    //qDebug() << "Created line";
     line.lineWidth = lineWidth;
     line.step = step;
     line.rightSide = rightSide;
@@ -3121,7 +3118,7 @@ void RoadBroken::addLine(float step, QString textureSource, float textureSize, f
 
 void RoadBroken::addLine()
 {
-    qDebug() << "Add line";
+    //qDebug() << "Add line";
     QString textSource;
     float lWidth;
     switch(lineType)
@@ -3162,7 +3159,7 @@ void RoadBroken::addLine()
     }
 
     addLine(step, textSource, 6.0f, lWidth, lineType, rightSide);
-    qDebug() << "Line added";
+    //qDebug() << "Line added";
 }
 
 void RoadBroken::setRightSide(bool status)
@@ -3184,7 +3181,7 @@ void RoadBroken::deleteLine()
 {
     QPushButton * b = qobject_cast<QPushButton*>(sender());
     if (!b) return;
-    qDebug() << "delete line " << b->text();
+    //qDebug() << "delete line " << b->text();
     int i = b->text().toInt() - 1;
     for (std::list<RoadElement*>::iterator it = model->getGroup(1).begin();
          it != model->getGroup(1).end(); ++it)
@@ -3271,7 +3268,7 @@ void RoadBroken::setBeginRounding(bool status)
 void RoadBroken::setEndRounding(bool status)
 {
     endRounding = status;
-    qDebug() << "endRounding" << endRounding;
+    //qDebug() << "endRounding" << endRounding;
 }
 
 void RoadBroken::setDifferentDirections(bool status)
@@ -3304,7 +3301,7 @@ void RoadBroken::drawMeasurements(QGLWidget *render)
 {
     GLdouble x, y, z;
     GLdouble wx, wy, wz;
-    QFont shrift = QFont("Times", 8, QFont::Black);
+    QFont shrift = QFont("Times", 8, QFont::Bold);
     float x1, x2, x3, x4, xR, xL, xL1, xR1,
             y1, y2, y3, y4, yR, yL, yR1, yL1;
     float dr, dr1, dr2, drR, drL, drR1, drL1;
@@ -3348,16 +3345,22 @@ void RoadBroken::drawMeasurements(QGLWidget *render)
             glVertex3f(x1, y1, 0.3f);
             glColor3f(1.0f, 1.0f, 1.0f);
             glVertex3f(x2, y2, 0.3f);
-
+        if (showRightBoard)
+        {
             glColor3f(0.0f, 1.0f, 0.0f);
             glVertex3f(x1, y1, 0.3f);
             glColor3f(0.0f, 1.0f, 0.0f);
             glVertex3f(xR, yR, 0.3f);
+        }
 
+        if (showLeftBoard)
+        {
             glColor3f(0.0f, 1.0f, 0.0f);
             glVertex3f(x2, y2, 0.3f);
             glColor3f(0.0f, 1.0f, 0.0f);
             glVertex3f(xL, yL, 0.3f);
+        }
+
 
             glEnd();
 
@@ -3385,33 +3388,42 @@ void RoadBroken::drawMeasurements(QGLWidget *render)
         glColor3f(1.0f, 1.0f, 1.0f);
         render->renderText(wx, wy, QString("%1").arg(dr2, 0, 'f', 2), shrift);
 
-        x = (x1 + xR) / 2.0f;
-        y = (y1 + yR) / 2.0f;
-        z = 0.0f;
-        getWindowCoord(x, y, z, wx, wy, wz);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        render->renderText(wx, wy, QString("%1").arg(drR, 0, 'f', 2), shrift);
+        if (showRightBoard)
+        {
+            x = (x1 + xR) / 2.0f;
+            y = (y1 + yR) / 2.0f;
+            z = 0.0f;
+            getWindowCoord(x, y, z, wx, wy, wz);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            render->renderText(wx, wy, QString("%1").arg(drR, 0, 'f', 2), shrift);
 
-        x = (x2 + xL) / 2.0f;
-        y = (y2 + yL) / 2.0f;
-        z = 0.0f;
-        getWindowCoord(x, y, z, wx, wy, wz);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        render->renderText(wx, wy, QString("%1").arg(drL, 0, 'f', 2), shrift);
+            x = (xR1 + xR) / 2.0f;
+            y = (yR1 + yR) / 2.0f;
+            z = 0.0f;
+            getWindowCoord(x, y, z, wx, wy, wz);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            render->renderText(wx, wy, QString("%1").arg(drR1, 0, 'f', 2), shrift);
+        }
 
-        x = (xL1 + xL) / 2.0f;
-        y = (yL1 + yL) / 2.0f;
-        z = 0.0f;
-        getWindowCoord(x, y, z, wx, wy, wz);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        render->renderText(wx, wy, QString("%1").arg(drL1, 0, 'f', 2), shrift);
+        if (showLeftBoard)
+        {
+            x = (x2 + xL) / 2.0f;
+            y = (y2 + yL) / 2.0f;
+            z = 0.0f;
+            getWindowCoord(x, y, z, wx, wy, wz);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            render->renderText(wx, wy, QString("%1").arg(drL, 0, 'f', 2), shrift);
 
-        x = (xR1 + xR) / 2.0f;
-        y = (yR1 + yR) / 2.0f;
-        z = 0.0f;
-        getWindowCoord(x, y, z, wx, wy, wz);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        render->renderText(wx, wy, QString("%1").arg(drR1, 0, 'f', 2), shrift);
+            x = (xL1 + xL) / 2.0f;
+            y = (yL1 + yL) / 2.0f;
+            z = 0.0f;
+            getWindowCoord(x, y, z, wx, wy, wz);
+            glColor3f(0.0f, 0.0f, 0.0f);
+            render->renderText(wx, wy, QString("%1").arg(drL1, 0, 'f', 2), shrift);
+        }
+
+
+
 
         if (i == vertexArray.size() / 3 - 4)
         {
@@ -3427,19 +3439,26 @@ void RoadBroken::drawMeasurements(QGLWidget *render)
             drL = sqrt((x2 - xL)*(x2 - xL) + (y2 - yL)*(y2 - yL));
             dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
 
-            x = (x2 + xL) / 2.0f;
-            y = (y2 + yL) / 2.0f;
-            z = 0.0f;
-            getWindowCoord(x, y, z, wx, wy, wz);
-            glColor3f(0.0f, 1.0f, 0.0f);
-            render->renderText(wx, wy, QString("%1").arg(drL, 0, 'f', 2), shrift);
+            if (showLeftBoard)
+            {
+                x = (x2 + xL) / 2.0f;
+                y = (y2 + yL) / 2.0f;
+                z = 0.0f;
+                getWindowCoord(x, y, z, wx, wy, wz);
+                glColor3f(0.0f, 0.0f, 0.0f);
+                render->renderText(wx, wy,QString("%1").arg(drL, 0, 'f', 2) + " Левый тротуар", shrift);
+            }
 
-            x = (x1 + xR) / 2.0f;
-            y = (y1 + yR) / 2.0f;
-            z = 0.0f;
-            getWindowCoord(x, y, z, wx, wy, wz);
-            glColor3f(0.0f, 1.0f, 0.0f);
-            render->renderText(wx, wy, QString("%1").arg(drR, 0, 'f', 2), shrift);
+            if (showRightBoard)
+            {
+                x = (x1 + xR) / 2.0f;
+                y = (y1 + yR) / 2.0f;
+                z = 0.0f;
+                getWindowCoord(x, y, z, wx, wy, wz);
+                glColor3f(0.0f, 0.0f, 0.0f);
+                render->renderText(wx, wy, QString("%1").arg(drR, 0, 'f', 2) + " Правый тротуар", shrift);
+            }
+
 
             x = (x1 + x2) / 2.0f;
             y = (y1 + y2) / 2.0f;

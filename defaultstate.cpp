@@ -110,7 +110,8 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
                                 (*it)->getName() == "Tramways" ||
                                 (*it)->getName() == "VoltageLine" ||
                                 (*it)->getName() == "DoubleVoltageLine" ||
-                                (*it)->getName() == "RailWay")
+                                (*it)->getName() == "RailWay" ||
+                                (*it)->getName() == "SplitZone")
                         {
                             stateManager->lineBuilderState->setLine(dynamic_cast<LineBroken*>(*it));
                             stateManager->lineBuilderState->setGroupIndex(selectedGroup);
@@ -148,7 +149,9 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
                         if ((*it)->getName() == "LineBroken" ||
                                 (*it)->getName() == "Tramways" ||
                                 (*it)->getName() == "VoltageLine" ||
-                                (*it)->getName() == "DoubleVoltageLine")
+                                (*it)->getName() == "DoubleVoltageLine" ||
+                                (*it)->getName() == "RailWay" ||
+                                (*it)->getName() == "SplitZone")
                         {
                             stateManager->lineBuilderState->setLine(dynamic_cast<LineBroken*>(*it));
                             stateManager->lineBuilderState->setGroupIndex(selectedGroup);
@@ -182,7 +185,7 @@ void DefaultState::wheelEvent(QWheelEvent *pe)
     if ((pe->delta())>0) scene->scale_plus();
     else
         if ((pe->delta())<0) scene->scale_minus();
-    qDebug() << "Wheel";
+    //qDebug() << "Wheel";
     scene->updateGL();
 }
 
@@ -231,7 +234,7 @@ void DefaultState::keyPressEvent(QKeyEvent *pe)
         break;
 
     case Qt::Key_Delete:
-        qDebug() << "DefaultState - Key_Delete";
+        //qDebug() << "DefaultState - Key_Delete";
         break;
 
 
@@ -290,17 +293,55 @@ void DefaultState::dropEvent(QDropEvent *event)
              model->getGroup(0).push_back(curve);
              model->setModified(true);
         } else
-            if (s == "Разделительная зона")
+            if (s == "Разделительная зона (разметка)")
             {
-                SplitZone* splitZone = new SplitZone(x,y,0.3f,
-                                                     x + 10.0f, y, 0.3f,
+                SplitZone* splitZone = new SplitZone(x,y,0.02f,
+                                                     x + 10.0f, y, 0.02f,
                                                      2.0f,
                                                      true,
                                                      true);
+
                 splitZone->setModel(model);
                 model->getGroup(0).push_back(splitZone);
                 model->setModified(true);
             }
+            else
+            if (s == "Разделительная зона (газон)")
+                        {
+                            SplitZone* splitZone = new SplitZone(x,y,0.0f,
+                                                                 x + 10.0f, y, 0.0f,
+                                                                 2.0f,
+                                                                 true,
+                                                                 true,
+                                                                 1,
+                                                                 0.1,
+                                                                 QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                                                 0.25f, 6.0f,
+                                                                 QApplication::applicationDirPath() + "/models/city_roads/grass.jpg",
+                                                                 3.0f, 3.0f);
+
+                            splitZone->setModel(model);
+                            model->getGroup(0).push_back(splitZone);
+                            model->setModified(true);
+                        }
+            else
+                        if (s == "Разделительная зона (тротуар)")
+                        {
+                            SplitZone* splitZone = new SplitZone(x,y,0.0f,
+                                                                 x + 10.0f, y, 0.0f,
+                                                                 2.0f,
+                                                                 true,
+                                                                 true,
+                                                                 2,
+                                                                 0.1,
+                                                                 QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                                                 0.25f, 6.0f,
+                                                                 QApplication::applicationDirPath() + "/models/city_roads/nr_07S.jpg",
+                                                                 6.0f, 6.0f);
+                            splitZone->setModel(model);
+                            model->getGroup(0).push_back(splitZone);
+                            model->setModified(true);
+                        }
     else
     if (s == "Дорога ломаная")
     {
@@ -415,14 +456,14 @@ void DefaultState::dropEvent(QDropEvent *event)
         model->getGroup(1).push_back(tramways);
         model->setModified(true);
     } else
-    if (s == "Железная дорога")
+    if (s == "Железная дорога123")
     {
         LineSimple* railway = new LineSimple(x - 2.0, y, x + 2.0, y, 2.1, QString(":/textures/railroad.png"), 2.1f, "Railroad", 1);
         railway->setModel(model);
         model->getGroup(1).push_back(railway);
         model->setModified(true);
     } else
-        if (s == "Железная дорога (Новая)")
+        if (s == "Железная дорога")
         {
             float axis[6];
             axis[0] = x - 2.5f;
@@ -499,7 +540,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         RoadElementOBJ* element = new RoadElementOBJ(x, y);
 
        stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/audi_q7/").toStdString().c_str(),"audi_q7.obj",
-                             element->meshes,2.177f, element->scaleFactor);
+                             element->meshes,2.177f, element->scaleFactor, 2);
        element->setModel(model);
         model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
         model->setModified(true);
@@ -509,7 +550,7 @@ void DefaultState::dropEvent(QDropEvent *event)
     {
         RoadElementOBJ* element = new RoadElementOBJ(x, y);
         stateManager->fileManagerOBJ->loadOBJ(QApplication::applicationDirPath() + "/models/cars/bmw_m3/","bmw_m3.obj",
-                             element->meshes,1.976f, element->scaleFactor);
+                             element->meshes,1.976f, element->scaleFactor, 2);
         //fileManager->loadOBJ("models/cars/","bmw_m3.obj",
         //                     element->meshes,2.177f, element->scaleFactor);
         element->setModel(model);
@@ -532,7 +573,7 @@ void DefaultState::dropEvent(QDropEvent *event)
     {
         RoadElementOBJ* element = new RoadElementOBJ(x, y);
         stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/VAZ_2106/").toStdString().c_str(),"VAZ_2106.obj",
-                             element->meshes,1.74f, element->scaleFactor);
+                             element->meshes,1.74f, element->scaleFactor, 1);
         //fileManager->loadOBJ("models/cars/","VAZ_2106.obj",
         //                     element->meshes,1.74f, element->scaleFactor);
         element->setModel(model);
@@ -554,7 +595,7 @@ void DefaultState::dropEvent(QDropEvent *event)
                 {
                     RoadElementOBJ* element = new RoadElementOBJ(x, y);
                     stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/PAZ_1/").toStdString().c_str(),"PAZ_1.obj",
-                                         element->meshes,2.5f, element->scaleFactor);
+                                         element->meshes,2.5f, element->scaleFactor, 1);
                     //fileManager->loadOBJ("models/cars/","PAZ_1.obj",
                     //                     element->meshes,1.74f, element->scaleFactor);
                     element->setModel(model);
@@ -713,7 +754,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         QStringList lst =  QString(event->mimeData()->data("text/plain")).split(' ');
         for (int i = 0; i < lst.size(); ++i)
         {
-            qDebug() << lst.at(i);
+            //qDebug() << lst.at(i);
         }
         if (lst.at(1)[lst.at(1).size() - 1] == 's')
         {
@@ -749,13 +790,12 @@ void DefaultState::dropEvent(QDropEvent *event)
                                      lst.at(1),
                                      element->meshes,2.374f, element->scaleFactor);
                 element->setModel(model);
-                element->scaleFactor = 1.0f;
                 model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
                 model->setModified(true);
                 element->setSelectedStatus(false);
             }
-        //qDebug() << lst.at(1)[lst.at(1).size() - 1];
-        //qDebug() << s.toStdString().c_str();
+        ////qDebug() << lst.at(1)[lst.at(1).size() - 1];
+        ////qDebug() << s.toStdString().c_str();
 
 
     }
@@ -949,7 +989,7 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
 
     selectedElementsCount = hitsForFigure;
 
-    qDebug() << "Hits: " << hitsForFigure;
+    //qDebug() << "Hits: " << hitsForFigure;
     if (hitsForFigure > 0) // есть совпадания и нет ошибок
     {
         // Если выделена одна фигура
@@ -1066,7 +1106,7 @@ void DefaultState::drawRect(QPoint p1, QPoint p2)
     glVertex3d(x2, y1, z2);
     glEnd();
     glEnable(GL_DEPTH_TEST);
-    //qDebug() << "drawRect";
+    ////qDebug() << "drawRect";
 }
 
 void DefaultState::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)

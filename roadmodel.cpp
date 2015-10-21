@@ -77,7 +77,7 @@ void RoadModel::setRoadElement(RoadElement *roadElement)
     if (!roadElement->isSelected())
         return;
     this->roadElement = roadElement;
-    qDebug() << "CONNECTED SUCCESFULLY";
+    //qDebug() << "CONNECTED SUCCESFULLY";
 
 }
 

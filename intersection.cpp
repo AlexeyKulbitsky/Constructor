@@ -13,12 +13,12 @@ Intersection::Intersection()
 
 Intersection::Intersection(float x, float y)
 {
-
+    indexOfSelectedControl = -1;
     layer = 0;
     float r = 10.0f;
     for (int i = 0; i < 4; ++i)
     {
-        float angle = 90.0f * float(i) * 3.1415926 / 180.0f;
+        float angle = 90.0f * float(i) * 3.14159265f / 180.0f;
         float dx = r * cosf(angle);
         float dy = r * sinf(angle);
         RoadSimple *road = new RoadSimple(x, y, x + dx, y + dy, 6.0f,
@@ -154,6 +154,8 @@ void Intersection::drawFigure(QGLWidget *render)
         }
     }
 
+    if (indexOfSelectedControl >=0 && indexOfSelectedControl < getNumberOfControls())
+        drawControlElement(indexOfSelectedControl, 5.0f, 10.0f);
 }
 
 void Intersection::drawSelectionFrame()
@@ -509,6 +511,7 @@ int Intersection::controlsForPoint()
 
 void Intersection::changeColorOfSelectedControl(int index)
 {
+    indexOfSelectedControl = index;
 }
 
 void Intersection::getProperties(QFormLayout *layout, QGLWidget *render)
@@ -1199,7 +1202,7 @@ void Intersection::calculateRoundings()
         curves[i]->calculateAngle();
         curves[i]->setAngleVertexArray();
 
-        //qDebug() << "Angle" << i << ":" << curves[i]->angleRounding;
+        ////qDebug() << "Angle" << i << ":" << curves[i]->angleRounding;
         //curves[i]->setAngle(curves[i]->angleRounding);
 
     }
@@ -1372,6 +1375,7 @@ void Intersection::deleteRoad()
                                           QString("Рукав №") + QString::number(i + 1));
         road->setLeftBoardShowStatus(true);
         road->setRightBoardShowStatus(true);
+        road->setSelectedStatus(true);
         //QObject::connect(road, SIGNAL(widthChanged(double)), this, SLOT(calculateRoadIntersections()));
         QObject::connect(road, SIGNAL(widthChanged(double)), this, SLOT(recalculateRoads()));
         roads.push_back(road);
@@ -1402,9 +1406,9 @@ void Intersection::deleteRoad()
                                  QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
                                  QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
                                  10);
-        QObject::connect(curve, SIGNAL(angleChanged(double)), this, SLOT(setAngle(double)));
+        //QObject::connect(curve, SIGNAL(angleChanged(double)), this, SLOT(setAngle(double)));
         showBoardStatus.push_back(false);
-        curve->setSelectedStatus(false);
+        curve->setSelectedStatus(true);
         curves.push_back(curve);
     }
 
@@ -1413,8 +1417,10 @@ void Intersection::deleteRoad()
     setVertexArray();
     setTextureArray(texture1USize, texture1VSize);
     setIndexArray();
+    this->setSelectedStatus(true);
     emit roadAdded();
     emit intersectionsChanged(layout, render);
+
 }
 
 void Intersection::recalculateRoads()
@@ -1424,7 +1430,7 @@ void Intersection::recalculateRoads()
     setRoadsTextures();
     setVertexArray();
     setTextureArray(texture1USize, texture1VSize);
-    //qDebug() << "Intersection::recalculateRoads()";
+    ////qDebug() << "Intersection::recalculateRoads()";
 }
 
 void Intersection::setAngle(double angle)
@@ -1539,6 +1545,7 @@ void Intersection::clearProperties(QLayout *layout)
     */
     for (int i = 0; i < 10; ++i)
         disconnect(stepDialogs[i], 0, 0, 0);
+    disconnect(stepDialog, 0, 0, 0);
 }
 
 
@@ -1549,4 +1556,41 @@ void Intersection::setModel(Model *model)
         roads[i]->setModel(model);
     for (int i = 0; i < curves.size(); ++i)
         curves[i]->setModel(model);
+}
+
+
+std::vector<vec3> Intersection::getCoordOfControl(int index)
+{
+    int i;
+    for (i = 0; i < roads.size(); ++i)
+    {
+        if (index > (roads[i]->getNumberOfControls() + 1))
+            index -= (roads[i]->getNumberOfControls() + 1);
+        else
+            break;
+    }
+    if (i == roads.size())
+    {
+        for (i = 0; i < curves.size(); ++i)
+        {
+            if (index > (curves[i]->getNumberOfControls()))
+                index -= (curves[i]->getNumberOfControls());
+            else
+                break;
+        }
+        if (index != 0)
+        {
+            return curves[i]->getCoordOfControl(index);
+        }
+    }
+    else
+        if (index == roads[i]->getNumberOfControls())
+            roads[i]->drawFigure();
+        else
+        {
+            if (index != 0)
+            {
+                return roads[i]->getCoordOfControl(index);
+            }
+        }
 }

@@ -54,12 +54,12 @@ void RoadElementOBJ::drawFigure(QGLWidget *render)
     //glRotatef(90.0f, 1.0f, 0.0f, 0.0f); // поворот по X
 
     glScalef(scaleFactor, scaleFactor, scaleFactor);
-    glScalef(xScale, yScale, zScale);
+    //glScalef(xScale, yScale, zScale);
     //glDisableClientState(GL_COLOR_ARRAY);
     //glDisableClientState(GL_NORMAL_ARRAY);
 
 
-    //qDebug() << "Number of meshes: " << meshes.size();
+    ////qDebug() << "Number of meshes: " << meshes.size();
     for (int i = 0; i < meshes.size(); ++i)
    {
 
@@ -74,20 +74,20 @@ void RoadElementOBJ::drawFigure(QGLWidget *render)
        {
            glEnable(GL_TEXTURE_2D);
            glBindTexture(GL_TEXTURE_2D, meshes[i]->map_Ka_ID);
-           //qDebug() << meshes[i]->map_Ka_ID;
+           ////qDebug() << meshes[i]->map_Ka_ID;
        }
        else if (meshes[i]->map_Ks_ID > 0)
        {
            glEnable(GL_TEXTURE_2D);
            glBindTexture(GL_TEXTURE_2D, meshes[i]->map_Ks_ID);
-           //qDebug() << meshes[i]->map_Ks_ID;
+           ////qDebug() << meshes[i]->map_Ks_ID;
        }
        else
            if (meshes[i]->map_Kd_ID > 0)
        {
                glEnable(GL_TEXTURE_2D);
            glBindTexture(GL_TEXTURE_2D, meshes[i]->map_Kd_ID);
-           //qDebug() << "Texture ID ID" <<  meshes[i]->map_Kd_ID;
+           ////qDebug() << "Texture ID ID" <<  meshes[i]->map_Kd_ID;
        }
 
            glDisableClientState(GL_COLOR_ARRAY);

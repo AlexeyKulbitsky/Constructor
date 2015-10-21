@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     propertiesWidget->setFeatures(QDockWidget::DockWidgetMovable |
                                   QDockWidget::DockWidgetFloatable);
     propertiesWidget->setWidget(scroll);
+    scroll->setMaximumWidth(300);
     addDockWidget(Qt::RightDockWidgetArea, propertiesWidget);
 
     model = new Model();
@@ -97,8 +98,10 @@ MainWindow::MainWindow(QWidget *parent) :
     toolBox->addItem(objectList, "Элементы");
     //QDir dir("D:/3ds/city_roads/");
 
+
+    /*
     QDir dir(QApplication::applicationDirPath());
-    //qDebug() << QApplication::applicationDirPath();
+    ////qDebug() << QApplication::applicationDirPath();
     //QDir dir("models/city_roads/");
     dir.cd("models/city_roads/");
     toolBox->addItem(new ObjectsList(dir, QString("*.3ds")), "Городские дороги");
@@ -147,6 +150,10 @@ MainWindow::MainWindow(QWidget *parent) :
     dir.cdUp();
     dir.cd("cars/");
     toolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Легковые автомобили");
+    */
+
+
+
 
     //connect(ui->tabWidget, SIGNAL(currentChanged(int)),
     //        ui->tabWidget->currentWidget(), SLOT(setFocus()));

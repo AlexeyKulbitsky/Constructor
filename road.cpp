@@ -331,7 +331,7 @@ void Road::changeColorOfSelectedControl(int index)
 {
 
     indexOfSelectedControl = index;
-    qDebug() << "ROAD CONTROL COLOR CHANGED";
+    //qDebug() << "ROAD CONTROL COLOR CHANGED";
 }
 
 QCursor Road::getCursorForControlElement(int index)

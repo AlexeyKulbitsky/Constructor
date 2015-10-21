@@ -70,6 +70,7 @@ private:
     bool selected;
     bool fixed;
     int layer;
+    int indexOfSelectedControl;
 
     QVector<RoadSimple*> roads;
     QVector<Curve*> curves;
@@ -98,6 +99,10 @@ public:
     // RoadElement interface
 public:
     virtual void setModel(Model *model);
+
+    // RoadElement interface
+public:
+    virtual std::vector<vec3> getCoordOfControl(int index);
 };
 
 #endif // INTERSECTION_H

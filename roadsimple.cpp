@@ -175,7 +175,7 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, float width,
 
 RoadSimple::~RoadSimple()
 {
-    qDebug() << "RoadSimple destructor";
+    //qDebug() << "RoadSimple destructor";
     for (int i = 0; i < lines.size(); ++i)
     {
         for (std::list<RoadElement*>::iterator it = model->getGroup(1).begin();
@@ -599,21 +599,6 @@ GLuint RoadSimple::getTextures(QString source)
 void RoadSimple::drawFigure(QGLWidget* render)
 {
 
-    if (selected == true)
-    {
-
-        // Если фигуры выбрана - изменяем цвет заливки
-        setColorArray(0.7f, 0.7f, 0.7f, alpha);
-        drawSelectionFrame();
-        // glColor3d(0.3, 0.7, 0.1);
-    }
-    else
-    {
-        // Если фигуры не выбрана - цвет заливки по умолчанию
-        setColorArray(red, green, blue, alpha);
-
-    }
-
     if (!useColor)
     {
         glDisableClientState(GL_COLOR_ARRAY);
@@ -631,7 +616,7 @@ void RoadSimple::drawFigure(QGLWidget* render)
 
         if (showRightBoard)
         {
-            //qDebug() << "RoadSimple: text1" << textureID[1];
+            ////qDebug() << "RoadSimple: text1" << textureID[1];
             glBindTexture(GL_TEXTURE_2D, textureID[1]);
             glVertexPointer(3, GL_FLOAT, 0, vertexArrayRight.begin());
             glTexCoordPointer(2, GL_FLOAT, 0, textureArrayRight.begin());
@@ -639,7 +624,7 @@ void RoadSimple::drawFigure(QGLWidget* render)
         }
         if (showLeftBoard)
         {
-            //qDebug() << "RoadSimple: text1" << textureID[1];
+            ////qDebug() << "RoadSimple: text1" << textureID[1];
             glBindTexture(GL_TEXTURE_2D, textureID[1]);
             glVertexPointer(3, GL_FLOAT, 0, vertexArrayLeft.begin());
             glTexCoordPointer(2, GL_FLOAT, 0, textureArrayLeft.begin());
@@ -668,6 +653,12 @@ void RoadSimple::drawFigure(QGLWidget* render)
         // Если фигуры выбрана - изменяем цвет заливки
         setColorArray(0.7f, 0.7f, 0.7f, alpha);
         drawSelectionFrame();
+        glEnable(GL_DEPTH_TEST);
+    }
+    if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
+    {
+        glDisable(GL_DEPTH_TEST);
+        drawControlElement(indexOfSelectedControl, 5.0f, 10.0f);
         glEnable(GL_DEPTH_TEST);
     }
 
@@ -783,7 +774,7 @@ void RoadSimple::drawSelectionFrame()
 {
     if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
     {
-        qDebug() << "Index " << indexOfSelectedControl;
+        //qDebug() << "Index " << indexOfSelectedControl;
         drawControlElement(indexOfSelectedControl, 5.0f, 10.0);
     }
     // Боковые грани для изменения размера
@@ -872,7 +863,7 @@ void RoadSimple::drawControlElement(int index, float lineWidth, float pointSize)
             glColor3f(0.0f, 0.0f, 0.0f);
             glVertex3f(VertexArray[0][0],VertexArray[0][1],VertexArray[0][2]);
             glEnd();
-            //qDebug() << "Point 0";
+            ////qDebug() << "Point 0";
         }
             break;
         case 1:
@@ -882,7 +873,7 @@ void RoadSimple::drawControlElement(int index, float lineWidth, float pointSize)
             glColor3f(0.0f, 0.0f, 0.0f);
             glVertex3f(VertexArray[1][0],VertexArray[1][1],VertexArray[1][2]);
             glEnd();
-            //qDebug() << "Point 1";
+            ////qDebug() << "Point 1";
         }
             break;
         case 2:
@@ -892,7 +883,7 @@ void RoadSimple::drawControlElement(int index, float lineWidth, float pointSize)
             glColor3f(0.0f, 0.0f, 0.0f);
             glVertex3f(VertexArray[2][0],VertexArray[2][1],VertexArray[2][2]);
             glEnd();
-            //qDebug() << "Point 2";
+            ////qDebug() << "Point 2";
         }
             break;
         case 3:
@@ -902,7 +893,7 @@ void RoadSimple::drawControlElement(int index, float lineWidth, float pointSize)
             glColor3f(0.0f, 0.0f, 0.0f);
             glVertex3f(VertexArray[3][0],VertexArray[3][1],VertexArray[3][2]);
             glEnd();
-            //qDebug() << "Point 3";
+            ////qDebug() << "Point 3";
         }
             break;
         case 4:
@@ -1336,6 +1327,7 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
                         width + dr * 2.0f :
                         0.1f;
             this->rightWidth += dr;
+            this->width += dr;
             setVertexArray(x1, y1, x2, y2, width);
             setTextureArray();
             //resetLines();
@@ -1351,6 +1343,7 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
                         width + dr * 2.0f :
                         0.1f;
             this->leftWidth += dr;
+            this->width += dr;
             setVertexArray(x1, y1, x2, y2, width);
             setTextureArray();
             //resetLines();
@@ -1415,7 +1408,7 @@ void RoadSimple::changeColorOfSelectedControl(int index)
 {
 
     indexOfSelectedControl = index;
-    qDebug() << "ROAD CONTROL COLOR CHANGED";
+    //qDebug() << "ROAD CONTROL COLOR CHANGED";
 }
 
 QCursor RoadSimple::getCursorForControlElement(int index)
@@ -1510,7 +1503,7 @@ void RoadSimple::setSelectedStatus(bool status)
 void RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)
 {
     clearProperties(layout);
-    qDebug() << "Road Simple Properties";
+    //qDebug() << "Road Simple Properties";
     this->layout = layout;
     this->render = render;
     while(QLayoutItem* child = layout->takeAt(0))
@@ -1784,7 +1777,7 @@ void RoadSimple::resetLines()
                         else
                             r1 = lines[index].step - lines[index].splitZoneWidth / 2.0f;
                     }
-                    qDebug() << "SplitZone founded";
+                    //qDebug() << "SplitZone founded";
 
                 }
                 else
@@ -1984,9 +1977,9 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
         {
             line.line = new SplitZone(line_x1, line_y1, 0.02f, line_x2, line_y2, 0.02f, splitZoneWidth, beginRounding, endRounding,
                                       QString("Линия №") + QString::number(lines.size() + 1));
-            qDebug() << "SplitZone width:" << splitZoneWidth;
-            qDebug() << "Begin rounding:" << beginRounding;
-            qDebug() << "End rounding:" << endRounding;
+            //qDebug() << "SplitZone width:" << splitZoneWidth;
+            //qDebug() << "Begin rounding:" << beginRounding;
+            //qDebug() << "End rounding:" << endRounding;
             line.splitZoneWidth = splitZoneWidth;
         }
             break;
@@ -2106,7 +2099,7 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
                     else
                         r1 = lines[index].step - lines[index].splitZoneWidth / 2.0f;
                 }
-                qDebug() << "SplitZone founded";
+                //qDebug() << "SplitZone founded";
 
             }
             else
@@ -2171,7 +2164,7 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
 
 void RoadSimple::addLine()
 {
-    qDebug() << "Add line";
+    //qDebug() << "Add line";
     QString textSource;
     float lWidth;
     switch(lineType)
@@ -2235,7 +2228,7 @@ void RoadSimple::addLine()
 void RoadSimple::setRightSide(bool status)
 {
     rightSide = status;
-    //qDebug() << "Road right side " << status;
+    ////qDebug() << "Road right side " << status;
 }
 
 void RoadSimple::setBeginSide(bool status)
@@ -2246,38 +2239,38 @@ void RoadSimple::setBeginSide(bool status)
 void RoadSimple::setBeginRounding(bool status)
 {
     beginRounding = status;
-    qDebug() << "Begin rounding" << beginRounding;
+    //qDebug() << "Begin rounding" << beginRounding;
 }
 
 void RoadSimple::setEndRounding(bool status)
 {
     endRounding = status;
-    qDebug() << "End rounding" << endRounding;
+    //qDebug() << "End rounding" << endRounding;
 }
 
 void RoadSimple::setDifferentDirections(bool status)
 {
     differentDirections = status;
-    qDebug() << "RoadSimple::setDifferentDirections";
+    //qDebug() << "RoadSimple::setDifferentDirections";
 }
 
 void RoadSimple::setStep(double value)
 {
     step = value;
-    //qDebug() << "Road step " << step;
+    ////qDebug() << "Road step " << step;
 }
 
 void RoadSimple::setLineType(int type)
 {
     lineType = type;
-    //qDebug() << "Road type " << type;
+    ////qDebug() << "Road type " << type;
 }
 
 void RoadSimple::deleteLine()
 {
     QPushButton * b = qobject_cast<QPushButton*>(sender());
     if (!b) return;
-    //qDebug() << "delete line " << b->text();
+    ////qDebug() << "delete line " << b->text();
     int i = b->text().toInt() - 1;
     for (std::list<RoadElement*>::iterator it = model->getGroup(1).begin();
          it != model->getGroup(1).end(); ++it)
@@ -2311,13 +2304,13 @@ void RoadSimple::deleteLine()
 void RoadSimple::setBeginStep(double step)
 {
     beginStep = step;
-    qDebug() << "Begin step";
+    //qDebug() << "Begin step";
 }
 
 void RoadSimple::setEndStep(double step)
 {
     endStep = step;
-    qDebug() << "End step";
+    //qDebug() << "End step";
 }
 
 void RoadSimple::setSplitZoneWidth(double value)
@@ -2356,7 +2349,7 @@ void RoadSimple::drawMeasurements(QGLWidget *render)
 {
     GLdouble x, y, z;
     GLdouble wx, wy, wz;
-    QFont shrift = QFont("Times", 8, QFont::Black);
+    QFont shrift = QFont("Times", 8, QFont::Bold);
     float x1, x2, y1, y2;
 
     // Ширина полосы
@@ -2367,10 +2360,10 @@ void RoadSimple::drawMeasurements(QGLWidget *render)
     x = (x1 + x2) / 2.0f;
     y = (y1 + y2) / 2.0f;
     z = 0.0f;
-    glColor3f(1.0f, 1.0f, 1.0f);
+    glColor3f(0.0f, 0.0f, 0.0f);
     float dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
     getWindowCoord(x, y, z, wx, wy, wz);
-    render->renderText(wx + 5, wy + 5, "W=" + QString("%1").arg(dr), shrift);
+    render->renderText(wx + 5, wy + 5, "W=" + QString("%1").arg(dr, 0, 'f', 2), shrift);
 
     // Длина полосы
     x1 = VertexArray[0][0];
@@ -2380,10 +2373,10 @@ void RoadSimple::drawMeasurements(QGLWidget *render)
     x = (x1 + x2) / 2.0f;
     y = (y1 + y2) / 2.0f;
     z = 0.0f;
-    glColor3f(1.0f, 1.0f, 1.0f);
+    glColor3f(0.0f, 0.0f, 0.0f);
     dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
     getWindowCoord(x, y, z, wx, wy, wz);
-    render->renderText(wx + 5, wy + 5, "L=" + QString("%1").arg(dr), shrift);
+    render->renderText(wx + 5, wy + 5, "L=" + QString("%1").arg(dr, 0, 'f', 2), shrift);
 
     if (description != "\0")
     {
@@ -2394,13 +2387,13 @@ void RoadSimple::drawMeasurements(QGLWidget *render)
         x = (x1 + x2) / 2.0f;
         y = (y1 + y2) / 2.0f;
         z = 0.0f;
-        glColor3f(1.0f, 1.0f, 1.0f);
+        glColor3f(0.0f, 0.0f, 0.0f);
         dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
         getWindowCoord(x, y, z, wx, wy, wz);
-        render->renderText(wx + 5, wy + 5, "L=" + QString("%1").arg(dr), shrift);
+        render->renderText(wx + 5, wy + 5, "L=" + QString("%1").arg(dr, 0, 'f', 2), shrift);
     }
 
-    if (showRightBoard)
+    if (showRightBoard && description == "\0")
     {
         // Ширина правого тротуара
         x1 = vertexArrayRight[0];
@@ -2410,13 +2403,13 @@ void RoadSimple::drawMeasurements(QGLWidget *render)
         x = (x1 + x2) / 2.0f;
         y = (y1 + y2) / 2.0f;
         z = 0.0f;
-        glColor3f(0.0f, 1.0f, 0.0f);
+        glColor3f(0.0f, 0.0f, 0.0f);
         dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
         getWindowCoord(x, y, z, wx, wy, wz);
-        render->renderText(wx + 5, wy, "W=" + QString("%1").arg(dr), shrift);
+        render->renderText(wx + 5, wy, "Правый тротуар: W=" + QString("%1").arg(dr, 0, 'f', 2), shrift);
     }
 
-    if (showLeftBoard)
+    if (showLeftBoard && description == "\0")
     {
         // Ширина левого тротуара
         x1 = vertexArrayLeft[0];
@@ -2426,10 +2419,10 @@ void RoadSimple::drawMeasurements(QGLWidget *render)
         x = (x1 + x2) / 2.0f;
         y = (y1 + y2) / 2.0f;
         z = 0.0f;
-        glColor3f(0.0f, 1.0f, 0.0f);
+        glColor3f(0.0f, 0.0f, 0.0f);
         dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
         getWindowCoord(x, y, z, wx, wy, wz);
-        render->renderText(wx + 5, wy, "W=" + QString("%1").arg(dr), shrift);
+        render->renderText(wx + 5, wy, "Левый тротуар: W=" + QString("%1").arg(dr, 0, 'f', 2), shrift);
     }
     for (int i = 0; i < lines.size(); ++i)
     {
@@ -2461,7 +2454,7 @@ int RoadSimple::getLayer()
 
 void RoadSimple::clear()
 {
-    qDebug() << "RoadSimple::clear()";
+    //qDebug() << "RoadSimple::clear()";
 }
 
 float RoadSimple::getRightBoardWidth()

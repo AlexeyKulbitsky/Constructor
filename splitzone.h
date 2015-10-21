@@ -3,7 +3,7 @@
 
 #include "linebroken.h"
 
-class SplitZone: public RoadElement
+class SplitZone: public LineBroken
 {
     Q_OBJECT
 public:
@@ -62,8 +62,17 @@ public:
     virtual int getLayer();
     virtual void clear();
     void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
+
+signals:
+    void widthChanged(double width);
+    void heightChanged(double height);
+    void lineWidthChanged(double lineWidth);
+
 public slots:
     virtual bool setFixed(bool fixed);
+    void setWidth(double width);
+    void setHeight(double height);
+    void setLineWidth(double value);
 
 private:
     LineBroken *line;

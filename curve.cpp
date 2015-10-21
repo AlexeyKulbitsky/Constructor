@@ -11,8 +11,8 @@ Curve::Curve(float xCenter, float yCenter, float zCenter,
              QString texture_2, float texture_2Usize, float texture_2Vsize,
              int numberOfSides)
 {
-    //qDebug() << texture_1;
-    //qDebug() << texture_2;
+    ////qDebug() << texture_1;
+    ////qDebug() << texture_2;
     this->numberOfSides = numberOfSides;
     controlPoints[0] = xCenter;
     controlPoints[1] = yCenter;
@@ -48,15 +48,16 @@ Curve::Curve(float xCenter, float yCenter, float zCenter,
     setTextureArrayBoard(texture2USize, texture2VSize);
     setIndexArrayBoard();
 
+    calculateAngle();
     setAngleVertexArray();
     setAngleColorArray(1.0f, 0.0f, 0.0f);
     setAngleIndexArray();
-    calculateAngle();
+    //calculateAngle();
     fixed = selected = false;
     showBoard = true;
     layer = 0;
-    //qDebug() << "New Curve";
-    //qDebug() << "Vertex Size: " << vertexArray.size() / 3;
+    ////qDebug() << "New Curve";
+    ////qDebug() << "Vertex Size: " << vertexArray.size() / 3;
 }
 
 Curve::~Curve()
@@ -82,7 +83,7 @@ void Curve::drawFigure(QGLWidget *render)
     {
         if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
         {
-            //qDebug() << "Index " << indexOfSelectedControl;
+            ////qDebug() << "Index " << indexOfSelectedControl;
             drawControlElement(indexOfSelectedControl, 5.0f, 10.0);
         }
         for (int i = 0; i < 4; ++i)
@@ -97,9 +98,9 @@ void Curve::drawFigure(QGLWidget *render)
 
         glDisable(GL_LINE_STIPPLE);
     }
-    //qDebug() << "Vertices: " << vertexArray.size() / 3;
-    //qDebug() << "Textures: " << textureArray.size() / 2;
-    //qDebug() << "Indices: " << indexArray.size() / 3;
+    ////qDebug() << "Vertices: " << vertexArray.size() / 3;
+    ////qDebug() << "Textures: " << textureArray.size() / 2;
+    ////qDebug() << "Indices: " << indexArray.size() / 3;
     glDisableClientState(GL_COLOR_ARRAY);
     glEnable(GL_TEXTURE_2D);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -189,19 +190,19 @@ void Curve::drawMeasurements(QGLWidget *render)
                 controlPoints[7],
                 0.3f);
         glEnd();
-        render->renderText(wx, wy, "R=" + QString("%1").arg(radius), shrift);
+        render->renderText(wx, wy, "R=" + QString("%1").arg(radius, 0, 'f', 2), shrift);
 
         x = (controlPoints[3] + controlPoints[0]) / 2.0f;
         y = (controlPoints[4] + controlPoints[1]) / 2.0f;
         z = (controlPoints[5] + controlPoints[2]) / 2.0f;
         getWindowCoord(x, y, z, wx, wy, wz);
-        render->renderText(wx, wy, "L=" + QString("%1").arg(leftLength), shrift);
+        render->renderText(wx, wy, "L=" + QString("%1").arg(leftLength, 0, 'f', 2), shrift);
 
         x = (controlPoints[6] + controlPoints[0]) / 2.0f;
         y = (controlPoints[7] + controlPoints[1]) / 2.0f;
         z = (controlPoints[8] + controlPoints[2]) / 2.0f;
         getWindowCoord(x, y, z, wx, wy, wz);
-        render->renderText(wx, wy, "L=" + QString("%1").arg(rightLength), shrift);
+        render->renderText(wx, wy, "L=" + QString("%1").arg(rightLength, 0, 'f', 2), shrift);
         glDisable(GL_LINE_STIPPLE);
 
         float i = angleVertexArray.size() / 6;
@@ -209,7 +210,7 @@ void Curve::drawMeasurements(QGLWidget *render)
         y = angleVertexArray[i * 3 + 1];
         z = angleVertexArray[i * 3 + 2];
         getWindowCoord(x, y, z, wx, wy, wz);
-        render->renderText(wx, wy, "a=" + QString("%1").arg(angleRounding), shrift);
+        render->renderText(wx, wy, "a=" + QString("%1").arg(angleRounding, 0, 'f', 2), shrift);
     }
     else
     {
@@ -606,9 +607,9 @@ void Curve::setVertexArray()
     vertexArray.push_back(xCenter);
     vertexArray.push_back(yCenter);
     vertexArray.push_back(zCenter);
-    //qDebug() << "---------------";
-    //qDebug() << "A1 = " << angle1 * 180.0f / 3.14159265f;
-    //qDebug() << "A2 = " << angle2 * 180.0f / 3.14159265f;
+    ////qDebug() << "---------------";
+    ////qDebug() << "A1 = " << angle1 * 180.0f / 3.14159265f;
+    ////qDebug() << "A2 = " << angle2 * 180.0f / 3.14159265f;
 
     for (int i = 0; i <= numberOfSides; ++i)
     {

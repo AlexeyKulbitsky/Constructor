@@ -278,7 +278,7 @@ void RoundingRoad::setVertexArray(float x1, float y1, float nearRadius, float an
     this->angel2NearRadius = angel2NearRadius;
     this->angel1FarRadius = angel1FarRadius;
     this->angel2FarRadius = angel2FarRadius;
-    //qDebug() << "Number of vertices: " << vertexArray.size() / 3;
+    ////qDebug() << "Number of vertices: " << vertexArray.size() / 3;
 }
 
 void RoundingRoad::setColorArray(float red, float green, float blue)
@@ -304,7 +304,7 @@ void RoundingRoad::setIndexArray()
         indexArray.push_back(i + 3);
         indexArray.push_back(i + 2);
     }
-    //qDebug() << "Number of faces: " << indexArray.size() / 3;
+    ////qDebug() << "Number of faces: " << indexArray.size() / 3;
     for (int i = 0; i < vertexArrayNear.size() / 3 - 5; i += 10)
     {
         indexArrayNear.push_back(i + 1);
@@ -374,8 +374,8 @@ void RoundingRoad::setIndexArray()
         indexArrayFar.push_back(i + 4);
         indexArrayFar.push_back(i + 9);
     }
-    //qDebug() << "Number of NEAR faces: " << indexArrayNear.size() / 3;
-    //qDebug() << "Number of FAR faces: " << indexArrayFar.size() / 3;
+    ////qDebug() << "Number of NEAR faces: " << indexArrayNear.size() / 3;
+    ////qDebug() << "Number of FAR faces: " << indexArrayFar.size() / 3;
 
 }
 
@@ -423,7 +423,7 @@ void RoundingRoad::setTextureArray(float textUsize, float textVsize)
         r1 += r2Temp;
         r2 += r2Temp;
     }
-    //qDebug() << "Number of texture vertices: " << textureArray.size()/2;
+    ////qDebug() << "Number of texture vertices: " << textureArray.size()/2;
 
 
 }
@@ -648,26 +648,10 @@ void RoundingRoad::setSelectedStatus(bool status)
 void RoundingRoad::drawFigure(QGLWidget* render)
 {
 
-    if (selected == true)
-    {
 
-        setColorArray(0.7f, 0.7f, 0.7f);
-        drawSelectionFrame();
-        if (render)
-        {
-            //drawMeasurements(render);
-        }
-
-    }
-    else
-    {
-        // Если фигуры не выбрана - цвет заливки по умолчанию
-        setColorArray(0.5f, 0.5f, 0.5f);
-
-    }
-    //qDebug() << "Texture coord: " << textureArray.size() / 2;
-    //qDebug() << "Vertex coord: " << vertexArray.size() / 3;
-    //qDebug() << "Index coord: " << indexArray.size() / 3;
+    ////qDebug() << "Texture coord: " << textureArray.size() / 2;
+    ////qDebug() << "Vertex coord: " << vertexArray.size() / 3;
+    ////qDebug() << "Index coord: " << indexArray.size() / 3;
     glDisableClientState(GL_COLOR_ARRAY);
     glEnable(GL_TEXTURE_2D);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -707,13 +691,14 @@ void RoundingRoad::drawFigure(QGLWidget* render)
 
     if (selected == true)
     {
-        glDisable(GL_DEPTH_TEST);
-        setColorArray(0.7f, 0.7f, 0.7f);
+        glDisable(GL_DEPTH_TEST);        
         drawSelectionFrame();
-        if (render)
-        {
-            //drawMeasurements(render);
-        }
+        glEnable(GL_DEPTH_TEST);
+    }
+    if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
+    {
+        glDisable(GL_DEPTH_TEST);
+        drawControlElement(indexOfSelectedControl, 5.0f, 10.0f);
         glEnable(GL_DEPTH_TEST);
     }
 
@@ -723,18 +708,9 @@ void RoundingRoad::drawSelectionFrame()
 {
     if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
     {
-        //qDebug() << "Index " << indexOfSelectedControl;
+        ////qDebug() << "Index " << indexOfSelectedControl;
         drawControlElement(indexOfSelectedControl, 5.0f, 10.0);
     }
-    // Боковые грани для изменения размера
-
-    /*
-    ///////////////////////////////////////////////////////
-    glVertexPointer(3, GL_FLOAT, 0, vertexArray);
-    glColorPointer(3, GL_FLOAT, 0, colorArrayForSelection);
-    glLineWidth(2.0);
-    glDrawElements(GL_LINES, numberOfVertices * 2, GL_UNSIGNED_BYTE, indexArrayForSelection);
-    */
     for (int i = 0; i < getNumberOfControls(); ++i)
     {
         drawControlElement(i, 2.0f, 5.0f);
@@ -813,7 +789,7 @@ GLuint RoundingRoad::getTextures(QString source)
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     // задаём: цвет текселя полностью замещает цвет фрагмента фигуры
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    //qDebug() << "TEXTURE ID " << ID;
+    ////qDebug() << "TEXTURE ID " << ID;
     return ID;
 }
 
@@ -1027,9 +1003,9 @@ void RoundingRoad::drawControlElement(int index, float lineWidth, float pointSiz
         case 10:
         {
             int i = 0;
-            glLineWidth(lineWidth + 5.0f);
+            glLineWidth(lineWidth);
             glBegin(GL_LINES);
-            glColor3f(1.0f, 1.0f, 1.0f);
+            glColor3f(0.0f, 1.0f, 0.0f);
             glVertex3f(vertexArray[i * 3],
                     vertexArray[i * 3 + 1],
                     vertexArray[i * 3 + 2]);
@@ -1044,9 +1020,9 @@ void RoundingRoad::drawControlElement(int index, float lineWidth, float pointSiz
         case 11:
         {
             int i = numberOfVertices - 2;
-            glLineWidth(lineWidth + 5.0f);
+            glLineWidth(lineWidth);
             glBegin(GL_LINES);
-            glColor3f(1.0f, 1.0f, 1.0f);
+            glColor3f(0.0f, 1.0f,0.0f);
             glVertex3f(vertexArray[i * 3],
                     vertexArray[i * 3 + 1],
                     vertexArray[i * 3 + 2]);
@@ -1769,7 +1745,7 @@ void RoundingRoad::addLine(float step, QString textureSource, float textureSize,
                 vertices.push_back(y + dy);
                 vertices.push_back(0.001f);
                 beginStepReleased = true;
-                qDebug() << "Begin step...";
+                //qDebug() << "Begin step...";
             }
         }
         else
@@ -1778,7 +1754,7 @@ void RoundingRoad::addLine(float step, QString textureSource, float textureSize,
                 vertices.push_back(x + dx);
                 vertices.push_back(y + dy);
                 vertices.push_back(0.001f);
-                qDebug() << "Middle part...";
+                //qDebug() << "Middle part...";
             }
 
             else
@@ -1788,7 +1764,7 @@ void RoundingRoad::addLine(float step, QString textureSource, float textureSize,
                 vertices.push_back(x + dx);
                 vertices.push_back(y + dy);
                 vertices.push_back(0.001f);
-                qDebug() << "End step...";
+                //qDebug() << "End step...";
                 break;
             }
 
@@ -1868,7 +1844,7 @@ void RoundingRoad::addLine(float step, QString textureSource, float textureSize,
 
 void RoundingRoad::addLine()
 {
-    //qDebug() << "Add line";
+    ////qDebug() << "Add line";
     QString textSource;
     float lWidth;
     switch(lineType)
@@ -1944,7 +1920,7 @@ void RoundingRoad::deleteLine()
 {
     QPushButton * b = qobject_cast<QPushButton*>(sender());
     if (!b) return;
-    //qDebug() << "delete line " << b->text();
+    ////qDebug() << "delete line " << b->text();
     int i = b->text().toInt() - 1;
 
         for (std::list<RoadElement*>::iterator it = model->getGroup(1).begin();
@@ -2023,7 +1999,7 @@ void RoundingRoad::resetLines()
                     vertices.push_back(y + dy);
                     vertices.push_back(0.001f);
                     beginStepReleased = true;
-                    //qDebug() << "Begin step...";
+                    ////qDebug() << "Begin step...";
                 }
             }
             else
@@ -2032,7 +2008,7 @@ void RoundingRoad::resetLines()
                     vertices.push_back(x + dx);
                     vertices.push_back(y + dy);
                     vertices.push_back(0.001f);
-                    //qDebug() << "Middle part...";
+                    ////qDebug() << "Middle part...";
                 }
 
                 else
@@ -2042,7 +2018,7 @@ void RoundingRoad::resetLines()
                     vertices.push_back(x + dx);
                     vertices.push_back(y + dy);
                     vertices.push_back(0.001f);
-                    //.qDebug() << "End step...";
+                    //.//qDebug() << "End step...";
                     break;
                 }
 
@@ -2079,13 +2055,13 @@ void RoundingRoad::resetLines()
 void RoundingRoad::setBeginStep(double step)
 {
     beginStep = step;
-    qDebug() << "RoundingRoad::beginStep = " << beginStep;
+    //qDebug() << "RoundingRoad::beginStep = " << beginStep;
 }
 
 void RoundingRoad::setEndStep(double step)
 {
     endStep = step;
-    qDebug() << "RoundingRoad::endStep = " << endStep;
+    //qDebug() << "RoundingRoad::endStep = " << endStep;
 }
 
 void RoundingRoad::setSplitZoneWidth(double value)
@@ -2182,7 +2158,7 @@ void RoundingRoad::drawMeasurements(QGLWidget *render)
 {
     GLdouble x, y, z;
     GLdouble wx, wy, wz;
-    QFont shrift = QFont("Times", 8, QFont::Black);
+    QFont shrift = QFont("Times", 8, QFont::Bold);
 
     // renderText (ptrMousePosition.x(), ptrMousePosition.y(), "HELLO", shrift);
     if (render)
@@ -2204,7 +2180,7 @@ void RoundingRoad::drawMeasurements(QGLWidget *render)
                 vertexArray[(i - 2) * 3 + 1],
                 0.3f);
         glEnd();
-        render->renderText(wx, wy, QString("%1").arg(nearRadius), shrift);
+        render->renderText(wx, wy, QString("%1").arg(nearRadius, 0, 'f', 2), shrift);
 
 
 
@@ -2222,29 +2198,31 @@ void RoundingRoad::drawMeasurements(QGLWidget *render)
                 0.3f);
         glEnd();
         glDisable(GL_LINE_STIPPLE);
-        render->renderText(wx, wy, QString("%1").arg(farRadius), shrift);
+        render->renderText(wx, wy, QString("%1").arg(farRadius, 0, 'f', 2), shrift);
 
 
         if (showNearBoard)
         {
-            glColor3f(0.0f, 1.0f, 0.0f);
-            x = (vertexArrayNear[0] + vertexArrayNear[12]) / 2.0f;
-            y = (vertexArrayNear[1] + vertexArrayNear[13]) / 2.0f;
-            z = (vertexArrayNear[2] + vertexArrayNear[14]) / 2.0f;
+            glColor3f(0.0f, 0.0f, 0.0f);
+            int count = vertexArrayNear.size() / 6;
+            x = (vertexArrayNear[(count - 2) * 3] + vertexArrayNear[(count - 1) * 3]) / 2.0f;
+            y = (vertexArrayNear[(count - 2) * 3 + 1] + vertexArrayNear[(count - 1) * 3 + 1]) / 2.0f;
+            z = (vertexArrayNear[(count - 2) * 3 + 2] + vertexArrayNear[(count - 1) * 3 + 2]) / 2.0f;
             getWindowCoord(x, y, z, wx, wy, wz);
 
-            render->renderText(wx, wy, QString("%1").arg(nearBoardWidth), shrift);
+            render->renderText(wx, wy,"Правый тротуар: " +  QString("%1").arg(nearBoardWidth, 0, 'f', 2), shrift);
         }
 
         if (showFarBoard)
         {
-            glColor3f(0.0f, 1.0f, 0.0f);
-            x = (vertexArrayFar[0] + vertexArrayFar[12]) / 2.0f;
-            y = (vertexArrayFar[1] + vertexArrayFar[13]) / 2.0f;
-            z = (vertexArrayFar[2] + vertexArrayFar[14]) / 2.0f;
+            glColor3f(0.0f, 0.0f, 0.0f);
+            int count = vertexArrayFar.size() / 3;
+            x = (vertexArrayFar[(count - 2) * 3] + vertexArrayFar[(count - 1) * 3]) / 2.0f;
+            y = (vertexArrayFar[(count - 2) * 3 + 1] + vertexArrayFar[(count - 1) * 3 + 1]) / 2.0f;
+            z = (vertexArrayFar[(count - 2) * 3 + 2] + vertexArrayFar[(count - 1) * 3 + 2]) / 2.0f;
             getWindowCoord(x, y, z, wx, wy, wz);
 
-            render->renderText(wx, wy, QString("%1").arg(farBoardWidth), shrift);
+            render->renderText(wx, wy,"Левый тротуар: " +  QString("%1").arg(farBoardWidth, 0, 'f', 2), shrift);
         }
         for (int i = 0; i < lines.size(); ++i)
         {

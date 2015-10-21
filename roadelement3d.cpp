@@ -96,7 +96,7 @@ void RoadElement3D::drawFigure(QGLWidget *render)
         glDrawArrays(GL_TRIANGLES, 0, meshes[i]->vertices.size());
     }
 
-    qDebug() << "meshes: " << meshes.size();
+    //qDebug() << "meshes: " << meshes.size();
 
     glPopMatrix();
 
@@ -118,7 +118,7 @@ void RoadElement3D::drawFigure(QGLWidget *render)
     //glColor3f(0.3f, 0.3f, 0.3f);
 
 
-    qDebug() << "Number of meshes " << meshes.size();
+    //qDebug() << "Number of meshes " << meshes.size();
     if (!selected)
     {
         glDisableClientState(GL_COLOR_ARRAY);
@@ -128,15 +128,15 @@ void RoadElement3D::drawFigure(QGLWidget *render)
         //glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         glEnable(GL_LIGHTING);
 
-        qDebug() << "NUMBER OF MESHES: " << meshes.size();
+        //qDebug() << "NUMBER OF MESHES: " << meshes.size();
         for (int i = 0; i < meshes.size(); ++i)
         {
 
 
             glVertexPointer(3, GL_FLOAT,0, meshes[i]->vertices.begin());
             //glTexCoordPointer(2, GL_FLOAT,0,meshes[i]->textures.begin());
-            qDebug() << "Drawing mesh: " << i;
-            qDebug() << "Number of material groups: " << meshes[i]->materialMeshes.size();
+            //qDebug() << "Drawing mesh: " << i;
+            //qDebug() << "Number of material groups: " << meshes[i]->materialMeshes.size();
             for (int j = 0; j < meshes[i]->materialMeshes.size(); ++j)
             {
                 GLfloat materialAmbient[]= { materials[meshes[i]->materialMeshes[j].materialName].ambientColor[0],
@@ -165,10 +165,10 @@ void RoadElement3D::drawFigure(QGLWidget *render)
                 }
                 else
                 {
-                    qDebug() << "No texture";
+                    //qDebug() << "No texture";
                     //glDisable(GL_LIGHTING);
                 }
-                // qDebug() << meshes[i]->materialMeshes[j].faces.size();
+                // //qDebug() << meshes[i]->materialMeshes[j].faces.size();
 
                 glDrawElements(GL_TRIANGLES,meshes[i]->materialMeshes[j].faces.size(),GL_UNSIGNED_SHORT,meshes[i]->materialMeshes[j].faces.begin());
                 glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -276,8 +276,8 @@ void RoadElement3D::resizeByControl(int index, float dx, float dy, float x, floa
 {
     if (index == 0)
         zRot += (GLfloat)(atan(dy/dx));
-   // qDebug() << "Rotating element";
-   // qDebug() << "Angel: " << zRot;
+   // //qDebug() << "Rotating element";
+   // //qDebug() << "Angel: " << zRot;
 }
 
 int RoadElement3D::getNumberOfControls()
@@ -285,7 +285,7 @@ int RoadElement3D::getNumberOfControls()
     int count = 0;
     for (int i = 0; i < meshes.size(); ++i)
         count += meshes[i]->vertices.size() / 3;
-    //qDebug() << count;
+    ////qDebug() << count;
     return count;
 }
 

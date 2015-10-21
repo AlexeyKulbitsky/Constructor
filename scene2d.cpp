@@ -57,8 +57,8 @@ void Scene2D::initializeGL()
     //int	maxTextureUnits;
 
     //glGetIntegerv ( GL_MAX_TEXTURE_UNITS_ARB, &maxTextureUnits );
-    //qDebug() << isExtensionSupported ( "GL_ARB_multitexture" )
-    //qDebug() << maxTextureUnits;
+    ////qDebug() << isExtensionSupported ( "GL_ARB_multitexture" )
+    ////qDebug() << maxTextureUnits;
 }
 
 void Scene2D::resizeGL(int nWidth, int nHeight)
@@ -486,7 +486,7 @@ void Scene2D::drawRect(QPoint p1, QPoint p2)
     glEnd();
 
     glEnable(GL_DEPTH_TEST);
-    //qDebug() << "drawRect";
+    ////qDebug() << "drawRect";
 }
 
 void Scene2D::dragEnterEvent(QDragEnterEvent* event)
@@ -526,7 +526,7 @@ void Scene2D::drawGrid()
         glEnd();
     }
     }
-    //qDebug() << "Draw grid";
+    ////qDebug() << "Draw grid";
     glEnable(GL_DEPTH_TEST);
 }
 

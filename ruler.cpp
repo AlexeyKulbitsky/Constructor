@@ -248,12 +248,14 @@ void Ruler::drawFigure(QGLWidget *render)
         glVertex3f(x2, y2, z);
         glEnd();
     }
-
+    if (indexOfSelectedControl == 0 && indexOfSelectedControl == 1)
+        drawControlElement(indexOfSelectedControl, 5.0f, 5.0f);
 }
 
 void Ruler::drawSelectionFrame()
 {
-
+    for (int i = 0; i < getNumberOfControls(); ++i)
+        drawControlElement(i, 5.0f, 10.0f);
 }
 
 void Ruler::drawMeasurements(QGLWidget *render)
@@ -262,7 +264,7 @@ void Ruler::drawMeasurements(QGLWidget *render)
     GLdouble wx, wy, wz;
     getWindowCoord(x2, y2, 0.0f, wx, wy, wz);
     glColor3f(0.0f, 0.0f, 0.0f);
-    render->renderText (wx + 5, wy - 5, QString("%1").arg(r));
+    render->renderText (wx + 5, wy - 5, QString("%1").arg(r, 0, 'f', 2));
 }
 
 void Ruler::move(float dx, float dy, float dz)
@@ -275,21 +277,33 @@ void Ruler::drawControlElement(int index, float lineWidth, float pointSize)
     switch (index)
     {
     case 0:
+        if (startPointIsActivated)
+        {
         X = x1;
         Y = y1;
+        glPointSize(pointSize);
+        glBegin(GL_POINTS);
+        glColor3f(0.0f,0.0f,0.0f);
+        glVertex3f(X, Y, 0.0);
+        glEnd();
+        }
         break;
     case 1:
+        if (endPointIsActivated)
+        {
         X = x2;
         Y = y2;
+        glPointSize(pointSize);
+        glBegin(GL_POINTS);
+        glColor3f(0.0f,0.0f,0.0f);
+        glVertex3f(X, Y, 0.0);
+        glEnd();
+        }
         break;
     default:
         break;
     }
-    glPointSize(pointSize);
-    glBegin(GL_POINTS);
-    glColor4f(0.3f,0.3f,0.3f, 1.0f);
-    glVertex3f(X, Y, 0.0);
-    glEnd();
+
 }
 
 QCursor Ruler::getCursorForControlElement(int index)
@@ -326,6 +340,7 @@ int Ruler::controlsForPoint()
 
 void Ruler::changeColorOfSelectedControl(int index)
 {
+    indexOfSelectedControl = index;
 }
 
 void Ruler::getProperties(QFormLayout *layout, QGLWidget *render)

@@ -21,6 +21,7 @@ private:
     bool selected;
     bool fixed;
     int layer;
+    int indexOfSelectedControl;
 
     RoadElement* element1;
     RoadElement* element2;

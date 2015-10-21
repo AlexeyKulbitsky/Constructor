@@ -105,12 +105,12 @@ bool _3DsFileManager::load3DS(const char *folder, const char *filename, std::vec
 
     FILE * file = fopen(fullPath, "rb");
     if( file == NULL ){
-        //qDebug() << "Impossible to open the .obj file!";
+        ////qDebug() << "Impossible to open the .obj file!";
         return false;
     }
     else
     {
-        //qDebug() << "File .obj successfully opened";
+        ////qDebug() << "File .obj successfully opened";
     }
 
     unsigned short int chunkID;          // ID chunk-а
@@ -125,14 +125,14 @@ bool _3DsFileManager::load3DS(const char *folder, const char *filename, std::vec
         switch(chunkID)
         {
         case M3DMAGIC: // Проверка подлинности 3ds файла
-            //qDebug() << "M3D_MAGIC";
+            ////qDebug() << "M3D_MAGIC";
             break;
         case MDATA://3D EDITOR CHUNK
-            //qDebug() << "MDATA";
+            ////qDebug() << "MDATA";
             break;
         case NAMED_OBJECT: // Имя объекта
         {
-            //qDebug() << "NAMED_OBJECT";
+            ////qDebug() << "NAMED_OBJECT";
             Mesh_3DS *mesh = new Mesh_3DS();
             int i = 0;
             do
@@ -141,17 +141,17 @@ bool _3DsFileManager::load3DS(const char *folder, const char *filename, std::vec
                 mesh->name[i] = ch;
                 i++;
             }while(ch != '\0' && i<20);
-            //qDebug() << "Object name: " << mesh->name << "\n";
-            //qDebug() << "Object size: " << chunkLength;
+            ////qDebug() << "Object name: " << mesh->name << "\n";
+            ////qDebug() << "Object size: " << chunkLength;
             if (readObject(file,mesh,chunkLength - 6))
                 meshes.push_back(mesh);
-            //qDebug() << meshes.size();
+            ////qDebug() << meshes.size();
         }
             break;
 
         case MAT_ENTRY:
         {
-            //qDebug() << "MAT_ENTRY";
+            ////qDebug() << "MAT_ENTRY";
             Material material;
             material.textureID = 0;
             if (readMaterial(file, material, chunkLength - 6))
@@ -176,7 +176,7 @@ bool _3DsFileManager::load3DS(const char *folder, const char *filename, std::vec
             redAmbient = (1/255)*red;
             greenAmbient = (1/255)*green;
             blueAmbient = (1/255)*blue;
-            qDebug() << "Ambient color: " << red << " " << green << " " << blue;
+            //qDebug() << "Ambient color: " << red << " " << green << " " << blue;
         }
             break;
 
@@ -196,7 +196,7 @@ bool _3DsFileManager::load3DS(const char *folder, const char *filename, std::vec
             redDiffuse = (1/255)*red;
             greenDiffuse = (1/255)*green;
             blueDiffuse = (1/255)*blue;
-            qDebug() << "Diffuse color: " << red << " " << green << " " << blue;
+            //qDebug() << "Diffuse color: " << red << " " << green << " " << blue;
 
         }
             break;
@@ -218,7 +218,7 @@ bool _3DsFileManager::load3DS(const char *folder, const char *filename, std::vec
             greenSpecular = (1/255)*green;
             blueSpecular = (1/255)*blue;
 
-            qDebug() << "Specular color: " << red << " " << green << " " << blue;
+            //qDebug() << "Specular color: " << red << " " << green << " " << blue;
         }
             break;
         */
@@ -333,7 +333,7 @@ bool _3DsFileManager::readMaterial(FILE *file, Material &material, unsigned int 
             }
             materialname [i] = '\0';
             material.name = materialname;
-            //qDebug() << "Material name: " << materialname;
+            ////qDebug() << "Material name: " << materialname;
             readed += chunkLength;
         }
             break;
@@ -383,13 +383,13 @@ bool _3DsFileManager::readMaterial(FILE *file, Material &material, unsigned int 
             break;
 
         case MAP_TEXTMAP:
-            //qDebug() << "MAP_TEXTMAP";
+            ////qDebug() << "MAP_TEXTMAP";
             readMaterial(file, material, chunkLength - 6);
             readed += chunkLength;
             break;
         case MAT_MAPNAME:
         {
-            //qDebug() << "MAT_MAPNAME";
+            ////qDebug() << "MAT_MAPNAME";
             char c;
             char text[256];
             int i = 0;
@@ -399,35 +399,35 @@ bool _3DsFileManager::readMaterial(FILE *file, Material &material, unsigned int 
                 text[i] = c;
                 i++;
             }while(c != '\0');
-            //qDebug() << "Steps: " << i;
+            ////qDebug() << "Steps: " << i;
             material.textureSource = text;
             //if (!RoadElement::texturesPool.contains(material.textureSource))
             //    RoadElement::texturesPool[material.textureSource] = getTextures(fileFolder + "/" + material.textureSource);
             //material.textureID = RoadElement::texturesPool[material.textureSource];
             material.textureID = getTextures(QString(fileFolder + material.textureSource));
-            //qDebug() << "Texture: " << text;
+            ////qDebug() << "Texture: " << text;
             readed += chunkLength;
         }
             break;
         /*
         case MAT_MAP_USCALE:
-            qDebug() << "MAT_MAP_USCALE";
+            //qDebug() << "MAT_MAP_USCALE";
             readed += chunk.length;
             break;
         case MAT_MAP_VSCALE:
-            qDebug() << "MAT_MAP_VSCALE";
+            //qDebug() << "MAT_MAP_VSCALE";
             readed += chunk.length;
             break;
         case MAT_MAP_UOFFSET:
-            qDebug() << "MAT_MAP_UOFFSET";
+            //qDebug() << "MAT_MAP_UOFFSET";
             readed += chunk.length;
             break;
         case MAT_MAP_ANG:
-            qDebug() << "MAT_MAP_ANG";
+            //qDebug() << "MAT_MAP_ANG";
             readed += chunk.length;
             break;
         case MAT_MAP_TILING:
-            qDebug() << "MAT_MAP_TILING";
+            //qDebug() << "MAT_MAP_TILING";
             readed += chunk.length;
             break;
         */
@@ -465,9 +465,9 @@ bool _3DsFileManager::readObject(FILE *file, Mesh_3DS *mesh, unsigned int bytesR
 
         case POINT_ARRAY: // Список вершин меша
         {
-            //qDebug() << "Reading vertices";
+            ////qDebug() << "Reading vertices";
             fread (&qty, 2, 1, file);
-            //qDebug() << "Number of vertices: " << qty;
+            ////qDebug() << "Number of vertices: " << qty;
             float x, y, z;
             for (int i = 0; i < qty; i++)
             {
@@ -488,10 +488,10 @@ bool _3DsFileManager::readObject(FILE *file, Mesh_3DS *mesh, unsigned int bytesR
 
         case TEXT_VERTS: // Текстурные координаты
         {
-            //qDebug() << "Reading textures";
+            ////qDebug() << "Reading textures";
 
             fread (&qty, sizeof (unsigned short), 1, file);
-            //qDebug() << "Number of texture groups" << qty;
+            ////qDebug() << "Number of texture groups" << qty;
             float u, v;
             for (int i = 0; i < qty; i++)
             {
@@ -507,10 +507,10 @@ bool _3DsFileManager::readObject(FILE *file, Mesh_3DS *mesh, unsigned int bytesR
         case FACE_ARRAY: // Читаем фейсы
         {
             unsigned int readedBytes = 0;
-            //qDebug() << "Reading faces";
+            ////qDebug() << "Reading faces";
             fread (&qty, sizeof (unsigned short), 1, file);
             readedBytes += sizeof (unsigned short);
-            //qDebug() << "Number of faces"<< qty;
+            ////qDebug() << "Number of faces"<< qty;
             unsigned short v1, v2, v3;
             unsigned short flags;
             for (int i = 0; i < qty; i++)
@@ -539,7 +539,7 @@ bool _3DsFileManager::readObject(FILE *file, Mesh_3DS *mesh, unsigned int bytesR
                 matName[i]=ch;
                 i++;
             }while(ch != '\0' && i<20);
-            //qDebug() << "Material name: " << matName;
+            ////qDebug() << "Material name: " << matName;
             MaterialMesh matMesh;
             matMesh.materialName = matName;
             fread (&qty, sizeof (unsigned short), 1, file);
@@ -551,15 +551,15 @@ bool _3DsFileManager::readObject(FILE *file, Mesh_3DS *mesh, unsigned int bytesR
                 matMesh.faces.push_back(mesh->faces[tmp * 3 + 1]);
                 matMesh.faces.push_back(mesh->faces[tmp * 3 + 2]);
 
-                //qDebug() << "Polygone number: " << tmp;
+                ////qDebug() << "Polygone number: " << tmp;
             }
             mesh->materialMeshes.push_back(matMesh);
-            //qDebug() << "Number of faces, that use material: " << qty;
+            ////qDebug() << "Number of faces, that use material: " << qty;
             readed += chunkLength;
         }
             break;
         case SMOOTH_GROUP:
-            //qDebug() << "SMOOTH GROUP (size): " << chunkLength;
+            ////qDebug() << "SMOOTH GROUP (size): " << chunkLength;
             fseek(file, chunkLength-6, SEEK_CUR);
             readed += chunkLength;
             break;

@@ -33,7 +33,7 @@ int TextureManager::getTextureID(QString textureSource)
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     // задаём: цвет текселя полностью замещает цвет фрагмента фигуры
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    //qDebug() << "TEXTURE ID " << ID;
+    ////qDebug() << "TEXTURE ID " << ID;
     return ID;
 }
 

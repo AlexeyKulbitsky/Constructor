@@ -101,12 +101,12 @@ bool OBJFileManager::loadOBJ(const char *folder, const char *filename, std::vect
     float minY = 0.0f, maxY = 0.0f;
     FILE * file = fopen(fullPath, "r");
     if( file == NULL ){
-        //qDebug() << "Impossible to open the .obj file!";
+        ////qDebug() << "Impossible to open the .obj file!";
         return false;
     }
     else
     {
-        //qDebug() << "File .obj successfully opened";
+        ////qDebug() << "File .obj successfully opened";
     }
     char buffer[256];
     while (!feof(file))
@@ -312,12 +312,12 @@ bool OBJFileManager::loadOBJ(const QString& folder, const QString& filename, std
     float minY = 0.0f, maxY = 0.0f;
     QFile file(fullPath);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
-        //qDebug() << "Impossible to open the .obj file!";
+        ////qDebug() << "Impossible to open the .obj file!";
         return false;
     }
     else
     {
-        //qDebug() << "File .obj successfully opened";
+        ////qDebug() << "File .obj successfully opened";
     }
 
     QTextStream in(&file);
@@ -486,20 +486,40 @@ bool OBJFileManager::loadOBJ(const QString& folder, const QString& filename, std
         }else continue;
     }
     file.close();
-    switch (axis)
+
+    qDebug() << filename;
+    if (filename[0] == 'm' &&
+            filename[1] == 'a' &&
+            filename[2] == 'n')
     {
-    case 1:
-        scaleFactor = velocity / (maxX - minX);
-        break;
-    case 2:
-        scaleFactor = velocity / (maxY - minY);
-        break;
-    case 3:
-        scaleFactor = velocity / (maxZ - minZ);
-        break;
-    default:
-        scaleFactor = 1.0f;
-        break;
+        scaleFactor = 1.75f / (maxZ - minZ);
+    }
+    else
+    if (filename[0] == 'w' &&
+            filename[1] == 'o' &&
+            filename[2] == 'm' &&
+            filename[3] == 'a' &&
+            filename[4] == 'n')
+    {
+        scaleFactor = 1.6f / (maxZ - minZ);
+    }
+    else
+    {
+        switch (axis)
+        {
+        case 1:
+            scaleFactor = velocity / (maxX - minX);
+            break;
+        case 2:
+            scaleFactor = velocity / (maxY - minY);
+            break;
+        case 3:
+            scaleFactor = velocity / (maxZ - minZ);
+            break;
+        default:
+            scaleFactor = 1.0f;
+            break;
+        }
     }
     meshes.push_back(currentMesh);
 }
@@ -541,12 +561,12 @@ void OBJFileManager::readMtl(char *mtlSource, std::vector<MaterialInfo*>& materi
     FILE *mtlFile = fopen(mtlSource, "r");
     if (mtlFile == NULL)
     {
-        qDebug() << "Impossible to open the .mtl file !\n";
+        //qDebug() << "Impossible to open the .mtl file !\n";
         return;
     }
     else
     {
-        qDebug() << "File .mtl successfully opened";
+        //qDebug() << "File .mtl successfully opened";
     }
     char mtlBuffer[256];
 
@@ -560,7 +580,7 @@ void OBJFileManager::readMtl(char *mtlSource, std::vector<MaterialInfo*>& materi
                 materials.push_back(info);
             info = new MaterialInfo();
             sscanf(mtlBuffer,"newmtl %s",info->name);
-            //qDebug() << "Reading " << info->name;
+            ////qDebug() << "Reading " << info->name;
         }
         else if (mtlBuffer[0] == 'K' && mtlBuffer[1] == 'a')
         {
@@ -631,7 +651,7 @@ void OBJFileManager::readMtl(char *mtlSource, std::vector<MaterialInfo*>& materi
     }
     materials.push_back(info);
     info = NULL;
-    //qDebug() << "Reading .mtl finished";
+    ////qDebug() << "Reading .mtl finished";
     fclose(mtlFile);
 }
 
@@ -642,12 +662,12 @@ void OBJFileManager::readMtl(QString &mtlSource, std::vector<MaterialInfo *> &ma
     QFile file(mtlSource);
 
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
-        //qDebug() << "Impossible to open the .obj file!";
+        ////qDebug() << "Impossible to open the .obj file!";
 
     }
     else
     {
-        //qDebug() << "File .obj successfully opened";
+        ////qDebug() << "File .obj successfully opened";
     }
 
     QTextStream in(&file);
@@ -662,7 +682,7 @@ void OBJFileManager::readMtl(QString &mtlSource, std::vector<MaterialInfo *> &ma
                 materials.push_back(info);
             info = new MaterialInfo();
             sscanf(mtlBuffer.toStdString().c_str(),"newmtl %s",info->name);
-            //qDebug() << "Reading " << info->name;
+            ////qDebug() << "Reading " << info->name;
         }
         else if (mtlBuffer[0] == 'K' && mtlBuffer[1] == 'a')
         {
@@ -738,12 +758,12 @@ void OBJFileManager::readMtl(QString &mtlSource, std::vector<MaterialInfo *> &ma
 
 void OBJFileManager::readUseMtl(char *materialName, std::vector<MaterialInfo *> &materials, Mesh *currentMesh)
 {
-    //qDebug() << "Reading material: " << materialName;
+    ////qDebug() << "Reading material: " << materialName;
     for (int i = 0; i < materials.size(); ++i)
     {
         if (!strcmp(materialName,materials[i]->name))
         {
-            //qDebug() << "Finded material" << materialName;
+            ////qDebug() << "Finded material" << materialName;
             currentMesh->Ka[0] = materials[i]->Ka[0];
             currentMesh->Ka[1] = materials[i]->Ka[1];
             currentMesh->Ka[2] = materials[i]->Ka[2];
@@ -764,29 +784,29 @@ void OBJFileManager::readUseMtl(char *materialName, std::vector<MaterialInfo *> 
             if (strlen(materials[i]->map_Ka) > 0)
             {
                 strcpy(currentMesh->map_Ka, materials[i]->map_Ka);
-                qDebug() << materials[i]->map_Ka;
+                //qDebug() << materials[i]->map_Ka;
                 getTexture(materials[i]->map_Ka, currentMesh->map_Ka_ID);
             }
             if (strlen(materials[i]->map_Ks) > 0)
             {
                 strcpy(currentMesh->map_Ks, materials[i]->map_Ks);
-                qDebug() << materials[i]->map_Ks;
+                //qDebug() << materials[i]->map_Ks;
                 getTexture(materials[i]->map_Ks, currentMesh->map_Ks_ID);
             }
             if (strlen(materials[i]->map_Kd) > 0)
             {
                 strcpy(currentMesh->map_Kd, materials[i]->map_Kd);
-                qDebug() << "Texture KD ID" << materials[i]->map_Kd;
+                //qDebug() << "Texture KD ID" << materials[i]->map_Kd;
                 getTexture(materials[i]->map_Kd, currentMesh->map_Kd_ID);
             }*/
             currentMesh->map_Ka_ID = materials[i]->Ka_ID;
             currentMesh->map_Kd_ID = materials[i]->Kd_ID;
             currentMesh->map_Ks_ID = materials[i]->Ks_ID;
             break;
-            //qDebug() << "Finished editing mesh: " << materialName;
+            ////qDebug() << "Finished editing mesh: " << materialName;
         }
     }
-    //qDebug() << "Finished material";
+    ////qDebug() << "Finished material";
 }
 
 void OBJFileManager::getTexture(QString textureSource, unsigned& textureID)
@@ -800,7 +820,7 @@ void OBJFileManager::getTexture(QString textureSource, unsigned& textureID)
         //                             QMessageBox::Yes | QMessageBox::No|
         //                              QMessageBox::Cancel);
 
-        qDebug() << "Unable to load texture from" << textureSource;
+        //qDebug() << "Unable to load texture from" << textureSource;
         return;
     }
     image1 = QGLWidget::convertToGLFormat(image1);
@@ -821,7 +841,7 @@ void OBJFileManager::getTexture(QString textureSource, unsigned& textureID)
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     // задаём: цвет текселя полностью замещает цвет фрагмента фигуры
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    //qDebug() << "Finished Loading tecture: " << textureSource;
+    ////qDebug() << "Finished Loading tecture: " << textureSource;
 }
 
 

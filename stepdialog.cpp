@@ -511,7 +511,7 @@ void StepDialog::buttonClicked()
         emit splitZoneWidthChanged(splitZoneWidth);
         emit splitZoneTypeChanged(splitZoneType);
         emit splitZoneHeightChanged(splitZoneHeight);
-        //qDebug() << "SplitZone";
+        ////qDebug() << "SplitZone";
     }
         break;
     case 7:
@@ -584,7 +584,7 @@ void StepDialog::setSplitZoneWidth(double width)
         return;
     splitZoneWidth = width;
     emit splitZoneWidthChanged(splitZoneWidth);
-    qDebug() << "StepDialog::splitZoneWidth" << splitZoneWidth;
+    //qDebug() << "StepDialog::splitZoneWidth" << splitZoneWidth;
 }
 
 void StepDialog::setSingleWay(bool status)
