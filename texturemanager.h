@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QMap>
 #include <QString>
+#include "logger.h"
 
 class TextureManager
 {

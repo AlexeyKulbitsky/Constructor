@@ -150,8 +150,6 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, float width,
     textureArrayLeft.resize(20);
 
     setVertexArray(x1, y1, x2, y2, width);
-    // textureID[0] = getTextures(source_1);
-    // textureID[1] = getTextures(source_2);
     textureID[0] = TextureManager::getInstance()->getID(source_1);
     textureID[1] = TextureManager::getInstance()->getID(source_2);
 
@@ -175,18 +173,11 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, float width,
 
 RoadSimple::~RoadSimple()
 {
-    //qDebug() << "RoadSimple destructor";
     for (int i = 0; i < lines.size(); ++i)
     {
-        for (std::list<RoadElement*>::iterator it = model->getGroup(1).begin();
-             it != model->getGroup(1).end(); ++it)
-        {
-            if (lines[i].line == (*it))
-            {
-                model->getGroup(1).erase(it);
-                break;
-            }
-        }
+        int index = model->getGroup(1).indexOf(lines[i].line);
+        if (index >= 0)
+            model->getGroup(1).removeAt(index);
         delete lines[i].line;
     }
     lines.clear();
@@ -205,7 +196,7 @@ RoadSimple::~RoadSimple()
     render = NULL;
 }
 
-// Индексы вершины для отрисовки
+
 void RoadSimple::setVertexArray(float x1, float y1, float x2, float y2, float width)
 {
     this->x1 = x1;
@@ -568,33 +559,6 @@ void RoadSimple::setTextureArrayBoard()
 
 }
 
-GLuint RoadSimple::getTextures(QString source)
-{
-    QImage image1;
-
-    GLuint ID;
-    image1.load(source);
-    image1 = QGLWidget::convertToGLFormat(image1);
-    glGenTextures(1, &ID);
-    // создаём и связываем 1-ый текстурный объект с последующим состоянием текстуры
-    glBindTexture(GL_TEXTURE_2D, ID);
-    // связываем текстурный объект с изображением
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, (GLsizei)image1.width(), (GLsizei)image1.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image1.bits());
-
-    // задаём линейную фильтрацию вблизи:
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // задаём линейную фильтрацию вдали:
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    // задаём: при фильтрации игнорируются тексели, выходящие за границу текстуры для s координаты
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // задаём: при фильтрации игнорируются тексели, выходящие за границу текстуры для t координаты
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // задаём: цвет текселя полностью замещает цвет фрагмента фигуры
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-    return ID;
-}
 
 void RoadSimple::drawFigure(QGLWidget* render)
 {
@@ -1028,6 +992,7 @@ void RoadSimple::drawControlElement(int index, float lineWidth, float pointSize)
 
 void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y)
 {
+    //qDebug() << "RoadSimle index:" << index << "dx:" << dx << "dy:" << dy;
     if (fixed)
     {
         return;
@@ -1055,17 +1020,23 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
             float dy2 = Y3 - Y2;
             float r2 = sqrt(dx2*dx2 + dy2*dy2);
             float pi = 3.14159265f;
-            float angle1 = acos(dx1 / r1);
+            float t = dx1 / r1;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float angle1 = acos(t);
             if (dy1 < 0)
                 angle1 = 2.0f * pi - angle1;
-            float angle2 = acos(dx2 / r2);
+            t = dx2 / r2;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float angle2 = acos(t);
             if (dy2 < 0)
                 angle2 = 2.0f * pi - angle2;
             float angle = angle2 - angle1;
-            //float angle = acos((dx1*dx2 + dy1*dy2) / (r1 * r2));
-            //float res = dx1*dy2 - dx2*dy1;
-            //if (res < 0)
-            //    angle *= -1.0f;
             x1 -= X2;
             y1 -= Y2;
             x2 -= X2;
@@ -1103,10 +1074,20 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
             float dy2 = Y3 - Y2;
             float r2 = sqrt(dx2*dx2 + dy2*dy2);
             float pi = 3.14159265f;
-            float angle1 = acos(dx1 / r1);
+            float t = dx1 / r1;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float angle1 = acos(t);
             if (dy1 < 0)
                 angle1 = 2.0f * pi - angle1;
-            float angle2 = acos(dx2 / r2);
+            t = dx2 / r2;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float angle2 = acos(t);
             if (dy2 < 0)
                 angle2 = 2.0f * pi - angle2;
             float angle = angle2 - angle1;
@@ -1146,10 +1127,20 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
             float dy2 = Y3 - Y2;
             float r2 = sqrt(dx2*dx2 + dy2*dy2);
             float pi = 3.14159265f;
-            float angle1 = acos(dx1 / r1);
+            float t = dx1 / r1;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float angle1 = acos(t);
             if (dy1 < 0)
                 angle1 = 2.0f * pi - angle1;
-            float angle2 = acos(dx2 / r2);
+            t = dx2 / r2;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float angle2 = acos(t);
             if (dy2 < 0)
                 angle2 = 2.0f * pi - angle2;
             float angle = angle2 - angle1;
@@ -1189,10 +1180,20 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
             float dy2 = Y3 - Y2;
             float r2 = sqrt(dx2*dx2 + dy2*dy2);
             float pi = 3.14159265f;
-            float angle1 = acos(dx1 / r1);
+            float t = dx1 / r1;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float angle1 = acos(t);
             if (dy1 < 0)
                 angle1 = 2.0f * pi - angle1;
-            float angle2 = acos(dx2 / r2);
+            t = dx2 / r2;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float angle2 = acos(t);
             if (dy2 < 0)
                 angle2 = 2.0f * pi - angle2;
             float angle = angle2 - angle1;
@@ -1232,13 +1233,25 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
             float dy2 = Y3 - Y2;
             float r2 = sqrt(dx2*dx2 + dy2*dy2);
             float pi = 3.14159265f;
-            float angle1 = acos(dx1 / r1);
+            float t = dx1 / r1;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float angle1 = acos(t);
             if (dy1 < 0)
                 angle1 = 2.0f * pi - angle1;
-            float angle2 = acos(dx2 / r2);
+
+            t = dx2 / r2;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float angle2 = acos(t);
             if (dy2 < 0)
                 angle2 = 2.0f * pi - angle2;
             float angle = angle2 - angle1;
+            //qDebug() << "Angle:" << angle;
             x1 -= X2;
             y1 -= Y2;
             float tx = x1, ty = y1;
@@ -1267,13 +1280,26 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
             float dy2 = Y3 - Y2;
             float r2 = sqrt(dx2*dx2 + dy2*dy2);
             float pi = 3.14159265f;
-            float angle1 = acos(dx1 / r1);
+
+            float t = dx1 / r1;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float angle1 = acos(t);
             if (dy1 < 0)
                 angle1 = 2.0f * pi - angle1;
-            float angle2 = acos(dx2 / r2);
+
+            t = dx2 / r2;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float angle2 = acos(t);
             if (dy2 < 0)
                 angle2 = 2.0f * pi - angle2;
             float angle = angle2 - angle1;
+            //qDebug() << "Angle:" << angle;
             x2 -= X2;
             y2 -= Y2;
             float tx = x2, ty = y2;
@@ -1414,7 +1440,7 @@ void RoadSimple::changeColorOfSelectedControl(int index)
 QCursor RoadSimple::getCursorForControlElement(int index)
 {
 
-        return Qt::CrossCursor;
+    return Qt::CrossCursor;
 
 }
 
@@ -1440,19 +1466,6 @@ QPoint RoadSimple::getCoorninateOfPointControl(int index)
     p.setY(VertexArray[index][1]);
 
     return p;
-}
-
-void RoadSimple::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)
-{
-    GLint viewport[4];
-    GLdouble mvmatrix[16], projmatrix[16];
-
-    glGetIntegerv(GL_VIEWPORT,viewport);
-    glGetDoublev(GL_MODELVIEW_MATRIX,mvmatrix);
-    glGetDoublev(GL_PROJECTION_MATRIX,projmatrix);
-
-    gluProject(x, y, z, mvmatrix, projmatrix, viewport, &wx, &wy, &wz);
-    wy=viewport[3]-wy;
 }
 
 
@@ -1502,18 +1515,14 @@ void RoadSimple::setSelectedStatus(bool status)
 
 void RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)
 {
-    clearProperties(layout);
-    //qDebug() << "Road Simple Properties";
+    Logger::getLogger()->writeLog("RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)");
     this->layout = layout;
     this->render = render;
-    while(QLayoutItem* child = layout->takeAt(0))
-    {
-        delete child->widget();
-        delete child;
-    }
 
     QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
+    widthSpinBox->setKeyboardTracking(false);
     QDoubleSpinBox* lengthSpinBox = new QDoubleSpinBox();
+    lengthSpinBox->setKeyboardTracking(false);
     QCheckBox* fixedCheckBox = new QCheckBox();
 
 
@@ -1541,9 +1550,10 @@ void RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)
     if (name != "Crosswalk")
     {
         QDoubleSpinBox* rightBoardSpinBox = new QDoubleSpinBox();
+        rightBoardSpinBox->setKeyboardTracking(false);
         QDoubleSpinBox* leftBoardSpinBox = new QDoubleSpinBox();
-
-        QCheckBox* showRightBoardCheckBox = new QCheckBox();
+        leftBoardSpinBox->setKeyboardTracking(false);
+        QCheckBox* showRightBoardCheckBox = new QCheckBox;
         QCheckBox* showLeftBoardCheckBox = new QCheckBox();
 
         rightBoardSpinBox->setValue(rightBoardWidth);
@@ -1751,11 +1761,11 @@ void RoadSimple::resetLines()
                     break;
                 }
                 else
-                if (lines[i].differentDirections)
-                {
-                    index = i;
-                    break;
-                }
+                    if (lines[i].differentDirections)
+                    {
+                        index = i;
+                        break;
+                    }
             }
 
             if (index >= 0)
@@ -1781,10 +1791,10 @@ void RoadSimple::resetLines()
 
                 }
                 else
-                if (!lines[index].rightSide)
-                    r1 = width - lines[index].step;
-                else
-                    r1 = lines[index].step;
+                    if (!lines[index].rightSide)
+                        r1 = width - lines[index].step;
+                    else
+                        r1 = lines[index].step;
                 line_x1 = line_x1 + (line_x2 - line_x1) / width * r1;
                 line_y1 = line_y1 + (line_y2 - line_y1) / width * r1;
 
@@ -2073,11 +2083,11 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
                 break;
             }
             else
-            if (lines[i].differentDirections)
-            {
-                index = i;
-                break;
-            }
+                if (lines[i].differentDirections)
+                {
+                    index = i;
+                    break;
+                }
         }
 
         if (index >= 0)
@@ -2103,10 +2113,10 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
 
             }
             else
-            if (!lines[index].rightSide)
-                r1 = width - lines[index].step;
-            else
-                r1 = lines[index].step;
+                if (!lines[index].rightSide)
+                    r1 = width - lines[index].step;
+                else
+                    r1 = lines[index].step;
             line_x1 = line_x1 + (line_x2 - line_x1) / width * r1;
             line_y1 = line_y1 + (line_y2 - line_y1) / width * r1;
 
@@ -2272,15 +2282,9 @@ void RoadSimple::deleteLine()
     if (!b) return;
     ////qDebug() << "delete line " << b->text();
     int i = b->text().toInt() - 1;
-    for (std::list<RoadElement*>::iterator it = model->getGroup(1).begin();
-         it != model->getGroup(1).end(); ++it)
-    {
-        if (lines[i].line == (*it))
-        {
-            model->getGroup(1).erase(it);
-            break;
-        }
-    }
+    int index = model->getGroup(1).indexOf(lines[i].line);
+    if (index >= 0)
+        model->getGroup(1).removeAt(index);
     delete lines[i].line;
     lines.remove(i);
 
@@ -2577,24 +2581,20 @@ std::vector<vec3> RoadSimple::getCoordOfControl(int index)
 
 void RoadSimple::clearProperties(QLayout *layout)
 {
-    /*
-    disconnect(stepDialog, SIGNAL(lineTypeChanged(int)), this, SLOT(setLineType(int)));
-    disconnect(stepDialog, SIGNAL(rightSideChanged(bool)), this, SLOT(setRightSide(bool)));
-    disconnect(stepDialog, SIGNAL(stepChanged(double)), this, SLOT(setStep(double)));
-    disconnect(stepDialog, SIGNAL(beginStepChanged(double)), this, SLOT(setBeginStep(double)));
-    disconnect(stepDialog, SIGNAL(endStepChanged(double)), this, SLOT(setEndStep(double)));
-    disconnect(stepDialog, SIGNAL(beginSideChanged(bool)), this, SLOT(setBeginSide(bool)));
-    disconnect(stepDialog, SIGNAL(beginRoundingChanged(bool)), this, SLOT(setBeginRounding(bool)));
-    disconnect(stepDialog, SIGNAL(endRoundingChanged(bool)), this, SLOT(setEndRounding(bool)));
-    disconnect(stepDialog, SIGNAL(splitZoneWidthChanged(double)), this, SLOT(setSplitZoneWidth(double)));
-    disconnect(stepDialog, SIGNAL(accepted()), this, SLOT(addLine()));
-    while(QLayoutItem* child = layout->takeAt(0))
+    Logger::getLogger()->writeLog("RoadSimple::clearProperties(QLayout *layout)");
+    if (layout == NULL)
     {
-        delete child->widget();
-        delete child;
+        QMessageBox::critical(0, "Ошибка", "QLayout *layout = NULL, cannot clearProperties, program terminates");
+        Logger::getLogger()->writeLog("QLayout *layout = NULL, cannot clearProperties, program terminates");
+        QApplication::exit(0);
     }
-    */
     disconnect(stepDialog, 0, this, 0);
+    while(layout->count() > 0)
+    {
+        QLayoutItem *item = layout->takeAt(0);
+        delete item->widget();
+        delete item;
+    }
 }
 
 

@@ -13,7 +13,7 @@ public:
     VoltageLine(float* axisArray, int size, float width = 0.01f,
                 QString name = "VoltageLine",
                 int layer = 1);
-
+    virtual ~VoltageLine();
     // RoadElement interface
 public:
     virtual bool isSelected();

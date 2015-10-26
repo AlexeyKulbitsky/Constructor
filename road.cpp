@@ -57,6 +57,11 @@ Road::Road(float x, float y, float size, float red, float green, float blue, flo
     fixed = false;
 }
 
+Road::~Road()
+{
+
+}
+
 // Индексы вершины для отрисовки
 void Road::setVertexArray(float x, float y, float size)
 {

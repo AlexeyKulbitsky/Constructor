@@ -23,6 +23,11 @@ VoltageLine::VoltageLine(float *axisArray, int size, float width,
     selected = fixed = false;
 }
 
+VoltageLine::~VoltageLine()
+{
+
+}
+
 
 
 bool VoltageLine::isSelected()
@@ -130,12 +135,14 @@ void VoltageLine::getProperties(QFormLayout *layout, QGLWidget *render)
         delete child;
     }
     QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
+    widthSpinBox->setKeyboardTracking(false);
     widthSpinBox->setMinimum(0.001);
     widthSpinBox->setValue(width);
     connect(widthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setWidth(double)));
     connect(this, SIGNAL(widthChanged(double)), widthSpinBox, SLOT(setValue(double)));
 
     QDoubleSpinBox* heightSpinBox = new QDoubleSpinBox();
+    heightSpinBox->setKeyboardTracking(false);
     heightSpinBox->setMinimum(0.0);
     heightSpinBox->setValue(height);
     connect(heightSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setHeight(double)));

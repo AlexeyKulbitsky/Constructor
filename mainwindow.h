@@ -1,15 +1,20 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QtXml>
-#include <QXmlStreamReader>
+
+//#include <QtXml>
+//#include <QXmlStreamReader>
 #include <QMessageBox>
 #include <QMainWindow>
 #include <QFileDialog>
 #include "model.h"
-#include "filemanager.h"
-#include "jsonfilemanager.h"
+//#include "filemanager.h"
+//#include "jsonfilemanager.h"
 #include <QLineEdit>
+#include <QScrollArea>
+#include <QFormLayout>
+#include <QUndoStack>
+
 namespace Ui {
 class MainWindow;
 }
@@ -25,10 +30,13 @@ public:
     void createActions();
     void createToolBar();
 
-    QDockWidget *propertiesWidget;
-    QDockWidget *tools;
+    QScrollArea *propertiesScrollArea;
+    QWidget *propertiesWidget;
+    QFormLayout *propertiesLayout;
+    QDockWidget *propertiesDockWidget;
+
+    QDockWidget *elementsDockWidget;
     QToolBar *propertiesToolBar;
-    QFormLayout *properties;
     QLineEdit* ed;
 
     QMenu* fileMenu;
@@ -55,10 +63,15 @@ public:
 
     QAction* showProperties;
 
+    QAction *undoAction;
+    QAction *redoAction;
+
+    QUndoStack *undoStack;
+
     Model* model;
 
 private:
-    JSONFileManager* jsonFileManager;
+    //JSONFileManager* jsonFileManager;
 
 private slots:
     void newFile();
@@ -68,11 +81,11 @@ private slots:
     void on_tabWidget_currentChanged(int index);
 
 public slots:
-    void setFileManager(FileManager* manager);
+    //void setFileManager(FileManager* manager);
 
 private:
     Ui::MainWindow *ui;
-    FileManager* fileManager;
+    //FileManager* fileManager;
 
     // QWidget interface
 protected:

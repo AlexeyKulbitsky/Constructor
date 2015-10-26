@@ -17,7 +17,7 @@ public:
     DefaultState(StateManager* manager, Model* model, Scene2D* scene, QFormLayout* properties);
 
     virtual ~DefaultState();
-    void clearProperties(QFormLayout* layout);
+
 private:
     StateManager* stateManager;
     Model* model;
@@ -44,22 +44,21 @@ public:
     virtual void dragEnterEvent(QDragEnterEvent *event);
     virtual void dropEvent(QDropEvent *event);
 
+    virtual QString getName();
+    virtual void contextMenuEvent(QContextMenuEvent *pe);
 
 private:
     bool tryToSelectFigures(QPoint mp, bool withResult);
     bool tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult);
 
 
-
-    // State interface
 public:
-    virtual QString getName();
+
     void drawRect(QPoint p1, QPoint p2);
     void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
     void getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz);
-    // State interface
-public:
-    virtual void contextMenuEvent(QContextMenuEvent *pe);
+    void clearProperties(QFormLayout* layout);
+
 };
 
 #endif // DEFAULTSTATE_H

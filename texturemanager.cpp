@@ -3,18 +3,24 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <QGLWidget>
+#include <QMessageBox>
+
 TextureManager* TextureManager::manager = NULL;
-
-
-
 
 
 int TextureManager::getTextureID(QString textureSource)
 {
+    Logger::getLogger()->writeLog(QString("Reading texture from ") + textureSource);
     QImage image1;
 
     GLuint ID;
-    image1.load(textureSource);
+    if (!image1.load(textureSource))
+    {
+        QMessageBox::critical(0, "Ошибка", QString("Cannot read texture from ") + textureSource,
+                              QMessageBox::Yes);
+        Logger::getLogger()->writeLog(QString("Cannot read texture from ") + textureSource);
+        return 0;
+    }
     image1 = QGLWidget::convertToGLFormat(image1);
     glGenTextures(1, &ID);
     // создаём и связываем 1-ый текстурный объект с последующим состоянием текстуры

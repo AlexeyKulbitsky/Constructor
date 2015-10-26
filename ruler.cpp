@@ -14,6 +14,12 @@ Ruler::Ruler()
     index1 = index2 = -1;
 }
 
+Ruler::~Ruler()
+{
+    element1 = NULL;
+    element2 = NULL;
+}
+
 void Ruler::activateStartPoint()
 {
     startPointIsActivated = true;

@@ -5,6 +5,11 @@ JSONFileManager::JSONFileManager(Model *model)
     this->model = model;
 }
 
+JSONFileManager::~JSONFileManager()
+{
+
+}
+
 
 
 bool JSONFileManager::openFile(QString source)

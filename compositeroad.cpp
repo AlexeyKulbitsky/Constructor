@@ -10,7 +10,12 @@ CompositeRoad::CompositeRoad()
 
 CompositeRoad::~CompositeRoad()
 {
-
+    for (int i = 0; i < elements.size(); ++i)
+    {
+        if (elements[i])
+            delete elements[i];
+        elements[i] = NULL;
+    }
 }
 
 

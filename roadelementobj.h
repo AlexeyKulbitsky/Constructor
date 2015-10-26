@@ -9,7 +9,7 @@ class RoadElementOBJ: public RoadElement
 public:
     RoadElementOBJ();
     RoadElementOBJ(float x, float y);
-
+    virtual ~RoadElementOBJ();
     // RoadElement interface
 public:
     virtual bool isSelected();

@@ -10,7 +10,7 @@ class StateManager;
 #include "statemanager.h"
 
 
-
+//#include "linebroken.h"
 
 class LineBuilderState: public State
 {
@@ -29,7 +29,7 @@ private:
 
     LineBroken* lineBroken;
 
-    LineBuilder* lineBuilder;
+
     QPoint ptrMousePosition;
     bool rightButtonIsPressed;
     bool leftButtonIsPressed;

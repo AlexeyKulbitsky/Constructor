@@ -9,6 +9,11 @@ Cube::Cube(float x, float y, float z, float delta, QString name, int layer)
     this->layer = layer;
 }
 
+Cube::~Cube()
+{
+    model = NULL;
+}
+
 void Cube::setVertexArray(float x, float y, float z, float delta)
 {
     vertexArray.push_back(x - delta);

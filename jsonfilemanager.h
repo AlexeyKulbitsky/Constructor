@@ -7,7 +7,7 @@ class JSONFileManager: public FileManager
 {
 public:
     JSONFileManager(Model* model);
-
+    virtual ~JSONFileManager();
     // FileManager interface
 public:
     virtual bool openFile(QString source);

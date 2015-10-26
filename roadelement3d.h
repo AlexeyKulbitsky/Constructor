@@ -10,6 +10,7 @@ class RoadElement3D: public RoadElement
 public:
     RoadElement3D();
     RoadElement3D(float x, float y);
+    virtual ~RoadElement3D();
     bool selected;
     bool fixed;
     int layer;

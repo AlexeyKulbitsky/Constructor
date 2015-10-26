@@ -3,12 +3,9 @@
 
 #include <QGLWidget>
 #include <QListWidgetItem>
-#include <GL/glu.h>
-#include <GL/glext.h>
-#include <GL/glaux.h>
 #include <vector>
 #include <iostream>
-
+#include <GL/glu.h>
 class StateManager;
 #include "statemanager.h"
 #include "model.h"
@@ -21,12 +18,12 @@ public:
     ~Scene3D();
     void setModel(Model* model);
 
-    void scale_plus();
-    void scale_minus();
-    void rotate_up();
-    void rotate_down();
-    void rotate_left();
-    void rotate_right();
+    void scalePlus();
+    void scaleMinus();
+    void rotateUp();
+    void rotateDown();
+    void rotateLeft();
+    void rotateRight();
 
     // QWidget interface
 protected:

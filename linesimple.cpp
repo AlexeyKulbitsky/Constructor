@@ -75,7 +75,6 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, floa
 
 LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QString source, float textureSize, QString name, int layer)
 {
-    //qDebug() << "LineSimple";
     this->layer = layer;
     this->name = name;
     this->textureSize = textureSize;
@@ -84,8 +83,7 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QStr
     this->size = size;
     this->width = width;
 
-    setVertexArray(x1, y1, x2, y2, width);
-    //getTextures(source);
+    setVertexArray(x1, y1, x2, y2, width);    
     textureID[0] = TextureManager::getInstance()->getID(source);
     setTextureArray();
     setIndexArray();
@@ -115,11 +113,9 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QStr
     this->width = width;
 
     setVertexArray(x1, y1, x2, y2, width);
-    //getTextures(source);
     textureID[0] = TextureManager::getInstance()->getID(source);
     setTextureArray();
     setIndexArray();
-    //qDebug() << "Texture binded";
     this->x1 = x1;
     this->y1 = y1;
     this->x2 = x2;
@@ -153,12 +149,12 @@ void LineSimple::setVertexArray(float x1, float y1, float x2, float y2, float wi
         dx *= -1.0f;
         dy *= -1.0f;
     }
-    if (x1 < x2 && y1 > y2)
+    if (x1 <= x2 && y1 >= y2)
     {
         dx *= -1.0f;
 
     }
-    if (x1 > x2 && y1 < y2)
+    if (x1 >= x2 && y1 <= y2)
     {
         dy *= -1.0f;
 
@@ -232,35 +228,10 @@ void LineSimple::setIndexArray()
 
 }
 
-void LineSimple::getTextures(QString source)
-{
-    QImage image1;
-
-    image1.load(source);
-    image1 = QGLWidget::convertToGLFormat(image1);
-    glGenTextures(1, textureID);
-    // создаём и связываем 1-ый текстурный объект с последующим состоянием текстуры
-    glBindTexture(GL_TEXTURE_2D, textureID[0]);
-    // связываем текстурный объект с изображением
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, (GLsizei)image1.width(), (GLsizei)image1.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image1.bits());
-
-    // задаём линейную фильтрацию вблизи:
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // задаём линейную фильтрацию вдали:
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    // задаём: при фильтрации игнорируются тексели, выходящие за границу текстуры для s координаты
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // задаём: при фильтрации игнорируются тексели, выходящие за границу текстуры для t координаты
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // задаём: цвет текселя полностью замещает цвет фрагмента фигуры
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    //qDebug() << "Line texture: " << textureID[0];
-}
 
 void LineSimple::drawFigure(QGLWidget* render)
 {
-
+    /*
     if (selected == true)
     {
         if (indexOfSelectedControl >= 0)
@@ -283,6 +254,7 @@ void LineSimple::drawFigure(QGLWidget* render)
         setColorArray(red, green, blue, alpha);
 
     }
+    */
     if (!useColor)
     {
         glDisableClientState(GL_COLOR_ARRAY);
@@ -315,12 +287,14 @@ void LineSimple::drawFigure(QGLWidget* render)
         glEnable(GL_DEPTH_TEST);
 
     }
+    if (indexOfSelectedControl >= 0 && indexOfSelectedControl < 2)
+    {
+        drawControlElement(indexOfSelectedControl, 5.0f, 10.0);
+    }
 
 }
 
 
-
-//////////////////////////////////////
 
 void LineSimple::setIndexArrayForSelectionFrame()
 {
@@ -350,11 +324,7 @@ void LineSimple::setColorArrayForSelectionFrame(float red, float green, float bl
 
 void LineSimple::drawSelectionFrame()
 {
-    if (indexOfSelectedControl >= 0 && indexOfSelectedControl < 2)
-    {
-        ////qDebug() << "Index " << indexOfSelectedControl;
-        drawControlElement(indexOfSelectedControl, 5.0f, 10.0);
-    }
+
     // Боковые грани для изменения размера
     glVertexPointer(3, GL_FLOAT, 0, VertexArray);
     glColorPointer(3, GL_FLOAT, 0, ColorArrayForSelection);
@@ -364,9 +334,6 @@ void LineSimple::drawSelectionFrame()
     // Угловые точки для изменения размера
     glPointSize(5.0);
     glDrawElements(GL_POINTS, 4, GL_UNSIGNED_BYTE, IndexArrayForSelection);
-
-    // Точки для вращения
-
 }
 
 
@@ -395,19 +362,6 @@ void LineSimple::drawControlElement(int index, float lineWidth, float pointSize)
     {
     case 0:
     {
-        /*
-        glLineWidth(lineWidth + 5.0);
-        glBegin(GL_LINES);
-          glColor3d(1.0, 1.0, 0.1);
-           glVertex3d(VertexArray[0][0],
-                        VertexArray[0][1],
-                         VertexArray[0][2]);
-           glColor3d(1.0, 1.0, 0.1);
-           glVertex3d(VertexArray[1][0],
-                        VertexArray[1][1],
-                        VertexArray[1][2]);
-        glEnd();
-        */
         glPointSize(pointSize);
         glBegin(GL_POINTS);
         glColor3f(0.0f, 0.0f, 0.0f);
@@ -417,19 +371,6 @@ void LineSimple::drawControlElement(int index, float lineWidth, float pointSize)
         break;
     case 1:
     {
-        /*
-        glLineWidth(lineWidth);
-        glBegin(GL_LINES);
-          glColor3d(1.0, 1.0, 0.1);
-           glVertex3d(VertexArray[2][0],
-                        VertexArray[2][1],
-                         VertexArray[2][2]);
-           glColor3d(1.0, 1.0, 0.1);
-           glVertex3d(VertexArray[3][0],
-                        VertexArray[3][1],
-                        VertexArray[3][2]);
-        glEnd();
-        */
         glPointSize(pointSize);
         glBegin(GL_POINTS);
         glColor3f(0.0f, 0.0f, 0.0f);
@@ -439,66 +380,11 @@ void LineSimple::drawControlElement(int index, float lineWidth, float pointSize)
         break;
     case 2:
     {
-        /*
-        glLineWidth(lineWidth);
-        glBegin(GL_LINES);
-          glColor3d(1.0, 1.0, 0.1);
-           glVertex3d(x1, y1, VertexArray[2][2]);
-           glColor3d(1.0, 1.0, 0.1);
-           glVertex3d(x2,y2,VertexArray[3][2]);
-        glEnd();
-        */
     }
         break;
     default:
         break;
     }
-
-    /*
-    if (index == 0)
-
-    else
-    {
-        if (index == 1)
-
-        else
-        {   /*
-
-            if (index == 2)
-            {
-                glLineWidth(lineWidth);
-                glBegin(GL_LINES);
-                  glColor3d(1.0, 1.0, 0.1);
-                   glVertex3d(VertexArray[0][0],
-                                VertexArray[0][1],
-                                 VertexArray[0][2]);
-                   glColor3d(1.0, 1.0, 0.1);
-                   glVertex3d(VertexArray[3][0],
-                                VertexArray[3][1],
-                                VertexArray[3][2]);
-                glEnd();
-            }
-            else
-            {
-                if (index == 3)
-                {
-                    glLineWidth(lineWidth);
-                    glBegin(GL_LINES);
-                      glColor3d(1.0, 1.0, 0.1);
-                       glVertex3d(VertexArray[1][0],
-                                    VertexArray[1][1],
-                                     VertexArray[1][2]);
-                       glColor3d(1.0, 1.0, 0.1);
-                       glVertex3d(VertexArray[2][0],
-                                    VertexArray[2][1],
-                                    VertexArray[2][2]);
-                    glEnd();
-                }
-            }
-
-        */
-    //    }
-    //  }
 
 }
 
@@ -528,12 +414,6 @@ void LineSimple::resizeByControl(int index, float dx, float dy, float x, float y
 
     case 2:
     {
-        /*
-        float dr = sqrt(dx * dx + dy * dy);
-        float res = dx * (x2 - x1) + dy * (y2 - y1);
-        float factor = res < 0 ? -1 : 1;
-        setVertexArray(x1, y1, x2, y2, width + dr * factor);
-        */
     }
         break;
     case 3:
@@ -552,9 +432,7 @@ void LineSimple::resizeByControl(int index, float dx, float dy, float x, float y
 
 void LineSimple::changeColorOfSelectedControl(int index)
 {
-
     indexOfSelectedControl = index;
-    //qDebug() << "ROAD CONTROL COLOR CHANGED";
 }
 
 QCursor LineSimple::getCursorForControlElement(int index)
@@ -599,18 +477,7 @@ QPoint LineSimple::getCoorninateOfPointControl(int index)
     return p;
 }
 
-void LineSimple::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)
-{
-    GLint viewport[4];
-    GLdouble mvmatrix[16], projmatrix[16];
 
-    glGetIntegerv(GL_VIEWPORT,viewport);
-    glGetDoublev(GL_MODELVIEW_MATRIX,mvmatrix);
-    glGetDoublev(GL_PROJECTION_MATRIX,projmatrix);
-
-    gluProject(x, y, z, mvmatrix, projmatrix, viewport, &wx, &wy, &wz);
-    wy=viewport[3]-wy;
-}
 
 void LineSimple::drawDescription(QGLWidget *render, float red, float green, float blue)
 {
@@ -677,7 +544,9 @@ void LineSimple::getProperties(QFormLayout *layout, QGLWidget* render)
     }
 
     QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
+    widthSpinBox->setKeyboardTracking(false);
     QDoubleSpinBox* lengthSpinBox = new QDoubleSpinBox();
+    lengthSpinBox->setKeyboardTracking(false);
     QCheckBox* fixedCheckBox = new QCheckBox();
 
     widthSpinBox->setValue(width);

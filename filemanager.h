@@ -9,7 +9,7 @@ class FileManager
 
 public:
 
-    virtual ~FileManager(){}
+    virtual ~FileManager(){ model = NULL; }
 
     virtual bool openFile(QString source) = 0;
     virtual bool saveFile(QString source) = 0;

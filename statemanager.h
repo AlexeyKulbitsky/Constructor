@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QWidget>
+#include <QFormLayout>
 
 #include "state.h"
 
@@ -12,23 +13,24 @@ class DefaultState;
 class SelectedState;
 #include "selectedstate.h"
 
-class MultiSelectedState;
-#include "multiselectedstate.h"
+//class MultiSelectedState;
+//#include "multiselectedstate.h"
 
-class RulerState;
-#include "rulerstate.h"
+//class RulerState;
+//#include "rulerstate.h"
 
 class LineBuilderState;
 #include "linebuilderstate.h"
 
 class RoadBuilderState;
 #include "roadbuilderstate.h"
-
+//class Scene2D;////////////
+//class Model;////////////////
 #include "scene2d.h"
 
-#include "_3dsfilemanager.h"
-#include "objfilemanager.h"
-#include "stepdialog.h"
+//#include "_3dsfilemanager.h"
+//#include "objfilemanager.h"
+//#include "stepdialog.h"
 
 class StateManager : public QObject
 {
@@ -47,17 +49,18 @@ private:
     bool rulerActive;
 
 public:
+
     DefaultState* defaultState;
     SelectedState* selectedState;
-    MultiSelectedState* multiSelectedState;
-    RulerState* rulerState;
+    //MultiSelectedState* multiSelectedState;
+    //RulerState* rulerState;
     LineBuilderState* lineBuilderState;
     RoadBuilderState* roadBuilderState;
 
     StepDialog* stepDialog;
     StepDialog* stepDialogs[10];
-    _3DsFileManager* fileManager3DS;
-    OBJFileManager* fileManagerOBJ;
+    //_3DsFileManager* fileManager3DS;
+    //OBJFileManager* fileManagerOBJ;
 
 public:
     void setState(State* state);

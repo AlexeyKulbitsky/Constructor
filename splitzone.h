@@ -42,7 +42,7 @@ public:
               QString texture_2,
               float texture2USize, float texture2VSize,
               QString description = '\0');
-    ~SplitZone();
+    virtual ~SplitZone();
     // RoadElement interface
 public:
     virtual bool isSelected();
@@ -61,7 +61,6 @@ public:
     virtual bool isFixed();
     virtual int getLayer();
     virtual void clear();
-    void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
 
 signals:
     void widthChanged(double width);
@@ -96,6 +95,7 @@ private:
     float xCenter, yCenter;
     int type;
     float height;
+    int indexOfSelectedControl;
 
     QVector<GLfloat> boardVertexArray;
     QVector<GLfloat> boardTextureArray;

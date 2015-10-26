@@ -1,6 +1,7 @@
 #ifndef ROADELEMENT
 #define ROADELEMENT
 
+#include <QMessageBox>
 #include <QtGui>
 #include <math.h>
 #include <QJsonObject>
@@ -12,8 +13,14 @@
 #include "stepdialog.h"
 #include <QMap>
 #include "texturemanager.h"
-//#include "model.h"
+#include "logger.h"
+#include <GL/glu.h>
+#include <QUndoStack>
+#include "commands.h"
+
 class Model;
+//#include "model.h"
+
 
 struct vec3
 {
@@ -122,7 +129,16 @@ struct Material
     float specularColor[3];
 
     QString textureSource;
-    unsigned int textureID = 0;
+    unsigned int textureID;
+    Material()
+    {
+        name = '\0';
+        ambientColor[0] = ambientColor[1] = ambientColor[2] = 0.0f;
+        diffuseColor[0] = diffuseColor[1] = diffuseColor[2] = 0.0f;
+        specularColor[0] = specularColor[1] = specularColor[1] = 0.0f;
+        textureSource = '\0';
+        textureID = 0;
+    }
 };
 
 
@@ -137,7 +153,7 @@ class RoadElement: public QObject
     Q_OBJECT
 
 public:
-
+    static QUndoStack* undoStack;
     virtual bool isSelected() = 0;
     virtual void setSelectedStatus(bool status) = 0;
     virtual void drawFigure(QGLWidget* render = 0) = 0;
@@ -145,57 +161,31 @@ public:
     virtual void drawMeasurements(QGLWidget* render = 0) = 0;
     virtual void move(float dx, float dy, float dz = 0) = 0;
     virtual void drawControlElement(int index, float lineWidth, float pointSize) = 0;
-    virtual std::vector<vec3> getCoordOfControl(int index) { std::vector<vec3> p; return p;}
-    virtual void setCoordForControl(int index) {}
+    virtual std::vector<vec3> getCoordOfControl(int index);
+    virtual void setCoordForControl(int index);
     virtual QCursor getCursorForControlElement(int index) = 0;
     virtual void resizeByControl(int index, float dx, float dy, float x, float y) = 0;
     virtual int getNumberOfControls() = 0;
     virtual int controlsForPoint() = 0;
     virtual void changeColorOfSelectedControl(int index) = 0;
-    virtual QString getName() { return name; }
-    virtual QJsonObject getJSONInfo() {  QJsonObject a; return a;}
+    virtual QString getName();
+    virtual QJsonObject getJSONInfo();
     virtual void getProperties(QFormLayout* layout, QGLWidget* render = 0) = 0;
-    virtual void clearProperties(QLayout* layout)
-
-    {
-        /*
-        QLayoutItem *item;
-        while((layout->count() > 0)) {
-            item = layout->itemAt(0);
-            if (item->layout()) {
-                clearProperties(item->layout());
-                delete item->layout();
-            }
-            if (item->widget()) {
-                delete item->widget();
-            }
-            delete item;
-        }
-        */
-    }
-    virtual void setModel(Model* model){ this->model = model; }
+    virtual void clearProperties(QLayout* layout);
+    virtual void setModel(Model* model);
     virtual bool isFixed() = 0;
-    virtual void addElement(RoadElement* element){}
-    virtual void deleteElement(int index){}
-    virtual int getNumberOfElements(){return 0;}
-    virtual RoadElement* getElement(int index) { return NULL; }
-    virtual ~RoadElement(){}
+    virtual void addElement(RoadElement* element);
+    virtual void deleteElement(int index);
+    virtual int getNumberOfElements();
+    virtual RoadElement* getElement(int index);
+    virtual ~RoadElement();
     virtual int getLayer() = 0;
     virtual void clear() = 0;
-    virtual void rotate(float angle, float x, float y, float z) {}
-    virtual void setStepDialog(StepDialog* dialog)
-    {
-        if (dialog)
-        stepDialog = dialog;
-    }
-    virtual void setStepDialogs(StepDialog** dialogs, int size)
-    {
-        if (!dialogs)
-            return;
-        for (int i = 0; i < size; ++i)
-            stepDialogs[i] = dialogs[i];
-    }
-    virtual void deleteLine(RoadElement* line){}
+    virtual void rotate(float angle, float x, float y, float z);
+    virtual void setStepDialog(StepDialog* dialog);
+    virtual void setStepDialogs(StepDialog** dialogs, int size);
+    virtual void deleteLine(RoadElement* line);
+    virtual void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
 public slots:
     virtual bool setFixed(bool fixed) = 0;
 
@@ -205,11 +195,7 @@ protected:
     StepDialog* stepDialogs[10];
     Model* model;
 
-public:
-    //static QMap<QString, int> texturesPool;
 };
-
-//QMap<QString, int> RoadElement:ureManager:texturesPool;
 
 
 #endif // ROADELEMENT

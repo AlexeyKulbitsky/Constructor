@@ -5,7 +5,6 @@
 #include "roadsimple.h"
 #include "curve.h"
 #include <QVector>
-#include <QScrollArea>
 
 class Intersection: public RoadElement
 {
@@ -13,6 +12,7 @@ class Intersection: public RoadElement
 public:
     Intersection();
     Intersection(float x, float y);
+    virtual ~Intersection();
     // RoadElement interface
 public:
     virtual bool isSelected();
@@ -61,6 +61,7 @@ public slots:
     void deleteRoad();
     void recalculateRoads();
 
+    void resetWidth();
     void setAngle(double angle);
     void setAngle(double angle, int index);
     void deleteLine();

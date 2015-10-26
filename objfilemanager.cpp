@@ -14,7 +14,8 @@ OBJFileManager::OBJFileManager(Model *model)
 
 OBJFileManager::~OBJFileManager()
 {
-
+    element = NULL;
+    file = NULL;
 }
 
 bool OBJFileManager::openFile(QString source)

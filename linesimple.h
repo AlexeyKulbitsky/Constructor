@@ -13,7 +13,6 @@ public:
     void setColorArray(float red, float green, float blue, float alpha);
     void setTextureArray();
     void setIndexArray();
-    void getTextures(QString source);
 
     // Рамка для выбора фигуры
     void setVertexArrayForSelection();
@@ -66,7 +65,6 @@ public:
     vec2 getAxisPoint_1(){return vec2(x1, y1);}
     vec2 getAxisPoint_2(){return vec2(x2, y2);}
     QPoint getCoorninateOfPointControl(int index);
-    void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
     void drawDescription(QGLWidget* render = 0, float red = 1.0f, float green = 1.0f, float blue = 1.0f);
 
     // RoadElement interface

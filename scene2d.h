@@ -11,17 +11,6 @@
 #include <QMenu>
 #include <QAction>
 
-#include "road.h"
-#include "roundingcrossroad.h"
-#include "roundingroad.h"
-
-
-#include "linesimple.h"
-
-#include "ruler.h"
-#include "roadsimple.h"
-#include "linebroken.h"
-#include "linebuilder.h"
 class StateManager;
 #include "statemanager.h"
 #include "model.h"
@@ -33,7 +22,6 @@ public:
 
     QFont shrift;
     bool rulerIsActive;
-    Ruler* ruler;
     bool rightButtonIsPressed;
     bool leftButtonIsPressed;
     GLfloat ratio; // отношение высоты окна виджета к его ширине
@@ -52,23 +40,22 @@ public:
     bool controlIsSelected;
     bool drawRectStatus;
     QPoint rectPoint1, rectPoint2;
-    void scale_plus();
-    void scale_minus();
-    void rotate_up();
-    void rotate_down();
-    void rotate_left();
-    void rotate_right();
-    void translate_down();
-    void translate_up();
+    void scalePlus();
+    void scaleMinus();
+    void rotateUp();
+    void rotateDown();
+    void rotateLeft();
+    void rotateRight();
+    void translateDown();
+    void translateUp();
     void defaultScene();
 
-    bool tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement* element, int& index);
-    bool tryToSelectFigures(QPoint mp, RoadElement*& element);
+   // bool tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement* element, int& index);
+   // bool tryToSelectFigures(QPoint mp, RoadElement*& element);
     void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
     void getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz);
 
-    void createMenu();
-    void createActions();
+
 
 protected:
     void initializeGL();
@@ -97,7 +84,7 @@ public:
     void setDrawRectStatus(bool status);
 
 signals:
-    void selectedFigureChanged(RoadElement* roadElement);
+    //void selectedFigureChanged(RoadElement* roadElement);
     void rulerStatusChanged(bool status);
 
 public slots:

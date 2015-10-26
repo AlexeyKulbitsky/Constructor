@@ -14,6 +14,7 @@ public:
     DoubleVoltageLine(float* axisArray, int size, float width = 0.5f,
                 QString name = "DoubleVoltageLine",
                 int layer = 1);
+    virtual ~DoubleVoltageLine();
     // RoadElement interface
 public:
     virtual bool isSelected();

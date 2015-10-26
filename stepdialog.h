@@ -19,6 +19,7 @@ class StepDialog: public QDialog
     Q_OBJECT
 public:
     StepDialog(QWidget *parent = 0);
+    ~StepDialog();
 
 private:
     QStackedLayout *layout;

@@ -21,47 +21,64 @@ Scene3D::Scene3D(QWidget *parent, QGLWidget* shared) : QGLWidget(parent, shared)
 
 Scene3D::~Scene3D()
 {
-
+    stateManager = NULL;
+    model = NULL;
 }
+
 
 void Scene3D::setModel(Model *model)
 {
-    this->model = model;
+    Logger::getLogger()->writeLog("Scene3D::setModel(Model *model)");
+    if (model != NULL)
+        this->model = model;
+    else
+    {
+        QMessageBox::critical(0, "Ошибка", "Scene3D::setModel(Model *model), model = NULL,\n cannot work with models", QMessageBox::Yes | QMessageBox::Default);
+        Logger::getLogger()->writeLog("Scene3D::setModel(Model *model), model = NULL, cannot work with models");
+    }
 }
 
-void Scene3D::scale_plus()
+
+void Scene3D::scalePlus()
 {
+    Logger::getLogger()->writeLog("Scene3D::scale_plus()");
     nSca = nSca * 1.05;
 }
 
-void Scene3D::scale_minus()
+void Scene3D::scaleMinus()
 {
+    Logger::getLogger()->writeLog("Scene3D::scale_minus()");
     nSca = nSca / 1.05;
 }
 
-void Scene3D::rotate_up()
+void Scene3D::rotateUp()
 {
+    Logger::getLogger()->writeLog("Scene3D::rotate_up()");
     xRot += 1.0;
 }
 
-void Scene3D::rotate_down()
+void Scene3D::rotateDown()
 {
+    Logger::getLogger()->writeLog("Scene3D::rotate_down()");
     xRot -= 1.0;
 }
 
-void Scene3D::rotate_left()
+void Scene3D::rotateLeft()
 {
+    Logger::getLogger()->writeLog("Scene3D::rotate_left()");
     zRot += 1.0;
 }
 
-void Scene3D::rotate_right()
+void Scene3D::rotateRight()
 {
+    Logger::getLogger()->writeLog("Scene3D::rotate_right()");
     zRot -= 1.0;
 }
 
 
 void Scene3D::mousePressEvent(QMouseEvent *pe)
 {
+    Logger::getLogger()->writeLog("Scene3D::mousePressEvent(QMouseEvent *pe)");
     ptrMousePosition = pe->pos();
     switch (pe->button())
     {
@@ -80,6 +97,7 @@ void Scene3D::mousePressEvent(QMouseEvent *pe)
 
 void Scene3D::mouseReleaseEvent(QMouseEvent *pe)
 {
+    Logger::getLogger()->writeLog("Scene3D::mouseReleaseEvent(QMouseEvent *pe)");
     rightButtonIsPressed = false;
     leftButtonIsPressed = false;
     middleButtonIsPressed = false;
@@ -87,6 +105,7 @@ void Scene3D::mouseReleaseEvent(QMouseEvent *pe)
 
 void Scene3D::mouseMoveEvent(QMouseEvent *pe)
 {
+    Logger::getLogger()->writeLog("Scene3D::mouseMoveEvent(QMouseEvent *pe)");
     if (rightButtonIsPressed)
     {
         // Поворот сцены
@@ -114,23 +133,27 @@ void Scene3D::mouseMoveEvent(QMouseEvent *pe)
 
 void Scene3D::wheelEvent(QWheelEvent *pe)
 {
-    if ((pe->delta())>0) scale_plus();
+    Logger::getLogger()->writeLog("Scene3D::wheelEvent(QWheelEvent *pe)");
+    if ((pe->delta())>0) scalePlus();
     else
-        if ((pe->delta())<0) scale_minus();
+        if ((pe->delta())<0) scaleMinus();
     updateGL();
 }
 
 void Scene3D::keyPressEvent(QKeyEvent *)
 {
+    Logger::getLogger()->writeLog("Scene3D::keyPressEvent(QKeyEvent *)");
 }
 
 void Scene3D::keyReleaseEvent(QKeyEvent *)
 {
+    Logger::getLogger()->writeLog("Scene3D::keyReleaseEvent(QKeyEvent *)");
 }
 
 void Scene3D::initializeGL()
 {
 
+    Logger::getLogger()->writeLog("Scene3D::initializeGL()");
     qglClearColor(Qt::white);
     glEnable(GL_DEPTH_TEST);
     glShadeModel(GL_FLAT);
@@ -174,6 +197,7 @@ void Scene3D::initializeGL()
 
 void Scene3D::resizeGL(int nWidth, int nHeight)
 {
+    Logger::getLogger()->writeLog("Scene3D::resizeGL(int nWidth, int nHeight)");
     /*
     glViewport(0, 0, (GLint)nWidth, (GLint)nHeight);
     glMatrixMode(GL_PROJECTION);
@@ -214,6 +238,7 @@ void Scene3D::resizeGL(int nWidth, int nHeight)
 
 void Scene3D::paintGL()
 {
+    Logger::getLogger()->writeLog("Scene3D::paintGL()");
     glClearColor(0.9, 0.9, 0.9, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -243,24 +268,21 @@ void Scene3D::paintGL()
     glRotatef(zRot, 0.0f, 0.0f, 1.0f); // поворот по Z
     glScalef(nSca, nSca, nSca);
 
-
-
-
-
-    // масштабирование
     if (model)
     {
         for (int i =  0; i < model->getNumberOfGroups(); ++i)
         {
             if (model->isGroupVisible(i) == true)
             {
-                for(std::list<RoadElement*>::iterator it = model->getGroup(i).begin();
+                for(QList<RoadElement*>::iterator it = model->getGroup(i).begin();
                     it != model->getGroup(i).end(); ++it)
                     (*it)->drawFigure(this);
             }
 
         }
     }
+
+
     glDisable(GL_LIGHT1);
     glDisable(GL_LIGHTING);
 

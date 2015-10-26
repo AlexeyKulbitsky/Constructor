@@ -112,7 +112,7 @@ RoadBroken::~RoadBroken()
     {
         for (int i = 0; i < lines.size(); ++i)
         {
-            for (std::list<RoadElement*>::iterator it = model->getGroup(1).begin();
+            for (QList<RoadElement*>::iterator it = model->getGroup(1).begin();
                  it != model->getGroup(1).end(); ++it)
             {
                 if (lines[i].line == (*it))
@@ -126,6 +126,9 @@ RoadBroken::~RoadBroken()
         delete lines[i].line;
     }
     lines.clear();
+
+    layout = NULL;
+    render = NULL;
 }
 
 void RoadBroken::setVertexArray(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, GLfloat width)
@@ -2447,10 +2450,22 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
                         float dy2 = Y3 - Y2;
                         float r2 = sqrt(dx2*dx2 + dy2*dy2);
                         float pi = 3.14159265f;
-                        float angle1 = acos(dx1 / r1);
+
+                        float t = dx1 / r1;
+                        if (t > 1)
+                            t = 1.0f;
+                        if (t < -1)
+                            t = -1.0f;
+                        float angle1 = acos(t);
                         if (dy1 < 0)
                             angle1 = 2.0f * pi - angle1;
-                        float angle2 = acos(dx2 / r2);
+
+                        t = dx2 / r2;
+                        if (t > 1)
+                            t = 1.0f;
+                        if (t < -1)
+                            t = -1.0f;
+                        float angle2 = acos(t);
                         if (dy2 < 0)
                             angle2 = 2.0f * pi - angle2;
                         float angle = angle2 - angle1;
@@ -2886,8 +2901,9 @@ void RoadBroken::getProperties(QFormLayout *layout, QGLWidget* render)
     QCheckBox* showLeftBoardCheckBox = new QCheckBox();
     QCheckBox* fixedCheckBox = new QCheckBox();
     QDoubleSpinBox* rightBoardSpinBox = new QDoubleSpinBox();
+    rightBoardSpinBox->setKeyboardTracking(false);
     QDoubleSpinBox* leftBoardSpinBox = new QDoubleSpinBox();
-
+    leftBoardSpinBox->setKeyboardTracking(false);
     showRightBoardCheckBox->setChecked(showRightBoard);
     QObject::connect(showRightBoardCheckBox, SIGNAL(toggled(bool)), this, SLOT(setRightBoardShowStatus(bool)));
 
@@ -3035,7 +3051,7 @@ void RoadBroken::addLine(float step, QString textureSource, float textureSize, f
         for (int i = 0; i < size; ++i)
             lineVertexArray[i] = axisArray[i];
 
-        SplitZone* splitZone;
+        SplitZone* splitZone = NULL;
         switch (splitZoneType)
         {
         case 0:
@@ -3183,7 +3199,7 @@ void RoadBroken::deleteLine()
     if (!b) return;
     //qDebug() << "delete line " << b->text();
     int i = b->text().toInt() - 1;
-    for (std::list<RoadElement*>::iterator it = model->getGroup(1).begin();
+    for (QList<RoadElement*>::iterator it = model->getGroup(1).begin();
          it != model->getGroup(1).end(); ++it)
     {
         if (lines[i].line == (*it))

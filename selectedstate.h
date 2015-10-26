@@ -12,17 +12,16 @@ class SelectedState: public State
 public:
     SelectedState();
     SelectedState(StateManager* manager, Model* model, Scene2D* scene, QFormLayout* properties);
-
-    std::list<RoadElement*> selectedElements;
-
     virtual ~SelectedState();
+    QList<RoadElement*> selectedElements;
+
     void clearProperties(QFormLayout *layout);
 private:
     StateManager* stateManager;
     Model* model;
     Scene2D* scene;
     QFormLayout* properties;
-    std::list<RoadElement*>::iterator it;
+    QList<RoadElement*>::iterator it;
     RoadElement* selectedElement;
 
     QMenu* contextMenu;
@@ -42,7 +41,7 @@ private:
     int elementIndex;
     int groupIndex;
     int controlIndex;
-    std::list<RoadElement*>::iterator elementIterator;
+    QList<RoadElement*>::iterator elementIterator;
     // State interface
 public:
     virtual void mousePressEvent(QMouseEvent *pe);
@@ -58,7 +57,7 @@ public:
     void setSelectedElement(RoadElement* element);
 
 private:
-    bool tryToSelectFigures(QPoint mp, std::list<RoadElement *> &elements);
+    bool tryToSelectFigures(QPoint mp, QList<RoadElement *> &elements);
     bool tryToSelectFigures(QPoint mp);
     bool tryToSelectAllFigures(QPoint mp);
     bool tryToSelectControlsInSelectedFigure(QPoint mp);

@@ -62,7 +62,9 @@ Curve::Curve(float xCenter, float yCenter, float zCenter,
 
 Curve::~Curve()
 {
-
+    layout = NULL;
+    render = NULL;
+    model = NULL;
 }
 
 
@@ -116,10 +118,10 @@ void Curve::drawFigure(QGLWidget *render)
 
     if (showBoard)
     {
-    glBindTexture(GL_TEXTURE_2D, textureID[1]);
-    glVertexPointer(3, GL_FLOAT, 0, vertexArrayBoard.begin());
-    glTexCoordPointer(2, GL_FLOAT, 0, textureArrayBoard.begin());
-    glDrawElements(GL_TRIANGLES, indexArrayBoard.size(), GL_UNSIGNED_BYTE, indexArrayBoard.begin());
+        glBindTexture(GL_TEXTURE_2D, textureID[1]);
+        glVertexPointer(3, GL_FLOAT, 0, vertexArrayBoard.begin());
+        glTexCoordPointer(2, GL_FLOAT, 0, textureArrayBoard.begin());
+        glDrawElements(GL_TRIANGLES, indexArrayBoard.size(), GL_UNSIGNED_BYTE, indexArrayBoard.begin());
     }
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisable(GL_TEXTURE_2D);
@@ -132,22 +134,22 @@ void Curve::drawSelectionFrame()
 {
     if (showBoard)
     {
-    glLineWidth(5.0f);
-    glBegin(GL_LINES);
-    for (int i = 0; i < vertexArrayBoard.size() / 3 - 5; i += 10)
-    {
+        glLineWidth(5.0f);
+        glBegin(GL_LINES);
+        for (int i = 0; i < vertexArrayBoard.size() / 3 - 5; i += 10)
+        {
 
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(vertexArrayBoard[(i + 4) * 3],
-                vertexArrayBoard[(i + 4) * 3 + 1],
-                vertexArrayBoard[(i + 4) * 3 + 2]);
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(vertexArrayBoard[(i + 9) * 3],
-                vertexArrayBoard[(i + 9) * 3 + 1],
-                vertexArrayBoard[(i + 9) * 3 + 2]);
+            glColor3f(0.0f, 1.0f, 0.0f);
+            glVertex3f(vertexArrayBoard[(i + 4) * 3],
+                    vertexArrayBoard[(i + 4) * 3 + 1],
+                    vertexArrayBoard[(i + 4) * 3 + 2]);
+            glColor3f(0.0f, 1.0f, 0.0f);
+            glVertex3f(vertexArrayBoard[(i + 9) * 3],
+                    vertexArrayBoard[(i + 9) * 3 + 1],
+                    vertexArrayBoard[(i + 9) * 3 + 2]);
 
-    }
-    glEnd();
+        }
+        glEnd();
     }
 }
 
@@ -283,22 +285,22 @@ void Curve::drawControlElement(int index, float lineWidth, float pointSize)
     {
         if (showBoard)
         {
-        glLineWidth(lineWidth);
-        glBegin(GL_LINES);
-        for (int i = 0; i < vertexArrayBoard.size() / 3 - 5; i += 10)
-        {
+            glLineWidth(lineWidth);
+            glBegin(GL_LINES);
+            for (int i = 0; i < vertexArrayBoard.size() / 3 - 5; i += 10)
+            {
 
-            glColor3f(0.0f, 1.0f, 0.0f);
-            glVertex3f(vertexArrayBoard[(i + 4) * 3],
-                    vertexArrayBoard[(i + 4) * 3 + 1],
-                    vertexArrayBoard[(i + 4) * 3 + 2]);
-            glColor3f(0.0f, 1.0f, 0.0f);
-            glVertex3f(vertexArrayBoard[(i + 9) * 3],
-                    vertexArrayBoard[(i + 9) * 3 + 1],
-                    vertexArrayBoard[(i + 9) * 3 + 2]);
+                glColor3f(0.0f, 1.0f, 0.0f);
+                glVertex3f(vertexArrayBoard[(i + 4) * 3],
+                        vertexArrayBoard[(i + 4) * 3 + 1],
+                        vertexArrayBoard[(i + 4) * 3 + 2]);
+                glColor3f(0.0f, 1.0f, 0.0f);
+                glVertex3f(vertexArrayBoard[(i + 9) * 3],
+                        vertexArrayBoard[(i + 9) * 3 + 1],
+                        vertexArrayBoard[(i + 9) * 3 + 2]);
 
-        }
-        glEnd();
+            }
+            glEnd();
         }
     }
         break;
@@ -432,12 +434,14 @@ void Curve::getProperties(QFormLayout *layout, QGLWidget *render)
     connect(fixedCheckBox, SIGNAL(toggled(bool)), this, SLOT(setFixed(bool)));
 
     QDoubleSpinBox *leftLengthDoubleSpinBox = new QDoubleSpinBox();
+    leftLengthDoubleSpinBox->setKeyboardTracking(false);
     leftLengthDoubleSpinBox->setMinimum(0.0);
     leftLengthDoubleSpinBox->setValue(leftLength);
     connect(this, SIGNAL(leftLengthChanged(double)), leftLengthDoubleSpinBox, SLOT(setValue(double)));
     connect(leftLengthDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setLeftLength(double)));
 
     QDoubleSpinBox *rightLengthDoubleSpinBox = new QDoubleSpinBox();
+    rightLengthDoubleSpinBox->setKeyboardTracking(false);
     rightLengthDoubleSpinBox->setMinimum(0.0);
     rightLengthDoubleSpinBox->setValue(rightLength);
     connect(this, SIGNAL(rightLengthChanged(double)), rightLengthDoubleSpinBox, SLOT(setValue(double)));
@@ -448,12 +452,14 @@ void Curve::getProperties(QFormLayout *layout, QGLWidget *render)
     connect(showBoardCheckBox, SIGNAL(toggled(bool)), this, SLOT(setBoardShowStatus(bool)));
 
     QDoubleSpinBox *boardWidthDoubleSpinBox = new QDoubleSpinBox();
+    boardWidthDoubleSpinBox->setKeyboardTracking(false);
     boardWidthDoubleSpinBox->setMinimum(0.0);
     boardWidthDoubleSpinBox->setValue(boardWidth);
     connect(this, SIGNAL(boardWidthChanged(double)), boardWidthDoubleSpinBox, SLOT(setValue(double)));
     connect(boardWidthDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setBoardWidth(double)));
 
     QDoubleSpinBox *angleDoubleSpinBox = new QDoubleSpinBox();
+    angleDoubleSpinBox->setKeyboardTracking(false);
     angleDoubleSpinBox->setMinimum(0.0);
     angleDoubleSpinBox->setMaximum(720.0);
     angleDoubleSpinBox->setValue(angleRounding);
@@ -656,7 +662,10 @@ void Curve::setTextureArray()
         if (cosAngle < -1.0f)
             cosAngle = -1.0f;
         float sinAngle = sqrt(1 - cosAngle * cosAngle);
-
+        if (sinAngle > 1.0f)
+            sinAngle = 1.0f;
+        if (sinAngle < -1.0f)
+            sinAngle = -1.0f;
         textureArray.push_back(r * sinAngle);
         textureArray.push_back(r * cosAngle);
     }
@@ -994,8 +1003,8 @@ vec3 Curve::getCoordOfPoint(int index)
     //assert(index > 0 && index < 3);
     if (index >= 0 && index < 3)
     {
-    vec3 p(controlPoints[index * 3], controlPoints[index * 3 + 1], controlPoints[index * 3 + 2]);
-    return p;
+        vec3 p(controlPoints[index * 3], controlPoints[index * 3 + 1], controlPoints[index * 3 + 2]);
+        return p;
     }
     else
         return vec3(0.0f, 0.0f, 0.0f);
@@ -1052,14 +1061,24 @@ void Curve::setAngleVertexArray()
     float dx = xRight - xCenter;
     float dy = yRight - yCenter;
     float r = sqrt(dx * dx + dy * dy);
-    float angle1 = acos(dx / r);
+    float t = dx / r;
+    if (t > 1)
+        t = 1.0f;
+    if (t < -1)
+        t = -1.0f;
+    float angle1 = acos(t);
     if (dy <= 0)
         angle1 = 2.0f * pi - angle1;
 
     dx = xLeft - xCenter;
     dy = yLeft - yCenter;
     r = sqrt(dx * dx + dy * dy);
-    float angle2 = acos(dx / r);
+    t = dx / r;
+    if (t > 1)
+        t = 1.0f;
+    if (t < -1)
+        t = -1.0f;
+    float angle2 = acos(t);
     if (dy <= 0)
         angle2 = 2.0f * pi - angle2;
 
@@ -1081,7 +1100,7 @@ void Curve::setAngleVertexArray()
         angleVertexArray.push_back(0.11f);
     }
     //angleRounding = (angle2 - angle1) * 180.0 / pi;
-       // emit angleChanged(angleRounding);
+    // emit angleChanged(angleRounding);
 }
 
 void Curve::setAngleColorArray(float red, float green, float blue)
@@ -1131,14 +1150,24 @@ void Curve::calculateAngle()
     float dx = xRight - xCenter;
     float dy = yRight - yCenter;
     float r = sqrt(dx * dx + dy * dy);
-    float angle1 = acos(dx / r);
+    float t = dx / r;
+    if (t > 1)
+        t = 1.0f;
+    if (t < -1)
+        t = -1.0f;
+    float angle1 = acos(t);
     if (dy <= 0)
         angle1 = 2.0f * pi - angle1;
 
     dx = xLeft - xCenter;
     dy = yLeft - yCenter;
     r = sqrt(dx * dx + dy * dy);
-    float angle2 = acos(dx / r);
+    t = dx / r;
+    if (t > 1)
+        t = 1.0f;
+    if (t < -1)
+        t = -1.0f;
+    float angle2 = acos(t);
     if (dy <= 0)
         angle2 = 2.0f * pi - angle2;
 
@@ -1173,111 +1202,111 @@ bool Curve::calculateLinesIntersection(float a1, float b1, float c1,
 
     }
     else
-    // Параллельна Ох
-    if (a1 == 0.0f && b1 != 0.0f && c1 != 0.0f)
-    {
-        if (a2 != 0.0f)
-        {
-            y = (-1.0f) * c1 / b1;
-            x = (-1.0f) * (b2 * y + c2) / a2;
-            return true;
-        }
-        else
-            return false;
-    }
-    else
-    // Параллельна Оу
-    if (b1 == 0.0f && a1 != 0.0f && c1 != 0.0f)
-    {
-        if (b2 != 0.0f)
-        {
-            x = (-1.0f) * c1 / a1;
-            y = (-1.0f) * (a2 * x + c2) / b2;
-            return true;
-        }
-        else
-            return false;
-    }
-    else
-    // Совпадает с Оу
-    if (b1 == 0.0f && c1 == 0.0f && a1 != 0.0f)
-    {
-        if (b2 != 0.0f)
-        {
-            x = 0.0f;
-            y = (-1.0f) * c2 / b2;
-            return true;
-        }
-        else
-            return false;
-    }
-    else
-    // Совпадает с Ох
-    if (a1 == 0.0f && c1 == 0.0f && b1 != 0.0f)
-    {
-        if (a2 != 0.0f)
-        {
-            y = 0.0f;
-            x = (-1.0f) * c2 / a2;
-            return true;
-        }
-        else
-            return false;
-    }
-    else
-    if (a1 != 0.0f && c1 != 0.0f && b1 != 0.0f)
-    {
-        // Проходит через начало координат
-        if (c2 == 0.0f && a2 != 0.0f && b2 != 0.0f)
-        {
-                x = (b2 * c1) / (a2 * b1 - a1 * b2);
-                y = (-1.0f) * a2 * x / b2;
-                return true;
-
-        }
-        else
         // Параллельна Ох
-        if (a2 == 0.0f && b2 != 0.0f && c2 != 0.0f)
+        if (a1 == 0.0f && b1 != 0.0f && c1 != 0.0f)
         {
-                y = (-1.0f) * c2 / b2;
-                x = (-1.0f) * (b1 * y + c1) / a1;
-                return true;
-        }
-        else
-        // Параллельна Оу
-        if (b2 == 0.0f && a2 != 0.0f && c2 != 0.0f)
-        {
-                x = (-1.0f) * c2 / a2;
-                y = (-1.0f) * (a1 * x + c1) / b1;
-                return true;
-        }
-        else
-        // Совпадает с Оу
-        if (b2 == 0.0f && c2 == 0.0f && a2 != 0.0f)
-        {
-                x = 0.0f;
+            if (a2 != 0.0f)
+            {
                 y = (-1.0f) * c1 / b1;
+                x = (-1.0f) * (b2 * y + c2) / a2;
                 return true;
+            }
+            else
+                return false;
         }
         else
-        // Совпадает с Ох
-        if (a2 == 0.0f && c2 == 0.0f && b2 != 0.0f)
-        {
-                y = 0.0f;
-                x = (-1.0f) * c1 / a1;
-                return true;
+            // Параллельна Оу
+            if (b1 == 0.0f && a1 != 0.0f && c1 != 0.0f)
+            {
+                if (b2 != 0.0f)
+                {
+                    x = (-1.0f) * c1 / a1;
+                    y = (-1.0f) * (a2 * x + c2) / b2;
+                    return true;
+                }
+                else
+                    return false;
+            }
+            else
+                // Совпадает с Оу
+                if (b1 == 0.0f && c1 == 0.0f && a1 != 0.0f)
+                {
+                    if (b2 != 0.0f)
+                    {
+                        x = 0.0f;
+                        y = (-1.0f) * c2 / b2;
+                        return true;
+                    }
+                    else
+                        return false;
+                }
+                else
+                    // Совпадает с Ох
+                    if (a1 == 0.0f && c1 == 0.0f && b1 != 0.0f)
+                    {
+                        if (a2 != 0.0f)
+                        {
+                            y = 0.0f;
+                            x = (-1.0f) * c2 / a2;
+                            return true;
+                        }
+                        else
+                            return false;
+                    }
+                    else
+                        if (a1 != 0.0f && c1 != 0.0f && b1 != 0.0f)
+                        {
+                            // Проходит через начало координат
+                            if (c2 == 0.0f && a2 != 0.0f && b2 != 0.0f)
+                            {
+                                x = (b2 * c1) / (a2 * b1 - a1 * b2);
+                                y = (-1.0f) * a2 * x / b2;
+                                return true;
 
-        }
-        else
-        if (a2 != 0.0f && c2 != 0.0f && b2 != 0.0f)
-        {
-            y = (c1 * a2 - c2 * a1) / (b2 * a1 - b1 * a2);
-            x = (-1.0f) * (b1 * y - c1) / a1;
-            return true;
-        }
-        else
-            return false;
-    }
+                            }
+                            else
+                                // Параллельна Ох
+                                if (a2 == 0.0f && b2 != 0.0f && c2 != 0.0f)
+                                {
+                                    y = (-1.0f) * c2 / b2;
+                                    x = (-1.0f) * (b1 * y + c1) / a1;
+                                    return true;
+                                }
+                                else
+                                    // Параллельна Оу
+                                    if (b2 == 0.0f && a2 != 0.0f && c2 != 0.0f)
+                                    {
+                                        x = (-1.0f) * c2 / a2;
+                                        y = (-1.0f) * (a1 * x + c1) / b1;
+                                        return true;
+                                    }
+                                    else
+                                        // Совпадает с Оу
+                                        if (b2 == 0.0f && c2 == 0.0f && a2 != 0.0f)
+                                        {
+                                            x = 0.0f;
+                                            y = (-1.0f) * c1 / b1;
+                                            return true;
+                                        }
+                                        else
+                                            // Совпадает с Ох
+                                            if (a2 == 0.0f && c2 == 0.0f && b2 != 0.0f)
+                                            {
+                                                y = 0.0f;
+                                                x = (-1.0f) * c1 / a1;
+                                                return true;
+
+                                            }
+                                            else
+                                                if (a2 != 0.0f && c2 != 0.0f && b2 != 0.0f)
+                                                {
+                                                    y = (c1 * a2 - c2 * a1) / (b2 * a1 - b1 * a2);
+                                                    x = (-1.0f) * (b1 * y - c1) / a1;
+                                                    return true;
+                                                }
+                                                else
+                                                    return false;
+                        }
 
 
     return false;
@@ -1301,10 +1330,20 @@ void Curve::calculateControlsForAngle(int index)
     float dxRight = xRight - xCenter;
     float dyRight = yRight - yCenter;
     float rRight = sqrt(dxRight*dxRight + dyRight*dyRight);
-    float alpha1 = acos(dxRight / rRight);
+    float t = dxRight / rRight;
+    if (t > 1)
+        t = 1.0f;
+    if (t < -1)
+        t = -1.0f;
+    float alpha1 = acos(t);
     if (dyRight < 0)
         alpha1 = 2.0f * pi - alpha1;
-    float alpha2 = acos(dxLeft / rLeft);
+    t = dxLeft / rLeft;
+    if (t > 1)
+        t = 1.0f;
+    if (t < -1)
+        t = -1.0f;
+    float alpha2 = acos(t);
     if (dyLeft < 0)
         alpha2 = 2.0f * pi - alpha2;
     float res = alpha2 - alpha1;
@@ -1406,7 +1445,7 @@ void Curve::setAngle(double angle)
 
     float pi = 3.14159265f;
 
-    if (angleRounding == angle)
+    if (fabs(angleRounding - angle) < 0.01f)
         return;
     angleRounding = angle;
 
@@ -1432,14 +1471,24 @@ void Curve::setAngle(double angle)
     float dx = xRight - xCenter;
     float dy = yRight - yCenter;
     float rRight = sqrt(dx * dx + dy * dy);
-    float angle1 = acos(dx / rRight);
+    float t = dx / rRight;
+    if (t > 1)
+        t = 1.0f;
+    if (t < -1)
+        t = -1.0f;
+    float angle1 = acos(t);
     if (dy <= 0)
         angle1 = 2.0f * pi - angle1;
 
     dx = xLeft - xCenter;
     dy = yLeft - yCenter;
     float rLeft = sqrt(dx * dx + dy * dy);
-    float angle2 = acos(dx / rLeft);
+    t = dx / rLeft;
+    if (t > 1)
+        t = 1.0f;
+    if (t < -1)
+        t = -1.0f;
+    float angle2 = acos(t);
     if (dy <= 0)
         angle2 = 2.0f * pi - angle2;
 

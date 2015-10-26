@@ -19,6 +19,19 @@ DoubleVoltageLine::DoubleVoltageLine(float *axisArray, int size, float width,
     setVertexArray();
 }
 
+DoubleVoltageLine::~DoubleVoltageLine()
+{
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i])
+        {
+            delete lines[i];
+        }
+        lines[i] = NULL;
+    }
+    model = NULL;
+}
+
 bool DoubleVoltageLine::isSelected()
 {
     return selected;
@@ -113,12 +126,14 @@ void DoubleVoltageLine::getProperties(QFormLayout *layout, QGLWidget *render)
         delete child;
     }
     QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
+    widthSpinBox->setKeyboardTracking(false);
     widthSpinBox->setMinimum(0.001);
     widthSpinBox->setValue(width);
     connect(widthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setWidth(double)));
     connect(this, SIGNAL(widthChanged(double)), widthSpinBox, SLOT(setValue(double)));
 
     QDoubleSpinBox* heightSpinBox = new QDoubleSpinBox();
+    heightSpinBox->setKeyboardTracking(false);
     heightSpinBox->setMinimum(0.0);
     heightSpinBox->setValue(height);
     connect(heightSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setHeight(double)));

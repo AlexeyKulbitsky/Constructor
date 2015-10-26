@@ -27,6 +27,11 @@ RoadElementOBJ::RoadElementOBJ(float x, float y)
     figureList = selectedFigureList = 0;
 }
 
+RoadElementOBJ::~RoadElementOBJ()
+{
+
+}
+
 
 
 bool RoadElementOBJ::isSelected()
@@ -193,6 +198,7 @@ void RoadElementOBJ::getProperties(QFormLayout *layout, QGLWidget *render)
     }
 
     QDoubleSpinBox* rotationSpinBox = new QDoubleSpinBox();
+    rotationSpinBox->setKeyboardTracking(false);
     rotationSpinBox->setMinimum(0.0f);
     rotationSpinBox->setMaximum(360.0f);
     rotationSpinBox->setValue(zRot);
@@ -200,6 +206,7 @@ void RoadElementOBJ::getProperties(QFormLayout *layout, QGLWidget *render)
     connect(this, SIGNAL(zRotationChanged(double)), rotationSpinBox, SLOT(setValue(double)));
 
     QDoubleSpinBox* scaleSpinBox = new QDoubleSpinBox();
+    scaleSpinBox->setKeyboardTracking(false);
     scaleSpinBox->setMinimum(0.01);
     scaleSpinBox->setDecimals(5);
     scaleSpinBox->setValue(scaleFactor);
@@ -207,18 +214,21 @@ void RoadElementOBJ::getProperties(QFormLayout *layout, QGLWidget *render)
     connect(this, SIGNAL(scaleChanged(double)), scaleSpinBox, SLOT(setValue(double)));
 
     QDoubleSpinBox* xScaleSpinBox = new QDoubleSpinBox();
+    xScaleSpinBox->setKeyboardTracking(false);
     xScaleSpinBox->setMinimum(0.01);
     xScaleSpinBox->setValue(xScale);
     connect(xScaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setXScale(double)));
     connect(this, SIGNAL(xScaleChanged(double)), xScaleSpinBox, SLOT(setValue(double)));
 
     QDoubleSpinBox* yScaleSpinBox = new QDoubleSpinBox();
+    yScaleSpinBox->setKeyboardTracking(false);
     yScaleSpinBox->setMinimum(0.01);
     yScaleSpinBox->setValue(yScale);
     connect(yScaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setYScale(double)));
     connect(this, SIGNAL(yScaleChanged(double)), yScaleSpinBox, SLOT(setValue(double)));
 
     QDoubleSpinBox* zScaleSpinBox = new QDoubleSpinBox();
+    zScaleSpinBox->setKeyboardTracking(false);
     zScaleSpinBox->setMinimum(0.01);
     zScaleSpinBox->setValue(zScale);
     connect(zScaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setZScale(double)));

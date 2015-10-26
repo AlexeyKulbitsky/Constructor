@@ -21,7 +21,7 @@ ObjectsList::ObjectsList(QWidget *parent)
     this->addItem("Разделительная зона (разметка)");
     this->addItem("Разделительная зона (газон)");
     this->addItem("Разделительная зона (тротуар)");
-    this->addItem("Сплошая");
+    this->addItem("Сплошная");
     this->addItem("Прерывистая");
     this->addItem("Двойная сплошая");
     this->addItem("Двойная прерывистая");

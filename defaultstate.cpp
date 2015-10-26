@@ -1,6 +1,6 @@
 #include "defaultstate.h"
-#include "objfilemanager.h"
-#include "_3dsfilemanager.h"
+//#include "objfilemanager.h"
+//#include "_3dsfilemanager.h"
 #include <QApplication>
 #include <GL/glu.h>
 
@@ -18,9 +18,34 @@ DefaultState::DefaultState()
 
 DefaultState::DefaultState(StateManager *manager, Model *model, Scene2D* scene, QFormLayout *properties)
 {
+    Logger::getLogger()->writeLog("Creating DefaultState");
+    if (manager == NULL)
+    {
+        QMessageBox::critical(0, "Ошибка", "Cannot create DefaultState: StateManager = NULL, program terminates");
+        Logger::getLogger()->writeLog("Cannot create DefaultState: StateManager = NULL, program terminates");
+        QApplication::exit(0);
+    }
     this->stateManager = manager;
+    if (model == NULL)
+    {
+        QMessageBox::critical(0, "Ошибка", "Cannot create DefaultState: Model = NULL, program terminates");
+        Logger::getLogger()->writeLog("Cannot create DefaultState: Model = NULL, program terminates");
+        QApplication::exit(0);
+    }
     this->model = model;
+    if (scene == NULL)
+    {
+        QMessageBox::critical(0, "Ошибка", "Cannot create DefaultState: Scene2D = NULL, program terminates");
+        Logger::getLogger()->writeLog("Cannot create DefaultState: Scene2D = NULL, program terminates");
+        QApplication::exit(0);
+    }
     this->scene = scene;
+    if (properties == NULL)
+    {
+        QMessageBox::critical(0, "Ошибка", "Cannot create DefaultState: QFormLayout(properties) = NULL, program terminates");
+        Logger::getLogger()->writeLog("Cannot create DefaultState: QFormLayout(properties) = NULL, program terminates");
+        QApplication::exit(0);
+    }
     this->properties = properties;
     rightButtonIsPressed = false;
     leftButtonIsPressed = false;
@@ -31,7 +56,7 @@ DefaultState::DefaultState(StateManager *manager, Model *model, Scene2D* scene, 
 
 void DefaultState::mousePressEvent(QMouseEvent *pe)
 {
-    //renderText (pe->pos().x(), pe->pos().y(), "HELLO");
+    Logger::getLogger()->writeLog("DefaultState::mousePressEvent(QMouseEvent *pe)");
     ptrMousePosition = pe->pos();
     switch (pe->button())
     {
@@ -52,6 +77,7 @@ void DefaultState::mousePressEvent(QMouseEvent *pe)
 
 void DefaultState::mouseMoveEvent(QMouseEvent *pe)
 {    
+    Logger::getLogger()->writeLog("DefaultState::mouseMoveEvent");
     if (rightButtonIsPressed == true)
     {
         // двигать камеру
@@ -76,6 +102,7 @@ void DefaultState::mouseMoveEvent(QMouseEvent *pe)
 
 void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
 {
+    Logger::getLogger()->writeLog("DefaultState::mouseReleaseEvent");
     if(pe->button() == Qt::RightButton)
     {
         rightButtonIsPressed = false;
@@ -84,6 +111,7 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
     {
         leftButtonIsPressed = false;
         scene->setDrawRectStatus(false);
+
         if (rectSelection == true)
         {
 
@@ -94,9 +122,16 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
                 {
                     scene->setMouseTracking(true);
                     scene->updateGL();
-                    std::list<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
+                    QList<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
                     for(int k = 0; k < selectedIndex; ++k)
                         ++it;
+                    (*it)->setSelectedStatus(true);
+
+                    (*it)->setStepDialog(stateManager->stepDialog);
+                    (*it)->setStepDialogs(stateManager->stepDialogs, 10);
+                    (*it)->getProperties(properties, scene);
+                    scene->setCursor(Qt::SizeAllCursor);
+
                     if ((*it)->getName() == "RoadBroken")
                     {
                         stateManager->roadBuilderState->setRoad(dynamic_cast<RoadBroken*>(*it));
@@ -120,6 +155,8 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
                         }
                         else
                         {
+                            stateManager->selectedState->setSelectedElement(selectedIndex, selectedGroup);
+                            stateManager->selectedState->setSelectedElement(*it);
                             stateManager->setState(stateManager->selectedState);
                         }
                     }
@@ -132,11 +169,19 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
             {
                 scene->setMouseTracking(true);
                 scene->updateGL();
+                scene->setCursor(Qt::SizeAllCursor);
                 if (selectedElementsCount == 1)
                 {
-                    std::list<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
+                    QList<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
                     for(int k = 0; k < selectedIndex; ++k)
                         ++it;
+                    (*it)->setSelectedStatus(true);
+
+                    (*it)->setStepDialog(stateManager->stepDialog);
+                    (*it)->setStepDialogs(stateManager->stepDialogs, 10);
+                    (*it)->getProperties(properties, scene);
+
+
                     if ((*it)->getName() == "RoadBroken")
                     {
                         stateManager->roadBuilderState->setRoad(dynamic_cast<RoadBroken*>(*it));
@@ -160,6 +205,8 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
                         }
                         else
                         {
+                            stateManager->selectedState->setSelectedElement(selectedIndex, selectedGroup);
+                            stateManager->selectedState->setSelectedElement(*it);
                             stateManager->setState(stateManager->selectedState);
                         }
                     }
@@ -175,6 +222,7 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
             }
         }
 
+
     }
     ptrMousePosition = pe->pos();
     scene->updateGL();
@@ -182,74 +230,86 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
 
 void DefaultState::wheelEvent(QWheelEvent *pe)
 {
-    if ((pe->delta())>0) scene->scale_plus();
+    Logger::getLogger()->writeLog("DefaultState::wheelEvent(QWheelEvent *pe)");
+    if ((pe->delta())>0) scene->scalePlus();
     else
-        if ((pe->delta())<0) scene->scale_minus();
-    //qDebug() << "Wheel";
+        if ((pe->delta())<0) scene->scaleMinus();
     scene->updateGL();
 }
 
 void DefaultState::keyPressEvent(QKeyEvent *pe)
 {
+    QString k;
     switch (pe->key())
     {
     case Qt::Key_Plus:
-        scene->scale_plus();
+        k = "Qt::Key_Plus";
+        scene->scalePlus();
         break;
 
     case Qt::Key_Equal:
-        scene->scale_plus();
+        k = "Qt::Key_Equal";
+        scene->scalePlus();
         break;
 
     case Qt::Key_Minus:
-        scene->scale_minus();
+        k = "Qt::Key_Minus";
+        scene->scaleMinus();
         break;
 
     case Qt::Key_Up:
-        scene->rotate_up();
+        k = "Qt::Key_Up";
+        scene->rotateUp();
         break;
 
     case Qt::Key_Down:
-        scene->rotate_down();
+        k = "Qt::Key_Down";
+        scene->rotateDown();
         break;
 
     case Qt::Key_Left:
-        scene->rotate_left();
+        k = "Qt::Key_Left";
+        scene->rotateLeft();
         break;
 
     case Qt::Key_Right:
-        scene->rotate_right();
+        k = "Qt::Key_Right";
+        scene->rotateRight();
         break;
 
     case Qt::Key_Z:
-        scene->translate_down();
+        k = "Qt::Key_Z";
+        scene->translateDown();
         break;
 
     case Qt::Key_X:
-        scene->translate_up();
+        k = "Qt::Key_X";
+        scene->translateUp();
         break;
 
     case Qt::Key_Space:
+        k = "Qt::Key_Space";
         scene->defaultScene();
         break;
 
     case Qt::Key_Delete:
-        //qDebug() << "DefaultState - Key_Delete";
+        k = "Qt::Key_Delete";
         break;
 
-
     }
-
+    Logger::getLogger()->writeLog("DefaultState::keyPressEvent(QKeyEvent *pe), key = " + k);
     scene->updateGL();
 }
 
 void DefaultState::dragEnterEvent(QDragEnterEvent *event)
 {
+    Logger::getLogger()->writeLog("DefaultState::dragEnterEvent(QDragEnterEvent *event)");
     event->acceptProposedAction();
 }
 
 void DefaultState::dropEvent(QDropEvent *event)
 {
+    Logger::getLogger()->writeLog("DefaultState::dropEvent(QDropEvent *event)");
     GLint viewport[4];
     GLdouble modelview[16];
     GLdouble projection[16];
@@ -271,6 +331,9 @@ void DefaultState::dropEvent(QDropEvent *event)
     float x = posX / scene->nSca + scene->xDelta;
     float y = posY / scene->nSca + scene->yDelta;
 
+
+
+
     if (s == "Дорога простая")
     {
         RoadSimple* road =  new RoadSimple(x - 2.0f, y, x + 2.0f, y, 6.0f,
@@ -280,7 +343,8 @@ void DefaultState::dropEvent(QDropEvent *event)
         road->setModel(model);
         model->getGroup(0).push_back(road);
         model->setModified(true);
-    } else
+    } /*
+    else
         if (s == "Закругление")
         {
             Curve* curve = new Curve(x, y, 0.0f,
@@ -341,21 +405,23 @@ void DefaultState::dropEvent(QDropEvent *event)
                             splitZone->setModel(model);
                             model->getGroup(0).push_back(splitZone);
                             model->setModified(true);
-                        }
+                        } */
     else
     if (s == "Дорога ломаная")
     {
-        RoadBroken* road = new RoadBroken(x, y, x + 2.75f, y, 6.0f,
-                                          QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
-                                          QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
-                                          "RoadBroken", 0);
-        road->setModel(model);
-        model->getGroup(0).push_back(road);
-        model->setModified(true);
-    } else
+
+            RoadBroken* road = new RoadBroken(x, y, x + 2.75f, y, 6.0f,
+                                              QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
+                                              QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
+                                              "RoadBroken", 0);
+            road->setModel(model);
+            model->getGroup(0).push_back(road);
+            model->setModified(true);
+    } /*
+    else
     if (s == "Круговой перекресток")
     {
-        model->getGroup(0).push_back(new RoundingCrossRoad(x, y, 10, 16, 50, "RoundingCrossRoad", 0));
+        //model->getGroup(0).push_back(new RoundingCrossRoad(x, y, 10, 16, 50, "RoundingCrossRoad", 0));
         model->setModified(true);
     } else
     if (s == "Поворот дороги")
@@ -376,7 +442,7 @@ void DefaultState::dropEvent(QDropEvent *event)
             model->getGroup(0).push_back(intersection);
             model->setModified(true);
         } else
-    if (s == "Сплошая")
+    if (s == "Сплошная")
     {
         float axis[6];
         axis[0] = x - 2.5f;
@@ -664,6 +730,10 @@ void DefaultState::dropEvent(QDropEvent *event)
         model->setModified(true);
     }
     */
+
+
+
+    /*
             if (s == "Здание 1")
             {
                 RoadElementOBJ* element = new RoadElementOBJ(x, y);
@@ -748,6 +818,8 @@ void DefaultState::dropEvent(QDropEvent *event)
     }
     */
     //QString(event->mimeData()->data());
+
+    /*
     else
     {
 
@@ -785,6 +857,7 @@ void DefaultState::dropEvent(QDropEvent *event)
                 model->setModified(true);
                 element->setSelectedStatus(false);
                 */
+    /*
                 RoadElementOBJ* element = new RoadElementOBJ(x, y);
                 stateManager->fileManagerOBJ->loadOBJ(lst.at(0),
                                      lst.at(1),
@@ -800,27 +873,39 @@ void DefaultState::dropEvent(QDropEvent *event)
 
     }
 
-
+*/
     scene->updateGL();
 }
 
 DefaultState::~DefaultState()
 {
-
+    stateManager = NULL;
+    model = NULL;
+    scene = NULL;
+    properties = NULL;
 }
 
 void DefaultState::clearProperties(QFormLayout *layout)
 {
-    while(QLayoutItem* child = layout->takeAt(0))
+    Logger::getLogger()->writeLog("DefaultState::clearProperties(QFormLayout *layout)");
+    if (layout == NULL)
     {
-        delete child->widget();
-        delete child;
+        QMessageBox::critical(0, "Ошибка", "QFormLayout* layout = NULL, cannot clearProperties, program terminates");
+        Logger::getLogger()->writeLog("QFormLayout* layout = NULL, cannot clearProperties, program terminates");
+        QApplication::exit(0);
+    }
+    while(layout->count() > 0)
+    {
+        QLayoutItem *item = layout->takeAt(0);
+        delete item->widget();
+        delete item;
     }
 
 }
 
 bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
 {
+    Logger::getLogger()->writeLog("DefaultState::tryToSelectFigures(QPoint mp, bool withResult)");
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
     GLint viewport[4]; // декларируем матрицу поля просмотра
     glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
@@ -857,7 +942,7 @@ bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
     int i = 1;
     for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
     {
-        for (std::list<RoadElement*>::iterator it = model->getGroup(j).begin();
+        for (QList<RoadElement*>::iterator it = model->getGroup(j).begin();
              it != model->getGroup(j).end(); ++it)
         {
             glPushMatrix();
@@ -873,6 +958,8 @@ bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
     }
 
     hitsForFigure=glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
+    Logger::getLogger()->writeLog(QString("DefaultState::tryToSelectFigures(QPoint mp, bool withResult), hits = ") +
+                                  QString::number(hitsForFigure));
 
     if (hitsForFigure > 0) // есть совпадания и нет ошибок
     {
@@ -885,21 +972,21 @@ bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
 
                 selectedGroup = j;
                 selectedIndex = i;
-                std::list<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
-                for(int k = 0; k < selectedIndex; ++k)
-                    ++it;
-                if ((*it)->getName() != "RoadBroken")
-                {
-                    stateManager->selectedState->setSelectedElement(i, j);
-                    stateManager->selectedState->setSelectedElement(*it);
-                }
+                //QList<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
+                //for(int k = 0; k < selectedIndex; ++k)
+                //    ++it;
+                //if ((*it)->getName() != "RoadBroken")
+                //{
+                //    stateManager->selectedState->setSelectedElement(i, j);
+                //    stateManager->selectedState->setSelectedElement(*it);
+                //}
 
-                (*it)->setSelectedStatus(true);
-                (*it)->setStepDialog(stateManager->stepDialog);
-                (*it)->setStepDialogs(stateManager->stepDialogs, 10);
-                (*it)->getProperties(properties, scene);
+                //(*it)->setSelectedStatus(true);
+                //(*it)->setStepDialog(stateManager->stepDialog);
+                //(*it)->setStepDialogs(stateManager->stepDialogs, 10);
+                //(*it)->getProperties(properties, scene);
 
-                scene->setCursor(Qt::SizeAllCursor);
+                //scene->setCursor(Qt::SizeAllCursor);
                 glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
                 glPopMatrix(); // извлечь матрицу из стека матриц
                 scene->updateGL(); // обновить изображение
@@ -921,6 +1008,7 @@ bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
 
 bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
 {
+    Logger::getLogger()->writeLog("DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)");
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
     GLint viewport[4]; // декларируем матрицу поля просмотра
     glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
@@ -935,16 +1023,6 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
     glPushMatrix(); // поместить текущую матрицу в стек матриц
     glRenderMode(GL_SELECT); // переход в режим выбора
     glLoadIdentity(); // загрузить единичную матрицу
-
-    // новый объём под указателем мыши
-   // gluPickMatrix((GLdouble)((mp1.x() + mp2.x()) / 2), (GLdouble)(viewport[3] - (mp1.y() + mp2.y()) / 2),
-   //         (GLdouble)(abs(mp2.x() - mp1.x())), (GLdouble)(abs(mp2.y() - mp1.y())),
-   //         viewport);
-
-    //qDebug () << "X1=" << mp1.x();
-    //qDebug () << "Y1=" << mp1.y();
-    //qDebug () << "X2=" << mp2.x();
-    //qDebug () << "Y2=" << mp2.y();
 
     GLdouble width = abs(mp1.x() - mp2.x()) > 2 ? (GLdouble)(abs(mp1.x() - mp2.x())) : 2.0;
     GLdouble height = abs(mp1.y() - mp2.y()) > 2 ? (GLdouble)(abs(mp1.y() - mp2.y())) : 2.0;
@@ -970,7 +1048,7 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
     int i = 1;
     for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
     {
-        for (std::list<RoadElement*>::iterator it = model->getGroup(j).begin();
+        for (QList<RoadElement*>::iterator it = model->getGroup(j).begin();
              it != model->getGroup(j).end(); ++it)
         {
             glPushMatrix();
@@ -986,10 +1064,10 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
     }
 
     hitsForFigure = glRenderMode(GL_RENDER);
-
+    Logger::getLogger()->writeLog("DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult), hits = " + QString::number(hitsForFigure));
     selectedElementsCount = hitsForFigure;
 
-    //qDebug() << "Hits: " << hitsForFigure;
+
     if (hitsForFigure > 0) // есть совпадания и нет ошибок
     {
         // Если выделена одна фигура
@@ -1003,21 +1081,21 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
 
                     selectedGroup = j;
                     selectedIndex = i;
-                    std::list<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
-                    for(int k = 0; k < selectedIndex; ++k)
-                        ++it;
-                    if ((*it)->getName() != "RoadBroken")
-                    {
-                        stateManager->selectedState->setSelectedElement(i, j);
-                        stateManager->selectedState->setSelectedElement(*it);
-                    }
+                   // QList<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
+                   // for(int k = 0; k < selectedIndex; ++k)
+                    //    ++it;
+                    //if ((*it)->getName() != "RoadBroken")
+                    //{
+                    //   stateManager->selectedState->setSelectedElement(i, j);
+                    //    stateManager->selectedState->setSelectedElement(*it);
+                    //}
 
-                    (*it)->setSelectedStatus(true);
-                    (*it)->setStepDialog(stateManager->stepDialog);
-                    (*it)->setStepDialogs(stateManager->stepDialogs, 10);
-                    (*it)->getProperties(properties, scene);
+                    //(*it)->setSelectedStatus(true);
+                    //(*it)->setStepDialog(stateManager->stepDialog);
+                    //(*it)->setStepDialogs(stateManager->stepDialogs, 10);
+                    //(*it)->getProperties(properties, scene);
 
-                    scene->setCursor(Qt::SizeAllCursor);
+                    //scene->setCursor(Qt::SizeAllCursor);
                     glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
                     glPopMatrix(); // извлечь матрицу из стека матриц
                     scene->updateGL(); // обновить изображение
@@ -1040,7 +1118,7 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
                     {
                         selectedGroup = j;
                         selectedIndex = i;
-                        std::list<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
+                        QList<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
                         for(int k = 0; k < selectedIndex; ++k)
                             ++it;
                         (*it)->setSelectedStatus(true);
@@ -1078,17 +1156,20 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
 
 void DefaultState::keyReleaseEvent(QKeyEvent *pe)
 {
+    Logger::getLogger()->writeLog("DefaultState::keyReleaseEvent(QKeyEvent *pe)");
 }
 
 
 
 QString DefaultState::getName()
 {
+    Logger::getLogger()->writeLog("DefaultState::getName()");
     return "DefaultState";
 }
 
 void DefaultState::drawRect(QPoint p1, QPoint p2)
 {
+    Logger::getLogger()->writeLog("DefaultState::drawRect(QPoint p1, QPoint p2)");
     GLdouble x1, y1, z1;
     GLdouble x2, y2, z2;
     getWorldCoord(p1.x(), p1.y(), 0, x1, y1, z1);
@@ -1111,6 +1192,7 @@ void DefaultState::drawRect(QPoint p1, QPoint p2)
 
 void DefaultState::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)
 {
+    Logger::getLogger()->writeLog("DefaultState::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)");
     GLint viewport[4];
     GLdouble mvmatrix[16], projmatrix[16];
 
@@ -1124,6 +1206,7 @@ void DefaultState::getWindowCoord(double x, double y, double z, double &wx, doub
 
 void DefaultState::getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz)
 {
+    Logger::getLogger()->writeLog("DefaultState::getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz)");
     GLint viewport[4];
     GLdouble mvmatrix[16], projmatrix[16];
 
@@ -1137,4 +1220,5 @@ void DefaultState::getWorldCoord(double x, double y, double z, double &wx, doubl
 
 void DefaultState::contextMenuEvent(QContextMenuEvent *pe)
 {
+    Logger::getLogger()->writeLog("DefaultState::contextMenuEvent(QContextMenuEvent *pe)");
 }

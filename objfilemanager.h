@@ -7,20 +7,31 @@
 struct MaterialInfo
 {
     char name[256];
-    float Ka[3] = {0.0f, 0.0f, 0.0f};
-    float Kd[3] = {0.0f, 0.0f, 0.0f};
-    float Ks[3] = {0.0f, 0.0f, 0.0f};
-    float d = 1.0f; // Прозрачность 0..1
-    float Ns = 1.0f; // Блеск
-    int illum = 1;
+    float Ka[3];
+    float Kd[3];
+    float Ks[3];
+    float d; // Прозрачность 0..1
+    float Ns; // Блеск
+    int illum;
 
-    char map_Ka[256] = {0};
-    char map_Kd[256] = {0};
-    char map_Ks[256] = {0};
+    char map_Ka[256];
+    char map_Kd[256];
+    char map_Ks[256];
 
-    unsigned Ka_ID = 0;
-    unsigned Ks_ID = 0;
-    unsigned Kd_ID = 0;
+    unsigned Ka_ID;
+    unsigned Ks_ID;
+    unsigned Kd_ID;
+    MaterialInfo()
+    {
+        Ka[0] = Ka[1] = Ka[2] = 0.0f;
+        Kd[0] = Kd[1] = Kd[2] = 0.0f;
+        Ks[0] = Ks[1] = Ks[2] = 0.0f;
+        d = 1.0f;
+        Ns = 1.0f;
+        illum = 1;
+        Ka_ID = Ks_ID = Kd_ID = 0;
+        map_Ka[0] = map_Ks[0] = map_Kd[0] = 0;
+    }
 
 };
 

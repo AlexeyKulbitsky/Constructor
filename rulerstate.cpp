@@ -361,7 +361,7 @@ void RulerState::dropEvent(QDropEvent *event)
     } else
     if (s == "Круговой перекресток")
     {
-        model->getGroup(0).push_back(new RoundingCrossRoad(x, y, 10, 16, 50, "RoundingCrossRoad", 0));
+        //model->getGroup(0).push_back(new RoundingCrossRoad(x, y, 10, 16, 50, "RoundingCrossRoad", 0));
         model->setModified(true);
     } else
     if (s == "Поворот дороги")
@@ -382,7 +382,7 @@ void RulerState::dropEvent(QDropEvent *event)
             model->getGroup(0).push_back(intersection);
             model->setModified(true);
         } else
-    if (s == "Сплошая")
+    if (s == "Сплошная")
     {
         float axis[6];
         axis[0] = x - 2.5f;
@@ -813,7 +813,11 @@ void RulerState::dropEvent(QDropEvent *event)
 
 RulerState::~RulerState()
 {
-
+    stateManager = NULL;
+    model = NULL;
+    scene = NULL;
+    ruler = NULL;
+    selectedFigure = NULL;
 }
 
 

@@ -2,32 +2,32 @@
 #define MODEL_H
 
 #include <QObject>
-#include <list>
+#include <QList>
+class RoadElement;
 #include "roadelement.h"
 
-#include "road.h"
-#include "roundingcrossroad.h"
-#include "roundingroad.h"
+
+//#include "road.h"
+//#include "roundingroad.h"
 
 
 #include "linesimple.h"
 
 #include "roadsimple.h"
 #include "linebroken.h"
-#include "linebuilder.h"
 #include "roadbroken.h"
 #include "compositeroad.h"
-#include "cube.h"
+//#include "cube.h"
 #include "curve.h"
 #include "intersection.h"
 #include "splitzone.h"
-#include "voltageline.h"
-#include "doublevoltageline.h"
+//#include "voltageline.h"
+//#include "doublevoltageline.h"
 #include "railway.h"
 
 struct Group
 {
-    std::list<RoadElement*> elements;
+    QList<RoadElement*> elements;
     bool visible;
 };
 
@@ -36,6 +36,7 @@ class Model : public QObject
     Q_OBJECT
 public:
     explicit Model(QObject *parent = 0);
+    virtual ~Model();
 
 private:
     int numberOfGroups;
@@ -49,7 +50,7 @@ public:
     void addElement(RoadElement* element, int groupIndex);
     void deleteElement(int elementId, int groupIndex);
     int getNumberOfGroups() { return numberOfGroups; }
-    std::list<RoadElement*>& getGroup(int groupIndex);
+    QList<RoadElement*>& getGroup(int groupIndex);
 
     bool isGroupVisible(int index);
     void setModified(bool status);

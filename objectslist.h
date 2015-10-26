@@ -9,12 +9,11 @@
 
 class ObjectsList : public QListWidget
 {
-
-
     public:
 
     ObjectsList(QWidget *parent = 0);
     ObjectsList(QDir directory, QString fileType, QWidget *parent = 0);
+
     protected:
     void dropEvent(QDropEvent* event);
     void mousePressEvent(QMouseEvent* event);

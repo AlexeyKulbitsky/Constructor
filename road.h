@@ -46,6 +46,7 @@ public:
     Road();
     Road(float x, float y, float size);
     Road(float x, float y, float size, float red, float green, float blue, float alpha);
+    virtual ~Road();
     bool hasPoint(GLfloat x, GLfloat y);
     void drawFigure(QGLWidget* render = 0);
     void drawSelectionFrame();

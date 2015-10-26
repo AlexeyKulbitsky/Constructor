@@ -34,7 +34,7 @@ public:
                QString source_2, float textureSize_2_Usize, float textureSize_2_Vsize,
                QString name, int layer,
                QString description = '\0');
-    ~RoadSimple();
+    virtual ~RoadSimple();
 
     void setVertexArray(float x1, float y1, float x2, float y2, float width);
     void setVertexArray();
@@ -44,14 +44,12 @@ public:
     void setVertexArrayBoard();
     void setIndexArrayBoard();
     void setTextureArrayBoard();
-    GLuint getTextures(QString source);
 
     void setVertexArrayForSelection();
     void setIndexArrayForSelectionFrame();
     void setColorArrayForSelectionFrame(float red, float green, float blue);
 
     QPoint getCoorninateOfPointControl(int index);
-    void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
 
     vec2 getAxisPoint_1();
     vec2 getAxisPoint_2();

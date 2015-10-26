@@ -8,6 +8,7 @@ class Cube: public RoadElement
     Q_OBJECT
 public:
     Cube(float x, float y, float z, float delta, QString name, int layer);
+    virtual ~Cube();
 
 private:
     QVector<GLfloat> vertexArray;

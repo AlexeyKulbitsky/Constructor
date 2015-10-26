@@ -5,82 +5,14 @@ _3DsFileManager::_3DsFileManager()
 
 }
 
+_3DsFileManager::~_3DsFileManager()
+{
+
+}
 
 
 bool _3DsFileManager::openFile(QString source)
 {
-
-    /*
-    int i;
-    FILE *l_file;
-    unsigned short l_chunk_id;
-    unsigned int l_chunk_length;
-    unsigned char l_char;
-    unsigned short l_qty;
-    unsigned short l_face_flags;
-
-    if ((l_file=fopen (p_filename, "rb"))== NULL) return 0; //Open the file
-    while (ftell (l_file) < filelength (fileno (l_file))) //Loop to scan the whole file
-    {
-        fread (&l_chunk_id, 2, 1, l_file); //Read the chunk header
-        fread (&l_chunk_length, 4, 1, l_file); //Read the length of the chunk
-        switch (l_chunk_id)
-        {
-        case 0x4d4d: //MAIN CHUNK
-            break;
-        case 0x3d3d://3D EDITOR CHUNK
-            break;
-        case 0x4000: // Имя объекта
-            i=0;
-            do
-            {
-                fread (&l_char, 1, 1, l_file);
-                p_object->name[i]=l_char;
-                i++;
-            }while(l_char != '\0' && i<20);
-            break;
-        case 0x4100: //END
-            break;
-        case 0x4110: // Список вершин объекта
-            fread (&l_qty, sizeof (unsigned short), 1, l_file);
-            p_object->vertices_qty = l_qty;
-            printf("Number of vertices: %d\n",l_qty);
-            for (i=0; i<l_qty; i++)
-            {
-                fread (&p_object->vertex[i].x, sizeof(float), 1, l_file);
-                fread (&p_object->vertex[i].y, sizeof(float), 1, l_file);
-                fread (&p_object->vertex[i].z, sizeof(float), 1, l_file);
-            }
-            break;
-        case 0x4120: // Список индексов вершин
-            fread (&l_qty, sizeof (unsigned short), 1, l_file);
-            p_object->polygons_qty = l_qty;
-            printf("Number of polygons: %d\n",l_qty);
-            for (i=0; i<l_qty; i++)
-            {
-                fread (&p_object->polygon[i].a, sizeof (unsigned short), 1, l_file);
-                fread (&p_object->polygon[i].b, sizeof (unsigned short), 1, l_file);
-                fread (&p_object->polygon[i].c, sizeof (unsigned short), 1, l_file);
-                fread (&l_face_flags, sizeof (unsigned short), 1, l_file);
-            }
-            break;
-            case 0xafff: // Материал меша
-            break;
-        case 0x4140: // Текстурные координаты
-            fread (&l_qty, sizeof (unsigned short), 1, l_file);
-            for (i=0; i<l_qty; i++)
-            {
-                fread (&p_object->mapcoord[i].u, sizeof (float), 1, l_file);
-                fread (&p_object->mapcoord[i].v, sizeof (float), 1, l_file);
-            }
-            break;
-        default:
-            fseek(l_file, l_chunk_length-6, SEEK_CUR);
-        }
-    }
-    fclose (l_file); // Closes the file stream
-    return (1); // Returns ok
-    */
 
 }
 
@@ -92,7 +24,7 @@ bool _3DsFileManager::saveFile(QString source)
 
 bool _3DsFileManager::load3DS(const char *folder, const char *filename, std::vector<Mesh_3DS *> &meshes, QMap<QString, Material> &materials)
 {
-    Mesh_3DS* mesh = new Mesh_3DS();
+    //Mesh_3DS* mesh = new Mesh_3DS();
 
     unsigned char ch;
     unsigned short qty;

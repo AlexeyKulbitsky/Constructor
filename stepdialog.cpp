@@ -27,6 +27,25 @@ StepDialog(QWidget *parent):QDialog(parent)
 
 }
 
+StepDialog::~StepDialog()
+{
+    if (layout)
+        delete layout;
+    layout = NULL;
+    if (defaultLayout)
+        delete defaultLayout;
+    defaultLayout = NULL;
+    if (stopLineLayout)
+        delete stopLineLayout;
+    stopLineLayout = NULL;
+    if (splitZoneLayout)
+        delete splitZoneLayout;
+    splitZoneLayout = NULL;
+    if (tramWaysLayout)
+        delete tramWaysLayout;
+    tramWaysLayout = NULL;
+}
+
 void StepDialog::setDefaultLayout()
 {
     QLabel *lineTypeLabel = new QLabel("Тип линии");

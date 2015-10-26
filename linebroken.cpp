@@ -5,9 +5,7 @@ LineBroken::LineBroken()
 {
     name = "noname";
     red = green = blue = alpha = 0.0f;
-
     width = 0.0f;
-
     hits = 0;
     indexOfSelectedControl = 0;
     numberOfVerticesOfAxis = 0;
@@ -25,9 +23,6 @@ LineBroken::LineBroken(float width, float* axisVertices, int size, QString name,
 
     this->layer = layer;
     this->name = name;
-    //VertexArray = NULL;
-    //ColorArray = NULL;
-    //IndexArray = NULL; // количество полигонов
     numberOfVertices = 0;
     numberOfPolygones = 0;
     red = green = blue = alpha = 1.0f;
@@ -36,32 +31,19 @@ LineBroken::LineBroken(float width, float* axisVertices, int size, QString name,
 
     hits = 0;
     indexOfSelectedControl = 0;
-    // Рамка для выделения
-
-    //IndexArrayForSelection = NULL;
-    //ColorArrayForSelection = NULL;
-
-    //vertexArrayForAxis = NULL;
-    //colorArrayForAxis = NULL;
-    //indexArrayForAxis = NULL;
     numberOfVerticesOfAxis = 0;
     numberOfAxises = 0;
     selected = 0;
     useColor = true;
-
-
-
 
     // Заполняем массив осевых точек
     setVertexArrayForAxis(axisVertices, size);
      setColorArrayForAxis(0.0f, 0.0f, 0.0f);
     // Заполняем массив индексов для осевых точек
     setIndexArrayForAxis();
-
     setVertexArray(width, axisVertices, size);
     setColorArray(1.0f, 1.0f, 1.0f, 1.0f);
     setIndexArray();
-
     setIndexArrayForSelectionFrame();
     setColorArrayForSelectionFrame(0.0f, 0.0f, 0.0f);
 
@@ -160,6 +142,11 @@ LineBroken::LineBroken(float width, float *axisVertices, int size, QString sourc
     LineBroken(width, axisVertices, size, source, textureSize, name, layer)
 {
     this->description = description;
+}
+
+LineBroken::~LineBroken()
+{
+
 }
 
 // Индексы вершины для отрисовки
@@ -288,6 +275,9 @@ void LineBroken::setVertexArray(float width, float* axisVertices, int size)
                     beta *= -1.0f;
                 }
                 float hamma = alpha + beta;
+                t = sin(alpha);
+                if (fabs(t) < 0.000001f)
+                    t = 1.0f;
                 float dx = (r / sin(alpha)) * cos(hamma);
                 float dy = (r / sin(alpha)) * sin(hamma);
 
@@ -328,30 +318,7 @@ void LineBroken::setColorArray(float red, float green, float blue, float alpha)
    }
 }
 
-void LineBroken::getTextures(QString source)
-{
-    QImage image1;
 
-    image1.load(source);
-    image1 = QGLWidget::convertToGLFormat(image1);
-    glGenTextures(1, textureID);
-    // создаём и связываем 1-ый текстурный объект с последующим состоянием текстуры
-    glBindTexture(GL_TEXTURE_2D, textureID[0]);
-    // связываем текстурный объект с изображением
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, (GLsizei)image1.width(), (GLsizei)image1.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image1.bits());
-
-    // задаём линейную фильтрацию вблизи:
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // задаём линейную фильтрацию вдали:
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    // задаём: при фильтрации игнорируются тексели, выходящие за границу текстуры для s координаты
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // задаём: при фильтрации игнорируются тексели, выходящие за границу текстуры для t координаты
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // задаём: цвет текселя полностью замещает цвет фрагмента фигуры
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-}
 
 void LineBroken::setTextureArray()
 {
@@ -464,22 +431,14 @@ void LineBroken::setIndexArrayForAxis()
     for (int i = 0; i < vertexArrayForAxis.size() / 3; ++i)
     {
         indexArrayForAxis[i] = i;
-
-
     }
 }
 
 void LineBroken::drawFigure(QGLWidget* render)
 {
+    /*
     if (selected == true)
     {
-        if (indexOfSelectedControl >= 0)
-        {
-
-            //glLineWidth(2.0);
-            //glPointSize(5.0);
-           // drawControlElement(indexOfSelectedControl, 2.0, 5.0);
-        }
         // Если фигуры выбрана - изменяем цвет заливки
         setColorArray(0.7f, 0.7f, 0.7f, alpha);
         drawSelectionFrame();
@@ -497,11 +456,7 @@ void LineBroken::drawFigure(QGLWidget* render)
         setColorArray(red, green, blue, alpha);
 
     }
-    //glVertexPointer(3, GL_FLOAT, 0, VertexArray.begin());
-   // glColorPointer(4, GL_FLOAT, 0, ColorArray.begin());
-   // glDrawElements(GL_TRIANGLES, IndexArray.size(), GL_UNSIGNED_BYTE, IndexArray.begin());
-   // //qDebug() << "Line broken";
-
+    */
 
     ////////////////////////////////////////////////
     if (!useColor)
@@ -536,8 +491,7 @@ void LineBroken::drawFigure(QGLWidget* render)
 
         glVertexPointer(3, GL_FLOAT, 0, vertexArrayForAxis.begin());
         glColorPointer(3, GL_FLOAT, 0, colorArrayForAxis.begin());
-        glDrawElements(GL_LINE_STRIP, indexArrayForAxis.size(), GL_UNSIGNED_BYTE, indexArrayForAxis.begin());
-
+        glDrawElements(GL_LINE_STRIP, indexArrayForAxis.size(), GL_UNSIGNED_BYTE, indexArrayForAxis.begin());        
 
     }
     if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
@@ -546,6 +500,7 @@ void LineBroken::drawFigure(QGLWidget* render)
         drawControlElement(indexOfSelectedControl, 5.0f, 10.0f);
         glEnable(GL_DEPTH_TEST);
     }
+
 }
 
 
@@ -554,7 +509,6 @@ void LineBroken::drawFigure(QGLWidget* render)
 
 void LineBroken::setIndexArrayForSelectionFrame()
 {
-    //delete[] IndexArrayForSelection;
     if (IndexArrayForSelection.size() != VertexArray.size() / 3)
     {
         IndexArrayForSelection.resize(VertexArray.size() / 3);
@@ -594,11 +548,6 @@ void LineBroken::setColorArrayForSelectionFrame(float red, float green, float bl
 
 void LineBroken::drawSelectionFrame()
 {
-    if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
-    {
-        ////qDebug() << "Index " << indexOfSelectedControl;
-        drawControlElement(indexOfSelectedControl, 5.0f, 10.0);
-    }
     // Боковые грани для изменения размера
     glVertexPointer(3, GL_FLOAT, 0, VertexArray.begin());
     glColorPointer(3, GL_FLOAT, 0, ColorArrayForSelection.begin());
@@ -612,7 +561,6 @@ void LineBroken::drawSelectionFrame()
     glPointSize(10.0);
     glVertexPointer(3, GL_FLOAT, 0, vertexArrayForAxis.begin());
     glDrawElements(GL_POINTS, indexArrayForAxis.size(), GL_UNSIGNED_BYTE, indexArrayForAxis.begin());
-    // Точки для вращения
 
 }
 
@@ -658,40 +606,7 @@ void LineBroken::resizeByControl(int index, float dx, float dy, float x, float y
     vertexArrayForAxis[index * 3] += dx;
     vertexArrayForAxis[index * 3 + 1] += dy;
     setVertexArray(this->width, vertexArrayForAxis.begin(), vertexArrayForAxis.size());
-    switch (index)
-    {
-    case 0:
 
-       //x1 += dx;
-       //y1 += dy;
-       // setVertexArray(x1, y1, x2, y2, width);
-        break;
-
-    case 1:
-       // x2 += dx;
-       // y2 += dy;
-      //   setVertexArray(x1, y1, x2, y2, width);
-        break;
-
-    case 2:
-    {
-        //float dr = sqrt(dx * dx + dy * dy);
-        //float res = dx * (x2 - x1) + dy * (y2 - y1);
-        //float factor = res < 0 ? -1 : 1;
-       // setVertexArray(x1, y1, x2, y2, width + dr * factor);
-    }
-        break;
-    case 3:
-    {
-        //float dr = sqrt(dx * dx + dy * dy);
-        //float res = dx * (x2 - x1) + dy * (y2 - y1);
-        //float factor = res < 0 ? -1 : 1;
-      //  setVertexArray(x1, y1, x2, y2, width + dr * factor);
-    }
-        break;
-   default:
-       break;
-    }
     setTextureArray();
 }
 
@@ -702,9 +617,7 @@ int LineBroken::getNumberOfControls()
 
 void LineBroken::changeColorOfSelectedControl(int index)
 {
-
     indexOfSelectedControl = index;
-    ////qDebug() << "ROAD CONTROL COLOR CHANGED";
 }
 
 QCursor LineBroken::getCursorForControlElement(int index)
@@ -739,18 +652,6 @@ QPoint LineBroken::getCoorninateOfPointControl(int index)
     return p;
 }
 
-void LineBroken::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)
-{
-    GLint viewport[4];
-    GLdouble mvmatrix[16], projmatrix[16];
-
-    glGetIntegerv(GL_VIEWPORT,viewport);
-    glGetDoublev(GL_MODELVIEW_MATRIX,mvmatrix);
-    glGetDoublev(GL_PROJECTION_MATRIX,projmatrix);
-
-    gluProject(x, y, z, mvmatrix, projmatrix, viewport, &wx, &wy, &wz);
-    wy=viewport[3]-wy;
-}
 
 void LineBroken::drawDescription(QGLWidget *render, float red, float green, float blue)
 {
@@ -820,10 +721,6 @@ void LineBroken::getProperties(QFormLayout *layout, QGLWidget* render)
         delete child->widget();
         delete child;
     }
-    QPushButton* linkButton = new QPushButton();
-    linkButton->setCheckable(true);
-    linkButton->setChecked(true);
-    layout->addRow("Привязать", linkButton);
 }
 
 
@@ -835,8 +732,6 @@ bool LineBroken::isFixed()
 
 void LineBroken::addBreak(bool front)
 {
-    //qDebug() << "LineBroken::addBreak " << front;
-    //qDebug() << "Axis size" << vertexArrayForAxis.size() / 3;
     float x, y, z;
     if (front)
     {

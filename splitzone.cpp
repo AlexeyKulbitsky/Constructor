@@ -29,6 +29,7 @@ SplitZone::SplitZone(float *pointsArray, int size,
     this->width = width;
     this->type = 0;
     this->height = 0.0f;
+    indexOfSelectedControl = -1;
     line = new LineBroken(lineWidth,lineAxisArray,this->size,
                           QApplication::applicationDirPath() + "/models/city_roads/solid.png", 6.0f,
                           "LineBroken", 1);
@@ -50,6 +51,7 @@ SplitZone::SplitZone(float *pointsArray, int size,
     this->type = type;
     this->height = height;
     lineAxisArray = NULL;
+    indexOfSelectedControl = -1;
     switch (type)
     {
     case 0:
@@ -143,8 +145,7 @@ SplitZone::SplitZone(float x1, float y1, float z1,
     this->width = width;
     calculateLine(pBegin,pEnd,width);
     lineWidth = 0.15f;
-
-    //line = new LineBroken(lineWidth,lineAxisArray,size,1.0f, 1.0f, 1.0f, 1.0f, "LineBroken", 1);
+    indexOfSelectedControl = -1;
     line = new LineBroken(lineWidth,lineAxisArray,this->size,
                           QApplication::applicationDirPath() + "/models/city_roads/solid.png", 6.0f,
                           "LineBroken", 1);
@@ -167,6 +168,7 @@ SplitZone::SplitZone(float x1, float y1, float z1,
     this->type = type;
     this->height = height;
     lineAxisArray = NULL;
+    indexOfSelectedControl = -1;
     switch (type)
     {
     case 0:
@@ -254,10 +256,12 @@ SplitZone::SplitZone(float x1, float y1, float z1,
 
 SplitZone::~SplitZone()
 {
-    delete line;
+    if (line)
+        delete line;
     line = NULL;
 
-    delete[] lineAxisArray;
+    if (lineAxisArray)
+        delete[] lineAxisArray;
     lineAxisArray = NULL;
 }
 
@@ -275,7 +279,6 @@ void SplitZone::setSelectedStatus(bool status)
 
 void SplitZone::drawFigure(QGLWidget *render)
 {
-    ////qDebug() << "AxisPoints: " << axisArray.size() / 3;
 
     switch (type)
     {
@@ -284,32 +287,7 @@ void SplitZone::drawFigure(QGLWidget *render)
         line->drawFigure(render);
     }
         break;
-    case 1:
-    {
-        glDisableClientState(GL_COLOR_ARRAY);
-        glEnable(GL_TEXTURE_2D);
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-        glBindTexture(GL_TEXTURE_2D, textureID[0]);
-        glVertexPointer(3, GL_FLOAT, 0, boardVertexArray.begin());
-        glTexCoordPointer(2, GL_FLOAT, 0, boardTextureArray.begin());
-        glDrawElements(GL_TRIANGLES, boardIndexArray.size(), GL_UNSIGNED_INT, boardIndexArray.begin());
-
-        glBindTexture(GL_TEXTURE_2D, textureID[1]);
-        glVertexPointer(3, GL_FLOAT, 0, vertexArray.begin());
-        glTexCoordPointer(2, GL_FLOAT, 0, textureArray.begin());
-        glDrawElements(GL_TRIANGLES, indexArray.size(), GL_UNSIGNED_INT, indexArray.begin());
-
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-        glDisable(GL_TEXTURE_2D);
-        glEnableClientState(GL_COLOR_ARRAY);
-
-        ////qDebug() << "vertixes: " << boardVertexArray.size() / 3;
-        ////qDebug() << "textures: " << boardTextureArray.size() / 3;
-        ////qDebug() << "indices: " << boardIndexArray.size() / 3;
-
-    }
-        break;
+    case 1:   
     case 2:
     {
         glDisableClientState(GL_COLOR_ARRAY);
@@ -329,38 +307,21 @@ void SplitZone::drawFigure(QGLWidget *render)
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         glDisable(GL_TEXTURE_2D);
         glEnableClientState(GL_COLOR_ARRAY);
-
-        ////qDebug() << "vertixes: " << boardVertexArray.size() / 3;
-        ////qDebug() << "textures: " << boardTextureArray.size() / 2;
-        ////qDebug() << "indices: " << boardIndexArray.size() / 3;
-        ////qDebug() << "axis: " << size / 3;
-
     }
         break;
     default:
         break;
     }
-    /*
-    glDisable(GL_DEPTH_TEST);
-    glLineWidth(2.0f);
-    glBegin(GL_LINE_STRIP);
-    for (int i = 0; i < size / 3; ++i)
-    {
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(lineAxisArray[i * 3],
-                lineAxisArray[i * 3 + 1],
-                lineAxisArray[i * 3 + 2]);
-    }
-    glEnd();
-    glEnable(GL_DEPTH_TEST);
-    */
     if (selected)
     {
         glDisable(GL_DEPTH_TEST);
         drawSelectionFrame();
         glEnable(GL_DEPTH_TEST);
     }
-    ////qDebug() << "SplitZone: drawFigure()";
+    if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
+    {
+        drawControlElement(indexOfSelectedControl, 5.0f, 10.0);
+    }
 }
 
 void SplitZone::drawSelectionFrame()
@@ -511,7 +472,6 @@ void SplitZone::resizeByControl(int index, float dx, float dy, float x, float y)
 
 int SplitZone::getNumberOfControls()
 {
-    //return 4;
     return axisArray.size() / 3;
 }
 
@@ -522,6 +482,14 @@ int SplitZone::controlsForPoint()
 
 void SplitZone::changeColorOfSelectedControl(int index)
 {
+    if (index < 0 || index >= getNumberOfControls())
+    {
+        QMessageBox::critical(0, "Ошибка", "SplitZone::changeColorOfSelectedControl(int index), index is out of range",
+                              QMessageBox::Yes);
+        Logger::getLogger()->writeLog("SplitZone::changeColorOfSelectedControl(int index), index is out of range");
+        QApplication::exit(0);
+    }
+    indexOfSelectedControl = index;
 }
 
 void SplitZone::getProperties(QFormLayout *layout, QGLWidget *render)
@@ -533,6 +501,7 @@ void SplitZone::getProperties(QFormLayout *layout, QGLWidget *render)
         delete child;
     }
     QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
+    widthSpinBox->setKeyboardTracking(false);
 
     QCheckBox* fixedCheckBox = new QCheckBox();
 
@@ -552,6 +521,7 @@ void SplitZone::getProperties(QFormLayout *layout, QGLWidget *render)
     case 0:
     {
         QDoubleSpinBox* lineWidthSpinBox = new QDoubleSpinBox();
+        lineWidthSpinBox->setKeyboardTracking(false);
         lineWidthSpinBox->setValue(lineWidth);
         connect(this, SIGNAL(lineWidthChanged(double)), lineWidthSpinBox, SLOT(setValue(double)));
         connect(lineWidthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setLineWidth(double)));
@@ -563,6 +533,7 @@ void SplitZone::getProperties(QFormLayout *layout, QGLWidget *render)
     case 2:
     {
         QDoubleSpinBox* heightSpinBox = new QDoubleSpinBox();
+        heightSpinBox->setKeyboardTracking(false);
         heightSpinBox->setValue(height);
         connect(this, SIGNAL(heightChanged(double)), heightSpinBox, SLOT(setValue(double)));
         connect(heightSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setHeight(double)));
@@ -591,18 +562,7 @@ void SplitZone::clear()
 {
 }
 
-void SplitZone::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)
-{
-    GLint viewport[4];
-    GLdouble mvmatrix[16], projmatrix[16];
 
-    glGetIntegerv(GL_VIEWPORT,viewport);
-    glGetDoublev(GL_MODELVIEW_MATRIX,mvmatrix);
-    glGetDoublev(GL_PROJECTION_MATRIX,projmatrix);
-
-    gluProject(x, y, z, mvmatrix, projmatrix, viewport, &wx, &wy, &wz);
-    wy=viewport[3]-wy;
-}
 
 bool SplitZone::setFixed(bool fixed)
 {
@@ -705,8 +665,6 @@ void SplitZone::setWidth(double width)
 
 void SplitZone::calculateLine(vec3 p1, vec3 p2, float width)
 {
-
-
 
     if (axisArray.size() != 6)
         axisArray.resize(6);

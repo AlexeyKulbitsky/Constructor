@@ -10,7 +10,7 @@ class Ruler: public RoadElement
     Q_OBJECT
 public:
     Ruler();
-
+    virtual ~Ruler();
 private:
     float x1, y1, z1;
     float x2, y2, z2;

@@ -1,6 +1,5 @@
 #include "roundingroad.h"
 #include <QApplication>
-#include "roundingcrossroad.h"
 #include "model.h"
 
 RoundingRoad::RoundingRoad()
@@ -125,7 +124,7 @@ RoundingRoad::~RoundingRoad()
 
     for (int i = 0; i < lines.size(); ++i)
     {
-        for (std::list<RoadElement*>::iterator it = model->getGroup(1).begin();
+        for (QList<RoadElement*>::iterator it = model->getGroup(1).begin();
              it != model->getGroup(1).end(); ++it)
         {
             if (lines[i].line == (*it))
@@ -138,13 +137,15 @@ RoundingRoad::~RoundingRoad()
     }
     lines.clear();
 
-    delete []indexArrayForSelection;
-    delete []colorArrayForSelection;
-
-
-
+    if (indexArrayForSelection)
+        delete []indexArrayForSelection;
+    if (colorArrayForSelection)
+        delete []colorArrayForSelection;
     indexArrayForSelection = NULL;
     colorArrayForSelection = NULL;
+
+    layout = NULL;
+    render = NULL;
 
 }
 
@@ -1118,9 +1119,11 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             float r1 = sqrt(dx1*dx1 + dy1*dy1);
             float dx2 = x3 - x2;
             float dy2 = y3 - y2;
-            float t = (dx1*dx2 + dy1*dy2) / (r1 * nearRadius);
-            if (t > 1 || t < -1)
+            float t = (dx1*dx2 + dy1*dy2) / (r1 * nearRadius);                       
+            if (t > 1)
                 t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
             float angle = acos(t);
             float res = dx2*dy1 - dx1*dy2;
             float factor = res > 0 ? 1.0f : -1.0f;
@@ -1144,8 +1147,10 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             float dx2 = x3 - x2;
             float dy2 = y3 - y2;
             float t = (dx1*dx2 + dy1*dy2) / (r1 * nearRadius);
-            if (t > 1 || t < -1)
+            if (t > 1)
                 t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
             float angle = acos(t);
             float res = dx2*dy1 - dx1*dy2;
             float factor = res > 0 ? 1.0f : -1.0f;
@@ -1169,8 +1174,10 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             float dx2 = x3 - x2;
             float dy2 = y3 - y2;
             float t = (dx1*dx2 + dy1*dy2) / (r1 * farRadius);
-            if (t > 1 || t < -1)
+            if (t > 1)
                 t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
             float angle = acos(t);
             float res = dx2*dy1 - dx1*dy2;
             float factor = res > 0 ? 1.0f : -1.0f;
@@ -1194,8 +1201,10 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             float dx2 = x3 - x2;
             float dy2 = y3 - y2;
             float t = (dx1*dx2 + dy1*dy2) / (r1 * farRadius);
-            if (t > 1 || t < -1)
+            if (t > 1)
                 t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
             float angle = acos(t);
             float res = dx2*dy1 - dx1*dy2;
             float factor = res > 0 ? 1.0f : -1.0f;
@@ -1286,8 +1295,10 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             float dy2 = y3 - y2;
             float r2 = sqrt(dx2*dx2 + dy2*dy2);
             float t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
-            if (t > 1 || t < -1)
+            if (t > 1)
                 t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
             float angle = acos(t);
             float res = dx2*dy1 - dx1*dy2;
             float factor = res > 0 ? 1.0f : -1.0f;
@@ -1307,8 +1318,10 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             dy2 = y3 - y2;
             r2 = sqrt(dx2*dx2 + dy2*dy2);
             t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
-            if (t > 1 || t < -1)
+            if (t > 1)
                 t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
             angle = acos(t);
             res = dx2*dy1 - dx1*dy2;
             factor = res > 0 ? 1.0f : -1.0f;
@@ -1333,8 +1346,10 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             float dy2 = y3 - y2;
             float r2 = sqrt(dx2*dx2 + dy2*dy2);
             float t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
-            if (t > 1 || t < -1)
+            if (t > 1)
                 t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
             float angle = acos(t);
             float res = dx2*dy1 - dx1*dy2;
             float factor = res > 0 ? 1.0f : -1.0f;
@@ -1354,8 +1369,10 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             dy2 = y3 - y2;
             r2 = sqrt(dx2*dx2 + dy2*dy2);
             t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
-            if (t > 1 || t < -1)
+            if (t > 1)
                 t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
             angle = acos(t);
             res = dx2*dy1 - dx1*dy2;
             factor = res > 0 ? 1.0f : -1.0f;
@@ -1449,21 +1466,27 @@ void RoundingRoad::getProperties(QFormLayout *layout, QGLWidget* render)
     }
 
     QDoubleSpinBox* nearRadiusSpinBox = new QDoubleSpinBox();
+    nearRadiusSpinBox->setKeyboardTracking(false);
     nearRadiusSpinBox->setMaximum(10000.0);
     QDoubleSpinBox* farRadiusSpinBox = new QDoubleSpinBox();
+    farRadiusSpinBox->setKeyboardTracking(false);
     farRadiusSpinBox->setMaximum(10000.0);
 
     QDoubleSpinBox* angel_1_NearRadiusSpinBox = new QDoubleSpinBox();
+    angel_1_NearRadiusSpinBox->setKeyboardTracking(false);
     angel_1_NearRadiusSpinBox->setMaximum(10000.0);
     angel_1_NearRadiusSpinBox->setMinimum(-10000.0);
     QDoubleSpinBox* angel_2_NearRadiusSpinBox = new QDoubleSpinBox();
+    angel_2_NearRadiusSpinBox->setKeyboardTracking(false);
     angel_2_NearRadiusSpinBox->setMaximum(10000.0);
     angel_2_NearRadiusSpinBox->setMinimum(-10000.0);
 
     QDoubleSpinBox* angel_1_FarRadiusSpinBox = new QDoubleSpinBox();
+    angel_1_FarRadiusSpinBox->setKeyboardTracking(false);
     angel_1_FarRadiusSpinBox->setMaximum(10000.0);
     angel_1_FarRadiusSpinBox->setMinimum(-10000.0);
     QDoubleSpinBox* angel_2_FarRadiusSpinBox = new QDoubleSpinBox();
+    angel_2_FarRadiusSpinBox->setKeyboardTracking(false);
     angel_2_FarRadiusSpinBox->setMaximum(10000.0);
     angel_2_FarRadiusSpinBox->setMinimum(-10000.0);
 
@@ -1507,6 +1530,7 @@ void RoundingRoad::getProperties(QFormLayout *layout, QGLWidget* render)
     QObject::connect(showFarBoardCheckBox, SIGNAL(toggled(bool)), this, SLOT(setShowFarBoard(bool)));
 
     QDoubleSpinBox* nearBoardWidthSpinBox = new QDoubleSpinBox();
+    nearBoardWidthSpinBox->setKeyboardTracking(false);
     nearBoardWidthSpinBox->setMinimum(0.0f);
     nearBoardWidthSpinBox->setValue(nearBoardWidth);
 
@@ -1514,6 +1538,7 @@ void RoundingRoad::getProperties(QFormLayout *layout, QGLWidget* render)
     connect(nearBoardWidthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setNearBoardWidth(double)));
 
     QDoubleSpinBox* farBoardWidthSpinBox = new QDoubleSpinBox();
+    farBoardWidthSpinBox->setKeyboardTracking(false);
     farBoardWidthSpinBox->setMinimum(0.0f);
     farBoardWidthSpinBox->setValue(farBoardWidth);
 
@@ -1923,7 +1948,7 @@ void RoundingRoad::deleteLine()
     ////qDebug() << "delete line " << b->text();
     int i = b->text().toInt() - 1;
 
-        for (std::list<RoadElement*>::iterator it = model->getGroup(1).begin();
+        for (QList<RoadElement*>::iterator it = model->getGroup(1).begin();
              it != model->getGroup(1).end(); ++it)
         {
             if (lines[i].line == (*it))
@@ -1981,7 +2006,7 @@ void RoundingRoad::resetLines()
 
         QVector<float> vertices;
         bool beginStepReleased = false, endStepReleased = false;
-        for (int i = 0; i <= numberOfSides; ++i)
+        for (int j = 0; j <= numberOfSides; ++j)
         {
             //float angle = 2.0 * 3.1415926 * float(i) / float(numberOfSides);
             float angle = (angel_1 + (angel_2 - angel_1) * float(i) / float(numberOfSides)) * 3.1415926 / 180.0f;

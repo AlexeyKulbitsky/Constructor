@@ -26,6 +26,11 @@ RoadElement3D::RoadElement3D(float x, float y)
     indexOfSelectedControl = -1;
 }
 
+RoadElement3D::~RoadElement3D()
+{
+
+}
+
 
 bool RoadElement3D::isSelected()
 {
@@ -312,6 +317,7 @@ void RoadElement3D::getProperties(QFormLayout *layout, QGLWidget *render)
     //rotationSlider->setMaximum(360);
 
     QDoubleSpinBox* rotationSpinBox = new QDoubleSpinBox();
+    rotationSpinBox->setKeyboardTracking(false);
     rotationSpinBox->setMinimum(0.0f);
     rotationSpinBox->setMaximum(360.0f);
     rotationSpinBox->setValue(zRot);
@@ -320,11 +326,13 @@ void RoadElement3D::getProperties(QFormLayout *layout, QGLWidget *render)
     connect(this, SIGNAL(zRotationChanged(double)), rotationSpinBox, SLOT(setValue(double)));
 
     QDoubleSpinBox* xScaleSpinBox = new QDoubleSpinBox();
+    xScaleSpinBox->setKeyboardTracking(false);
     xScaleSpinBox->setValue(xScale);
     connect(xScaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setXScale(double)));
     connect(this, SIGNAL(xScaleChanged(double)), xScaleSpinBox, SLOT(setValue(double)));
 
     QDoubleSpinBox* yScaleSpinBox = new QDoubleSpinBox();
+    yScaleSpinBox->setKeyboardTracking(false);
     yScaleSpinBox->setValue(yScale);
     connect(yScaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setYScale(double)));
     connect(this, SIGNAL(yScaleChanged(double)), yScaleSpinBox, SLOT(setValue(double)));

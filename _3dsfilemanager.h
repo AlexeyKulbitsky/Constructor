@@ -155,7 +155,7 @@ class _3DsFileManager: public FileManager
 
 public:
     _3DsFileManager();
-
+    ~_3DsFileManager();
     // FileManager interface
 public:
     virtual bool openFile(QString source);
