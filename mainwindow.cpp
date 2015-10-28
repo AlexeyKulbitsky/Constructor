@@ -9,9 +9,15 @@
 #include "objectslist.h"
 #include <QDockWidget>
 #include <QScrollBar>
-
+#include <QtWebKitWidgets/QWebView>
+#include <QUrl>
 #include <QToolBox>
 #include "logger.h"
+#include <QStackedLayout>
+#include "overlayedmapswidget.h"
+#include "yandexmapsview.h"
+#include "googlemapsview.h"
+#include <QWebFrame>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -20,8 +26,8 @@ MainWindow::MainWindow(QWidget *parent) :
     Logger::getLogger()->startLogging();
     ui->setupUi(this);
 
-    RoadElement::undoStack = new QUndoStack(this);
-    undoStack = RoadElement::undoStack;
+    //RoadElement::undoStack = new QUndoStack(this);
+    //undoStack = RoadElement::undoStack;
 
     model = new Model(this);
 
@@ -40,19 +46,67 @@ MainWindow::MainWindow(QWidget *parent) :
     addDockWidget(Qt::RightDockWidgetArea, propertiesDockWidget);
 
 
+    scenePropertiesDockWidget = new QDockWidget("Свойства сцены", this);
+    scenePropertiesDockWidget->setFeatures(QDockWidget::DockWidgetMovable |
+                                  QDockWidget::DockWidgetFloatable);
+    scenePropertiesScrollArea = new QScrollArea(scenePropertiesDockWidget);
+    scenePropertiesDockWidget->setWidget(scenePropertiesScrollArea);
+    scenePropertiesScrollArea->setMaximumWidth(300);
+
+    scenePropertiesWidget = new QWidget(scenePropertiesDockWidget);
+    scenePropertiesLayout = new QFormLayout(scenePropertiesWidget);
+    scenePropertiesWidget->setLayout(scenePropertiesLayout);
+    scenePropertiesScrollArea->setWidget(scenePropertiesWidget);
+    scenePropertiesScrollArea->setWidgetResizable(true);
+    addDockWidget(Qt::LeftDockWidgetArea, scenePropertiesDockWidget);
+
+
+
+    QWidget* tabScene2D = new QWidget();
+
+    QStackedLayout* stackedLayout = new QStackedLayout(tabScene2D);
+    tabScene2D->setLayout(stackedLayout);
+    stackedLayout->setStackingMode(QStackedLayout::StackAll);
+    YandexMapsView* yandexMaps = new YandexMapsView(this);
+    //GoogleMapsView* googleMaps = new GoogleMapsView(this);
+    scene2D = new Scene2D(tabScene2D);
+    scene2D->setOverlayWidget(yandexMaps);
+    stackedLayout->addWidget(scene2D);
+    stackedLayout->addWidget(yandexMaps);
+    //stackedLayout->addWidget(googleMaps);
+
+
+
+
+
+    scene2D->setProperties(propertiesLayout);
+    scene2D->setModel(model);
+    scene2D->setAcceptDrops(true);
+    scene2D->setFocus();
+    ui->tabWidget->setFocusPolicy(Qt::StrongFocus);
+
+    ui->tabWidget->addTab(tabScene2D, "Вид сверху");
+
+    connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(on_tabWidget_currentChanged(int)));
+
+
+    //Scene2D* scene2D = new Scene2D(view);
+    //scene2D->show();
+
+    /*
     ui->scene2D->setProperties(propertiesLayout);
     ui->scene2D->setModel(model);
     ui->scene3D->setModel(model);
     ui->scene2D->setAcceptDrops(true);
     ui->scene2D->setFocus();
     ui->tabWidget->setFocusPolicy(Qt::StrongFocus);
+    */
 
 
 
 
-
-    createActions();
-    createMenu();
+    //createActions();
+    //createMenu();
      /*
     createToolBar();
     jsonFileManager = new JSONFileManager(model);
@@ -90,11 +144,12 @@ MainWindow::MainWindow(QWidget *parent) :
     elementsScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     addDockWidget(Qt::LeftDockWidgetArea, elementsDockWidget);
-
+    this->tabifyDockWidget ( elementsDockWidget, scenePropertiesDockWidget);
 
     QListWidget* objectList = new ObjectsList(elementsDockWidget);
-    connect(objectList, SIGNAL(itemClicked(QListWidgetItem*)), ui->scene2D, SLOT(listItemClicked(QListWidgetItem*)));
+    //connect(objectList, SIGNAL(itemClicked(QListWidgetItem*)), ui->scene2D, SLOT(listItemClicked(QListWidgetItem*)));
     elementsToolBox->addItem(objectList, "Части дорог");
+
 
 
 
@@ -197,10 +252,10 @@ void MainWindow::createMenu()
 void MainWindow::createActions()
 {
 
-    undoAction = undoStack->createUndoAction(this, tr("&Undo"));
+    undoAction = undoStack->createUndoAction(this, tr("&Отменить"));
     undoAction->setShortcuts(QKeySequence::Undo);
 
-    redoAction = undoStack->createRedoAction(this, tr("&Redo"));
+    redoAction = undoStack->createRedoAction(this, tr("&Повторить"));
     redoAction->setShortcuts(QKeySequence::Redo);
 
     /*
@@ -367,19 +422,20 @@ void MainWindow::setFileManager(FileManager *manager)
 
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
-    /*
+
     switch (index)
     {
     case 0:
-        ui->scene2D->setFocus();
         break;
     case 1:
-        ui->scene3D->setFocus();
+        break;
+    case 2:
+        scene2D->getProperties(scenePropertiesLayout);
         break;
     default:
         break;
     }
-    */
+
 }
 
 

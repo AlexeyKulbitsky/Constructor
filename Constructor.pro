@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl #xml
+QT       += core gui opengl webkit webkitwidgets network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -52,7 +52,10 @@ SOURCES += main.cpp\
     logger.cpp \
     roadelement.cpp \
     state.cpp \
-    commands.cpp
+    commands.cpp \
+    overlayedmapswidget.cpp \
+    yandexmapsview.cpp \
+    googlemapsview.cpp
 
 
 
@@ -98,9 +101,12 @@ HEADERS  += mainwindow.h\
     linelinked.h \
     logger.h \
 #    mptr.h
-    commands.h
+    commands.h \
+    overlayedmapswidget.h \
+    yandexmapsview.h \
+    googlemapsview.h
 
-
+##LIBS += -LC:/OpenSSL-Win64 -llibeay32 -llibssl32
 
 
 FORMS    += mainwindow.ui

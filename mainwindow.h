@@ -14,6 +14,8 @@
 #include <QScrollArea>
 #include <QFormLayout>
 #include <QUndoStack>
+#include <QGraphicsScene>
+#include "scene2d.h"
 
 namespace Ui {
 class MainWindow;
@@ -29,6 +31,14 @@ public:
     void createMenu();
     void createActions();
     void createToolBar();
+
+    Scene2D* scene2D;
+    QGraphicsScene *scene;
+
+    QScrollArea *scenePropertiesScrollArea;
+    QWidget* scenePropertiesWidget;
+    QFormLayout* scenePropertiesLayout;
+    QDockWidget* scenePropertiesDockWidget;
 
     QScrollArea *propertiesScrollArea;
     QWidget *propertiesWidget;

@@ -102,12 +102,12 @@ void CompositeRoad::resizeByControl(int index, float dx, float dy, float x, floa
 
 int CompositeRoad::getNumberOfControls()
 {
-    return 1;
+    return 0;
 }
 
 int CompositeRoad::controlsForPoint()
 {
-    return 1;
+    return 0;
 }
 
 void CompositeRoad::changeColorOfSelectedControl(int index)
@@ -144,7 +144,11 @@ int CompositeRoad::getLayer()
 void CompositeRoad::deleteElement(int index)
 {
     if (index >= elements.size())
+    {
+        Logger::getLogger()->writeLog("CompositeRoad::deleteElement(int index), index out of range");
+        QMessageBox::critical(0, "Ошибка", "CompositeRoad::deleteElement(int index), index out of range");
         return;
+    }
     elements.removeAt(index);
 }
 
@@ -156,7 +160,11 @@ int CompositeRoad::getNumberOfElements()
 RoadElement *CompositeRoad::getElement(int index)
 {
     if (index >= elements.size())
+    {
+        Logger::getLogger()->writeLog("CompositeRoad::getElement(int index), index out of range, return NULL pointer");
+        QMessageBox::critical(0, "Ошибка", "CompositeRoad::getElement(int index), index out of range, return NULL pointer");
         return NULL;
+    }
     return elements.at(index);
 }
 

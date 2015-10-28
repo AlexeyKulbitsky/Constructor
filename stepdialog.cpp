@@ -18,7 +18,7 @@ StepDialog(QWidget *parent):QDialog(parent)
     splitZoneHeight = 0.1;
     splitZoneType = 0;
     layout = new QStackedLayout();
-
+    //layout->setStackingMode(QStackedLayout::StackAll);
     setDefaultLayout();
     setSplitZoneLayout();
     setStopLineLayout();

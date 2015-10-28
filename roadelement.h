@@ -15,6 +15,7 @@
 #include "texturemanager.h"
 #include "logger.h"
 #include <GL/glu.h>
+#include <GL/gl.h>
 #include <QUndoStack>
 #include "commands.h"
 

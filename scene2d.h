@@ -29,7 +29,9 @@ public:
     GLfloat yRot;
     GLfloat zRot;
     GLfloat zTra;
-    GLfloat nSca;
+    GLdouble nSca;
+    GLdouble scaleStep;
+    GLdouble gridStep;
     GLfloat xDelta;
     GLfloat yDelta;
     GLfloat dX;
@@ -39,6 +41,10 @@ public:
     bool figureIsSelected;
     bool controlIsSelected;
     bool drawRectStatus;
+    bool showMaps;
+    bool showScene;
+    bool sceneActive;
+    bool fixedScale;
     QPoint rectPoint1, rectPoint2;
     void scalePlus();
     void scaleMinus();
@@ -83,9 +89,15 @@ public:
     void drawBackground(QPainter *painter);
     void setDrawRectStatus(bool status);
 
+    void setOverlayWidget(QWidget *widget);
+    void drawModel();
 signals:
     //void selectedFigureChanged(RoadElement* roadElement);
     void rulerStatusChanged(bool status);
+    void scaleChanged(double value);
+    void scaleStepChanged(double value);
+    void gridStepChanged(double value);
+    void showMapsStatusChanged(bool status);
 
 public slots:
     void activateRuler();
@@ -93,14 +105,26 @@ public slots:
     void setRulerActive(bool status);
     void listItemClicked(QListWidgetItem* item);
     void setShowGrid(bool);
+    void setScale(double scale);
+    void setScaleStep(double step);
+    void setGridStep(double step);
+    void getProperties(QFormLayout* layout);
+    void setShowMapsStatus(bool status);
+    void setShowSceneStatus(bool status);
+    void setSceneActive(bool status);
+    void setFixedScaleStatus(bool status);
+
 private:
     StateManager* stateManager;
     Model* model;
     QFormLayout* properties;
     bool showGrid;
+    QWidget* widget;
+
 
     // QWidget interface
 protected:
     virtual void contextMenuEvent(QContextMenuEvent *pe);
+
 };
 #endif

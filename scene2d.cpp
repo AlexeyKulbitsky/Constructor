@@ -2,12 +2,26 @@
 #include <math.h>
 #include "scene2D.h"
 #include <iostream>
-
+#include <QImage>
+#include "yandexmapsview.h"
 
 GLint viewport[4]; // декларируем матрицу поля просмотра
 
-Scene2D::Scene2D(QWidget* parent) : QGLWidget(parent)
+Scene2D::Scene2D(QWidget* parent) : QGLWidget(parent), widget(0)
 {
+    //setAttribute(Qt::WA_TranslucentBackground);
+    //setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint );
+
+    //setWindowOpacity(0.5);
+
+    //setAutoFillBackground(false);
+    fixedScale = false;
+    widget = NULL;
+    sceneActive = true;
+    showScene = true;
+    showMaps = false;
+    scaleStep = 1.05;
+    gridStep = 1.0;
     showGrid = true;
     this->setFocusPolicy(Qt::StrongFocus);
     nSca = 0.2f;
@@ -37,24 +51,19 @@ Scene2D::~Scene2D()
 
 void Scene2D::initializeGL()
 {
-    Logger::getLogger()->writeLog("Scene2D::initializeGL");
-    qglClearColor(Qt::white);
+    Logger::getLogger()->writeLog("Scene2D::initializeGL");    
+    glClearColor(0.9f, 0.9f, 0.9f, 0.0f);
     glEnable(GL_DEPTH_TEST);
     glShadeModel(GL_SMOOTH);
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
-    glEnable(GL_MULTISAMPLE);    
+    glEnable(GL_ALPHA_TEST);
+    glEnable(GL_MULTISAMPLE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
     glEnable(GL_NORMALIZE);
-    //glEnable(GL_LIGHT0);
 
-    //int	maxTextureUnits;
-
-    //glGetIntegerv ( GL_MAX_TEXTURE_UNITS_ARB, &maxTextureUnits );
-    ////qDebug() << isExtensionSupported ( "GL_ARB_multitexture" )
-    ////qDebug() << maxTextureUnits;
 }
 
 void Scene2D::resizeGL(int nWidth, int nHeight)
@@ -79,101 +88,32 @@ void Scene2D::resizeGL(int nWidth, int nHeight)
 
 }
 
+
 void Scene2D::paintGL()
 {
     Logger::getLogger()->writeLog("Scene2D::paintGL()");
-    glClearColor(0.9, 0.9, 0.9, 1);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glPushMatrix();
 
-    GLfloat LightAmbient[]= { 1.0f, 1.0f, 1.0f, 1.0f }; // Значения фонового света ( НОВОЕ )
-    GLfloat LightDiffuse[]= { 1.0f, 1.0f, 1.0f, 1.0f }; // Значения диффузного света ( НОВОЕ )
-
-    GLfloat LightPosition[]= { 0.0f, 0.0f, 200.0f, 0.0f };     // Позиция света ( НОВОЕ )
-    glLightfv(GL_LIGHT1, GL_POSITION, LightPosition);
-
-    glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);    // Установка Фонового Света
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);
-    glEnable(GL_LIGHT1);
-    glScalef(nSca, nSca, nSca);
-
-
-
-    gluLookAt(xDelta,yDelta,0.5,
-              xDelta,yDelta,-10,
-              0,1,0);
-    drawGrid();
-    drawAxis();
-      // Установка Диффузного Света
-
-    //glEnable(GL_LIGHTING);
-    //glEnable(GL_LIGHT1);
-
-
-    if (model)
+    if (showMaps)
     {
-    for (int i =  0; i < model->getNumberOfGroups(); ++i)
-    {
-        if (model->isGroupVisible(i) == true)
-        {
-        for(QList<RoadElement*>::iterator it = model->getGroup(i).begin();
-            it != model->getGroup(i).end(); ++it)
-        {
-            (*it)->drawFigure(this);
-        }
-        }
-
+        QImage img(widget->size(),QImage::Format_RGBA8888);
+        widget->render(&img);
+        img = QGLWidget::convertToGLFormat(img);
+        glDisable(GL_DEPTH_TEST);
+        glDrawPixels(img.width(), img.height(), GL_RGBA, GL_UNSIGNED_BYTE, img.bits());
+        glEnable(GL_DEPTH_TEST);
     }
-    }
-    ////////////////////////////
-    /*
-    for (int i =  0; i < model->getNumberOfGroups(); ++i)
-    {
-        if (model->isGroupVisible(i) == true)
-        {
-        for(std::list<RoadElement*>::iterator it = model->getGroup(i).begin();
-            it != model->getGroup(i).end(); ++it)
-        {
-            if ((*it)->isSelected() == true)
-            {
-                glDisable(GL_DEPTH_TEST);
-                (*it)->drawMeasurements(this);
-                glEnable(GL_DEPTH_TEST);
-            }
-        }
-        }
 
-    }
-    /////////////////////////////
-        int count = model->getNumberOfGroups();
-        if (model->isGroupVisible(count - 1) == true)
-        {
-        for(std::list<RoadElement*>::iterator it = model->getGroup(count - 1).begin();
-            it != model->getGroup(count - 1).end(); ++it)
-        {
-            if ((*it)->getName() == "Ruler")
-                (*it)->drawMeasurements(this);
-        }
-        }
-
-    }
-    //shrift = QFont("Times", 15, QFont::Black);
-    // renderText (ptrMousePosition.x(), ptrMousePosition.y(), "HELLO", shrift);
-
-    //glDisable(GL_LIGHT1);
-    //glDisable(GL_LIGHTING);
-    */
-    if (drawRectStatus == true)
-        drawRect(rectPoint1, rectPoint2);
-
-    glPopMatrix();
+    drawModel();
 }
+
 
 void Scene2D::mousePressEvent(QMouseEvent* pe)
 {
     Logger::getLogger()->writeLog("Scene2D::mousePressEvent(QMouseEvent* pe)");
+    if (pe->button() == Qt::RightButton)
+        rightButtonIsPressed;
     this->setFocus();
     if (stateManager)
         stateManager->mousePressEvent(pe);
@@ -201,6 +141,9 @@ void Scene2D::mouseMoveEvent(QMouseEvent* pe)
 
     Logger::getLogger()->writeLog("Scene2D::mouseMoveEvent(QMouseEvent* pe)");
     this->setFocus();
+    if (widget && rightButtonIsPressed)
+        qobject_cast<YandexMapsView*>(widget)->mouseMo(pe);
+
     if (stateManager)
         stateManager->mouseMoveEvent(pe);
     else
@@ -213,13 +156,29 @@ void Scene2D::mouseMoveEvent(QMouseEvent* pe)
 void Scene2D::wheelEvent(QWheelEvent* pe)
 {
     Logger::getLogger()->writeLog("Scene2D::wheelEvent(QWheelEvent* pe)");
-    if (stateManager)
-        stateManager->wheelEvent(pe);
+    if (fixedScale)
+        return;
+    if (sceneActive)
+    {
+        if (stateManager)
+            stateManager->wheelEvent(pe);
+        else
+        {
+            QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::wheelEvent(QWheelEvent* pe) stopped", QMessageBox::Yes | QMessageBox::Default);
+            Logger::getLogger()->writeLog("Scene2D::stateManager = NULL, Scene2D::wheelEvent(QWheelEvent* pe) stopped");
+        }
+        if (widget)
+            qobject_cast<YandexMapsView*>(widget)->wheelEv(pe);
+    }
     else
     {
-        QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::wheelEvent(QWheelEvent* pe) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("Scene2D::stateManager = NULL, Scene2D::wheelEvent(QWheelEvent* pe) stopped");
+        qobject_cast<YandexMapsView*>(widget)->wheelEv(pe);
+        if ((pe->delta())>0) scalePlus();
+        else
+            if ((pe->delta())<0) scaleMinus();
     }
+
+
 }
 
 void Scene2D::keyPressEvent(QKeyEvent* pe)
@@ -237,13 +196,15 @@ void Scene2D::keyPressEvent(QKeyEvent* pe)
 void Scene2D::scalePlus()
 {
     Logger::getLogger()->writeLog("Scene2D::scalePlus()");
-    nSca = nSca*1.1;
+    nSca = nSca*scaleStep;
+    emit scaleChanged(nSca);
 }
 
 void Scene2D::scaleMinus()
 {
     Logger::getLogger()->writeLog("Scene2D::scaleMinus()");
-    nSca = nSca/1.1;
+    nSca = nSca/scaleStep;
+    emit scaleChanged(nSca);
 }
 
 void Scene2D::rotateUp()
@@ -572,7 +533,7 @@ void Scene2D::drawGrid()
     if (showGrid)
     {
     glLineWidth(1.0);
-    for (int i = -1000; i < 1001; ++i)
+    for (double i = -1000.0; i < 1001.0; i += gridStep)
     {
         glBegin(GL_LINES);
         glColor3d(0.7,0.7,0.7);
@@ -581,7 +542,7 @@ void Scene2D::drawGrid()
         glEnd();
     }
 
-    for (int i = -1000; i < 1001; ++i)
+    for (double i = -1000.0; i < 1001.0; i += gridStep)
     {
         glBegin(GL_LINES);
         glColor3d(0.7,0.7,0.7);
@@ -652,6 +613,109 @@ void Scene2D::setDrawRectStatus(bool status)
 {
     Logger::getLogger()->writeLog("Scene2D::setDrawRectStatus(bool status)");
     drawRectStatus = status;
+}
+
+void Scene2D::setOverlayWidget(QWidget *widget)
+{
+    Logger::getLogger()->writeLog("Scene2D::setOverlayWidget(QWidget *widget)");
+    if (widget == NULL)
+    {
+        QMessageBox::critical(0, "Ошибка", "Scene2D::setOverlayWidget(QWidget *widget) widget = NULL, program terminates");
+        Logger::getLogger()->writeLog("Scene2D::setOverlayWidget(QWidget *widget) widget = NULL, program terminates");
+        QApplication::exit(0);
+    }
+    this->widget = widget;
+    setShowMapsStatus(widget->isVisible());
+    connect(this, SIGNAL(showMapsStatusChanged(bool)), widget, SLOT(setVisible(bool)));
+}
+
+void Scene2D::drawModel()
+{
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glPushMatrix();
+
+    GLfloat LightAmbient[]= { 1.0f, 1.0f, 1.0f, 1.0f }; // Значения фонового света ( НОВОЕ )
+    GLfloat LightDiffuse[]= { 1.0f, 1.0f, 1.0f, 1.0f }; // Значения диффузного света ( НОВОЕ )
+
+    GLfloat LightPosition[]= { 0.0f, 0.0f, 200.0f, 0.0f };     // Позиция света ( НОВОЕ )
+    glLightfv(GL_LIGHT1, GL_POSITION, LightPosition);
+
+    glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);    // Установка Фонового Света
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);
+    glEnable(GL_LIGHT1);
+    glScalef(nSca, nSca, nSca);
+
+
+
+    gluLookAt(xDelta,yDelta,0.5,
+              xDelta,yDelta,-10,
+              0,1,0);
+    drawGrid();
+    drawAxis();
+      // Установка Диффузного Света
+
+    //glEnable(GL_LIGHTING);
+    //glEnable(GL_LIGHT1);
+
+
+    if (model)
+    {
+    for (int i =  0; i < model->getNumberOfGroups(); ++i)
+    {
+        if (model->isGroupVisible(i) == true)
+        {
+        for(QList<RoadElement*>::iterator it = model->getGroup(i).begin();
+            it != model->getGroup(i).end(); ++it)
+        {
+            (*it)->drawFigure(this);
+        }
+        }
+
+    }
+    }
+    ////////////////////////////
+    /*
+    for (int i =  0; i < model->getNumberOfGroups(); ++i)
+    {
+        if (model->isGroupVisible(i) == true)
+        {
+        for(std::list<RoadElement*>::iterator it = model->getGroup(i).begin();
+            it != model->getGroup(i).end(); ++it)
+        {
+            if ((*it)->isSelected() == true)
+            {
+                glDisable(GL_DEPTH_TEST);
+                (*it)->drawMeasurements(this);
+                glEnable(GL_DEPTH_TEST);
+            }
+        }
+        }
+
+    }
+    /////////////////////////////
+        int count = model->getNumberOfGroups();
+        if (model->isGroupVisible(count - 1) == true)
+        {
+        for(std::list<RoadElement*>::iterator it = model->getGroup(count - 1).begin();
+            it != model->getGroup(count - 1).end(); ++it)
+        {
+            if ((*it)->getName() == "Ruler")
+                (*it)->drawMeasurements(this);
+        }
+        }
+
+    }
+    //shrift = QFont("Times", 15, QFont::Black);
+    // renderText (ptrMousePosition.x(), ptrMousePosition.y(), "HELLO", shrift);
+
+    //glDisable(GL_LIGHT1);
+    //glDisable(GL_LIGHTING);
+    */
+    if (drawRectStatus == true)
+        drawRect(rectPoint1, rectPoint2);
+
+    glPopMatrix();
 }
 
 void Scene2D::activateRuler()
@@ -757,6 +821,122 @@ void Scene2D::setShowGrid(bool status)
     showGrid = status;
 }
 
+void Scene2D::setScale(double scale)
+{
+    Logger::getLogger()->writeLog(QString("Scene2D::setScale(double scale), scale = ") +
+                                  QString::number(scale));
+    if (this->nSca == scale)
+        return;
+    this->nSca = scale;
+    updateGL();
+    emit scaleChanged(scale);
+}
+
+void Scene2D::setScaleStep(double step)
+{
+    Logger::getLogger()->writeLog(QString("Scene2D::setScaleStep(double step), step = ") +
+                                  QString::number(step));
+    if (this->scaleStep == step)
+        return;
+    this->scaleStep = step;
+    emit scaleStepChanged(step);
+}
+
+void Scene2D::setGridStep(double step)
+{
+    Logger::getLogger()->writeLog(QString("Scene2D::setGridStep(double step), step = ") +
+                                  QString::number(step));
+    if (this->gridStep == step)
+        return;
+    this->gridStep = step;
+    updateGL();
+    emit gridStepChanged(step);
+}
+
+void Scene2D::getProperties(QFormLayout *layout)
+{
+    //disconnect(stepDialog, 0, this, 0);
+    while(layout->count() > 0)
+    {
+        QLayoutItem *item = layout->takeAt(0);
+        delete item->widget();
+        delete item;
+    }
+
+    QDoubleSpinBox* scaleSpinBox = new QDoubleSpinBox();
+    scaleSpinBox->setMinimum(0.0);
+    scaleSpinBox->setDecimals(5);
+    scaleSpinBox->setValue(nSca);
+    connect(scaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setScale(double)));
+    connect(this, SIGNAL(scaleChanged(double)), scaleSpinBox, SLOT(setValue(double)));
+
+    QDoubleSpinBox* scaleStepSpinBox = new QDoubleSpinBox();
+    scaleStepSpinBox->setMinimum(0.0);
+    scaleStepSpinBox->setDecimals(5);
+    scaleStepSpinBox->setValue(scaleStep);
+    connect(scaleStepSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setScaleStep(double)));
+    connect(this, SIGNAL(scaleStepChanged(double)), scaleStepSpinBox, SLOT(setValue(double)));
+
+    QDoubleSpinBox* gridStepSpinBox = new QDoubleSpinBox();
+    gridStepSpinBox->setMinimum(0.0);
+    gridStepSpinBox->setDecimals(5);
+    gridStepSpinBox->setValue(gridStep);
+    connect(gridStepSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setGridStep(double)));
+    connect(this, SIGNAL(gridStepChanged(double)), gridStepSpinBox, SLOT(setValue(double)));
+
+    QCheckBox* showMapsCheckBox = new QCheckBox();
+    showMapsCheckBox->setChecked(showMaps);
+    connect(showMapsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setShowMapsStatus(bool)));
+
+    QComboBox* mapsTypeComboBox = new QComboBox();
+    mapsTypeComboBox->addItem("Яндекс.Карты");
+    mapsTypeComboBox->addItem("Google Maps");
+
+    QRadioButton* mapsOnTopRadioButton = new QRadioButton();
+    QRadioButton* sceneOnTopRadioButton = new QRadioButton();
+    connect(sceneOnTopRadioButton, SIGNAL(toggled(bool)), this, SLOT(setSceneActive(bool)));
+    sceneOnTopRadioButton->setChecked(true);
+
+    QCheckBox* fixedScaleCheckBox = new QCheckBox();
+    fixedScaleCheckBox->setChecked(fixedScale);
+    connect(fixedScaleCheckBox, SIGNAL(toggled(bool)), SLOT(setFixedScaleStatus(bool)));
+
+    layout->addRow("Масштаб", scaleSpinBox);
+    layout->addRow("Шаг масштабирования", scaleStepSpinBox);
+    layout->addRow("Шаг сетки", gridStepSpinBox);
+    layout->addRow("Отображать карту", showMapsCheckBox);
+    layout->addRow("Ресурс карт", mapsTypeComboBox);
+    layout->addRow("Активная сцена", sceneOnTopRadioButton);
+    layout->addRow("Активная карта", mapsOnTopRadioButton);
+    layout->addRow("Зафиксировать", fixedScaleCheckBox);
+}
+
+void Scene2D::setShowMapsStatus(bool status)
+{
+    Logger::getLogger()->writeLog("Scene2D::setShowMapsStatus(bool status)");
+    showMaps = status;
+    updateGL();
+}
+
+void Scene2D::setShowSceneStatus(bool status)
+{
+    Logger::getLogger()->writeLog("Scene2D::setShowSceneStatus(bool status)");
+    showScene = status;
+    updateGL();
+}
+
+void Scene2D::setSceneActive(bool status)
+{
+    Logger::getLogger()->writeLog("Scene2D::setSceneActive(bool status)");
+    sceneActive = status;
+}
+
+void Scene2D::setFixedScaleStatus(bool status)
+{
+    Logger::getLogger()->writeLog("Scene2D::setFixedScaleStatus(bool status)");
+    fixedScale = status;
+}
+
 
 void Scene2D::keyReleaseEvent(QKeyEvent *pe)
 {
@@ -782,3 +962,9 @@ void Scene2D::contextMenuEvent(QContextMenuEvent *pe)
         Logger::getLogger()->writeLog("Scene2D::stateManager = NULL, Scene2D::contextMenuEvent(QContextMenuEvent *pe) stopped");
     }
 }
+
+
+
+
+
+
