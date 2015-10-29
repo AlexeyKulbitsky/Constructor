@@ -152,6 +152,7 @@ LineBroken::~LineBroken()
 // Индексы вершины для отрисовки
 void LineBroken::setVertexArray(float width, float* axisVertices, int size)
 {
+    Logger::getLogger()->writeLog("LineBroken::setVertexArray(float width, float* axisVertices, int size)");
     this->width = width;
     float r = width / 2.0f;
 
@@ -305,6 +306,7 @@ void LineBroken::setVertexArray(float width, float* axisVertices, int size)
 // Индексы каждой вершины
 void LineBroken::setColorArray(float red, float green, float blue, float alpha)
 {
+    Logger::getLogger()->writeLog("LineBroken::setColorArray(float red, float green, float blue, float alpha)");
    if (ColorArray.size() / 4 != VertexArray.size() / 3)
    {
        ColorArray.resize(VertexArray.size() / 3 * 4);
@@ -322,6 +324,7 @@ void LineBroken::setColorArray(float red, float green, float blue, float alpha)
 
 void LineBroken::setTextureArray()
 {
+    Logger::getLogger()->writeLog("LineBroken::setTextureArray()");
     GLfloat x1, y1, x2, y2;
     GLfloat r1 = 0.0f, r2 = 0.0f;
    // GLfloat textureSize = 0.5f;
@@ -376,6 +379,7 @@ void LineBroken::setTextureArray()
 // Индексы для отрисовки фигуры
 void LineBroken::setIndexArray()
 {
+    Logger::getLogger()->writeLog("LineBroken::setIndexArray()");
     if (IndexArray.size() != VertexArray.size() / 2)
         IndexArray.resize(VertexArray.size() / 2);
     for (int i = 0; i < VertexArray.size() / 3 - 3; i += 4)
@@ -394,9 +398,16 @@ void LineBroken::setIndexArray()
 
 void LineBroken::setVertexArrayForAxis(float *axisVertices, int size)
 {
+    Logger::getLogger()->writeLog("LineBroken::setVertexArrayForAxis(float *axisVertices, int size)");
+    if (axisVertices == NULL)
+    {
+        QMessageBox::critical(0, "Ошибка", "LineBroken::setVertexArrayForAxis(float *axisVertices, int size), axisVertices = NULL, program terminates",
+                              QMessageBox::Yes);
+        Logger::getLogger()->writeLog("LineBroken::setVertexArrayForAxis(float *axisVertices, int size), axisVertices = NULL, program terminates", ERROR_T);
+        QApplication::exit(0);
+    }
     if (vertexArrayForAxis.size() != size)
     {
-
         vertexArrayForAxis.resize(size);
     }
 
@@ -409,6 +420,7 @@ void LineBroken::setVertexArrayForAxis(float *axisVertices, int size)
 
 void LineBroken::setColorArrayForAxis(float red, float green, float blue)
 {
+    Logger::getLogger()->writeLog("LineBroken::setColorArrayForAxis(float red, float green, float blue)");
     if (colorArrayForAxis.size() != vertexArrayForAxis.size())
     {
         colorArrayForAxis.resize(vertexArrayForAxis.size());
@@ -423,6 +435,7 @@ void LineBroken::setColorArrayForAxis(float red, float green, float blue)
 
 void LineBroken::setIndexArrayForAxis()
 {
+    Logger::getLogger()->writeLog("LineBroken::setIndexArrayForAxis()");
     if (indexArrayForAxis.size() != vertexArrayForAxis.size() / 3)
     {
         indexArrayForAxis.resize(vertexArrayForAxis.size() / 3);
@@ -436,6 +449,7 @@ void LineBroken::setIndexArrayForAxis()
 
 void LineBroken::drawFigure(QGLWidget* render)
 {
+    Logger::getLogger()->writeLog("LineBroken::drawFigure(QGLWidget* render)");
     /*
     if (selected == true)
     {
@@ -509,6 +523,7 @@ void LineBroken::drawFigure(QGLWidget* render)
 
 void LineBroken::setIndexArrayForSelectionFrame()
 {
+    Logger::getLogger()->writeLog("LineBroken::setIndexArrayForSelectionFrame()");
     if (IndexArrayForSelection.size() != VertexArray.size() / 3)
     {
         IndexArrayForSelection.resize(VertexArray.size() / 3);
@@ -532,6 +547,7 @@ void LineBroken::setIndexArrayForSelectionFrame()
 
 void LineBroken::setColorArrayForSelectionFrame(float red, float green, float blue)
 {
+    Logger::getLogger()->writeLog("LineBroken::setColorArrayForSelectionFrame(float red, float green, float blue)");
     if (ColorArrayForSelection.size() != VertexArray.size())
     {
         ColorArrayForSelection.resize(VertexArray.size());
@@ -548,6 +564,7 @@ void LineBroken::setColorArrayForSelectionFrame(float red, float green, float bl
 
 void LineBroken::drawSelectionFrame()
 {
+    Logger::getLogger()->writeLog("LineBroken::drawSelectionFrame()");
     // Боковые грани для изменения размера
     glVertexPointer(3, GL_FLOAT, 0, VertexArray.begin());
     glColorPointer(3, GL_FLOAT, 0, ColorArrayForSelection.begin());
@@ -567,6 +584,7 @@ void LineBroken::drawSelectionFrame()
 
 void LineBroken::move(float dx, float dy, float dz)
 {
+    Logger::getLogger()->writeLog("LineBroken::move(float dx, float dy, float dz)");
     if (fixed)
     {
         return;
@@ -587,6 +605,7 @@ void LineBroken::move(float dx, float dy, float dz)
 
 void LineBroken::drawControlElement(int index, float lineWidth, float pointSize)
 {
+    Logger::getLogger()->writeLog("LineBroken::drawControlElement(int index, float lineWidth, float pointSize)");
     glPointSize(pointSize);
     glBegin(GL_POINTS);
     glColor3f(1.0f, 1.0f, 1.0f);
@@ -599,6 +618,7 @@ void LineBroken::drawControlElement(int index, float lineWidth, float pointSize)
 
 void LineBroken::resizeByControl(int index, float dx, float dy, float x, float y)
 {
+    Logger::getLogger()->writeLog("LineBroken::resizeByControl(int index, float dx, float dy, float x, float y)");
     if (fixed)
     {
         return;
@@ -612,16 +632,19 @@ void LineBroken::resizeByControl(int index, float dx, float dy, float x, float y
 
 int LineBroken::getNumberOfControls()
 {
+    Logger::getLogger()->writeLog("LineBroken::getNumberOfControls()");
     return indexArrayForAxis.size();
 }
 
 void LineBroken::changeColorOfSelectedControl(int index)
 {
+    Logger::getLogger()->writeLog("LineBroken::changeColorOfSelectedControl(int index)");
     indexOfSelectedControl = index;
 }
 
 QCursor LineBroken::getCursorForControlElement(int index)
 {
+    Logger::getLogger()->writeLog("LineBroken::getCursorForControlElement(int index)");
     if (index >= 0 && index < indexArrayForAxis.size())
         return Qt::CrossCursor;
     else
@@ -630,6 +653,7 @@ QCursor LineBroken::getCursorForControlElement(int index)
 
 bool LineBroken::hasPoint(GLfloat x, GLfloat y)
 {
+    Logger::getLogger()->writeLog("LineBroken::hasPoint(GLfloat x, GLfloat y)");
     if (x >= VertexArray[0] &&
             x <= VertexArray[6] &&
             y >= VertexArray[1] &&
@@ -645,6 +669,7 @@ bool LineBroken::hasPoint(GLfloat x, GLfloat y)
 
 QPoint LineBroken::getCoorninateOfPointControl(int index)
 {
+    Logger::getLogger()->writeLog("LineBroken::getCoorninateOfPointControl(int index)");
     QPoint p;
     p.setX(VertexArray[index * 3]);
     p.setY(VertexArray[index * 3 + 1]);
@@ -655,6 +680,7 @@ QPoint LineBroken::getCoorninateOfPointControl(int index)
 
 void LineBroken::drawDescription(QGLWidget *render, float red, float green, float blue)
 {
+    Logger::getLogger()->writeLog("LineBroken::drawDescription(QGLWidget *render, float red, float green, float blue)");
     glColor3f(red, green, blue);
     if (render && description[0] != '\0')
     {
@@ -677,6 +703,7 @@ void LineBroken::addControl(float x, float y)
 
 QJsonObject LineBroken::getJSONInfo()
 {
+    Logger::getLogger()->writeLog("LineBroken::getJSONInfo()");
     QJsonObject element;
 
     element["Name"] = name;
@@ -716,6 +743,7 @@ QJsonObject LineBroken::getJSONInfo()
 
 void LineBroken::getProperties(QFormLayout *layout, QGLWidget* render)
 {
+    Logger::getLogger()->writeLog("LineBroken::getProperties(QFormLayout *layout, QGLWidget* render)");
     while(QLayoutItem* child = layout->takeAt(0))
     {
         delete child->widget();
@@ -727,11 +755,13 @@ void LineBroken::getProperties(QFormLayout *layout, QGLWidget* render)
 
 bool LineBroken::isFixed()
 {
+    Logger::getLogger()->writeLog("LineBroken::isFixed()");
     return fixed;
 }
 
 void LineBroken::addBreak(bool front)
 {
+    Logger::getLogger()->writeLog("LineBroken::addBreak(bool front)");
     float x, y, z;
     if (front)
     {
@@ -770,17 +800,20 @@ void LineBroken::drawMeasurements(QGLWidget *render)
 
 bool LineBroken::setFixed(bool fixed)
 {
+    Logger::getLogger()->writeLog("LineBroken::setFixed(bool fixed)");
     this->fixed = fixed;
 }
 
 void LineBroken::setDescription(QString description)
 {
+    Logger::getLogger()->writeLog("LineBroken::setDescription(QString description)");
     this->description = description;
 }
 
 
 int LineBroken::getLayer()
 {
+    Logger::getLogger()->writeLog("LineBroken::getLayer()");
     return layer;
 }
 
@@ -792,6 +825,7 @@ void LineBroken::clear()
 
 std::vector<vec3> LineBroken::getCoordOfControl(int index)
 {
+    Logger::getLogger()->writeLog("LineBroken::getCoordOfControl(int index)");
     std::vector<vec3> res;
     vec3 p(vertexArrayForAxis[index * 3],
             vertexArrayForAxis[index * 3 + 1],
@@ -802,6 +836,7 @@ std::vector<vec3> LineBroken::getCoordOfControl(int index)
 
 void LineBroken::rotate(float angle, float x, float y, float z)
 {
+    Logger::getLogger()->writeLog("LineBroken::rotate(float angle, float x, float y, float z)");
     for (int i = 0; i < vertexArrayForAxis.size() / 3; ++i)
     {
         vertexArrayForAxis[i * 3] -= x;

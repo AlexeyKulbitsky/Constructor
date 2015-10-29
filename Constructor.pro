@@ -55,7 +55,8 @@ SOURCES += main.cpp\
     commands.cpp \
     overlayedmapswidget.cpp \
     yandexmapsview.cpp \
-    googlemapsview.cpp
+    googlemapsview.cpp \
+    settingsdialog.cpp
 
 
 
@@ -104,12 +105,14 @@ HEADERS  += mainwindow.h\
     commands.h \
     overlayedmapswidget.h \
     yandexmapsview.h \
-    googlemapsview.h
+    googlemapsview.h \
+    settingsdialog.h
 
 ##LIBS += -LC:/OpenSSL-Win64 -llibeay32 -llibssl32
 
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    settingsdialog.ui
 
 RESOURCES += \
     textures.qrc \

@@ -117,7 +117,7 @@ protected:
     bool singleWay;
     int splitZoneType;
     double splitZoneHeight;
-
+    static bool log;
     QFormLayout* layout;
     QGLWidget* render;
 
@@ -144,6 +144,7 @@ public:
     virtual void clear();
     float getRightBoardWidth();
     float getLeftBoardWidth();
+    static bool getLogging() { return log; }
 
 signals:
     void widthChanged(double width);
@@ -155,6 +156,7 @@ signals:
     void leftWidthChanged(double width);
 
 public slots:
+    static void setLogging(bool status);
     void setWidth(double width);
     void setRightWidth(double width);
     void setLeftWidth(double width);

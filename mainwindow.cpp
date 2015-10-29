@@ -21,10 +21,12 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    settings("LpGR","Constructor")
 {    
     Logger::getLogger()->startLogging();
     ui->setupUi(this);
+    //settingsDialog = new SettingsDialog(this);
 
     //RoadElement::undoStack = new QUndoStack(this);
     //undoStack = RoadElement::undoStack;
@@ -205,11 +207,12 @@ MainWindow::MainWindow(QWidget *parent) :
     dir.cd("cars/");
     elementsToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Легковые автомобили");
     */
-
+    readSettings();
 }
 
 MainWindow::~MainWindow()
 {
+    writeSettings();
     Logger::getLogger()->stopLogging();
     Logger::deleteLogger();
 
@@ -353,6 +356,27 @@ void MainWindow::createActions()
 void MainWindow::createToolBar()
 {
     //ui->mainToolBar->addAction(rulerAction);
+}
+
+MainWindow::readSettings()
+{
+    settings.beginGroup("/Settings");
+    int windowWidth = settings.value("/window_width", width()).toInt();
+    int windowHeight = settings.value("/window_height", height()).toInt();
+    int windowPositionX = settings.value("/window_position_x", pos().x()).toInt();
+    int windowPositionY = settings.value("/window_position_y", pos().y()).toInt();
+    //this->setGeometry(windowPositionX, windowPositionY, windowWidth, windowHeight);
+    settings.endGroup();
+}
+
+MainWindow::writeSettings()
+{
+    settings.beginGroup("/Settings");
+    settings.setValue("/window_width", width());
+    settings.setValue("/window_height", height());
+    settings.setValue("/window_positin_x", pos().x());
+    settings.setValue("/window_positin_y", pos().y());
+    settings.endGroup();
 }
 
 

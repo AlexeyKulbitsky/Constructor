@@ -16,6 +16,7 @@
 #include <QUndoStack>
 #include <QGraphicsScene>
 #include "scene2d.h"
+#include "settingsdialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -34,6 +35,7 @@ public:
 
     Scene2D* scene2D;
     QGraphicsScene *scene;
+    SettingsDialog* settingsDialog;
 
     QScrollArea *scenePropertiesScrollArea;
     QWidget* scenePropertiesWidget;
@@ -80,8 +82,12 @@ public:
 
     Model* model;
 
+    readSettings();
+    writeSettings();
+
 private:
     //JSONFileManager* jsonFileManager;
+    QSettings settings;
 
 private slots:
     void newFile();

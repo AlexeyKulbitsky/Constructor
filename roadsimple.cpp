@@ -6,6 +6,8 @@
 #include "splitzone.h"
 #include "model.h"
 
+bool RoadSimple::log = true;
+
 RoadSimple::RoadSimple()
 {
     name = "noname";
@@ -199,6 +201,13 @@ RoadSimple::~RoadSimple()
 
 void RoadSimple::setVertexArray(float x1, float y1, float x2, float y2, float width)
 {
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadSimple::setVertexArray(float x1, float y1, float x2, float y2, float width)"
+                                   << " x1 = " << x1
+                                   << " y1 = " << y1
+                                   << " x2 = " << x2
+                                   << " y2 = " << y2
+                                   << " width = " << width << "\n";
     this->x1 = x1;
     this->y1 = y1;
     this->x2 = x2;
@@ -347,12 +356,20 @@ void RoadSimple::setVertexArray(float x1, float y1, float x2, float y2, float wi
 
 void RoadSimple::setVertexArray()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setVertexArray()\n";
     setVertexArray(x1, y1, x2, y2, width);
 }
 
 // Индексы каждой вершины
 void RoadSimple::setColorArray(float red, float green, float blue, float alpha)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setColorArray(float red, float green, float blue, float alpha)"
+                                       << " red = " << red
+                                       << " green = " << green
+                                       << " blue = " << blue
+                                       << " alpha = " << alpha << "\n";
     for (int i=0; i<4; i++)
     {
         ColorArray[i][0]=red;
@@ -364,6 +381,8 @@ void RoadSimple::setColorArray(float red, float green, float blue, float alpha)
 
 void RoadSimple::setTextureArray()
 {
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadSimple::setTextureArray()\n";
     GLfloat x1 = VertexArray[0][0];
     GLfloat y1 = VertexArray[0][1];
     GLfloat x2 = VertexArray[3][0];
@@ -463,6 +482,8 @@ void RoadSimple::setTextureArray()
 // Индексы для отрисовки фигуры
 void RoadSimple::setIndexArray()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setIndexArray()\n";
     // Порядок обхода - по часовой стрелке
 
     // 1-ый полигон
@@ -562,6 +583,12 @@ void RoadSimple::setTextureArrayBoard()
 
 void RoadSimple::drawFigure(QGLWidget* render)
 {
+    if (log)
+    {
+        Logger::getLogger()->infoLog() << "RoadSimple::drawFigure(QGLWidget* render)\n";
+        if (render == NULL)
+            Logger::getLogger()->warningLog() << "RoadSimple::drawFigure(QGLWidget* render) render = NULL\n";
+    }
 
     if (!useColor)
     {
@@ -634,6 +661,8 @@ void RoadSimple::drawFigure(QGLWidget* render)
 
 void RoadSimple::setIndexArrayForSelectionFrame()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setIndexArrayForSelectionFrame()\n";
     IndexArrayForSelection[0] = 0;
     IndexArrayForSelection[1] = 1;
     IndexArrayForSelection[2] = 2;
@@ -644,6 +673,11 @@ void RoadSimple::setIndexArrayForSelectionFrame()
 
 void RoadSimple::setColorArrayForSelectionFrame(float red, float green, float blue)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setColorArrayForSelectionFrame(float red, float green, float blue)"
+                                       << " red = " << red
+                                       << " grren = " << green
+                                       << " blue = " << blue << "\n";
     for (int i = 0; i < 4; ++i)
     {
         ColorArrayForSelection[i][0] = red;
@@ -654,6 +688,8 @@ void RoadSimple::setColorArrayForSelectionFrame(float red, float green, float bl
 
 vec2 RoadSimple::getAxisPoint_1()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::getAxisPoint_1()\n";
     vec2 res;
     res.x = x1;
     res.y = y1;
@@ -662,6 +698,8 @@ vec2 RoadSimple::getAxisPoint_1()
 
 vec2 RoadSimple::getAxisPoint_2()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::getAxisPoint_2()\n";
     vec2 res;
     res.x = x2;
     res.y = y2;
@@ -670,6 +708,11 @@ vec2 RoadSimple::getAxisPoint_2()
 
 void RoadSimple::setCoordForAxisPoint(int index, float x, float y)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setCoordForAxisPoint(int index, float x, float y)"
+                                       << " index = " << index
+                                       << " x = " << x
+                                       << " y = " << y << "\n";
     if (index == 0)
     {
         x1 = x;
@@ -685,8 +728,24 @@ void RoadSimple::setCoordForAxisPoint(int index, float x, float y)
 
 void RoadSimple::setCoordForPoint(int index, float newX, float newY, float newZ)
 {
+    if (log)
+    {
+        Logger::getLogger()->infoLog() << "RoadSimple::setCoordForPoint(int index, float newX, float newY, float newZ)"
+                                       << " index = " << index
+                                       << " newX = " << newX
+                                       << " newY = " << newY
+                                       << " newZ = " << newZ << "\n";
+    }
     if (index < 0 || index > 3)
+    {
+        QMessageBox::critical(0, "Ошибка", "RoadSimple::setCoordForPoint(int index, float newX, float newY, float newZ) index out of range",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->errorLog() << "RoadSimple::setCoordForPoint(int index, float newX, float newY, float newZ)"
+                                            << " index out of range\n";
         return;
+    }
+
     VertexArray[index][0] = newX;
     VertexArray[index][1] = newY;
     VertexArray[index][2] = newZ;
@@ -700,8 +759,17 @@ void RoadSimple::setCoordForPoint(int index, float newX, float newY, float newZ)
 
 vec3 RoadSimple::getCoordOfPoint(int index)
 {
-    assert(index >= 0 && index <= 3);
-    //if (index < 0 || index > 3);
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::getCoordOfPoint(int index)"
+                                       << " index = " << index << "\n";
+    if (index < 0 || index > 3)
+    {
+        QMessageBox::critical(0, "Ошибка", "RoadSimple::getCoordOfPoint(int index) index out of range",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->infoLog() << "RoadSimple::getCoordOfPoint(int index) index out of range\n";
+        QApplication::exit(0);
+    }
     vec3 res(0.0f, 0.0f, 0.0f);
     res.x = VertexArray[index][0];
     res.y = VertexArray[index][1];
@@ -711,11 +779,21 @@ vec3 RoadSimple::getCoordOfPoint(int index)
 
 void RoadSimple::setDescription(const QString &description)
 {
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadSimple::setDescription(const QString &description)\n";
     this->description = description;
 }
 
 void RoadSimple::drawDescription(QGLWidget *render, float red, float green, float blue)
 {
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadSimple::drawDescription(QGLWidget *render, float red, float green, float blue)";
+    if (render == NULL)
+    {
+        if (log)
+            Logger::getLogger()->warningLog() << "RoadSimple::drawDescription(QGLWidget *render, float red, float green, float blue), render = NULL";
+        return;
+    }
     glColor3f(red, green, blue);
     if (render && description[0] != '\0')
     {
@@ -736,11 +814,8 @@ void RoadSimple::drawDescription(QGLWidget *render, float red, float green, floa
 
 void RoadSimple::drawSelectionFrame()
 {
-    if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
-    {
-        //qDebug() << "Index " << indexOfSelectedControl;
-        drawControlElement(indexOfSelectedControl, 5.0f, 10.0);
-    }
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::drawSelectionFrame()\n";
     // Боковые грани для изменения размера
     glVertexPointer(3, GL_FLOAT, 0, VertexArray);
     glColorPointer(3, GL_FLOAT, 0, ColorArrayForSelection);
@@ -771,18 +846,17 @@ void RoadSimple::drawSelectionFrame()
         glVertex3f(vertexArrayLeft[27],vertexArrayLeft[28],vertexArrayLeft[29]);
         glEnd();
     }
-    // Угловые точки для изменения размера
-
-
-    // Точки для вращения
-
-
 
 }
 
 
 void RoadSimple::move(float dx, float dy, float dz)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::move(float dx, float dy, float dz)"
+                                       << " dx = " << dx
+                                       << " dy = " << dy
+                                       << " dz = " << dz << "\n";
     if (fixed)
     {
         return;
@@ -813,6 +887,11 @@ void RoadSimple::move(float dx, float dy, float dz)
 
 void RoadSimple::drawControlElement(int index, float lineWidth, float pointSize)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::drawControlElement(int index, float lineWidth, float pointSize)"
+                                       << " index = " << index
+                                       << " lineWidth = " << lineWidth
+                                       << " pointSize = " << pointSize << "\n";
     int lineControls = getNumberOfControls() - 12;
     if (index >= lineControls)
     {
@@ -992,7 +1071,13 @@ void RoadSimple::drawControlElement(int index, float lineWidth, float pointSize)
 
 void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y)
 {
-    //qDebug() << "RoadSimle index:" << index << "dx:" << dx << "dy:" << dy;
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y)"
+                                       << " index = " << index
+                                       << " dx = " << dx
+                                       << " dy = " << dy
+                                       << " x = " << x
+                                       << " y = " << y << "\n";
     if (fixed)
     {
         return;
@@ -1423,6 +1508,8 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
 
 int RoadSimple::getNumberOfControls()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::getNumberOfControls()\n";
     int roadControls = 12;
     int lineControls = 0;
     for (int i = 0; i < lines.size(); ++i)
@@ -1432,20 +1519,28 @@ int RoadSimple::getNumberOfControls()
 
 void RoadSimple::changeColorOfSelectedControl(int index)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::changeColorOfSelectedControl(int index)"
+                                       << " index = " << index << "\n";
     indexOfSelectedControl = index;
     //qDebug() << "ROAD CONTROL COLOR CHANGED";
 }
 
 QCursor RoadSimple::getCursorForControlElement(int index)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::getCursorForControlElement(int index)"
+                                       << " index = " << index << "\n";
     return Qt::CrossCursor;
 
 }
 
 bool RoadSimple::hasPoint(GLfloat x, GLfloat y)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::hasPoint(GLfloat x, GLfloat y)"
+                                       << " x = " << x
+                                       << " y = " << y << "\n";
     if (x >= VertexArray[0][0] &&
             x <= VertexArray[2][0] &&
             y >= VertexArray[0][1] &&
@@ -1461,6 +1556,17 @@ bool RoadSimple::hasPoint(GLfloat x, GLfloat y)
 
 QPoint RoadSimple::getCoorninateOfPointControl(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::getCoorninateOfPointControl(int index)"
+                                       << " index = " << index << "\n";
+    if (index < 0 || index > 3)
+    {
+        QMessageBox::critical(0, "Ошибка", "RoadSimple::getCoorninateOfPointControl(int index) index out of range",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->errorLog() << "RoadSimple::getCoorninateOfPointControl(int index) index out of range\n";
+        QApplication::exit(0);
+    }
     QPoint p;
     p.setX(VertexArray[index][0]);
     p.setY(VertexArray[index][1]);
@@ -1471,6 +1577,8 @@ QPoint RoadSimple::getCoorninateOfPointControl(int index)
 
 QJsonObject RoadSimple::getJSONInfo()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::getJSONInfo()\n";
     QJsonObject element;
     element["Name"] = name;
     element["Layer"] = layer;
@@ -1507,6 +1615,9 @@ QJsonObject RoadSimple::getJSONInfo()
 
 void RoadSimple::setSelectedStatus(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setSelectedStatus(bool status)"
+                                       << " status = " << status << "\n";
     selected = status;
     for (int i = 0; i < lines.size(); ++i)
         lines[i].line->setSelectedStatus(status);
@@ -1515,7 +1626,8 @@ void RoadSimple::setSelectedStatus(bool status)
 
 void RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)
 {
-    Logger::getLogger()->writeLog("RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)");
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)\n";
     this->layout = layout;
     this->render = render;
 
@@ -1624,6 +1736,8 @@ void RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)
 
 void RoadSimple::resetLines()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::resetLines()\n";
     /*
     float r = width / 2.0f;
     float dx = sqrt(r*r*(y2-y1)*(y2-y1)/((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1)));
@@ -1840,6 +1954,9 @@ void RoadSimple::resetLines()
 
 void RoadSimple::setWidth(double width)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setWidth(double width)"
+                                       << " width = " << width << "\n";
     if (this->width != width)
     {
         float temp = this->width;
@@ -1861,6 +1978,9 @@ void RoadSimple::setWidth(double width)
 
 void RoadSimple::setRightWidth(double width)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setRightWidth(double width)"
+                                       << " width = " << width << "\n";
     if (this->rightWidth != width)
     {
         float temp = this->rightWidth;
@@ -1880,6 +2000,9 @@ void RoadSimple::setRightWidth(double width)
 
 void RoadSimple::setLeftWidth(double width)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setLeftWidth(double width)"
+                                       << " width = " << width << "\n";
     if (this->leftWidth != width)
     {
         float temp = this->leftWidth;
@@ -1899,6 +2022,9 @@ void RoadSimple::setLeftWidth(double width)
 
 void RoadSimple::setLength(double length)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setLength(double length)"
+                                       << " length = " << length << "\n";
     if (this->length != length)
     {
         x2 = x1 + (x2 - x1) * (length / this->length);
@@ -1916,16 +2042,25 @@ void RoadSimple::setLength(double length)
 
 void RoadSimple::setRightBoardShowStatus(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setRightBoardShowStatus(bool status)"
+                                       << " status = " << status << "\n";
     showRightBoard = status;
 }
 
 void RoadSimple::setLeftBoardShowStatus(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setLeftBoardShowStatus(bool status)"
+                                       << " status = " << status << "\n";
     showLeftBoard = status;
 }
 
 void RoadSimple::setRightBoardWidth(double width)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setRightBoardWidth(double width)"
+                                       << " width = " << width << "\n";
     if (rightBoardWidth == width)
         return;
     rightBoardWidth = width;
@@ -1935,6 +2070,9 @@ void RoadSimple::setRightBoardWidth(double width)
 
 void RoadSimple::setLeftBoardWidth(double width)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setLeftBoardWidth(double width)"
+                                       << " width = " << width << "\n";
     if (leftBoardWidth == width)
         return;
     leftBoardWidth = width;
@@ -1944,7 +2082,16 @@ void RoadSimple::setLeftBoardWidth(double width)
 
 void RoadSimple::addLine(float step, QString textureSource, float textureSize, float lineWidth, int lineType, bool rightSide, float beginStep, float endStep)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::addLine(float step, QString textureSource, float textureSize, float lineWidth, int lineType, bool rightSide, float beginStep, float endStep)"
+                                       << " step = " << step
+                                       << " textureSource = " << textureSource
+                                       << " textureSize = " << textureSize
+                                       << " lineWidth = " << lineWidth
+                                       << " lineType = " << lineType
+                                       << " rightSide = " << rightSide
+                                       << " beginStep = " << beginStep
+                                       << " endStep = " << endStep << "\n";
     float line_x1, line_x2, line_y1, line_y2;
     float r1;
     if (!rightSide)
@@ -2174,6 +2321,8 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
 
 void RoadSimple::addLine()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::addLine()\n";
     //qDebug() << "Add line";
     QString textSource;
     float lWidth;
@@ -2237,47 +2386,70 @@ void RoadSimple::addLine()
 
 void RoadSimple::setRightSide(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setRightSide(bool status)"
+                                       << " status = " << status << "\n";
     rightSide = status;
     ////qDebug() << "Road right side " << status;
 }
 
 void RoadSimple::setBeginSide(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setBeginSide(bool status)"
+                                       << " status = " << status << "\n";
     beginSide = status;
 }
 
 void RoadSimple::setBeginRounding(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setBeginRounding(bool status)"
+                                       << " status = " << status << "\n";
     beginRounding = status;
     //qDebug() << "Begin rounding" << beginRounding;
 }
 
 void RoadSimple::setEndRounding(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setEndRounding(bool status)"
+                                       << " status = " << status << "\n";
     endRounding = status;
     //qDebug() << "End rounding" << endRounding;
 }
 
 void RoadSimple::setDifferentDirections(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setDifferentDirections(bool status)"
+                                       << " status = " << status << "\n";
     differentDirections = status;
     //qDebug() << "RoadSimple::setDifferentDirections";
 }
 
 void RoadSimple::setStep(double value)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setStep(double value)"
+                                       << " value = " << value << "\n";
     step = value;
     ////qDebug() << "Road step " << step;
 }
 
 void RoadSimple::setLineType(int type)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setLineType(int type)"
+                                       << " type = " << type << "\n";
     lineType = type;
     ////qDebug() << "Road type " << type;
 }
 
 void RoadSimple::deleteLine()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::deleteLine()\n";
     QPushButton * b = qobject_cast<QPushButton*>(sender());
     if (!b) return;
     ////qDebug() << "delete line " << b->text();
@@ -2307,50 +2479,80 @@ void RoadSimple::deleteLine()
 
 void RoadSimple::setBeginStep(double step)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setBeginStep(double step)"
+                                       << " step = " << step << "\n";
     beginStep = step;
     //qDebug() << "Begin step";
 }
 
 void RoadSimple::setEndStep(double step)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setEndStep(double step)"
+                                       << " step = " << step << "\n";
     endStep = step;
     //qDebug() << "End step";
 }
 
 void RoadSimple::setSplitZoneWidth(double value)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setSplitZoneWidth(double value)"
+                                       << " value = " << value << "\n";
     splitZoneWidth = value;
 }
 
 void RoadSimple::setSingleWay(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setSingleWay(bool status)"
+                                       << " status = " << status << "\n";
     singleWay = status;
 }
 
 void RoadSimple::setAxisStep(double step)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setAxisStep(double step)"
+                                       << " step = " << step << "\n";
     axisStep = step;
 }
 
 void RoadSimple::setSplitZoneType(int type)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setSplitZoneType(int type)"
+                                       << " type = " << type << "\n";
     splitZoneType = type;
 }
 
 void RoadSimple::setSplitZoneHeight(double height)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setSplitZoneHeight(double height)"
+                                       << " height = " << height << "\n";
     splitZoneHeight = height;
 }
 
 
 bool RoadSimple::isFixed()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::isFixed()\n";
     return fixed;
 }
 
 
 void RoadSimple::drawMeasurements(QGLWidget *render)
 {
+    if (log)
+    {
+        Logger::getLogger()->infoLog() << "RoadSimple::drawMeasurements(QGLWidget *render)\n";
+        if (render == NULL)
+            Logger::getLogger()->warningLog() << "RoadSimple::drawMeasurements(QGLWidget *render) render = NULL\n";
+    }
+
     GLdouble x, y, z;
     GLdouble wx, wy, wz;
     QFont shrift = QFont("Times", 8, QFont::Bold);
@@ -2446,34 +2648,53 @@ void RoadSimple::drawMeasurements(QGLWidget *render)
 
 bool RoadSimple::setFixed(bool fixed)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setFixed(bool fixed)"
+                                       << " fixed = " << fixed << "\n";
     this->fixed = fixed;
 }
 
 
 int RoadSimple::getLayer()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::getLayer()\n";
     return layer;
 }
 
 
 void RoadSimple::clear()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::clear()\n";
     //qDebug() << "RoadSimple::clear()";
 }
 
 float RoadSimple::getRightBoardWidth()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::getRightBoardWidth()\n";
     return rightBoardWidth;
 }
 
 float RoadSimple::getLeftBoardWidth()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::getLeftBoardWidth()\n";
     return leftBoardWidth;
+}
+
+void RoadSimple::setLogging(bool status)
+{
+    log = status;
 }
 
 
 std::vector<vec3> RoadSimple::getCoordOfControl(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::getCoordOfControl(int index)"
+                                       << " index = " << index << "\n";
     std::vector<vec3> res;
     switch(index)
     {
@@ -2581,11 +2802,13 @@ std::vector<vec3> RoadSimple::getCoordOfControl(int index)
 
 void RoadSimple::clearProperties(QLayout *layout)
 {
-    Logger::getLogger()->writeLog("RoadSimple::clearProperties(QLayout *layout)");
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::clearProperties(QLayout *layout)\n";
     if (layout == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "QLayout *layout = NULL, cannot clearProperties, program terminates");
-        Logger::getLogger()->writeLog("QLayout *layout = NULL, cannot clearProperties, program terminates");
+        if (log)
+        Logger::getLogger()->warningLog() << "QLayout *layout = NULL, cannot clearProperties, program terminates\n";
         QApplication::exit(0);
     }
     disconnect(stepDialog, 0, this, 0);
@@ -2600,6 +2823,16 @@ void RoadSimple::clearProperties(QLayout *layout)
 
 void RoadSimple::deleteLine(RoadElement *line)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::deleteLine(RoadElement *line)\n";
+    if (line == NULL)
+    {
+        QMessageBox::critical(0, "Ошибка", "RoadSimple::deleteLine(RoadElement *line) line = NULL",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->errorLog() << "RoadSimple::deleteLine(RoadElement *line) line = NULL\n";
+        QApplication::exit(0);
+    }
     int index = -1;
     for (int i = 0; i < lines.size(); ++i)
     {

@@ -33,15 +33,16 @@ private:
     bool fixed;
     QList<RoadElement*> elements;
     int layer;
-
+    static bool log;
     // RoadElement interface
 public slots:
     virtual bool setFixed(bool fixed);
+    static void setLogging(bool status);
 
     // RoadElement interface
 public:
     virtual int getLayer();
-
+    static bool getLogging() { return log; }
     // RoadElement interface
 public:
     virtual void deleteElement(int index);

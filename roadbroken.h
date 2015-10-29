@@ -93,7 +93,7 @@ protected:
     double splitZoneHeight;
     QFormLayout* layout;
     QGLWidget* render;
-
+    static bool log;
 public:
     void setVertexArray(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, GLfloat width);
     void setVertexArray(QVector<GLfloat>& vertexArray);
@@ -142,7 +142,7 @@ public:
 
     virtual QJsonObject getJSONInfo();
     void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
-
+    static bool getLogging() { return log; }
 signals:
     void rightBoardWidthChanged(double width);
     void leftBoardWidthChanged(double width);
@@ -150,6 +150,7 @@ signals:
     void linesChanged(QFormLayout* layout, QGLWidget* render);
 
 public slots:
+    static void setLogging(bool status);
     virtual bool setFixed(bool fixed);
 
     void setRightBoardShowStatus(bool status);
