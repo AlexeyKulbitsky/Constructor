@@ -3,6 +3,8 @@
 //#include "_3dsfilemanager.h"
 #include <QApplication>
 
+bool SelectedState::log = true;
+
 SelectedState::SelectedState()
 {
     this->stateManager = NULL;
@@ -21,32 +23,37 @@ SelectedState::SelectedState()
 
 SelectedState::SelectedState(StateManager *manager, Model *model, Scene2D* scene, QFormLayout *properties)
 {
-    Logger::getLogger()->writeLog("Creating SelectedState");
+    if (log)
+    Logger::getLogger()->infoLog() << "Creating SelectedState\n";
     if (manager == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Cannot create SelectedState: StateManager = NULL, program terminates");
-        Logger::getLogger()->writeLog("Cannot create SelectedState: StateManager = NULL, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Cannot create SelectedState: StateManager = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->stateManager = manager;
     if (model == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Cannot create SelectedState: Model = NULL, program terminates");
-        Logger::getLogger()->writeLog("Cannot create SelectedState: Model = NULL, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Cannot create SelectedState: Model = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->model = model;
     if (scene == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Cannot create SelectedState: Scene2D = NULL, program terminates");
-        Logger::getLogger()->writeLog("Cannot create SelectedState: Scene2D = NULL, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Cannot create SelectedState: Scene2D = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->scene = scene;
     if (properties == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Cannot create SelectedState: QFormLayout(properties) = NULL, program terminates");
-        Logger::getLogger()->writeLog("Cannot create SelectedState: QFormLayout(properties) = NULL, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Cannot create SelectedState: QFormLayout(properties) = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->properties = properties;
@@ -67,7 +74,8 @@ SelectedState::SelectedState(StateManager *manager, Model *model, Scene2D* scene
 
 void SelectedState::mousePressEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("SelectedState::mousePressEvent(QMouseEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::mousePressEvent(QMouseEvent *pe)\n";
     ptrMousePosition = pe->pos();
     switch (pe->button())
     {
@@ -109,6 +117,8 @@ void SelectedState::mousePressEvent(QMouseEvent *pe)
         {
             controlIsSelected = true;
             controlIndex = index;
+            oldX = selectedElement->getCoordOfControl(controlIndex)[0].x;
+            oldY = selectedElement->getCoordOfControl(controlIndex)[0].y;
             scene->setCursor(selectedElement->getCursorForControlElement(index));
             scene->updateGL();
             scene->setFocus();
@@ -152,6 +162,8 @@ void SelectedState::mousePressEvent(QMouseEvent *pe)
                 else
                 {
                     figureIsSelected = true;
+                    oldX = selectedElement->getElementX();
+                    oldY = selectedElement->getElementY();
                 }
             }
             else
@@ -186,7 +198,8 @@ void SelectedState::mousePressEvent(QMouseEvent *pe)
 
 void SelectedState::mouseMoveEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("SelectedState::mouseMoveEvent(QMouseEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::mouseMoveEvent(QMouseEvent *pe)\n";
     if (rightButtonIsPressed == true)
     {
         // двигать камеру
@@ -243,8 +256,8 @@ void SelectedState::mouseMoveEvent(QMouseEvent *pe)
                     float dX = (GLfloat)(pe->x()-ptrMousePosition.x())/
                             scene->width()/(scene->nSca * scene->ratio) * 2.0;
 
-                    //selectedElement->move(dX, dY);
-                    RoadElement::undoStack->push(new MoveCommand(selectedElement, dX, dY));
+                    selectedElement->move(dX, dY);
+                    //RoadElement::undoStack->push(new MoveCommand(selectedElement, dX, dY));
                     scene->updateGL();
                     model->setModified(true);
                     ptrMousePosition = pe->pos();
@@ -297,13 +310,33 @@ void SelectedState::mouseMoveEvent(QMouseEvent *pe)
 
 void SelectedState::mouseReleaseEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("SelectedState::mouseReleaseEvent(QMouseEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::mouseReleaseEvent(QMouseEvent *pe)\n";
     if(pe->button() == Qt::RightButton)
     {
         rightButtonIsPressed = false;
     }
     if(pe->button() == Qt::LeftButton)
     {       
+        if (controlIsSelected)
+        {
+            newX = selectedElement->getCoordOfControl(controlIndex)[0].x;
+            newY = selectedElement->getCoordOfControl(controlIndex)[0].y;
+            float dx = newX - oldX;
+            float dy = newY - oldY;
+            selectedElement->resizeByControl(controlIndex, (-1.0f)*dx, (-1.0f)*dy, newX, newY);
+            RoadElement::undoStack->push(new ResizeByControlCommand(selectedElement, controlIndex,oldX, oldY, dx, dy, scene));
+        } else
+        if (figureIsSelected)
+        {
+
+            newX = selectedElement->getElementX();
+            newY = selectedElement->getElementY();
+            float dx = newX - oldX;
+            float dy = newY - oldY;
+            selectedElement->move((-1.0f)*dx, (-1.0f)*dy);
+            RoadElement::undoStack->push(new MoveCommand(selectedElement, dx, dy, scene));
+        }
         leftButtonIsPressed = false;
         figureIsSelected = false;
         controlIsSelected = false;
@@ -313,7 +346,8 @@ void SelectedState::mouseReleaseEvent(QMouseEvent *pe)
 
 void SelectedState::wheelEvent(QWheelEvent *pe)
 {
-    Logger::getLogger()->writeLog("SelectedState::wheelEvent(QWheelEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::wheelEvent(QWheelEvent *pe)\n";
     if ((pe->delta())>0) scene->scalePlus();
     else
         if ((pe->delta())<0) scene->scaleMinus();
@@ -462,19 +496,22 @@ void SelectedState::keyPressEvent(QKeyEvent *pe)
     default:
         break;
     }
-    Logger::getLogger()->writeLog(QString("SelectedState::keyPressEvent(QKeyEvent *pe), key = ") + s);
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::keyPressEvent(QKeyEvent *pe), key = " << s << "\n";
     scene->updateGL();
 }
 
 void SelectedState::dragEnterEvent(QDragEnterEvent *event)
 {
-    Logger::getLogger()->writeLog("SelectedState::dragEnterEvent(QDragEnterEvent *event)");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::dragEnterEvent(QDragEnterEvent *event)\n";
     event->acceptProposedAction();
 }
 
 void SelectedState::dropEvent(QDropEvent *event)
 {
-    Logger::getLogger()->writeLog("SelectedState::dropEvent(QDropEvent *event)");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::dropEvent(QDropEvent *event)\n";
     GLint viewport[4];
     GLdouble modelview[16];
     GLdouble projection[16];
@@ -502,20 +539,23 @@ void SelectedState::dropEvent(QDropEvent *event)
 
 void SelectedState::setSelectedElement(int elementIndex, int groupIndex)
 {
-    Logger::getLogger()->writeLog("SelectedState::setSelectedElement(int elementIndex = " + QString::number(elementIndex) +
-                                  ", int groupIndex = " + QString::number(groupIndex) + ")");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::setSelectedElement(int elementIndex = "
+                                   << elementIndex << ", int groupIndex = " << groupIndex << ")\n";
     if (groupIndex >= model->getNumberOfGroups() || groupIndex < 0)
     {
         QMessageBox::critical(0, "Ошибка", "In model group index = " + QString::number(groupIndex) + " out of range",
                               QMessageBox::Yes);
-        Logger::getLogger()->writeLog("In model group index = " + QString::number(groupIndex) + " out of range");
+        if (log)
+        Logger::getLogger()->errorLog() << "In model group index = " << groupIndex << " out of range\n";
         QApplication::exit(0);
     }
     if (elementIndex >= model->getGroup(groupIndex).size() || elementIndex < 0)
     {
         QMessageBox::critical(0, "Ошибка", "In model element index = " + QString::number(elementIndex) + " out of range",
                               QMessageBox::Yes);
-        Logger::getLogger()->writeLog("In model element index = " + QString::number(elementIndex) + " out of range");
+        if (log)
+        Logger::getLogger()->errorLog() << "In model element index = " << elementIndex << " out of range\n";
         QApplication::exit(0);
     }
     this->elementIndex = elementIndex;
@@ -524,15 +564,26 @@ void SelectedState::setSelectedElement(int elementIndex, int groupIndex)
 
 void SelectedState::setSelectedElement(RoadElement *element)
 {
-    Logger::getLogger()->writeLog("SelectedState::setSelectedElement(RoadElement *element)");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::setSelectedElement(RoadElement *element)\n";
     if (element == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "RoadElement* element = NULL, program terminates",
                               QMessageBox::Yes);
-        Logger::getLogger()->writeLog("RoadElement* element = NULL, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "RoadElement* element = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->selectedElement = element;
+}
+
+void SelectedState::setLogging(bool status)
+{
+    log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "SelectedState::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
 }
 
 SelectedState::~SelectedState()
@@ -556,11 +607,13 @@ SelectedState::~SelectedState()
 
 void SelectedState::clearProperties(QFormLayout *layout)
 {
-    Logger::getLogger()->writeLog("SelectedState::clearProperties(QFormLayout *layout)");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::clearProperties(QFormLayout *layout)\n";
     if (layout == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "QFormLayout *layout = NULL, cannot claerProperties, program terminates");
-        Logger::getLogger()->writeLog("QFormLayout *layout = NULL, cannot claerProperties, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "QFormLayout *layout = NULL, cannot claerProperties, program terminates\n";
         QApplication::exit(0);
     }
     while(layout->count() > 0)
@@ -575,7 +628,8 @@ void SelectedState::clearProperties(QFormLayout *layout)
 
 bool SelectedState::tryToSelectFigures(QPoint mp, QList<RoadElement*>& elements)
 {
-    Logger::getLogger()->writeLog("SelectedState::tryToSelectFigures(QPoint mp, QList<RoadElement*>& elements)");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::tryToSelectFigures(QPoint mp, QList<RoadElement*>& elements)\n";
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
     GLint viewport[4]; // декларируем матрицу поля просмотра
     glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
@@ -625,8 +679,9 @@ bool SelectedState::tryToSelectFigures(QPoint mp, QList<RoadElement*>& elements)
 
 
     hitsForFigure=glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
-    Logger::getLogger()->writeLog(QString("SelectedState::tryToSelectFigures(QPoint mp, QList<RoadElement*>& elements), hits = ") +
-                                  QString::number(hitsForFigure));
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::tryToSelectFigures(QPoint mp, QList<RoadElement*>& elements), hits = "
+                                   << hitsForFigure << "\n";
     if (hitsForFigure > 0) // есть совпадания и нет ошибок
     {
         glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
@@ -645,7 +700,8 @@ bool SelectedState::tryToSelectFigures(QPoint mp, QList<RoadElement*>& elements)
 
 bool SelectedState::tryToSelectAllFigures(QPoint mp)
 {
-    Logger::getLogger()->writeLog("SelectedState::tryToSelectAllFigures(QPoint mp)");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::tryToSelectAllFigures(QPoint mp)\n";
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
     GLint viewport[4]; // декларируем матрицу поля просмотра
     glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
@@ -702,8 +758,9 @@ bool SelectedState::tryToSelectAllFigures(QPoint mp)
 
     hitsForFigure=glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
 
-    Logger::getLogger()->writeLog(QString("SelectedState::tryToSelectAllFigures(QPoint mp), hits = ") +
-                                  QString::number(hitsForFigure));
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::tryToSelectAllFigures(QPoint mp), hits = "
+                                   << hitsForFigure << "\n";
     if (hitsForFigure > 0) // есть совпадания и нет ошибок
     {
         i = selectBuffer[3] - 1; // имя фигуры верхняя фигура
@@ -747,7 +804,8 @@ bool SelectedState::tryToSelectAllFigures(QPoint mp)
 
 bool SelectedState::tryToSelectControlsInSelectedFigure(QPoint mp)
 {
-    Logger::getLogger()->writeLog("SelectedState::tryToSelectControlsInSelectedFigure(QPoint mp)");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::tryToSelectControlsInSelectedFigure(QPoint mp)\n";
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
     GLint viewport[4]; // декларируем матрицу поля просмотра
     glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
@@ -800,9 +858,9 @@ bool SelectedState::tryToSelectControlsInSelectedFigure(QPoint mp)
 
 
     hitsForControl = glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
-
-    Logger::getLogger()->writeLog(QString("SelectedState::tryToSelectControlsInSelectedFigure(QPoint mp), hits = ") +
-                                  QString::number(hitsForControl));
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::tryToSelectControlsInSelectedFigure(QPoint mp), hits = "
+                                   << hitsForControl << "\n";
     if (hitsForControl > 0) // есть совпадания и нет ошибок
     {
         //controlIndex = selectBuffer[hitsForControl * 4 - 1] - 1;
@@ -824,7 +882,8 @@ bool SelectedState::tryToSelectControlsInSelectedFigure(QPoint mp)
 
 bool SelectedState::tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement *element, int &index)
 {
-    Logger::getLogger()->writeLog("SelectedState::tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement *element, int &index), hits = ");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement *element, int &index)\n";
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
     GLint viewport[4]; // декларируем матрицу поля просмотра
     glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
@@ -874,9 +933,9 @@ bool SelectedState::tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement *
 
 
     hitsForControl = glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
-
-    Logger::getLogger()->writeLog(QString("SelectedState::tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement *element, int &index), hits = ") +
-                                  QString::number(hitsForControl));
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement *element, int &index), hits = "
+                                   << hitsForControl << "\n";
     if (hitsForControl > 0) // есть совпадания и нет ошибок
     {
         index = selectBuffer[3] - 1;
@@ -894,7 +953,8 @@ bool SelectedState::tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement *
 
 bool SelectedState::tryToSelectFigures(QPoint mp, RoadElement *&element)
 {
-    Logger::getLogger()->writeLog("SelectedState::tryToSelectFigures(QPoint mp, RoadElement *&element)");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::tryToSelectFigures(QPoint mp, RoadElement *&element)\n";
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
     GLint viewport[4]; // декларируем матрицу поля просмотра
     glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
@@ -948,9 +1008,9 @@ bool SelectedState::tryToSelectFigures(QPoint mp, RoadElement *&element)
     }
 
     hitsForFigure = glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
-
-    Logger::getLogger()->writeLog(QString("SelectedState::tryToSelectFigures(QPoint mp, RoadElement *&element), hits = ") +
-                                  QString::number(hitsForFigure));
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::tryToSelectFigures(QPoint mp, RoadElement *&element), hits = "
+                                   << hitsForFigure << "\n";
 
     if (hitsForFigure > 0) // есть совпадания и нет ошибок
     {
@@ -984,7 +1044,8 @@ bool SelectedState::tryToSelectFigures(QPoint mp, RoadElement *&element)
 
 void SelectedState::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)
 {
-    Logger::getLogger()->writeLog("SelectedState::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)\n";
     GLint viewport[4];
     GLdouble mvmatrix[16], projmatrix[16];
 
@@ -1025,7 +1086,8 @@ void SelectedState::createActions()
 
 void SelectedState::combineElements()
 {
-    Logger::getLogger()->writeLog("SelectedState::combineElements()");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::combineElements()\n";
     if (selectedElements.size() > 1)
     {
         CompositeRoad* element = new CompositeRoad();
@@ -1062,7 +1124,8 @@ void SelectedState::combineElements()
 
 void SelectedState::breakElements()
 {
-    Logger::getLogger()->writeLog("SelectedState::breakElements()");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::breakElements()\n";
     if (selectedElement->getName() != "CompositeRoad")
         return;
     for (int i = 0; i < selectedElement->getNumberOfElements(); ++i)
@@ -1076,7 +1139,8 @@ void SelectedState::breakElements()
 
 void SelectedState::clear()
 {
-    Logger::getLogger()->writeLog("SelectedState::clear()");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::clear()\n";
     selectedElement = NULL;
     rightButtonIsPressed = false;
     leftButtonIsPressed = false;
@@ -1098,7 +1162,8 @@ void SelectedState::clear()
 
 void SelectedState::keyReleaseEvent(QKeyEvent *pe)
 {
-    Logger::getLogger()->writeLog("SelectedState::keyReleaseEvent(QKeyEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::keyReleaseEvent(QKeyEvent *pe)\n";
     if (pe->key() == Qt::Key_Control)
     {
         keyboardKey = 0;
@@ -1108,14 +1173,16 @@ void SelectedState::keyReleaseEvent(QKeyEvent *pe)
 
 QString SelectedState::getName()
 {
-    Logger::getLogger()->writeLog("SelectedState::getName()");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::getName()\n";
     return "SelectedState";
 }
 
 
 void SelectedState::contextMenuEvent(QContextMenuEvent *pe)
 {
-    Logger::getLogger()->writeLog("SelectedState::contextMenuEvent(QContextMenuEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::contextMenuEvent(QContextMenuEvent *pe)\n";
     if (selectedElements.size() > 1)
     {
         if (tryToSelectFigures(pe->pos(), selectedElements) == true)
@@ -1143,7 +1210,8 @@ void SelectedState::contextMenuEvent(QContextMenuEvent *pe)
 
 bool SelectedState::tryToSelectFigures(QPoint mp)
 {
-    Logger::getLogger()->writeLog("SelectedState::tryToSelectFigures(QPoint mp)");
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::tryToSelectFigures(QPoint mp)\n";
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
     GLint viewport[4]; // декларируем матрицу поля просмотра
     glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
@@ -1190,9 +1258,9 @@ bool SelectedState::tryToSelectFigures(QPoint mp)
 
 
     hitsForFigure = glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
-
-    Logger::getLogger()->writeLog(QString("SelectedState::tryToSelectFigures(QPoint mp), hits = ") +
-                                  QString::number(hitsForFigure));
+    if (log)
+    Logger::getLogger()->infoLog() << "SelectedState::tryToSelectFigures(QPoint mp), hits = "
+                                   << hitsForFigure << "\n";
 
     if (hitsForFigure > 0) // есть совпадания и нет ошибок
     {

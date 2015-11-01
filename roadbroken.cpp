@@ -1896,6 +1896,10 @@ void RoadBroken::setColorArrayForSelectionFrame(float red, float green, float bl
 void RoadBroken::setLogging(bool status)
 {
     log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "RoadBroken::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
 }
 
 
@@ -3043,11 +3047,6 @@ void RoadBroken::getProperties(QFormLayout *layout, QGLWidget* render)
     clearProperties(layout);
     this->layout = layout;
     this->render = render;
-    while(QLayoutItem* child = layout->takeAt(0))
-    {
-        delete child->widget();
-        delete child;
-    }
 
     QCheckBox* showRightBoardCheckBox = new QCheckBox();
     QCheckBox* showLeftBoardCheckBox = new QCheckBox();
@@ -3901,10 +3900,11 @@ void RoadBroken::clearProperties(QLayout *layout)
     disconnect(stepDialog, SIGNAL(endRoundingChanged(bool)), this, SLOT(setEndRounding(bool)));
     disconnect(stepDialog, SIGNAL(splitZoneWidthChanged(double)), this, SLOT(setSplitZoneWidth(double)));
     disconnect(stepDialog, SIGNAL(accepted()), this, SLOT(addLine()));
-    while(QLayoutItem* child = layout->takeAt(0))
+    while(layout->count() > 0)
     {
-        delete child->widget();
-        delete child;
+        QLayoutItem *item = layout->takeAt(0);
+        delete item->widget();
+        delete item;
     }
 }
 

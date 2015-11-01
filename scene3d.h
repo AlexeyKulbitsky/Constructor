@@ -24,7 +24,7 @@ public:
     void rotateDown();
     void rotateLeft();
     void rotateRight();
-
+    static bool getLogging() { return log; }
     // QWidget interface
 protected:
     virtual void mousePressEvent(QMouseEvent *);
@@ -43,7 +43,7 @@ protected:
 signals:
 
 public slots:
-
+    static void setLogging(bool status);
 public:
     bool rightButtonIsPressed;
     bool leftButtonIsPressed;
@@ -68,6 +68,8 @@ public:
 private:
     StateManager* stateManager;
     Model* model;
+
+    static bool log;
 };
 
 #endif // SCENE3D_H

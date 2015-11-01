@@ -34,6 +34,7 @@ public:
     void createToolBar();
 
     Scene2D* scene2D;
+    Scene3D* scene3D;
     QGraphicsScene *scene;
     SettingsDialog* settingsDialog;
 
@@ -54,6 +55,7 @@ public:
     QMenu* fileMenu;
     QMenu* editMenu;
     QMenu* toolsMenu;
+    QMenu* optionsMenu;
     QMenu* contextMenu;
 
     QAction* newAction;
@@ -77,6 +79,8 @@ public:
 
     QAction *undoAction;
     QAction *redoAction;
+
+    QAction *optionsAction;
 
     QUndoStack *undoStack;
 

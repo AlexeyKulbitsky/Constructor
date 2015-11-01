@@ -8,7 +8,7 @@ class RoadElement;
 
 
 //#include "road.h"
-//#include "roundingroad.h"
+#include "roundingroad.h"
 
 
 #include "linesimple.h"

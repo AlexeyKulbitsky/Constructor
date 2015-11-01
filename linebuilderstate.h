@@ -45,6 +45,8 @@ private:
     int key;
 
     bool linking;
+
+    static bool log;
     // State interface
 public:
     virtual void mousePressEvent(QMouseEvent *pe);
@@ -68,6 +70,9 @@ public:
     void setGroupIndex(int index);
     void setElementIndex(int index);
     void clear();
+
+    static void setLogging(bool status);
+    static bool getLogging() { return log; }
 public:
     bool useColor;
 

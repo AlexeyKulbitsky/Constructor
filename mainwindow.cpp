@@ -26,10 +26,12 @@ MainWindow::MainWindow(QWidget *parent) :
 {    
     Logger::getLogger()->startLogging();
     ui->setupUi(this);
-    //settingsDialog = new SettingsDialog(this);
 
-    //RoadElement::undoStack = new QUndoStack(this);
-    //undoStack = RoadElement::undoStack;
+    settingsDialog = new SettingsDialog(&settings, this);
+
+
+    RoadElement::undoStack = new QUndoStack(this);
+    undoStack = RoadElement::undoStack;
 
     model = new Model(this);
 
@@ -47,7 +49,6 @@ MainWindow::MainWindow(QWidget *parent) :
     propertiesScrollArea->setWidgetResizable(true);
     addDockWidget(Qt::RightDockWidgetArea, propertiesDockWidget);
 
-
     scenePropertiesDockWidget = new QDockWidget("Свойства сцены", this);
     scenePropertiesDockWidget->setFeatures(QDockWidget::DockWidgetMovable |
                                   QDockWidget::DockWidgetFloatable);
@@ -63,7 +64,6 @@ MainWindow::MainWindow(QWidget *parent) :
     addDockWidget(Qt::LeftDockWidgetArea, scenePropertiesDockWidget);
 
 
-
     QWidget* tabScene2D = new QWidget();
 
     QStackedLayout* stackedLayout = new QStackedLayout(tabScene2D);
@@ -77,17 +77,22 @@ MainWindow::MainWindow(QWidget *parent) :
     stackedLayout->addWidget(yandexMaps);
     //stackedLayout->addWidget(googleMaps);
 
-
-
-
-
     scene2D->setProperties(propertiesLayout);
     scene2D->setModel(model);
     scene2D->setAcceptDrops(true);
     scene2D->setFocus();
     ui->tabWidget->setFocusPolicy(Qt::StrongFocus);
+    ui->tabWidget->insertTab(0, tabScene2D, "Вид сверху");
+    ui->tabWidget->setCurrentIndex(0);
 
-    ui->tabWidget->addTab(tabScene2D, "Вид сверху");
+    QWidget* tabScene3D = new QWidget();
+    QGridLayout* layout = new QGridLayout(tabScene3D);
+    layout->setMargin(0);
+    scene3D = new Scene3D(tabScene3D, scene2D);
+    scene3D->setModel(model);
+    layout->addWidget(scene3D);
+    ui->tabWidget->insertTab(1, tabScene3D, "3D-вид");
+
 
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(on_tabWidget_currentChanged(int)));
 
@@ -104,11 +109,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tabWidget->setFocusPolicy(Qt::StrongFocus);
     */
 
+    createActions();
+    createMenu();
 
-
-
-    //createActions();
-    //createMenu();
      /*
     createToolBar();
     jsonFileManager = new JSONFileManager(model);
@@ -147,7 +150,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     addDockWidget(Qt::LeftDockWidgetArea, elementsDockWidget);
     this->tabifyDockWidget ( elementsDockWidget, scenePropertiesDockWidget);
-
+    elementsDockWidget->raise();
     QListWidget* objectList = new ObjectsList(elementsDockWidget);
     //connect(objectList, SIGNAL(itemClicked(QListWidgetItem*)), ui->scene2D, SLOT(listItemClicked(QListWidgetItem*)));
     elementsToolBox->addItem(objectList, "Части дорог");
@@ -212,6 +215,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    settingsDialog->saveLogTreeSettings();
     writeSettings();
     Logger::getLogger()->stopLogging();
     Logger::deleteLogger();
@@ -249,6 +253,9 @@ void MainWindow::createMenu()
 
     contextMenu = new QMenu(this);
     */
+
+    optionsMenu = menuBar()->addMenu(tr("&Настройки"));
+    optionsMenu->addAction(optionsAction);
 
 }
 
@@ -317,7 +324,7 @@ void MainWindow::createActions()
     //showGridAction->setChecked(spreadsheet->showGrid());
     showGridAction->setStatusTip(tr("Отображать/прятать координатную сетку"));
     showGridAction->setChecked(true);
-    connect(showGridAction, SIGNAL(toggled(bool)),ui->scene2D, SLOT(setShowGrid(bool)));
+    //connect(showGridAction, SIGNAL(toggled(bool)),ui->scene2D, SLOT(setShowGrid(bool)));
 
     showRoadAction = new QAction(tr("Отображать дорожное полотно"), this);
     showRoadAction->setCheckable(true);
@@ -351,6 +358,9 @@ void MainWindow::createActions()
     showProperties->setShortcut(tr("Ctrl+I"));
     connect(showProperties, SIGNAL(toggled(bool)), propertiesDockWidget, SLOT(setVisible(bool)));
     */
+    optionsAction = new QAction(tr("Настройки"), this);
+    optionsAction->setStatusTip(tr("Показать настройки приложения"));
+    connect(optionsAction, SIGNAL(triggered()), settingsDialog, SLOT(exec()));
 }
 
 void MainWindow::createToolBar()
@@ -450,11 +460,12 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     switch (index)
     {
     case 0:
+        scene2D->getProperties(scenePropertiesLayout);
         break;
     case 1:
         break;
     case 2:
-        scene2D->getProperties(scenePropertiesLayout);
+
         break;
     default:
         break;

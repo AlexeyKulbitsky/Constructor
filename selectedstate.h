@@ -42,6 +42,10 @@ private:
     int groupIndex;
     int controlIndex;
     QList<RoadElement*>::iterator elementIterator;
+
+    static bool log;
+
+    double oldX, oldY, newX, newY;
     // State interface
 public:
     virtual void mousePressEvent(QMouseEvent *pe);
@@ -55,6 +59,8 @@ public:
     virtual void dropEvent(QDropEvent *event);
     void setSelectedElement(int elementIndex, int groupIndex);
     void setSelectedElement(RoadElement* element);
+    static void setLogging(bool status);
+    static bool getLogging() { return log; }
 
 private:
     bool tryToSelectFigures(QPoint mp, QList<RoadElement *> &elements);

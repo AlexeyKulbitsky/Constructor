@@ -1,6 +1,8 @@
 #include "railway.h"
 #include "model.h"
 
+bool RailWay::log = true;
+
 RailWay::RailWay()
 {
 
@@ -49,16 +51,23 @@ RailWay::~RailWay()
 
 bool RailWay::isSelected()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::isSelected()\n";
     return selected;
 }
 
 void RailWay::setSelectedStatus(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::setSelectedStatus(bool status)"
+                                       << " status = " << status << "\n";
     selected = status;
 }
 
 void RailWay::drawFigure(QGLWidget *render)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::drawFigure(QGLWidget *render)\n";
     glDisableClientState(GL_COLOR_ARRAY);
     glEnable(GL_TEXTURE_2D);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -82,17 +91,25 @@ void RailWay::drawFigure(QGLWidget *render)
 
 void RailWay::drawSelectionFrame()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::drawSelectionFrame()\n";
     for (int i = 0; i < getNumberOfControls(); ++i)
         drawControlElement(i, 5.0f, 10.0f);
 }
 
 void RailWay::drawMeasurements(QGLWidget *render)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::drawMeasurements(QGLWidget *render)\n";
 }
 
 void RailWay::move(float dx, float dy, float dz)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::move(float dx, float dy, float dz)"
+                                       << " dx = " << dx
+                                       << " dy = " << dy
+                                       << " dz = " << dz << "\n";
     for (int i = 0; i < axisVertexArray.size() / 3; ++i)
     {
         axisVertexArray[i * 3] += dx;
@@ -107,8 +124,20 @@ void RailWay::move(float dx, float dy, float dz)
 
 void RailWay::drawControlElement(int index, float lineWidth, float pointSize)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::drawControlElement(int index, float lineWidth, float pointSize)"
+                                       << " index = " << index
+                                       << " lineWidth = " << lineWidth
+                                       << " pointSize = " << pointSize << "\n";
     if (index < 0 || index >= axisVertexArray.size() / 3)
+    {
+        QMessageBox::critical(0, "Ошибка", "RailWay::drawControlElement(int index, float lineWidth, float pointSize) index out of range",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->warningLog() << "RailWay::drawControlElement(int index, float lineWidth, float pointSize) index out of range\n";
         return;
+    }
+
     glPointSize(pointSize + 5.0f);
     glBegin(GL_POINTS);
     glColor3f(0.0f, 0.0f, 0.0f);
@@ -120,13 +149,29 @@ void RailWay::drawControlElement(int index, float lineWidth, float pointSize)
 
 QCursor RailWay::getCursorForControlElement(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::getCursorForControlElement(int index)"
+                                       << " index = " << index << "\n";
     return Qt::CrossCursor;
 }
 
 void RailWay::resizeByControl(int index, float dx, float dy, float x, float y)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::resizeByControl(int index, float dx, float dy, float x, float y)"
+                                       << " index = " << index
+                                       << " dx = " << dx
+                                       << " dy = " << dy
+                                       << " x = " << x
+                                       << " y = " << y << "\n";
     if (index < 0 || index >= axisVertexArray.size() / 3)
+    {
+        QMessageBox::critical(0, "Ошибка", "RailWay::resizeByControl(int index, float dx, float dy, float x, float y) index out of range",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->warningLog() << "RailWay::resizeByControl(int index, float dx, float dy, float x, float y) index out of range\n";
         return;
+    }
     axisVertexArray[index * 3] += dx;
     axisVertexArray[index * 3 + 1] += dy;
 
@@ -136,41 +181,64 @@ void RailWay::resizeByControl(int index, float dx, float dy, float x, float y)
 
 int RailWay::getNumberOfControls()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::getNumberOfControls()\n";
     return axisVertexArray.size() / 3;
 }
 
 int RailWay::controlsForPoint()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::controlsForPoint()\n";
     return 1;
 }
 
 void RailWay::changeColorOfSelectedControl(int index)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::changeColorOfSelectedControl(int index)"
+                                       << " index = " << index << "\n";
 }
 
 void RailWay::getProperties(QFormLayout *layout, QGLWidget *render)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::getProperties(QFormLayout *layout, QGLWidget *render)\n";
+    if (layout == NULL)
+    {
+        QMessageBox::critical(0, "Ошибка", "RailWay::getProperties(QFormLayout *layout, QGLWidget *render) layout = NULL",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->errorLog() << "RailWay::getProperties(QFormLayout *layout, QGLWidget *render) layout = NULL\n";
+        QApplication::exit(0);
+    }
 }
 
 bool RailWay::isFixed()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::isFixed()\n";
     return fixed;
 }
 
 int RailWay::getLayer()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::getLayer()\n";
     return layer;
 }
 
 void RailWay::clear()
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::clear()\n";
 }
 
 void RailWay::addBreak(bool front)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::addBreak(bool front)"
+                                       << " front = " << front << "\n";
     float x, y, z;
     if (front)
     {
@@ -198,6 +266,8 @@ void RailWay::addBreak(bool front)
 
 void RailWay::setVertexArray()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::setVertexArray()\n";
     vertexArray.clear();
     float r = 2.7f / 2.0f;
     for (int i = 0; i < axisVertexArray.size() / 3; ++i)
@@ -367,7 +437,12 @@ void RailWay::setVertexArray()
                 float y3 = axisVertexArray[(i + 1) * 3 + 1];
                 float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
                 float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
-                float alpha = (acos(num / den))/2.0f;
+                float t = num / den;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float alpha = (acos(t))/2.0f;
                 float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
                 float pi = 3.1415926f;
                 if(sa < 0) // Точка находится справа
@@ -375,9 +450,18 @@ void RailWay::setVertexArray()
                     alpha = pi - alpha;
                 }
 
-
-                float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
-                if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
+                t = (x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float beta = acos(t);
+                t = (y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                if (asin(t) < 0)
                 {
                     beta *= -1.0f;
                 }
@@ -499,6 +583,10 @@ void RailWay::setVertexArray()
 
 void RailWay::setTextureArray(float textureUsize, float textureVsize)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::setTextureArray(float textureUsize, float textureVsize)"
+                                       << " textureUsize = " << textureUsize
+                                       << " textureVsize = " << textureVsize << "\n";
     textureArray.clear();
     for (int i = 0; i < vertexArray.size() / 3 - 12; i += 24)
     {
@@ -745,6 +833,8 @@ void RailWay::setTextureArray(float textureUsize, float textureVsize)
 
 void RailWay::setIndexArray()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::setIndexArray()\n";
     indexArray.clear();
     for (int i = 0 ; i < vertexArray.size() / 3; i += 24)
     {
@@ -838,8 +928,20 @@ void RailWay::setIndexArray()
     }
 }
 
+void RailWay::setLogging(bool status)
+{
+    log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "RailWay::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
+}
+
 bool RailWay::setFixed(bool fixed)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::setFixed(bool fixed)"
+                                       << " fixed = " << fixed << "\n";
     this->fixed = fixed;
     return true;
 }

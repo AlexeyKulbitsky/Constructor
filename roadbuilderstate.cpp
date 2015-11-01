@@ -4,6 +4,8 @@
 #include "_3dsfilemanager.h"
 #include <QApplication>
 
+bool RoadBuilderState::log = true;
+
 RoadBuilderState::RoadBuilderState()
 {
     this->stateManager = NULL;
@@ -21,31 +23,37 @@ RoadBuilderState::RoadBuilderState()
 
 RoadBuilderState::RoadBuilderState(StateManager *manager, Model *model, Scene2D *scene, QFormLayout *properties)
 {
+    if (log)
+    Logger::getLogger()->infoLog() << "Creating RoadBuilderState\n";
     if (manager == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Cannot create RoadBuilderState: StateManager = NULL, program terminates");
-        Logger::getLogger()->writeLog("Cannot create RoadBuilderState: StateManager = NULL, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Cannot create RoadBuilderState: StateManager = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->stateManager = manager;
     if (model == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Cannot create RoadBuilderState: Model = NULL, program terminates");
-        Logger::getLogger()->writeLog("Cannot create RoadBuilderState: Model = NULL, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Cannot create RoadBuilderState: Model = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->model = model;
     if (scene == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Cannot create RoadBuilderState: Scene2D = NULL, program terminates");
-        Logger::getLogger()->writeLog("Cannot create RoadBuilderState: Scene2D = NULL, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Cannot create RoadBuilderState: Scene2D = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->scene = scene;
     if (properties == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Cannot create RoadBuilderState: QFormLayout(properties) = NULL, program terminates");
-        Logger::getLogger()->writeLog("Cannot create RoadBuilderState: QFormLayout(properties) = NULL, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Cannot create RoadBuilderState: QFormLayout(properties) = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->properties = properties;
@@ -71,7 +79,8 @@ RoadBuilderState::~RoadBuilderState()
 
 void RoadBuilderState::mousePressEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::mousePressEvent(QMouseEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::mousePressEvent(QMouseEvent *pe)\n";
     ptrMousePosition = pe->pos();
     switch (pe->button())
     {
@@ -175,7 +184,8 @@ void RoadBuilderState::mousePressEvent(QMouseEvent *pe)
 
 void RoadBuilderState::mouseMoveEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::mouseMoveEvent(QMouseEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::mouseMoveEvent(QMouseEvent *pe)\n";
     if (rightButtonIsPressed == true)
     {
         // двигать камеру
@@ -262,7 +272,8 @@ void RoadBuilderState::mouseMoveEvent(QMouseEvent *pe)
 
 void RoadBuilderState::mouseReleaseEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::mouseReleaseEvent(QMouseEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::mouseReleaseEvent(QMouseEvent *pe)\n";
     if(pe->button() == Qt::RightButton)
     {
         rightButtonIsPressed = false;
@@ -279,7 +290,8 @@ void RoadBuilderState::mouseReleaseEvent(QMouseEvent *pe)
 
 void RoadBuilderState::wheelEvent(QWheelEvent *pe)
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::wheelEvent(QWheelEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::wheelEvent(QWheelEvent *pe)\n";
     if ((pe->delta())>0) scene->scalePlus();
     else
         if ((pe->delta())<0) scene->scaleMinus();
@@ -384,25 +396,29 @@ void RoadBuilderState::keyPressEvent(QKeyEvent *pe)
     default:
         break;
     }
-    Logger::getLogger()->writeLog(QString("RoadBuilderState::keyPressEvent(QKeyEvent *pe), key = ") + s);
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::keyPressEvent(QKeyEvent *pe), key = " << s << "\n";
     scene->updateGL();
 }
 
 void RoadBuilderState::keyReleaseEvent(QKeyEvent *pe)
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::keyReleaseEvent(QKeyEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::keyReleaseEvent(QKeyEvent *pe)\n";
     key = 0;
 }
 
 void RoadBuilderState::dragEnterEvent(QDragEnterEvent *event)
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::dragEnterEvent(QDragEnterEvent *event)");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::dragEnterEvent(QDragEnterEvent *event)\n";
     event->acceptProposedAction();
 }
 
 void RoadBuilderState::dropEvent(QDropEvent *event)
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::dropEvent(QDropEvent *event)");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::dropEvent(QDropEvent *event)\n";
     GLint viewport[4];
     GLdouble modelview[16];
     GLdouble projection[16];
@@ -430,7 +446,8 @@ void RoadBuilderState::dropEvent(QDropEvent *event)
 
 bool RoadBuilderState::tryToSelectControlsInSelectedFigure(QPoint mp)
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::tryToSelectControlsInSelectedFigure(QPoint mp)");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::tryToSelectControlsInSelectedFigure(QPoint mp)\n";
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
     GLint viewport[4]; // декларируем матрицу поля просмотра
     glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
@@ -481,9 +498,9 @@ bool RoadBuilderState::tryToSelectControlsInSelectedFigure(QPoint mp)
 
 
     hitsForControl = glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
-
-    Logger::getLogger()->writeLog(QString("RoadBuilderState::tryToSelectControlsInSelectedFigure(QPoint mp), hits = ") +
-                                  QString::number(hitsForControl));
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::tryToSelectControlsInSelectedFigure(QPoint mp), hits = "
+                                   << hitsForControl << "\n";
 
     if (hitsForControl > 0) // есть совпадания и нет ошибок
     {
@@ -504,7 +521,8 @@ bool RoadBuilderState::tryToSelectControlsInSelectedFigure(QPoint mp)
 
 bool RoadBuilderState::tryToSelectFigures(QPoint mp)
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::tryToSelectFigures(QPoint mp)");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::tryToSelectFigures(QPoint mp)\n";
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
     GLint viewport[4]; // декларируем матрицу поля просмотра
     glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
@@ -552,9 +570,9 @@ bool RoadBuilderState::tryToSelectFigures(QPoint mp)
     glPopMatrix();
 
     hitsForFigure=glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
-
-    Logger::getLogger()->writeLog(QString("RoadBuilderState::tryToSelectFigures(QPoint mp), hits = ") +
-                                  QString::number(hitsForFigure));
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::tryToSelectFigures(QPoint mp), hits = "
+                                   << hitsForFigure << "\n";
 
     if (hitsForFigure > 0) // есть совпадания и нет ошибок
     {
@@ -574,17 +592,20 @@ bool RoadBuilderState::tryToSelectFigures(QPoint mp)
 
 void RoadBuilderState::setName(QString name)
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::setName(QString name)");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::setName(QString name)\n";
     this->name = name;
 }
 
 void RoadBuilderState::setLayer(int layer)
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::setLayer(int layer)");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::setLayer(int layer)\n";
     if (layer < 0 || layer >= model->getNumberOfGroups())
     {
         QMessageBox::critical(0, "Ошибка", "Layer is out of range", QMessageBox::Yes);
-        Logger::getLogger()->writeLog("Layer is out of range");
+        if (log)
+        Logger::getLogger()->errorLog() << "Layer is out of range\n";
         QApplication::exit(0);
     }
     this->layer = layer;
@@ -592,11 +613,13 @@ void RoadBuilderState::setLayer(int layer)
 
 void RoadBuilderState::setGroupIndex(int index)
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::setGroupIndex(int index)");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::setGroupIndex(int index)\n";
     if (index < 0 || index >= model->getNumberOfGroups())
     {
         QMessageBox::critical(0, "Ошибка", "Group index out of range, program terminates");
-        Logger::getLogger()->writeLog("Group index out of range, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Group index out of range, program terminates\n";
         QApplication::exit(0);
     }
     groupIndex = index;
@@ -604,36 +627,51 @@ void RoadBuilderState::setGroupIndex(int index)
 
 void RoadBuilderState::setElementIndex(int index)
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::setElementIndex(int index)");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::setElementIndex(int index)\n";
     if (groupIndex < 0 || groupIndex >= model->getNumberOfGroups())
     {
         QMessageBox::critical(0, "Ошибка", "Group index out of range, program terminates");
-        Logger::getLogger()->writeLog("Group index out of range, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Group index out of range, program terminates\n";
         QApplication::exit(0);
     }
     if (index < 0 || index >= model->getGroup(groupIndex).size())
     {
         QMessageBox::critical(0, "Ошибка", "Element index out of range, program terminates");
-        Logger::getLogger()->writeLog("Element index out of range, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Element index out of range, program terminates\n";
         QApplication::exit(0);
     }
     elementIndex = index;
 }
 
+void RoadBuilderState::setLogging(bool status)
+{
+    log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "RoadBuilderState::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
+}
+
 
 QString RoadBuilderState::getName()
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::getName()");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::getName()\n";
     return "RoadBuilderState";
 }
 
 void RoadBuilderState::clearProperties(QFormLayout *layout)
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::clearProperties(QFormLayout *layout)");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::clearProperties(QFormLayout *layout)\n";
     if (layout == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "QFormLayout* layout = NULL, cannot clearProperties, program terminates");
-        Logger::getLogger()->writeLog("QFormLayout* layout = NULL, cannot clearProperties, program terminates");
+        if (log)
+        Logger::getLogger()->infoLog() << "QFormLayout* layout = NULL, cannot clearProperties, program terminates\n";
         QApplication::exit(0);
     }
     while(layout->count() > 0)
@@ -646,7 +684,8 @@ void RoadBuilderState::clearProperties(QFormLayout *layout)
 
 void RoadBuilderState::clear()
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::clear()");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::clear()\n";
     roadBroken = NULL;
     rightButtonIsPressed = false;
     leftButtonIsPressed = false;
@@ -659,13 +698,15 @@ void RoadBuilderState::clear()
 
 void RoadBuilderState::setRoad(RoadBroken *roadBroken)
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::setRoad(RoadBroken *roadBroken)");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::setRoad(RoadBroken *roadBroken)\n";
     if (roadBroken)
         this->roadBroken = roadBroken;
     else
     {
         QMessageBox::critical(0, "Ошибка", "RoadBroken* roadBroken = NULL, program terminates");
-        Logger::getLogger()->writeLog("RoadBroken* roadBroken = NULL, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "RoadBroken* roadBroken = NULL, program terminates\n";
         QApplication::exit(0);
     }
 }
@@ -673,5 +714,6 @@ void RoadBuilderState::setRoad(RoadBroken *roadBroken)
 
 void RoadBuilderState::contextMenuEvent(QContextMenuEvent *pe)
 {
-    Logger::getLogger()->writeLog("RoadBuilderState::contextMenuEvent(QContextMenuEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::contextMenuEvent(QContextMenuEvent *pe)\n";
 }

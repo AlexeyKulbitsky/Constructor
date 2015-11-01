@@ -4,6 +4,8 @@
 #include <QApplication>
 #include <GL/glu.h>
 
+bool DefaultState::log = true;
+
 DefaultState::DefaultState()
 {
     this->stateManager = NULL;
@@ -18,32 +20,37 @@ DefaultState::DefaultState()
 
 DefaultState::DefaultState(StateManager *manager, Model *model, Scene2D* scene, QFormLayout *properties)
 {
-    Logger::getLogger()->writeLog("Creating DefaultState");
+    if (log)
+        Logger::getLogger()->infoLog() << "Creating DefaultState\n";
     if (manager == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Cannot create DefaultState: StateManager = NULL, program terminates");
-        Logger::getLogger()->writeLog("Cannot create DefaultState: StateManager = NULL, program terminates");
+        if (log)
+            Logger::getLogger()->errorLog() << "Cannot create DefaultState: StateManager = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->stateManager = manager;
     if (model == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Cannot create DefaultState: Model = NULL, program terminates");
-        Logger::getLogger()->writeLog("Cannot create DefaultState: Model = NULL, program terminates");
+        if (log)
+            Logger::getLogger()->errorLog() << "Cannot create DefaultState: Model = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->model = model;
     if (scene == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Cannot create DefaultState: Scene2D = NULL, program terminates");
-        Logger::getLogger()->writeLog("Cannot create DefaultState: Scene2D = NULL, program terminates");
+        if (log)
+            Logger::getLogger()->errorLog() << "Cannot create DefaultState: Scene2D = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->scene = scene;
     if (properties == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Cannot create DefaultState: QFormLayout(properties) = NULL, program terminates");
-        Logger::getLogger()->writeLog("Cannot create DefaultState: QFormLayout(properties) = NULL, program terminates");
+        if (log)
+            Logger::getLogger()->errorLog() << "Cannot create DefaultState: QFormLayout(properties) = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->properties = properties;
@@ -56,7 +63,8 @@ DefaultState::DefaultState(StateManager *manager, Model *model, Scene2D* scene, 
 
 void DefaultState::mousePressEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("DefaultState::mousePressEvent(QMouseEvent *pe)");
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::mousePressEvent(QMouseEvent *pe)\n";
     ptrMousePosition = pe->pos();
     switch (pe->button())
     {
@@ -77,7 +85,8 @@ void DefaultState::mousePressEvent(QMouseEvent *pe)
 
 void DefaultState::mouseMoveEvent(QMouseEvent *pe)
 {    
-    Logger::getLogger()->writeLog("DefaultState::mouseMoveEvent");
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::mouseMoveEvent\n";
     if (rightButtonIsPressed == true)
     {
         // двигать камеру
@@ -88,21 +97,22 @@ void DefaultState::mouseMoveEvent(QMouseEvent *pe)
         scene->updateGL();
     }
     else
-    if (leftButtonIsPressed == true)
-    {
-        if (rectSelection == true)
+        if (leftButtonIsPressed == true)
         {
-            scene->rectPoint2 = pe->pos();
-            scene->setDrawRectStatus(true);
+            if (rectSelection == true)
+            {
+                scene->rectPoint2 = pe->pos();
+                scene->setDrawRectStatus(true);
+            }
         }
-    }
     ptrMousePosition = pe->pos();
     scene->updateGL();
 }
 
 void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("DefaultState::mouseReleaseEvent");
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::mouseReleaseEvent(QMouseEvent *pe)\n";
     if(pe->button() == Qt::RightButton)
     {
         rightButtonIsPressed = false;
@@ -116,7 +126,7 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
         {
 
             if (abs(scene->rectPoint1.x() - pe->pos().x()) <= 5 &&
-                abs(scene->rectPoint1.y() - pe->pos().y()) <= 5)
+                    abs(scene->rectPoint1.y() - pe->pos().y()) <= 5)
             {
                 if (this->tryToSelectFigures(pe->pos(), true) == true)
                 {
@@ -165,61 +175,61 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
             }
             else
 
-            if (this->tryToSelectFigures(scene->rectPoint1, pe->pos(), true) == true)
-            {
-                scene->setMouseTracking(true);
-                scene->updateGL();
-                scene->setCursor(Qt::SizeAllCursor);
-                if (selectedElementsCount == 1)
+                if (this->tryToSelectFigures(scene->rectPoint1, pe->pos(), true) == true)
                 {
-                    QList<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
-                    for(int k = 0; k < selectedIndex; ++k)
-                        ++it;
-                    (*it)->setSelectedStatus(true);
-
-                    (*it)->setStepDialog(stateManager->stepDialog);
-                    (*it)->setStepDialogs(stateManager->stepDialogs, 10);
-                    (*it)->getProperties(properties, scene);
-
-
-                    if ((*it)->getName() == "RoadBroken")
+                    scene->setMouseTracking(true);
+                    scene->updateGL();
+                    scene->setCursor(Qt::SizeAllCursor);
+                    if (selectedElementsCount == 1)
                     {
-                        stateManager->roadBuilderState->setRoad(dynamic_cast<RoadBroken*>(*it));
-                        stateManager->roadBuilderState->setGroupIndex(selectedGroup);
-                        stateManager->roadBuilderState->setElementIndex(selectedIndex);
-                        stateManager->setState(stateManager->roadBuilderState);
-                    }
-                    else
-                    {
-                        if ((*it)->getName() == "LineBroken" ||
-                                (*it)->getName() == "Tramways" ||
-                                (*it)->getName() == "VoltageLine" ||
-                                (*it)->getName() == "DoubleVoltageLine" ||
-                                (*it)->getName() == "RailWay" ||
-                                (*it)->getName() == "SplitZone")
+                        QList<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
+                        for(int k = 0; k < selectedIndex; ++k)
+                            ++it;
+                        (*it)->setSelectedStatus(true);
+
+                        (*it)->setStepDialog(stateManager->stepDialog);
+                        (*it)->setStepDialogs(stateManager->stepDialogs, 10);
+                        (*it)->getProperties(properties, scene);
+
+
+                        if ((*it)->getName() == "RoadBroken")
                         {
-                            stateManager->lineBuilderState->setLine(dynamic_cast<LineBroken*>(*it));
-                            stateManager->lineBuilderState->setGroupIndex(selectedGroup);
-                            stateManager->lineBuilderState->setElementIndex(selectedIndex);
-                            stateManager->setState(stateManager->lineBuilderState);
+                            stateManager->roadBuilderState->setRoad(dynamic_cast<RoadBroken*>(*it));
+                            stateManager->roadBuilderState->setGroupIndex(selectedGroup);
+                            stateManager->roadBuilderState->setElementIndex(selectedIndex);
+                            stateManager->setState(stateManager->roadBuilderState);
                         }
                         else
                         {
-                            stateManager->selectedState->setSelectedElement(selectedIndex, selectedGroup);
-                            stateManager->selectedState->setSelectedElement(*it);
-                            stateManager->setState(stateManager->selectedState);
+                            if ((*it)->getName() == "LineBroken" ||
+                                    (*it)->getName() == "Tramways" ||
+                                    (*it)->getName() == "VoltageLine" ||
+                                    (*it)->getName() == "DoubleVoltageLine" ||
+                                    (*it)->getName() == "RailWay" ||
+                                    (*it)->getName() == "SplitZone")
+                            {
+                                stateManager->lineBuilderState->setLine(dynamic_cast<LineBroken*>(*it));
+                                stateManager->lineBuilderState->setGroupIndex(selectedGroup);
+                                stateManager->lineBuilderState->setElementIndex(selectedIndex);
+                                stateManager->setState(stateManager->lineBuilderState);
+                            }
+                            else
+                            {
+                                stateManager->selectedState->setSelectedElement(selectedIndex, selectedGroup);
+                                stateManager->selectedState->setSelectedElement(*it);
+                                stateManager->setState(stateManager->selectedState);
+                            }
                         }
                     }
+                    else
+                        if (selectedElementsCount > 1)
+                        {
+                            stateManager->setState(stateManager->selectedState);
+                        }
+
+                    rectSelection = false;
+
                 }
-                else
-                    if (selectedElementsCount > 1)
-                    {
-                        stateManager->setState(stateManager->selectedState);
-                    }
-
-                rectSelection = false;
-
-            }
         }
 
 
@@ -230,7 +240,8 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
 
 void DefaultState::wheelEvent(QWheelEvent *pe)
 {
-    Logger::getLogger()->writeLog("DefaultState::wheelEvent(QWheelEvent *pe)");
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::wheelEvent(QWheelEvent *pe)\n";
     if ((pe->delta())>0) scene->scalePlus();
     else
         if ((pe->delta())<0) scene->scaleMinus();
@@ -297,19 +308,22 @@ void DefaultState::keyPressEvent(QKeyEvent *pe)
         break;
 
     }
-    Logger::getLogger()->writeLog("DefaultState::keyPressEvent(QKeyEvent *pe), key = " + k);
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::keyPressEvent(QKeyEvent *pe), key = " << k << "\n";
     scene->updateGL();
 }
 
 void DefaultState::dragEnterEvent(QDragEnterEvent *event)
 {
-    Logger::getLogger()->writeLog("DefaultState::dragEnterEvent(QDragEnterEvent *event)");
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::dragEnterEvent(QDragEnterEvent *event)\n";
     event->acceptProposedAction();
 }
 
 void DefaultState::dropEvent(QDropEvent *event)
 {
-    Logger::getLogger()->writeLog("DefaultState::dropEvent(QDropEvent *event)");
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::dropEvent(QDropEvent *event)\n";
     GLint viewport[4];
     GLdouble modelview[16];
     GLdouble projection[16];
@@ -332,8 +346,6 @@ void DefaultState::dropEvent(QDropEvent *event)
     float y = posY / scene->nSca + scene->yDelta;
 
 
-
-
     if (s == "Дорога простая")
     {
         RoadSimple* road =  new RoadSimple(x - 2.0f, y, x + 2.0f, y, 6.0f,
@@ -343,87 +355,22 @@ void DefaultState::dropEvent(QDropEvent *event)
         road->setModel(model);
         model->getGroup(0).push_back(road);
         model->setModified(true);
-    } /*
-    else
-        if (s == "Закругление")
-        {
-            Curve* curve = new Curve(x, y, 0.0f,
-                                     x - 5.0f, y, 0.0f,
-                                     x, y + 5.0f, 0.0f,
-                                     QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
-                                     QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
-                                     10);
-            curve->setModel(model);
-             model->getGroup(0).push_back(curve);
-             model->setModified(true);
-        } else
-            if (s == "Разделительная зона (разметка)")
-            {
-                SplitZone* splitZone = new SplitZone(x,y,0.02f,
-                                                     x + 10.0f, y, 0.02f,
-                                                     2.0f,
-                                                     true,
-                                                     true);
-
-                splitZone->setModel(model);
-                model->getGroup(0).push_back(splitZone);
-                model->setModified(true);
-            }
-            else
-            if (s == "Разделительная зона (газон)")
-                        {
-                            SplitZone* splitZone = new SplitZone(x,y,0.0f,
-                                                                 x + 10.0f, y, 0.0f,
-                                                                 2.0f,
-                                                                 true,
-                                                                 true,
-                                                                 1,
-                                                                 0.1,
-                                                                 QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
-                                                                 0.25f, 6.0f,
-                                                                 QApplication::applicationDirPath() + "/models/city_roads/grass.jpg",
-                                                                 3.0f, 3.0f);
-
-                            splitZone->setModel(model);
-                            model->getGroup(0).push_back(splitZone);
-                            model->setModified(true);
-                        }
-            else
-                        if (s == "Разделительная зона (тротуар)")
-                        {
-                            SplitZone* splitZone = new SplitZone(x,y,0.0f,
-                                                                 x + 10.0f, y, 0.0f,
-                                                                 2.0f,
-                                                                 true,
-                                                                 true,
-                                                                 2,
-                                                                 0.1,
-                                                                 QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
-                                                                 0.25f, 6.0f,
-                                                                 QApplication::applicationDirPath() + "/models/city_roads/nr_07S.jpg",
-                                                                 6.0f, 6.0f);
-                            splitZone->setModel(model);
-                            model->getGroup(0).push_back(splitZone);
-                            model->setModified(true);
-                        } */
-    else
+        scene->updateGL();
+        return;
+    }
     if (s == "Дорога ломаная")
     {
 
-            RoadBroken* road = new RoadBroken(x, y, x + 2.75f, y, 6.0f,
-                                              QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
-                                              QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
-                                              "RoadBroken", 0);
-            road->setModel(model);
-            model->getGroup(0).push_back(road);
-            model->setModified(true);
-    } /*
-    else
-    if (s == "Круговой перекресток")
-    {
-        //model->getGroup(0).push_back(new RoundingCrossRoad(x, y, 10, 16, 50, "RoundingCrossRoad", 0));
+        RoadBroken* road = new RoadBroken(x, y, x + 2.75f, y, 6.0f,
+                                          QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
+                                          QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
+                                          "RoadBroken", 0);
+        road->setModel(model);
+        model->getGroup(0).push_back(road);
         model->setModified(true);
-    } else
+        scene->updateGL();
+        return;
+    }
     if (s == "Поворот дороги")
     {
         RoundingRoad* road = new RoundingRoad(x, y, 10, 0, 90,
@@ -435,13 +382,82 @@ void DefaultState::dropEvent(QDropEvent *event)
         model->getGroup(0).push_back(road);
         model->setModified(true);
     } else
-        if (s == "Перекресток")
+        if (s == "Закругление")
         {
-            Intersection* intersection = new Intersection(x, y);
-            intersection->setModel(model);
-            model->getGroup(0).push_back(intersection);
+            Curve* curve = new Curve(x, y, 0.0f,
+                                     x - 5.0f, y, 0.0f,
+                                     x, y + 5.0f, 0.0f,
+                                     QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
+                                     QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
+                                     10);
+            curve->setModel(model);
+            model->getGroup(0).push_back(curve);
             model->setModified(true);
-        } else
+            scene->updateGL();
+            return;
+        }
+    if (s == "Перекресток")
+    {
+        Intersection* intersection = new Intersection(x, y);
+        intersection->setModel(model);
+        model->getGroup(0).push_back(intersection);
+        model->setModified(true);
+        scene->updateGL();
+        return;
+    }
+    if (s == "Разделительная зона (разметка)")
+    {
+        SplitZone* splitZone = new SplitZone(x,y,0.02f,
+                                             x + 10.0f, y, 0.02f,
+                                             2.0f,
+                                             true,
+                                             true);
+
+        splitZone->setModel(model);
+        model->getGroup(0).push_back(splitZone);
+        model->setModified(true);
+        scene->updateGL();
+        return;
+    }
+    if (s == "Разделительная зона (газон)")
+    {
+        SplitZone* splitZone = new SplitZone(x,y,0.0f,
+                                             x + 10.0f, y, 0.0f,
+                                             2.0f,
+                                             true,
+                                             true,
+                                             1,
+                                             0.1,
+                                             QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                             0.25f, 6.0f,
+                                             QApplication::applicationDirPath() + "/models/city_roads/grass.jpg",
+                                             3.0f, 3.0f);
+
+        splitZone->setModel(model);
+        model->getGroup(0).push_back(splitZone);
+        model->setModified(true);
+        scene->updateGL();
+        return;
+    }
+    if (s == "Разделительная зона (тротуар)")
+    {
+        SplitZone* splitZone = new SplitZone(x,y,0.0f,
+                                             x + 10.0f, y, 0.0f,
+                                             2.0f,
+                                             true,
+                                             true,
+                                             2,
+                                             0.1,
+                                             QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                             0.25f, 6.0f,
+                                             QApplication::applicationDirPath() + "/models/city_roads/nr_07S.jpg",
+                                             6.0f, 6.0f);
+        splitZone->setModel(model);
+        model->getGroup(0).push_back(splitZone);
+        model->setModified(true);
+        scene->updateGL();
+        return;
+    }
     if (s == "Сплошная")
     {
         float axis[6];
@@ -455,7 +471,9 @@ void DefaultState::dropEvent(QDropEvent *event)
         line->setModel(model);
         model->getGroup(1).push_back(line);
         model->setModified(true);
-    } else
+        scene->updateGL();
+        return;
+    }
     if (s == "Прерывистая")
     {
         float axis[6];
@@ -469,7 +487,9 @@ void DefaultState::dropEvent(QDropEvent *event)
         line->setModel(model);
         model->getGroup(1).push_back(line);
         model->setModified(true);
-    } else
+        scene->updateGL();
+        return;
+    }
     if (s == "Двойная сплошая")
     {
         float axis[6];
@@ -483,7 +503,9 @@ void DefaultState::dropEvent(QDropEvent *event)
         line->setModel(model);
         model->getGroup(1).push_back(line);
         model->setModified(true);
-    } else
+        scene->updateGL();
+        return;
+    }
     if (s == "Двойная прерывистая")
     {
         float axis[6];
@@ -497,7 +519,25 @@ void DefaultState::dropEvent(QDropEvent *event)
         line->setModel(model);
         model->getGroup(1).push_back(line);
         model->setModified(true);
-    } else
+        scene->updateGL();
+        return;
+    }
+    if (s == "Двойная прерывистая")
+    {
+        float axis[6];
+        axis[0] = x - 2.5f;
+        axis[1] = y;
+        axis[2] = 0.02f;
+        axis[3] = x + 2.5f;
+        axis[4] = y;
+        axis[5] = 0.02f;
+        LineBroken* line = new LineBroken(0.25f, axis, 6, QApplication::applicationDirPath() + "/models/city_roads/d_inter.png", 6.0f, QString("LineBroken"), 1);
+        line->setModel(model);
+        model->getGroup(1).push_back(line);
+        model->setModified(true);
+        scene->updateGL();
+        return;
+    }
     if (s == "Пешеходный переход")
     {
         RoadSimple* crosswalk = new RoadSimple(x - 2.0f, y, x + 2.0f, y, 2.0f,
@@ -507,7 +547,9 @@ void DefaultState::dropEvent(QDropEvent *event)
         crosswalk->setModel(model);
         model->getGroup(1).push_back(crosswalk);
         model->setModified(true);
-    } else
+        scene->updateGL();
+        return;
+    }
     if (s == "Трамвайные пути")
     {
         float axis[6];
@@ -521,30 +563,30 @@ void DefaultState::dropEvent(QDropEvent *event)
         tramways->setModel(model);
         model->getGroup(1).push_back(tramways);
         model->setModified(true);
-    } else
-    if (s == "Железная дорога123")
+        scene->updateGL();
+        return;
+    }
+    if (s == "Железная дорога")
     {
-        LineSimple* railway = new LineSimple(x - 2.0, y, x + 2.0, y, 2.1, QString(":/textures/railroad.png"), 2.1f, "Railroad", 1);
+        float axis[6];
+        axis[0] = x - 2.5f;
+        axis[1] = y;
+        axis[2] = 0.02f;
+        axis[3] = x + 2.5f;
+        axis[4] = y;
+        axis[5] = 0.02f;
+        RailWay* railway = new RailWay(axis, 6,
+                                       QApplication::applicationDirPath() + "/models/city_roads/railway.jpg",
+                                       2.65f, 6.0f);
         railway->setModel(model);
         model->getGroup(1).push_back(railway);
         model->setModified(true);
-    } else
-        if (s == "Железная дорога")
-        {
-            float axis[6];
-            axis[0] = x - 2.5f;
-            axis[1] = y;
-            axis[2] = 0.02f;
-            axis[3] = x + 2.5f;
-            axis[4] = y;
-            axis[5] = 0.02f;
-            RailWay* railway = new RailWay(axis, 6,
-                                           QApplication::applicationDirPath() + "/models/city_roads/railway.jpg",
-                                           2.65f, 6.0f);
-            railway->setModel(model);
-            model->getGroup(1).push_back(railway);
-            model->setModified(true);
-        } else
+        scene->updateGL();
+        return;
+    }
+    /*
+
+         else
         if (s == "Провод")
         {
             float axis[6];
@@ -573,29 +615,7 @@ void DefaultState::dropEvent(QDropEvent *event)
                 model->getGroup(1).push_back(line);
                 model->setModified(true);
             } else
-    if (s == "Ломаная")
-    {
-        float ar[15];
-        ar[0] = x - 2.4f;
-        ar[1] = y + 1.3f;
-        ar[2] = 0.025f;
-        ar[3] = x - 2.0f;
-        ar[4] = y + 0.5f;
-        ar[5] = 0.025f;
-        ar[6] = x;
-        ar[7] = y;
-        ar[8] = 0.025f;
-        ar[9] = x + 2.0f;
-        ar[10] = y + 1.0f;
-        ar[11] = 0.025f;
-        ar[12] = x + 3.0f;
-        ar[13] = y - 1.5f;
-        ar[14] = 0.025f;
-        LineBroken* line = new LineBroken(1.1f, ar, 15, 1.0f, 1.0f, 1.0f, 1.0f, "LineSolidBroken", 1);
-        line->setModel(model);
-        model->getGroup(1).push_back(line);
-        model->setModified(true);
-    } else
+
     if (s == "Куб")
     {
         model->getGroup(2).push_back(new Cube(x, y, 1.0f, 2.0f, "Cube", 2));
@@ -874,7 +894,7 @@ void DefaultState::dropEvent(QDropEvent *event)
     }
 
 */
-    scene->updateGL();
+    //scene->updateGL();
 }
 
 DefaultState::~DefaultState()
@@ -887,11 +907,13 @@ DefaultState::~DefaultState()
 
 void DefaultState::clearProperties(QFormLayout *layout)
 {
-    Logger::getLogger()->writeLog("DefaultState::clearProperties(QFormLayout *layout)");
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::clearProperties(QFormLayout *layout)\n";
     if (layout == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "QFormLayout* layout = NULL, cannot clearProperties, program terminates");
-        Logger::getLogger()->writeLog("QFormLayout* layout = NULL, cannot clearProperties, program terminates");
+        if (log)
+            Logger::getLogger()->errorLog() << "QFormLayout* layout = NULL, cannot clearProperties, program terminates\n";
         QApplication::exit(0);
     }
     while(layout->count() > 0)
@@ -905,7 +927,8 @@ void DefaultState::clearProperties(QFormLayout *layout)
 
 bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
 {
-    Logger::getLogger()->writeLog("DefaultState::tryToSelectFigures(QPoint mp, bool withResult)");
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::tryToSelectFigures(QPoint mp, bool withResult)\n";
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
     GLint viewport[4]; // декларируем матрицу поля просмотра
     glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
@@ -958,8 +981,9 @@ bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
     }
 
     hitsForFigure=glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
-    Logger::getLogger()->writeLog(QString("DefaultState::tryToSelectFigures(QPoint mp, bool withResult), hits = ") +
-                                  QString::number(hitsForFigure));
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::tryToSelectFigures(QPoint mp, bool withResult), hits = "
+                                       << hitsForFigure << "\n";
 
     if (hitsForFigure > 0) // есть совпадания и нет ошибок
     {
@@ -1008,7 +1032,8 @@ bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
 
 bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
 {
-    Logger::getLogger()->writeLog("DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)");
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)\n";
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
     GLint viewport[4]; // декларируем матрицу поля просмотра
     glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
@@ -1027,8 +1052,8 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
     GLdouble width = abs(mp1.x() - mp2.x()) > 2 ? (GLdouble)(abs(mp1.x() - mp2.x())) : 2.0;
     GLdouble height = abs(mp1.y() - mp2.y()) > 2 ? (GLdouble)(abs(mp1.y() - mp2.y())) : 2.0;
     gluPickMatrix((GLdouble)((mp1.x() + mp2.x()) / 2), (GLdouble)(viewport[3] - (mp1.y() + mp2.y()) / 2),
-                width, height,
-                viewport);
+            width, height,
+            viewport);
     // мировое окно
     if (scene->width() >= scene->height())
         glOrtho(-1.0/ratio, 1.0/ratio, -1.0, 1.0, -10.0, 1.0);
@@ -1064,7 +1089,8 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
     }
 
     hitsForFigure = glRenderMode(GL_RENDER);
-    Logger::getLogger()->writeLog("DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult), hits = " + QString::number(hitsForFigure));
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult), hits = " << hitsForFigure << "\n";
     selectedElementsCount = hitsForFigure;
 
 
@@ -1081,8 +1107,8 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
 
                     selectedGroup = j;
                     selectedIndex = i;
-                   // QList<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
-                   // for(int k = 0; k < selectedIndex; ++k)
+                    // QList<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
+                    // for(int k = 0; k < selectedIndex; ++k)
                     //    ++it;
                     //if ((*it)->getName() != "RoadBroken")
                     //{
@@ -1156,20 +1182,23 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
 
 void DefaultState::keyReleaseEvent(QKeyEvent *pe)
 {
-    Logger::getLogger()->writeLog("DefaultState::keyReleaseEvent(QKeyEvent *pe)");
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::keyReleaseEvent(QKeyEvent *pe)\n";
 }
 
 
 
 QString DefaultState::getName()
 {
-    Logger::getLogger()->writeLog("DefaultState::getName()");
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::getName()\n";
     return "DefaultState";
 }
 
 void DefaultState::drawRect(QPoint p1, QPoint p2)
 {
-    Logger::getLogger()->writeLog("DefaultState::drawRect(QPoint p1, QPoint p2)");
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::drawRect(QPoint p1, QPoint p2)\n";
     GLdouble x1, y1, z1;
     GLdouble x2, y2, z2;
     getWorldCoord(p1.x(), p1.y(), 0, x1, y1, z1);
@@ -1192,7 +1221,8 @@ void DefaultState::drawRect(QPoint p1, QPoint p2)
 
 void DefaultState::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)
 {
-    Logger::getLogger()->writeLog("DefaultState::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)");
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)\n";
     GLint viewport[4];
     GLdouble mvmatrix[16], projmatrix[16];
 
@@ -1206,7 +1236,8 @@ void DefaultState::getWindowCoord(double x, double y, double z, double &wx, doub
 
 void DefaultState::getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz)
 {
-    Logger::getLogger()->writeLog("DefaultState::getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz)");
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz)\n";
     GLint viewport[4];
     GLdouble mvmatrix[16], projmatrix[16];
 
@@ -1220,5 +1251,15 @@ void DefaultState::getWorldCoord(double x, double y, double z, double &wx, doubl
 
 void DefaultState::contextMenuEvent(QContextMenuEvent *pe)
 {
-    Logger::getLogger()->writeLog("DefaultState::contextMenuEvent(QContextMenuEvent *pe)");
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::contextMenuEvent(QContextMenuEvent *pe)\n";
+}
+
+void DefaultState::setLogging(bool status)
+{
+    log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "DefaultState::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
 }

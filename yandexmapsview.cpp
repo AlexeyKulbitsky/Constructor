@@ -3,6 +3,8 @@
 #include <QWebFrame>
 #include <QVariant>
 
+bool YandexMapsView::log = true;
+
 YandexMapsView::YandexMapsView(QWidget *parent)
     :QWebView(parent)
 {
@@ -19,5 +21,14 @@ void YandexMapsView::wheelEv(QWheelEvent *pe)
 void YandexMapsView::mouseMo(QMouseEvent *pe)
 {
     this->mouseMoveEvent(pe);
+}
+
+void YandexMapsView::setLogging(bool status)
+{
+    log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "GoogleMapsView::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
 }
 

@@ -1,6 +1,8 @@
 #include "linebroken.h"
 #include <gl/glu.h>
 
+bool LineBroken::log = true;
+
 LineBroken::LineBroken()
 {
     name = "noname";
@@ -152,7 +154,16 @@ LineBroken::~LineBroken()
 // Индексы вершины для отрисовки
 void LineBroken::setVertexArray(float width, float* axisVertices, int size)
 {
-    Logger::getLogger()->writeLog("LineBroken::setVertexArray(float width, float* axisVertices, int size)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::setVertexArray(float width, float* axisVertices, int size)\n";
+    if (axisVertices == NULL)
+    {
+        QMessageBox::critical(0, "Ошибка", "LineBroken::setVertexArray(float width, float* axisVertices, int size) axisVertices = NULL",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->errorLog() << "LineBroken::setVertexArray(float width, float* axisVertices, int size) axisVertices = NULL\n";
+        QApplication::exit(0);
+    }
     this->width = width;
     float r = width / 2.0f;
 
@@ -306,7 +317,12 @@ void LineBroken::setVertexArray(float width, float* axisVertices, int size)
 // Индексы каждой вершины
 void LineBroken::setColorArray(float red, float green, float blue, float alpha)
 {
-    Logger::getLogger()->writeLog("LineBroken::setColorArray(float red, float green, float blue, float alpha)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::setColorArray(float red, float green, float blue, float alpha)\n"
+                                   << " red = " << red
+                                   << " green = " << green
+                                   << " blue = " << blue
+                                   << " alpha = " << alpha << "\n";
    if (ColorArray.size() / 4 != VertexArray.size() / 3)
    {
        ColorArray.resize(VertexArray.size() / 3 * 4);
@@ -324,7 +340,8 @@ void LineBroken::setColorArray(float red, float green, float blue, float alpha)
 
 void LineBroken::setTextureArray()
 {
-    Logger::getLogger()->writeLog("LineBroken::setTextureArray()");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::setTextureArray()\n";
     GLfloat x1, y1, x2, y2;
     GLfloat r1 = 0.0f, r2 = 0.0f;
    // GLfloat textureSize = 0.5f;
@@ -379,7 +396,8 @@ void LineBroken::setTextureArray()
 // Индексы для отрисовки фигуры
 void LineBroken::setIndexArray()
 {
-    Logger::getLogger()->writeLog("LineBroken::setIndexArray()");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::setIndexArray()\n";
     if (IndexArray.size() != VertexArray.size() / 2)
         IndexArray.resize(VertexArray.size() / 2);
     for (int i = 0; i < VertexArray.size() / 3 - 3; i += 4)
@@ -398,12 +416,14 @@ void LineBroken::setIndexArray()
 
 void LineBroken::setVertexArrayForAxis(float *axisVertices, int size)
 {
-    Logger::getLogger()->writeLog("LineBroken::setVertexArrayForAxis(float *axisVertices, int size)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::setVertexArrayForAxis(float *axisVertices, int size)\n";
     if (axisVertices == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "LineBroken::setVertexArrayForAxis(float *axisVertices, int size), axisVertices = NULL, program terminates",
                               QMessageBox::Yes);
-        Logger::getLogger()->writeLog("LineBroken::setVertexArrayForAxis(float *axisVertices, int size), axisVertices = NULL, program terminates", ERROR_T);
+        if (log)
+        Logger::getLogger()->infoLog() << "LineBroken::setVertexArrayForAxis(float *axisVertices, int size), axisVertices = NULL, program terminates\n";
         QApplication::exit(0);
     }
     if (vertexArrayForAxis.size() != size)
@@ -420,7 +440,11 @@ void LineBroken::setVertexArrayForAxis(float *axisVertices, int size)
 
 void LineBroken::setColorArrayForAxis(float red, float green, float blue)
 {
-    Logger::getLogger()->writeLog("LineBroken::setColorArrayForAxis(float red, float green, float blue)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::setColorArrayForAxis(float red, float green, float blue)"
+                                   << " red  = " << red
+                                   << " grren = " << green
+                                   << " blue = " << blue << "\n";
     if (colorArrayForAxis.size() != vertexArrayForAxis.size())
     {
         colorArrayForAxis.resize(vertexArrayForAxis.size());
@@ -435,7 +459,8 @@ void LineBroken::setColorArrayForAxis(float red, float green, float blue)
 
 void LineBroken::setIndexArrayForAxis()
 {
-    Logger::getLogger()->writeLog("LineBroken::setIndexArrayForAxis()");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::setIndexArrayForAxis()\n";
     if (indexArrayForAxis.size() != vertexArrayForAxis.size() / 3)
     {
         indexArrayForAxis.resize(vertexArrayForAxis.size() / 3);
@@ -449,7 +474,8 @@ void LineBroken::setIndexArrayForAxis()
 
 void LineBroken::drawFigure(QGLWidget* render)
 {
-    Logger::getLogger()->writeLog("LineBroken::drawFigure(QGLWidget* render)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::drawFigure(QGLWidget* render)\n";
     /*
     if (selected == true)
     {
@@ -523,7 +549,8 @@ void LineBroken::drawFigure(QGLWidget* render)
 
 void LineBroken::setIndexArrayForSelectionFrame()
 {
-    Logger::getLogger()->writeLog("LineBroken::setIndexArrayForSelectionFrame()");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::setIndexArrayForSelectionFrame()\n";
     if (IndexArrayForSelection.size() != VertexArray.size() / 3)
     {
         IndexArrayForSelection.resize(VertexArray.size() / 3);
@@ -547,7 +574,11 @@ void LineBroken::setIndexArrayForSelectionFrame()
 
 void LineBroken::setColorArrayForSelectionFrame(float red, float green, float blue)
 {
-    Logger::getLogger()->writeLog("LineBroken::setColorArrayForSelectionFrame(float red, float green, float blue)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::setColorArrayForSelectionFrame(float red, float green, float blue)"
+                                   << " red = " << red
+                                   << " green = " << green
+                                   << " blue = " << blue << "\n";
     if (ColorArrayForSelection.size() != VertexArray.size())
     {
         ColorArrayForSelection.resize(VertexArray.size());
@@ -560,11 +591,21 @@ void LineBroken::setColorArrayForSelectionFrame(float red, float green, float bl
     }
 }
 
+void LineBroken::setLogging(bool status)
+{
+    log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "LineBroken::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
+}
+
 
 
 void LineBroken::drawSelectionFrame()
 {
-    Logger::getLogger()->writeLog("LineBroken::drawSelectionFrame()");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::drawSelectionFrame()\n";
     // Боковые грани для изменения размера
     glVertexPointer(3, GL_FLOAT, 0, VertexArray.begin());
     glColorPointer(3, GL_FLOAT, 0, ColorArrayForSelection.begin());
@@ -584,7 +625,11 @@ void LineBroken::drawSelectionFrame()
 
 void LineBroken::move(float dx, float dy, float dz)
 {
-    Logger::getLogger()->writeLog("LineBroken::move(float dx, float dy, float dz)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::move(float dx, float dy, float dz)"
+                                   << " dx = " << dx
+                                   << " dy = " << dy
+                                   << " dz = " << dz << "\n";
     if (fixed)
     {
         return;
@@ -605,7 +650,11 @@ void LineBroken::move(float dx, float dy, float dz)
 
 void LineBroken::drawControlElement(int index, float lineWidth, float pointSize)
 {
-    Logger::getLogger()->writeLog("LineBroken::drawControlElement(int index, float lineWidth, float pointSize)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::drawControlElement(int index, float lineWidth, float pointSize)"
+                                   << " index = " << index
+                                   << " lineWidth = " << lineWidth
+                                   << " pointSize = " << pointSize << "\n";
     glPointSize(pointSize);
     glBegin(GL_POINTS);
     glColor3f(1.0f, 1.0f, 1.0f);
@@ -618,7 +667,10 @@ void LineBroken::drawControlElement(int index, float lineWidth, float pointSize)
 
 void LineBroken::resizeByControl(int index, float dx, float dy, float x, float y)
 {
-    Logger::getLogger()->writeLog("LineBroken::resizeByControl(int index, float dx, float dy, float x, float y)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::resizeByControl(int index, float dx, float dy, float x, float y)"
+                                   << " index = " << index << " dx = " << dx
+                                   << " dy = " << dy << " x = " << x << " y = " << y << "\n";
     if (fixed)
     {
         return;
@@ -632,19 +684,22 @@ void LineBroken::resizeByControl(int index, float dx, float dy, float x, float y
 
 int LineBroken::getNumberOfControls()
 {
-    Logger::getLogger()->writeLog("LineBroken::getNumberOfControls()");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::getNumberOfControls()\n";
     return indexArrayForAxis.size();
 }
 
 void LineBroken::changeColorOfSelectedControl(int index)
 {
-    Logger::getLogger()->writeLog("LineBroken::changeColorOfSelectedControl(int index)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::changeColorOfSelectedControl(int index)\n";
     indexOfSelectedControl = index;
 }
 
 QCursor LineBroken::getCursorForControlElement(int index)
 {
-    Logger::getLogger()->writeLog("LineBroken::getCursorForControlElement(int index)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::getCursorForControlElement(int index)\n";
     if (index >= 0 && index < indexArrayForAxis.size())
         return Qt::CrossCursor;
     else
@@ -653,7 +708,9 @@ QCursor LineBroken::getCursorForControlElement(int index)
 
 bool LineBroken::hasPoint(GLfloat x, GLfloat y)
 {
-    Logger::getLogger()->writeLog("LineBroken::hasPoint(GLfloat x, GLfloat y)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::hasPoint(GLfloat x, GLfloat y)"
+                                   << " x = " << x << " y = " << y << "\n";
     if (x >= VertexArray[0] &&
             x <= VertexArray[6] &&
             y >= VertexArray[1] &&
@@ -669,7 +726,8 @@ bool LineBroken::hasPoint(GLfloat x, GLfloat y)
 
 QPoint LineBroken::getCoorninateOfPointControl(int index)
 {
-    Logger::getLogger()->writeLog("LineBroken::getCoorninateOfPointControl(int index)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::getCoorninateOfPointControl(int index)\n";
     QPoint p;
     p.setX(VertexArray[index * 3]);
     p.setY(VertexArray[index * 3 + 1]);
@@ -680,7 +738,11 @@ QPoint LineBroken::getCoorninateOfPointControl(int index)
 
 void LineBroken::drawDescription(QGLWidget *render, float red, float green, float blue)
 {
-    Logger::getLogger()->writeLog("LineBroken::drawDescription(QGLWidget *render, float red, float green, float blue)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::drawDescription(QGLWidget *render, float red, float green, float blue)"
+                                   << " red = " << red
+                                   << " green = " << green
+                                   << " blue = " << blue << "\n";
     glColor3f(red, green, blue);
     if (render && description[0] != '\0')
     {
@@ -697,13 +759,16 @@ void LineBroken::drawDescription(QGLWidget *render, float red, float green, floa
 
 void LineBroken::addControl(float x, float y)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "LineBroken::addControl(float x, float y)"
+                                       << " x = " << x << " y = " << y << "\n";
 }
 
 
 QJsonObject LineBroken::getJSONInfo()
 {
-    Logger::getLogger()->writeLog("LineBroken::getJSONInfo()");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::getJSONInfo()\n";
     QJsonObject element;
 
     element["Name"] = name;
@@ -743,11 +808,15 @@ QJsonObject LineBroken::getJSONInfo()
 
 void LineBroken::getProperties(QFormLayout *layout, QGLWidget* render)
 {
-    Logger::getLogger()->writeLog("LineBroken::getProperties(QFormLayout *layout, QGLWidget* render)");
-    while(QLayoutItem* child = layout->takeAt(0))
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::getProperties(QFormLayout *layout, QGLWidget* render)\n";
+    if (layout == NULL)
     {
-        delete child->widget();
-        delete child;
+        QMessageBox::critical(0, "Ошибка", "LineBroken::getProperties(QFormLayout *layout, QGLWidget* render) layout = NULL",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->errorLog() << "LineBroken::getProperties(QFormLayout *layout, QGLWidget* render) layout = NULL\n";
+        QApplication::exit(0);
     }
 }
 
@@ -755,13 +824,16 @@ void LineBroken::getProperties(QFormLayout *layout, QGLWidget* render)
 
 bool LineBroken::isFixed()
 {
-    Logger::getLogger()->writeLog("LineBroken::isFixed()");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::isFixed()\n";
     return fixed;
 }
 
 void LineBroken::addBreak(bool front)
 {
-    Logger::getLogger()->writeLog("LineBroken::addBreak(bool front)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::addBreak(bool front)"
+                                   << " front = " << front << "\n";
     float x, y, z;
     if (front)
     {
@@ -795,37 +867,46 @@ void LineBroken::addBreak(bool front)
 
 void LineBroken::drawMeasurements(QGLWidget *render)
 {
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::drawMeasurements(QGLWidget *render)\n";
 }
 
 
 bool LineBroken::setFixed(bool fixed)
 {
-    Logger::getLogger()->writeLog("LineBroken::setFixed(bool fixed)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::setFixed(bool fixed)"
+                                   << " fixed = " << fixed << "\n";
     this->fixed = fixed;
 }
 
 void LineBroken::setDescription(QString description)
 {
-    Logger::getLogger()->writeLog("LineBroken::setDescription(QString description)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::setDescription(QString description)"
+                                   << " description = " << description << "\n";
     this->description = description;
 }
 
 
 int LineBroken::getLayer()
 {
-    Logger::getLogger()->writeLog("LineBroken::getLayer()");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::getLayer()\n";
     return layer;
 }
 
 
 void LineBroken::clear()
 {
+    Logger::getLogger()->infoLog() << "LineBroken::clear()\n";
 }
 
 
 std::vector<vec3> LineBroken::getCoordOfControl(int index)
 {
-    Logger::getLogger()->writeLog("LineBroken::getCoordOfControl(int index)");
+    Logger::getLogger()->infoLog() << "LineBroken::getCoordOfControl(int index)"
+                                   << " index = " << index << "\n";
     std::vector<vec3> res;
     vec3 p(vertexArrayForAxis[index * 3],
             vertexArrayForAxis[index * 3 + 1],
@@ -836,7 +917,11 @@ std::vector<vec3> LineBroken::getCoordOfControl(int index)
 
 void LineBroken::rotate(float angle, float x, float y, float z)
 {
-    Logger::getLogger()->writeLog("LineBroken::rotate(float angle, float x, float y, float z)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::rotate(float angle, float x, float y, float z)"
+                                   << " angle = " << angle
+                                   << " x = " << x << " y = " << y
+                                   << " z = " << z << "\n";
     for (int i = 0; i < vertexArrayForAxis.size() / 3; ++i)
     {
         vertexArrayForAxis[i * 3] -= x;

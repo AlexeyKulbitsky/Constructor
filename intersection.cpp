@@ -5,6 +5,9 @@
 #include <QPushButton>
 #include <QCheckBox>
 #include "mainwindow.h"
+
+bool Intersection::log = true;
+
 Intersection::Intersection()
 {
     selected = false;
@@ -110,11 +113,16 @@ Intersection::~Intersection()
 
 bool Intersection::isSelected()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::isSelected()\n";
     return selected;
 }
 
 void Intersection::setSelectedStatus(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::setSelectedStatus(bool status)"
+                                       << " status = " << status << "\n";
     selected = status;
     for (int i = 0; i < roads.size(); ++i)
     {
@@ -129,8 +137,9 @@ void Intersection::setSelectedStatus(bool status)
 
 void Intersection::drawFigure(QGLWidget *render)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::drawFigure(QGLWidget *render)\n";
 
-    Logger::getLogger()->writeLog("Intersection::drawFigure(QGLWidget *render)");
     glDisableClientState(GL_COLOR_ARRAY);
     glEnable(GL_TEXTURE_2D);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -172,12 +181,14 @@ void Intersection::drawFigure(QGLWidget *render)
 
 void Intersection::drawSelectionFrame()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::drawSelectionFrame()\n";
 }
 
 void Intersection::drawMeasurements(QGLWidget *render)
 {
-
-    Logger::getLogger()->writeLog("Intersection::drawMeasurements(QGLWidget *render)");
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::drawMeasurements(QGLWidget *render)\n";
     for (int i = 0; i < curves.size(); ++i)
         curves[i]->drawMeasurements(render);
 
@@ -204,10 +215,11 @@ void Intersection::drawMeasurements(QGLWidget *render)
 
 void Intersection::move(float dx, float dy, float dz)
 {
-    Logger::getLogger()->writeLog("Intersection::move(" +
-                                  QString::number(dx) + ", " +
-                                  QString::number(dy) + ", " +
-                                  QString::number(dz) + ")");
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::move(float dx, float dy, float dz)"
+                                       << " dx = " << dx
+                                       << " dy = " << dy
+                                       << " dz = " << dz << "\n";
     if (fixed)
         return;
 
@@ -224,6 +236,11 @@ void Intersection::move(float dx, float dy, float dz)
 
 void Intersection::drawControlElement(int index, float lineWidth, float pointSize)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::drawControlElement(int index, float lineWidth, float pointSize)"
+                                       << " index = " << index
+                                       << " lineWidth = " << lineWidth
+                                       << " pointSize = " << pointSize << "\n";
     int i;
     for (i = 0; i < roads.size(); ++i)
     {
@@ -246,11 +263,21 @@ void Intersection::drawControlElement(int index, float lineWidth, float pointSiz
 
 QCursor Intersection::getCursorForControlElement(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::getCursorForControlElement(int index)"
+                                       << " index = " << index << "\n";
     return Qt::CrossCursor;
 }
 
 void Intersection::resizeByControl(int index, float dx, float dy, float x, float y)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::resizeByControl(int index, float dx, float dy, float x, float y)"
+                                       << " index = " << index
+                                       << " dx = " << dx
+                                       << " dy = " << dy
+                                       << " x = " << x
+                                       << " y = " << y << "\n";
     if (fixed)
         return;
 
@@ -510,6 +537,8 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
 
 int Intersection::getNumberOfControls()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::getNumberOfControls()\n";
     int count = 0;
     for (int i = 0; i < roads.size(); ++i)
     {
@@ -522,25 +551,34 @@ int Intersection::getNumberOfControls()
 
 int Intersection::controlsForPoint()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::controlsForPoint()\n";
     return 1;
 }
 
 void Intersection::changeColorOfSelectedControl(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::changeColorOfSelectedControl(int index)"
+                                       << " index = " << index << "\n";
     indexOfSelectedControl = index;
 }
 
 void Intersection::getProperties(QFormLayout *layout, QGLWidget *render)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::getProperties(QFormLayout *layout, QGLWidget *render)\n";
+    if (layout == NULL)
+    {
+        QMessageBox::critical(0, "Ошибка", "Intersection::getProperties(QFormLayout *layout, QGLWidget *render) layout = NULL",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->errorLog() << "Intersection::getProperties(QFormLayout *layout, QGLWidget *render) layout = NULL\n";
+        QApplication::exit(0);
+    }
     clearProperties(layout);
     this->layout = layout;
     this->render = render;
-    while(QLayoutItem* child = layout->takeAt(0))
-    {
-        delete child->widget();
-        delete child;
-    }
-
 
     QCheckBox *fixedCheckBox = new QCheckBox();
     fixedCheckBox->setChecked(fixed);
@@ -665,16 +703,22 @@ void Intersection::getProperties(QFormLayout *layout, QGLWidget *render)
 
 bool Intersection::isFixed()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::isFixed()\n";
     return fixed;
 }
 
 int Intersection::getLayer()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::getLayer()\n";
     return layer;
 }
 
 void Intersection::setRoadsTextures()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::setRoadsTextures()\n";
     for (int i = 0; i < roads.size(); ++i)
     {
         int index1 = i == 0 ? roads.size() - 1 : i - 1;
@@ -693,6 +737,10 @@ bool Intersection::calculateLinesIntersection(float a1, float b1, float c1,
                                               float a2, float b2, float c2,
                                               float &x, float &y)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::calculateLinesIntersection(float a1, float b1, float c1,float a2, float b2, float c2,float &x, float &y)"
+                                       << " a1 = " << a1 << " b1 = " << b1 << " c1 = " << c1
+                                       << " a2 = " << a2 << " b2 = " << b2 << " c2 = " << c2 << "\n";
     float eps = 1e-9;
     float den = a1 * b2 - a2 * b1;
     float numX = c1 * b2 - c2 * b1;
@@ -709,6 +757,12 @@ bool Intersection::calculateLinesIntersection(float a1, float b1, float c1,
 
 float Intersection::calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4)
 {    
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4)"
+                                       << " p1.x = " << p1.x << " p1.y = " << p1.y
+                                       << " p2.x = " << p2.x << " p2.y = " << p2.y
+                                       << " p3.x = " << p3.x << " p3.y = " << p3.y
+                                       << " p4.x = " << p4.x << " p4.y = " << p4.y << "\n";
     float dx1 = p2.x - p1.x;
     float dy1 = p2.y - p1.y;
     float r1 = sqrt(dx1*dx1 + dy1*dy1);
@@ -731,7 +785,10 @@ float Intersection::calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4)
 
 void Intersection::calculateRoadForAngle(int i, int index)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::calculateRoadForAngle(int i, int index)"
+                                       << " i = " << i
+                                       << " index = " << index << "\n";
     vec2 p1 = roads[i]->getAxisPoint_1();
     vec2 p2 = roads[i]->getAxisPoint_2();
     int j = i == (roads.size() - 1) ? 0 : i + 1;
@@ -780,7 +837,10 @@ void Intersection::calculateRoadForAngle(int i, int index)
 
 void Intersection::calculateRoadForRounding(int i, int index)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::calculateRoadForRounding(int i, int index)"
+                                       << " i = " << i
+                                       << " index = " << index << "\n";
     if (index < (roads[i]->getNumberOfControls() - 12))
         return;
     int num = 12 - (roads[i]->getNumberOfControls() - index);
@@ -939,7 +999,11 @@ dafault:
 
 void Intersection::calculateRoadForMoving(int i, float dx, float dy)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::calculateRoadForMoving(int i, float dx, float dy)"
+                                       << " i = " << i
+                                       << " dx = " << dx
+                                       << " dy = " << dy << "\n";
     float r = sqrt(dx*dx + dy*dy);
     int j = i == (roads.size() - 1) ? 0 : i + 1;
     vec3 p1 = roads[j]->getCoordOfPoint(0);
@@ -1060,7 +1124,8 @@ void Intersection::calculateRoadForMoving(int i, float dx, float dy)
 
 bool Intersection::calculateRoadIntersections()
 {    
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::calculateRoadIntersections()\n";
     for (int i = 0; i < roads.size(); ++i)
         roads[i]->setVertexArray();
     for (int i = 0; i < roads.size(); ++i)
@@ -1145,7 +1210,8 @@ bool Intersection::calculateRoadIntersections()
 
 void Intersection::calculateRoundings()
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::calculateRoundings()\n";
     if (roads.size() == 0)
         return;
 
@@ -1183,7 +1249,8 @@ void Intersection::calculateRoundings()
 
 void Intersection::setVertexArray()
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::setVertexArray()\n";
     vertexArray.clear();
 
     vec3 p = roads[0]->getCoordOfPoint(0);
@@ -1203,7 +1270,8 @@ void Intersection::setVertexArray()
 
 void Intersection::setIndexArray()
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::setIndexArray()\n";
     indexArray.clear();
     for (int i = 2; i < vertexArray.size() / 3; ++i)
     {
@@ -1216,7 +1284,10 @@ void Intersection::setIndexArray()
 
 void Intersection::setTextureArray(float textureUSize, float textureVSize)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::setTextureArray(float textureUSize, float textureVSize)"
+                                       << " textureUSize = " << textureUSize
+                                       << " textureVSize = " << textureVSize << "\n";
     textureArray.clear();
 
     textureArray.push_back(0.0f);
@@ -1250,7 +1321,8 @@ void Intersection::setTextureArray(float textureUSize, float textureVSize)
 
 void Intersection::addRoad()
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::addRoad()\n";
     int numberOfRoads = roads.size() + 1;
     float x = roads[0]->getAxisPoint_1().x;
     float y = roads[0]->getAxisPoint_1().y;
@@ -1330,7 +1402,8 @@ void Intersection::addRoad()
 
 void Intersection::deleteRoad()
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::deleteRoad()\n";
     int numberOfRoads = roads.size() - 1;
     float x = roads[0]->getAxisPoint_1().x;
     float y = roads[0]->getAxisPoint_1().y;
@@ -1411,7 +1484,8 @@ void Intersection::deleteRoad()
 
 void Intersection::recalculateRoads()
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::recalculateRoads()\n";
     calculateRoadIntersections();
     calculateRoundings();
     setRoadsTextures();
@@ -1422,7 +1496,8 @@ void Intersection::recalculateRoads()
 
 void Intersection::resetWidth()
 {
-    //recalculateRoads();
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::resetWidth()\n";
     RoadSimple* road = qobject_cast<RoadSimple*>(sender());
     int index = -1;
     for (int i = 0; i < roads.size(); ++i)
@@ -1513,7 +1588,9 @@ void Intersection::resetWidth()
 
 void Intersection::setAngle(double angle)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::setAngle(double angle)"
+                                       << " angle = " << angle << "\n";
     int i = qobject_cast<QDoubleSpinBox*>(sender())->objectName().toInt();
     // Curve * curve = qobject_cast<Curve*>(sender());
     Curve * curve = curves[i];
@@ -1565,32 +1642,55 @@ void Intersection::setAngle(double angle)
 
 void Intersection::setAngle(double angle, int index)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::setAngle(double angle, int index)"
+                                       << " angle = " << angle
+                                       << " index = " << index<< "\n";
 }
 
 void Intersection::deleteLine()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::deleteLine()\n";
     emit linesChanged(layout, render);
 }
 
 void Intersection::addLine()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::addLine()\n";
     emit linesChanged(layout, render);
 }
 
 bool Intersection::setFixed(bool fixed)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::setFixed(bool fixed)"
+                                       << " fixed = " << fixed << "\n";
     this->fixed = fixed;
 }
 
 
 void Intersection::clear()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::clear()\n";
+}
+
+void Intersection::setLogging(bool status)
+{
+    log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "Intersection::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
 }
 
 
 void Intersection::clearProperties(QLayout *layout)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::clearProperties(QLayout *layout)\n";
     for (int i = 0; i < 10; ++i)
         disconnect(stepDialogs[i], 0, 0, 0);
     disconnect(stepDialog, 0, 0, 0);
@@ -1599,6 +1699,8 @@ void Intersection::clearProperties(QLayout *layout)
 
 void Intersection::setModel(Model *model)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::setModel(Model *model)\n";
     this->model = model;
     for (int i = 0; i < roads.size(); ++i)
         roads[i]->setModel(model);
@@ -1607,6 +1709,10 @@ void Intersection::setModel(Model *model)
 
 std::vector<vec3> Intersection::getCoordOfControl(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Intersection::getCoordOfControl(int index)"
+                                       << " index = " << index << "\n";
+
     int i;
     for (i = 0; i < roads.size(); ++i)
     {

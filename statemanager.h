@@ -47,7 +47,7 @@ private:
     State* currentState;
 
     bool rulerActive;
-
+    static bool log;
 public:
 
     DefaultState* defaultState;
@@ -76,7 +76,8 @@ public:
     void dropEvent(QDropEvent * event);
 
     void contextMenuEvent(QContextMenuEvent *pe);
-
+    static void setLogging(bool status);
+    static bool getLogging() { return log; }
 signals:
 
 public slots:

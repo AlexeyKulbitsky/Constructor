@@ -14,62 +14,6 @@
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
-     <widget class="QWidget" name="logTab">
-      <attribute name="title">
-       <string>Tab 1</string>
-      </attribute>
-      <widget class="QCheckBox" name="logRoadSimpleCheckBox">
-       <property name="geometry">
-        <rect>
-         <x>30</x>
-         <y>30</y>
-         <width>111</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Дорога простая</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="logRoadBrokenCheckBox">
-       <property name="geometry">
-        <rect>
-         <x>30</x>
-         <y>60</y>
-         <width>121</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Дорога ломаная</string>
-       </property>
-      </widget>
-      <widget class="QCheckBox" name="logCompositeRoadCheckBox">
-       <property name="geometry">
-        <rect>
-         <x>30</x>
-         <y>90</y>
-         <width>121</width>
-         <height>17</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Составная дорога</string>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="tab_2">
-      <attribute name="title">
-       <string>Tab 2</string>
-      </attribute>
-     </widget>
-    </widget>
-   </item>
    <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -108,41 +52,40 @@
      </item>
     </layout>
    </item>
+   <item row="0" column="0">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="logTab">
+      <attribute name="title">
+       <string>Логирование</string>
+      </attribute>
+      <widget class="QTreeWidget" name="logTreeWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>256</width>
+         <height>281</height>
+        </rect>
+       </property>
+       <column>
+        <property name="text">
+         <string notr="true">1</string>
+        </property>
+       </column>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>Tab 2</string>
+      </attribute>
+     </widget>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>cancelButton</sender>
-   <signal>clicked()</signal>
-   <receiver>SettingsDialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>333</x>
-     <y>281</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>86</x>
-     <y>272</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>okButton</sender>
-   <signal>clicked()</signal>
-   <receiver>SettingsDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>194</x>
-     <y>282</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>28</x>
-     <y>270</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

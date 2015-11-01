@@ -44,7 +44,7 @@ protected:
     GLfloat ColorArrayForSelection[4][3];
     bool selected;
     QString description;
-
+    static bool log;
 public:
     LineSimple();
     LineSimple(float x1, float y1, float x2, float y2, QString name,int layer);
@@ -66,7 +66,8 @@ public:
     vec2 getAxisPoint_2(){return vec2(x2, y2);}
     QPoint getCoorninateOfPointControl(int index);
     void drawDescription(QGLWidget* render = 0, float red = 1.0f, float green = 1.0f, float blue = 1.0f);
-
+    static void setLogging(bool status);
+    static bool getLogging() { return log; }
     // RoadElement interface
 public:
     virtual QJsonObject getJSONInfo();

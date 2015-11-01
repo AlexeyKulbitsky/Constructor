@@ -4,6 +4,8 @@
 #include <QCheckBox>
 #include <assert.h>
 
+bool Curve::log = true;
+
 Curve::Curve(float xCenter, float yCenter, float zCenter,
              float xLeft, float yLeft, float zLeft,
              float xRight, float yRight, float zRight,
@@ -11,8 +13,7 @@ Curve::Curve(float xCenter, float yCenter, float zCenter,
              QString texture_2, float texture_2Usize, float texture_2Vsize,
              int numberOfSides)
 {
-    ////qDebug() << texture_1;
-    ////qDebug() << texture_2;
+
     this->numberOfSides = numberOfSides;
     controlPoints[0] = xCenter;
     controlPoints[1] = yCenter;
@@ -71,16 +72,23 @@ Curve::~Curve()
 
 bool Curve::isSelected()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::isSelected()\n";
     return selected;
 }
 
 void Curve::setSelectedStatus(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setSelectedStatus(bool status)"
+                                       << " status = " << status << "\n";
     selected = status;
 }
 
 void Curve::drawFigure(QGLWidget *render)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::drawFigure(QGLWidget *render)\n";
     if (selected)
     {
         if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
@@ -132,6 +140,8 @@ void Curve::drawFigure(QGLWidget *render)
 
 void Curve::drawSelectionFrame()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::drawSelectionFrame()\n";
     if (showBoard)
     {
         glLineWidth(5.0f);
@@ -155,7 +165,8 @@ void Curve::drawSelectionFrame()
 
 void Curve::drawMeasurements(QGLWidget *render)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::drawMeasurements(QGLWidget *render)\n";
     GLdouble x, y, z;
     GLdouble wx, wy, wz;
     QFont shrift = QFont("Times", 8, QFont::Black);
@@ -223,6 +234,11 @@ void Curve::drawMeasurements(QGLWidget *render)
 
 void Curve::move(float dx, float dy, float dz)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::move(float dx, float dy, float dz)"
+                                       << " dx = " << dx
+                                       << " dy = " << dy
+                                       << " dz = " << dz << "\n";
     if (fixed)
         return;
 
@@ -252,6 +268,11 @@ void Curve::move(float dx, float dy, float dz)
 
 void Curve::drawControlElement(int index, float lineWidth, float pointSize)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::drawControlElement(int index, float lineWidth, float pointSize)"
+                                       << " index = " << index
+                                       << " lineWidth = " << lineWidth
+                                       << " pointSize = " << pointSize << "\n";
     switch (index)
     {
     case 0:
@@ -333,11 +354,21 @@ void Curve::drawControlElement(int index, float lineWidth, float pointSize)
 
 QCursor Curve::getCursorForControlElement(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::getCursorForControlElement(int index)"
+                                       << " index = " << index << "\n";
     return Qt::CrossCursor;
 }
 
 void Curve::resizeByControl(int index, float dx, float dy, float x, float y)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::resizeByControl(int index, float dx, float dy, float x, float y)"
+                                       << " index = " << index
+                                       << " dx = " << dx
+                                       << " dy = " << dy
+                                       << " x = " << x
+                                       << " y = " << y << "\n";
     if (fixed)
         return;
 
@@ -406,28 +437,40 @@ void Curve::resizeByControl(int index, float dx, float dy, float x, float y)
 
 int Curve::getNumberOfControls()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::getNumberOfControls()\n";
     return 4;
 }
 
 int Curve::controlsForPoint()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::controlsForPoint()\n";
     return 1;
 }
 
 void Curve::changeColorOfSelectedControl(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::changeColorOfSelectedControl(int index)"
+                                       << " index = " << index << "\n";
     indexOfSelectedControl = index;
 }
 
 void Curve::getProperties(QFormLayout *layout, QGLWidget *render)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::getProperties(QFormLayout *layout, QGLWidget *render)\n";
+    if (layout == NULL)
+    {
+        QMessageBox::critical(0, "Ошибка", "Curve::getProperties(QFormLayout *layout, QGLWidget *render) layout = NULL",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->errorLog() << "Curve::getProperties(QFormLayout *layout, QGLWidget *render) layout = NULL\n";
+        QApplication::exit(0);
+    }
     this->layout = layout;
     this->render = render;
-    while(QLayoutItem* child = layout->takeAt(0))
-    {
-        delete child->widget();
-        delete child;
-    }
 
     QCheckBox *fixedCheckBox = new QCheckBox();
     fixedCheckBox->setChecked(fixed);
@@ -486,20 +529,28 @@ void Curve::getProperties(QFormLayout *layout, QGLWidget *render)
 
 bool Curve::isFixed()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::isFixed()\n";
     return fixed;
 }
 
 int Curve::getLayer()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::getLayer()\n";
     return layer;
 }
 
 void Curve::clear()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::clear()\n";
 }
 
 void Curve::setVertexArray()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setVertexArray()\n";
     vertexArray.clear();
     float pi = 3.14159265f;
 
@@ -631,6 +682,8 @@ void Curve::setVertexArray()
 
 void Curve::setTextureArray()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setTextureArray()\n";
     textureArray.clear();
     float x = controlPoints[0];
     float y = controlPoints[1];
@@ -673,6 +726,8 @@ void Curve::setTextureArray()
 
 void Curve::setIndexArray()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setIndexArray()\n";
     indexArray.clear();
     for (int i = 1; i < vertexArray.size() / 3 - 1; ++i)
     {
@@ -686,6 +741,8 @@ void Curve::setIndexArray()
 
 void Curve::setVertexArrayBoard()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setVertexArrayBoard()\n";
     vertexArrayBoard.clear();
 
     if (angleRounding == 180)
@@ -811,6 +868,10 @@ void Curve::setVertexArrayBoard()
 
 void Curve::setTextureArrayBoard(float textureUSize, float textureVSize)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setTextureArrayBoard(float textureUSize, float textureVSize)"
+                                       << " textureUSize = " << textureUSize
+                                       << " textureVSize = " << textureVSize << "\n";
     textureArrayBoard.clear();
     float x1, y1, x2, y2;
     float r1 = 0.0f, r2 = 0.0f, r3 = 0.0f, r4 = 0.0f, r5 = 0.0f;
@@ -915,6 +976,8 @@ void Curve::setTextureArrayBoard(float textureUSize, float textureVSize)
 
 void Curve::setIndexArrayBoard()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setIndexArrayBoard()\n";
     indexArrayBoard.clear();
     for (int i = 0; i < vertexArrayBoard.size() / 3 - 5; i += 10)
     {
@@ -953,38 +1016,23 @@ void Curve::setIndexArrayBoard()
     }
 }
 
-GLuint Curve::getTextures(QString source)
-{
-    QImage image1;
 
-    GLuint ID;
-    image1.load(source);
-    image1 = QGLWidget::convertToGLFormat(image1);
-    glGenTextures(1, &ID);
-    // создаём и связываем 1-ый текстурный объект с последующим состоянием текстуры
-    glBindTexture(GL_TEXTURE_2D, ID);
-    // связываем текстурный объект с изображением
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, (GLsizei)image1.width(), (GLsizei)image1.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image1.bits());
-
-    // задаём линейную фильтрацию вблизи:
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // задаём линейную фильтрацию вдали:
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    // задаём: при фильтрации игнорируются тексели, выходящие за границу текстуры для s координаты
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // задаём: при фильтрации игнорируются тексели, выходящие за границу текстуры для t координаты
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // задаём: цвет текселя полностью замещает цвет фрагмента фигуры
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-    return ID;
-}
 
 void Curve::setCoordForPoint(int index, float x, float y, float z)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setCoordForPoint(int index, float x, float y, float z)"
+                                       << " index = " << index << " x = " << x
+                                       << " y = " << y << " z = " << z << "\n";
+
     if (index < 0 || index > 2)
-        return;
+    {
+        QMessageBox::critical(0, "Ошибка", "Curve::setCoordForPoint(int index, float x, float y, float z) index out of range",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->errorLog() << "Curve::setCoordForPoint(int index, float x, float y, float z) index out of range\n";
+        QApplication::exit(0);
+    }
     controlPoints[index * 3] = x;
     controlPoints[index * 3 + 1] = y;
     controlPoints[index * 3 + 2] = z;
@@ -1000,7 +1048,18 @@ void Curve::setCoordForPoint(int index, float x, float y, float z)
 
 vec3 Curve::getCoordOfPoint(int index)
 {
-    //assert(index > 0 && index < 3);
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::getCoordOfPoint(int index)"
+                                       << " index = " << index << "\n";
+
+    if (index < 0 || index > 2)
+    {
+        QMessageBox::critical(0, "Ошибка", "Curve::getCoordOfPoint(int index) index out of range",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->errorLog() << "Curve::getCoordOfPoint(int index) index out of range\n";
+        QApplication::exit(0);
+    }
     if (index >= 0 && index < 3)
     {
         vec3 p(controlPoints[index * 3], controlPoints[index * 3 + 1], controlPoints[index * 3 + 2]);
@@ -1012,6 +1071,8 @@ vec3 Curve::getCoordOfPoint(int index)
 
 void Curve::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)\n";
     GLint viewport[4];
     GLdouble mvmatrix[16], projmatrix[16];
 
@@ -1025,17 +1086,22 @@ void Curve::getWindowCoord(double x, double y, double z, double &wx, double &wy,
 
 float Curve::getBoardWidth()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::getBoardWidth()\n";
     return boardWidth;
 }
 
 bool Curve::getBoardShowStatus()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::getBoardShowStatus()\n";
     return showBoard;
 }
 
 void Curve::setAngleVertexArray()
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setAngleVertexArray()\n";
     angleVertexArray.clear();
     float pi = 3.1415926f;
 
@@ -1105,6 +1171,11 @@ void Curve::setAngleVertexArray()
 
 void Curve::setAngleColorArray(float red, float green, float blue)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setAngleColorArray(float red, float green, float blue)"
+                                       << " red = " << red
+                                       << " green = " << green
+                                       << " blue = " << blue << "\n";
     angleColorArray.clear();
     for (int i = 0; i < angleVertexArray.size() / 3; ++i)
     {
@@ -1116,6 +1187,8 @@ void Curve::setAngleColorArray(float red, float green, float blue)
 
 void Curve::setAngleIndexArray()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setAngleIndexArray()\n";
     angleIndexArray.clear();
     for (int i = 0; i < angleVertexArray.size() / 3; ++i)
     {
@@ -1125,7 +1198,8 @@ void Curve::setAngleIndexArray()
 
 void Curve::calculateAngle()
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::calculateAngle()\n";
     float pi = 3.1415926f;
 
     float xCenter = controlPoints[0];
@@ -1188,6 +1262,10 @@ bool Curve::calculateLinesIntersection(float a1, float b1, float c1,
                                        float a2, float b2, float c2,
                                        float &x, float &y)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::calculateLinesIntersection(float a1, float b1, float c1,float a2, float b2, float c2,float &x, float &y)"
+                                       << " a1 = " << a1 << " b1 = " << b1 << " c1 = " << c1
+                                       << " a2 = " << a2 << " b2 = " << b2 << " c2 = " << c2 << "\n";
     // Проходит через начало координат
     if (c1 == 0.0f && a1 != 0.0f && b1 != 0.0f)
     {
@@ -1314,6 +1392,8 @@ bool Curve::calculateLinesIntersection(float a1, float b1, float c1,
 
 void Curve::calculateControlsForAngle(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::calculateControlsForAngle(int index)\n";
     float pi = 3.14159265f;
     float xCenter = controlPoints[0];
     float yCenter = controlPoints[1];
@@ -1377,14 +1457,28 @@ void Curve::calculateControlsForAngle(int index)
     }
 }
 
+void Curve::setLogging(bool status)
+{
+    log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "Curve::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
+}
+
 bool Curve::setFixed(bool fixed)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setFixed(bool fixed)"
+                                       << " fixed = " << fixed << "\n";
     this->fixed = fixed;
 }
 
 void Curve::setLeftLength(double length)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setLeftLength(double length)"
+                                       << " length = " << length << "\n";
     if (this->leftLength == length)
         return;
     float x1 = controlPoints[0];
@@ -1404,6 +1498,9 @@ void Curve::setLeftLength(double length)
 
 void Curve::setRightLength(double length)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setRightLength(double length)"
+                                       << " length = " << length << "\n";
     if (this->rightLength == length)
         return;
 
@@ -1424,6 +1521,9 @@ void Curve::setRightLength(double length)
 
 void Curve::setBoardWidth(double width)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setBoardWidth(double width)"
+                                       << " width = " << width << "\n";
     if (boardWidth == width)
         return;
     boardWidth = width;
@@ -1434,6 +1534,9 @@ void Curve::setBoardWidth(double width)
 
 void Curve::setBoardShowStatus(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setBoardShowStatus(bool status)"
+                                       << " status = " << status << "\n";
     if (showBoard == status)
         return;
     showBoard = status;
@@ -1442,7 +1545,9 @@ void Curve::setBoardShowStatus(bool status)
 
 void Curve::setAngle(double angle)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setAngle(double angle)"
+                                       << " angle = " << angle << "\n";
     float pi = 3.14159265f;
 
     if (fabs(angleRounding - angle) < 0.01f)
@@ -1518,6 +1623,9 @@ void Curve::setAngle(double angle)
 
 std::vector<vec3> Curve::getCoordOfControl(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::getCoordOfControl(int index)"
+                                       << " index = " << index << "\n";
     std::vector<vec3> res;
 
     switch (index)
@@ -1586,3 +1694,5 @@ std::vector<vec3> Curve::getCoordOfControl(int index)
     }
     return res;
 }
+
+

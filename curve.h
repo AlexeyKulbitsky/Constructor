@@ -57,7 +57,8 @@ public:
                                     float a2, float b2, float c2,
                                     float& x, float& y);
     void calculateControlsForAngle(int index);
-
+    static void setLogging(bool status);
+    static bool getLogging() { return log; }
 signals:
     void leftLengthChanged(double value);
     void rightLengthChanged(double value);
@@ -78,6 +79,7 @@ private:
     QVector<GLfloat> textureArray;
     QVector<GLubyte> indexArray;
 
+    static bool log;
 public:
     QVector<GLfloat> vertexArrayBoard;
     float texture1USize, texture1VSize;

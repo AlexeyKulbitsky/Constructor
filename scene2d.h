@@ -91,6 +91,8 @@ public:
 
     void setOverlayWidget(QWidget *widget);
     void drawModel();
+    static bool getLogging();
+
 signals:
     //void selectedFigureChanged(RoadElement* roadElement);
     void rulerStatusChanged(bool status);
@@ -113,7 +115,7 @@ public slots:
     void setShowSceneStatus(bool status);
     void setSceneActive(bool status);
     void setFixedScaleStatus(bool status);
-
+    static void setLogging(bool status);
 private:
     StateManager* stateManager;
     Model* model;
@@ -121,7 +123,7 @@ private:
     bool showGrid;
     QWidget* widget;
 
-
+    static bool log;
     // QWidget interface
 protected:
     virtual void contextMenuEvent(QContextMenuEvent *pe);

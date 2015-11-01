@@ -35,28 +35,6 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="tabScene3D">
-       <attribute name="title">
-        <string>3D - вид</string>
-       </attribute>
-       <layout class="QGridLayout" name="gridLayout_4">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
-        <item row="0" column="0">
-         <widget class="Scene3D" name="scene3D" native="true"/>
-        </item>
-       </layout>
-      </widget>
       <widget class="QWidget" name="tab">
        <attribute name="title">
         <string>Камера</string>
@@ -88,14 +66,6 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>Scene3D</class>
-   <extends>QWidget</extends>
-   <header location="global">scene3d.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -2,6 +2,8 @@
 #include <QApplication>
 #include "model.h"
 
+bool RoundingRoad::log = true;
+
 RoundingRoad::RoundingRoad()
 {
 
@@ -152,6 +154,18 @@ RoundingRoad::~RoundingRoad()
 void RoundingRoad::setVertexArray(float x1, float y1, float nearRadius, float angel1NearRadius, float angel2NearRadius,
                                   float x2, float y2, float farRadius, float angel1FarRadius, float angel2FarRadius, int numberOfSides)
 {
+    if (log)
+    Logger::getLogger()->infoLog() << "RoundingRoad::setVertexArray(float x1, float y1, float nearRadius, float angel1NearRadius, float angel2NearRadius, float x2, float y2, float farRadius, float angel1FarRadius, float angel2FarRadius, int numberOfSides)"
+                                   << " x1 = " << x1 << " y1 = " << y1
+                                   << " nearRadius = " << nearRadius
+                                   << " angel1NearRadius = " << angel1NearRadius
+                                   << " angel2NearRadius = " << angel2NearRadius
+                                   << " x2 = " << x2 << " y2 = " << y2
+                                   << " farRadius = " << farRadius
+                                   << " angel1FarRadius = " << angel1FarRadius
+                                   << " angel2FarRadius = " << angel2FarRadius
+                                   << " numberOfSides = " << numberOfSides << "\n";
+
     this->angel1NearRadius = angel1NearRadius;
     this->angel2NearRadius = angel2NearRadius;
     this->angel1FarRadius = angel1FarRadius;
@@ -284,6 +298,11 @@ void RoundingRoad::setVertexArray(float x1, float y1, float nearRadius, float an
 
 void RoundingRoad::setColorArray(float red, float green, float blue)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setColorArray(float red, float green, float blue)"
+                                       << " red = " << red
+                                       << " green = " << green
+                                       << " blue = " << blue << "\n";
     for (int i = 0; i < numberOfVertices; ++i)
     {
         colorArray.push_back(red);
@@ -294,6 +313,8 @@ void RoundingRoad::setColorArray(float red, float green, float blue)
 
 void RoundingRoad::setIndexArray()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setIndexArray()\n";
     int i;
     for (i = 0; i < vertexArray.size() / 3 - 2; i += 4)
     {
@@ -382,6 +403,10 @@ void RoundingRoad::setIndexArray()
 
 void RoundingRoad::setTextureArray(float textUsize, float textVsize)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setTextureArray(float textUsize, float textVsize)"
+                                       << " textUsize = " << textUsize
+                                       << " textVsize = " << textVsize << "\n";
     textureArray.clear();
     float x1, y1, x2, y2, r1 = 0.0f, r2 = 0.0f, r3;
     int i = 0;
@@ -431,6 +456,10 @@ void RoundingRoad::setTextureArray(float textUsize, float textVsize)
 
 void RoundingRoad::setNearTextureArray(float textUsize, float textVsize)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setNearTextureArray(float textUsize, float textVsize)"
+                                       << " textUsize = " << textUsize
+                                       << " textVsize = " << textVsize << "\n";
     textureArrayNear.clear();
     float x1, y1, x2, y2;
     float r1 = 0.0f, r2 = 0.0f, r3 = 0.0f, r4 = 0.0f, r5 = 0.0f;
@@ -537,6 +566,10 @@ void RoundingRoad::setNearTextureArray(float textUsize, float textVsize)
 
 void RoundingRoad::setFarTextureArray(float textUsize, float textVsize)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setFarTextureArray(float textUsize, float textVsize)"
+                                       << " textUsize = " << textUsize
+                                       << " textVsize = " << textVsize << "\n";
     textureArrayFar.clear();
     float x1, y1, x2, y2;
     float r1 = 0.0f, r2 = 0.0f, r3 = 0.0f, r4 = 0.0f, r5 = 0.0f;
@@ -641,6 +674,9 @@ void RoundingRoad::setFarTextureArray(float textUsize, float textVsize)
 
 void RoundingRoad::setSelectedStatus(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setSelectedStatus(bool status)"
+                                       << " status = " << status << "\n";
     selected = status;
     for (int i = 0; i < lines.size(); ++i)
         lines[i].line->setSelectedStatus(status);
@@ -649,6 +685,12 @@ void RoundingRoad::setSelectedStatus(bool status)
 void RoundingRoad::drawFigure(QGLWidget* render)
 {
 
+    if (log)
+    {
+        Logger::getLogger()->infoLog() << "RoundingRoad::drawFigure(QGLWidget* render)\n";
+        if (render == NULL)
+            Logger::getLogger()->warningLog() << "RoundingRoad::drawFigure(QGLWidget* render) render = NULL\n";
+    }
 
     ////qDebug() << "Texture coord: " << textureArray.size() / 2;
     ////qDebug() << "Vertex coord: " << vertexArray.size() / 3;
@@ -707,6 +749,8 @@ void RoundingRoad::drawFigure(QGLWidget* render)
 
 void RoundingRoad::drawSelectionFrame()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::drawSelectionFrame()\n";
     if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
     {
         ////qDebug() << "Index " << indexOfSelectedControl;
@@ -721,6 +765,11 @@ void RoundingRoad::drawSelectionFrame()
 
 void RoundingRoad::setColorArrayForSelectionFrame(float red, float green, float blue)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setColorArrayForSelectionFrame(float red, float green, float blue)"
+                                       << " red = " << red
+                                       << " green = " << green
+                                       << " blue = " << blue << "\n";
     for (int i = 0; i < numberOfVertices; ++i)
     {
         colorArrayForSelection[i * 3] = red;
@@ -731,6 +780,8 @@ void RoundingRoad::setColorArrayForSelectionFrame(float red, float green, float 
 
 void RoundingRoad::setIndexArrayForSelectionFrame()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setIndexArrayForSelectionFrame()\n";
     int count = 0;
     // Внутренний радиус
     int i = 0;
@@ -766,36 +817,10 @@ void RoundingRoad::setIndexArrayForSelectionFrame()
 
 }
 
-GLuint RoundingRoad::getTextures(QString source)
-{
-    QImage image1;
-
-    GLuint ID;
-    image1.load(source);
-    image1 = QGLWidget::convertToGLFormat(image1);
-    glGenTextures(1, &ID);
-    // создаём и связываем 1-ый текстурный объект с последующим состоянием текстуры
-    glBindTexture(GL_TEXTURE_2D, ID);
-    // связываем текстурный объект с изображением
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, (GLsizei)image1.width(), (GLsizei)image1.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image1.bits());
-
-    // задаём линейную фильтрацию вблизи:
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // задаём линейную фильтрацию вдали:
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-    // задаём: при фильтрации игнорируются тексели, выходящие за границу текстуры для s координаты
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    // задаём: при фильтрации игнорируются тексели, выходящие за границу текстуры для t координаты
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // задаём: цвет текселя полностью замещает цвет фрагмента фигуры
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    ////qDebug() << "TEXTURE ID " << ID;
-    return ID;
-}
 
 void RoundingRoad::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)
 {
+
     GLint viewport[4];
     GLdouble mvmatrix[16], projmatrix[16];
 
@@ -809,6 +834,11 @@ void RoundingRoad::getWindowCoord(double x, double y, double z, double &wx, doub
 
 void RoundingRoad::move(float dx, float dy, float dz)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setIndexArrayForSelectionFrame()"
+                                       << " dx = " << dx
+                                       << " dy = " << dy
+                                       << " dz = " << dz << "\n";
     if (fixed)
     {
         return;
@@ -841,6 +871,11 @@ void RoundingRoad::move(float dx, float dy, float dz)
 
 void RoundingRoad::drawControlElement(int index, float lineWidth, float pointSize)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::drawControlElement(int index, float lineWidth, float pointSize)"
+                                       << " index = " << index
+                                       << " lineWidth = " << lineWidth
+                                       << " pointSize = " << pointSize << "\n";
     int linesCount = 0;
     for (int i = 0; i < lines.size(); ++i)
         linesCount += lines[i].line->getNumberOfControls();
@@ -1073,11 +1108,19 @@ void RoundingRoad::drawControlElement(int index, float lineWidth, float pointSiz
 
 QCursor RoundingRoad::getCursorForControlElement(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::getCursorForControlElement(int index)"
+                                       << " index = " << index << "\n";
     return Qt::CrossCursor;
 }
 
 void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float y)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float y)"
+                                       << " index = " << index
+                                       << " dx = " << dx << " dy = " << dy
+                                       << " x = " << x << " y = " << y << "\n";
     if (fixed)
     {
         return;
@@ -1407,6 +1450,8 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
 
 int RoundingRoad::getNumberOfControls()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::getNumberOfControls()\n";
     //return vertexArray.size() / 3 + 10 + 2;
     int linesCount = 0;
     for (int i = 0; i < lines.size(); ++i)
@@ -1417,12 +1462,17 @@ int RoundingRoad::getNumberOfControls()
 
 void RoundingRoad::changeColorOfSelectedControl(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::changeColorOfSelectedControl(int index)"
+                                       << " index = " << index << "\n";
     indexOfSelectedControl = index;
 }
 
 
 QJsonObject RoundingRoad::getJSONInfo()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::getJSONInfo()\n";
     QJsonObject element;
 
     element["Name"] = name;
@@ -1456,14 +1506,19 @@ QJsonObject RoundingRoad::getJSONInfo()
 
 void RoundingRoad::getProperties(QFormLayout *layout, QGLWidget* render)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::getProperties(QFormLayout *layout, QGLWidget* render)\n";
+    if (layout == NULL)
+    {
+        QMessageBox::critical(0, "Ошибка", "RoundingRoad::getProperties(QFormLayout *layout, QGLWidget* render) layout = NULL",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->fatalLog() << "RoundingRoad::getProperties(QFormLayout *layout, QGLWidget* render) layout = NULL\n";
+        QApplication::exit(0);
+    }
     clearProperties(layout);
     this->layout = layout;
     this->render = render;
-    while(QLayoutItem* child = layout->takeAt(0))
-    {
-        delete child->widget();
-        delete child;
-    }
 
     QDoubleSpinBox* nearRadiusSpinBox = new QDoubleSpinBox();
     nearRadiusSpinBox->setKeyboardTracking(false);
@@ -1607,6 +1662,9 @@ void RoundingRoad::getProperties(QFormLayout *layout, QGLWidget* render)
 
 void RoundingRoad::setNearRadius(double nearRadius)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setNearRadius(double nearRadius)"
+                                       << " nearRadius = " << nearRadius << "\n";
     if (this->nearRadius != nearRadius)
     {
         this->nearRadius = nearRadius;
@@ -1627,6 +1685,9 @@ void RoundingRoad::setNearRadius(double nearRadius)
 
 void RoundingRoad::setAngel_1_NearRadius(double angel1)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setAngel_1_NearRadius(double angel1)"
+                                       << " angel1 = " << angel1 << "\n";
     if (angel1NearRadius != angel1)
     {
         angel1NearRadius = angel1;
@@ -1647,6 +1708,9 @@ void RoundingRoad::setAngel_1_NearRadius(double angel1)
 
 void RoundingRoad::setAngel_2_NearRadius(double angel2)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setAngel_2_NearRadius(double angel2)"
+                                       << " angel2 = " << angel2 << "\n";
     if (angel2NearRadius != angel2)
     {
         angel2NearRadius = angel2;
@@ -1667,6 +1731,9 @@ void RoundingRoad::setAngel_2_NearRadius(double angel2)
 
 void RoundingRoad::setFarRadius(double farRadius)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setFarRadius(double farRadius)"
+                                       << " farRadius = " << farRadius << "\n";
     if (this->farRadius != farRadius)
     {
         this->farRadius = farRadius;
@@ -1687,6 +1754,9 @@ void RoundingRoad::setFarRadius(double farRadius)
 
 void RoundingRoad::setAngel_1_FarRadius(double angel1)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setAngel_1_FarRadius(double angel1)"
+                                       << " angel1 = " << angel1 << "\n";
     if (angel1FarRadius != angel1)
     {
         angel1FarRadius = angel1;
@@ -1707,6 +1777,9 @@ void RoundingRoad::setAngel_1_FarRadius(double angel1)
 
 void RoundingRoad::setAngel_2_FarRadius(double angel2)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setAngel_2_FarRadius(double angel2)"
+                                       << " angel2 = " << angel2 << "\n";
     if (angel2FarRadius != angel2)
     {
         angel2FarRadius = angel2;
@@ -1727,6 +1800,14 @@ void RoundingRoad::setAngel_2_FarRadius(double angel2)
 
 void RoundingRoad::addLine(float step, QString textureSource, float textureSize, float lineWidth, int lineType, bool nearSide)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::addLine(float step, QString textureSource, float textureSize, float lineWidth, int lineType, bool nearSide)"
+                                       << " step = " << step
+                                       << " textureSource = " << textureSource
+                                       << " textureSize = " << textureSize
+                                       << " lineWidth = " << lineWidth
+                                       << " lineType = " << lineType
+                                       << " nearSide = " << nearSide << "\n";
     float angel_1, angel_2;
     float x, y, radius;
     float factor;
@@ -1869,7 +1950,8 @@ void RoundingRoad::addLine(float step, QString textureSource, float textureSize,
 
 void RoundingRoad::addLine()
 {
-    ////qDebug() << "Add line";
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::addLine()\n";
     QString textSource;
     float lWidth;
     switch(lineType)
@@ -1928,21 +2010,32 @@ void RoundingRoad::addLine()
 
 void RoundingRoad::setNearSide(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setNearSide(bool status)"
+                                       << " status = " << status << "\n";
     this->nearSide = status;
 }
 
 void RoundingRoad::setStep(double value)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setStep(double value)"
+                                       << " value = " << value << "\n";
     this->step = value;
 }
 
 void RoundingRoad::setLineType(int type)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setLineType(int type)"
+                                       << " type = " << type << "\n";
     this->lineType = type;
 }
 
 void RoundingRoad::deleteLine()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::deleteLine()\n";
     QPushButton * b = qobject_cast<QPushButton*>(sender());
     if (!b) return;
     ////qDebug() << "delete line " << b->text();
@@ -1977,6 +2070,8 @@ void RoundingRoad::deleteLine()
 
 void RoundingRoad::resetLines()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::resetLines()\n";
     float angel_1, angel_2;
     float x, y, radius;
     float factor;
@@ -2079,73 +2174,115 @@ void RoundingRoad::resetLines()
 
 void RoundingRoad::setBeginStep(double step)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setBeginStep(double step)"
+                                       << " step = " << step << "\n";
     beginStep = step;
     //qDebug() << "RoundingRoad::beginStep = " << beginStep;
 }
 
 void RoundingRoad::setEndStep(double step)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setEndStep(double step)"
+                                       << " step = " << step << "\n";
     endStep = step;
     //qDebug() << "RoundingRoad::endStep = " << endStep;
 }
 
 void RoundingRoad::setSplitZoneWidth(double value)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setSplitZoneWidth(double value)"
+                                       << " value = " << value << "\n";
     splitZoneWidth = value;
 }
 
 void RoundingRoad::setBeginSide(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setBeginSide(bool status)"
+                                       << " status = " << status << "\n";
     beginSide = status;
 }
 
 void RoundingRoad::setBeginRounding(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setBeginRounding(bool status)"
+                                       << " status = " << status << "\n";
     beginRounding = status;
 }
 
 void RoundingRoad::setEndRounding(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setEndRounding(bool status)"
+                                       << " status = " << status << "\n";
     endRounding = status;
 }
 
 void RoundingRoad::setDifferentDirections(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setDifferentDirections(bool status)"
+                                       << " status = " << status << "\n";
     differentDirections = status;
 }
 
 void RoundingRoad::setSingleWay(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setSingleWay(bool status)"
+                                       << " status = " << status << "\n";
     singleWay = status;
 }
 
 void RoundingRoad::setAxisStep(double step)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setAxisStep(double step)"
+                                       << " step = " << step << "\n";
     axisStep = step;
 }
 
 void RoundingRoad::setSplitZoneType(int type)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setSplitZoneType(int type)"
+                                       << " type = " << type << "\n";
     splitZoneType = type;
 }
 
 void RoundingRoad::setSplitZoneHeight(double height)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setSplitZoneHeight(double height)"
+                                       << " height = " << height << "\n";
     splitZoneHeight = height;
 }
 
 void RoundingRoad::setShowNearBoard(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setShowNearBoard(bool status)"
+                                       << " status = " << status << "\n";
     showNearBoard = status;
 }
 
 void RoundingRoad::setShowFarBoard(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setShowFarBoard(bool status)"
+                                       << " status = " << status << "\n";
     showFarBoard = status;
 }
 
 void RoundingRoad::setNearBoardWidth(double width)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setNearBoardWidth(double width)"
+                                       << " width = " << width << "\n";
     if (nearBoardWidth == width)
         return;
     nearBoardWidth = width;
@@ -2158,6 +2295,9 @@ void RoundingRoad::setNearBoardWidth(double width)
 
 void RoundingRoad::setFarBoardWidth(double width)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setFarBoardWidth(double width)"
+                                       << " width = " << width << "\n";
     if (farBoardWidth == width)
         return;
     farBoardWidth = width;
@@ -2175,12 +2315,16 @@ void RoundingRoad::setFarBoardWidth(double width)
 
 bool RoundingRoad::isFixed()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::isFixed()\n";
     return fixed;
 }
 
 
 void RoundingRoad::drawMeasurements(QGLWidget *render)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::drawMeasurements(QGLWidget *render)\n";
     GLdouble x, y, z;
     GLdouble wx, wy, wz;
     QFont shrift = QFont("Times", 8, QFont::Bold);
@@ -2272,23 +2416,33 @@ void RoundingRoad::drawMeasurements(QGLWidget *render)
 
 bool RoundingRoad::setFixed(bool fixed)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setFixed(bool fixed)"
+                                       << " fixed = " << fixed << "\n";
     this->fixed = fixed;
 }
 
 
 int RoundingRoad::getLayer()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::getLayer()\n";
     return layer;
 }
 
 
 void RoundingRoad::clear()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::clear()\n";
 }
 
 
 std::vector<vec3> RoundingRoad::getCoordOfControl(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::getCoordOfControl(int index)"
+                                       << " index = " << index << "\n";
     std::vector<vec3> res;
 
     switch (index)
@@ -2444,13 +2598,16 @@ std::vector<vec3> RoundingRoad::getCoordOfControl(int index)
 
 void RoundingRoad::clearProperties(QLayout *layout)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::clearProperties(QLayout *layout)\n";
     disconnect(stepDialog, 0, this, 0);
 }
 
 
 void RoundingRoad::deleteLine(RoadElement *line)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::deleteLine(RoadElement *line)\n";
     int index = -1;
     for (int i = 0; i < lines.size(); ++i)
     {
@@ -2462,4 +2619,13 @@ void RoundingRoad::deleteLine(RoadElement *line)
     }
     if (index >=0)
         lines.remove(index);
+}
+
+void RoundingRoad::setLogging(bool status)
+{
+    log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "RoundingRoad::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
 }

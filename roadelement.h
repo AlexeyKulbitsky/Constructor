@@ -145,8 +145,7 @@ struct Material
 
 
 
-enum RoadElementName{ROAD_SIMPLE = 0,
-                     ROAD_BROKEN,
+enum RoadElementName{ROAD_SIMPLE = 0, ROAD_BROKEN,
                      CROOKED_ROAD, LINE_SIMPLE, LINE_BROKEN, ROUNDING_ROAD};
 
 class RoadElement: public QObject
@@ -187,6 +186,9 @@ public:
     virtual void setStepDialogs(StepDialog** dialogs, int size);
     virtual void deleteLine(RoadElement* line);
     virtual void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
+    virtual void getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz);
+    virtual float getElementX() { return elementX; }
+    virtual float getElementY() { return elementY; }
 public slots:
     virtual bool setFixed(bool fixed) = 0;
 
@@ -195,7 +197,7 @@ protected:
     StepDialog* stepDialog;
     StepDialog* stepDialogs[10];
     Model* model;
-
+    float elementX, elementY;
 };
 
 

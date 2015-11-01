@@ -5,6 +5,8 @@
 #include <QImage>
 #include "yandexmapsview.h"
 
+bool Scene2D::log = true;
+
 GLint viewport[4]; // декларируем матрицу поля просмотра
 
 Scene2D::Scene2D(QWidget* parent) : QGLWidget(parent), widget(0)
@@ -51,7 +53,8 @@ Scene2D::~Scene2D()
 
 void Scene2D::initializeGL()
 {
-    Logger::getLogger()->writeLog("Scene2D::initializeGL");    
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::initializeGL\n";
     glClearColor(0.9f, 0.9f, 0.9f, 0.0f);
     glEnable(GL_DEPTH_TEST);
     glShadeModel(GL_SMOOTH);
@@ -68,8 +71,10 @@ void Scene2D::initializeGL()
 
 void Scene2D::resizeGL(int nWidth, int nHeight)
 {
-   Logger::getLogger()->writeLog("Scene2D::resizeGL(" + QString::number(nWidth) +
-                                  ", " + QString::number(nHeight) + ")");
+    if (log)
+   Logger::getLogger()->infoLog() << "Scene2D::resizeGL(int nWidth, int nHeight)"
+                                  << " nWidth = " << nWidth
+                                  << " nHeight = " << nHeight << "\n";
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
@@ -91,7 +96,8 @@ void Scene2D::resizeGL(int nWidth, int nHeight)
 
 void Scene2D::paintGL()
 {
-    Logger::getLogger()->writeLog("Scene2D::paintGL()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::paintGL()\n";
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -111,7 +117,8 @@ void Scene2D::paintGL()
 
 void Scene2D::mousePressEvent(QMouseEvent* pe)
 {
-    Logger::getLogger()->writeLog("Scene2D::mousePressEvent(QMouseEvent* pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::mousePressEvent(QMouseEvent* pe)\n";
     if (pe->button() == Qt::RightButton)
         rightButtonIsPressed;
     this->setFocus();
@@ -120,26 +127,31 @@ void Scene2D::mousePressEvent(QMouseEvent* pe)
     else
     {
         QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::mousePressEvent(QMouseEvent* pe) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("Scene2D::stateManager = NULL, Scene2D::mousePressEvent(QMouseEvent* pe) stopped");
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene2D::stateManager = NULL, Scene2D::mousePressEvent(QMouseEvent* pe) stopped\n";
+        QApplication::exit(0);
     }
 }
 
 void Scene2D::mouseReleaseEvent(QMouseEvent* pe)
 {
-    Logger::getLogger()->writeLog("Scene2D::mouseReleaseEvent(QMouseEvent* pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::mouseReleaseEvent(QMouseEvent* pe)\n";
     if (stateManager)
         stateManager->mouseReleaseEvent(pe);
     else
     {
         QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::mouseReleaseEvent(QMouseEvent* pe) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("Scene2D::stateManager = NULL, Scene2D::mouseReleaseEvent(QMouseEvent* pe) stopped");
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene2D::stateManager = NULL, Scene2D::mouseReleaseEvent(QMouseEvent* pe) stopped\n";
+        QApplication::exit(0);
     }
 }
 
 void Scene2D::mouseMoveEvent(QMouseEvent* pe)
 {
-
-    Logger::getLogger()->writeLog("Scene2D::mouseMoveEvent(QMouseEvent* pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::mouseMoveEvent(QMouseEvent* pe)\n";
     this->setFocus();
     if (widget && rightButtonIsPressed)
         qobject_cast<YandexMapsView*>(widget)->mouseMo(pe);
@@ -149,13 +161,16 @@ void Scene2D::mouseMoveEvent(QMouseEvent* pe)
     else
     {
         QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::mouseMoveEvent(QMouseEvent* pe) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("Scene2D::stateManager = NULL, Scene2D::mouseMoveEvent(QMouseEvent* pe) stopped");
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene2D::stateManager = NULL, Scene2D::mouseMoveEvent(QMouseEvent* pe) stopped\n";
+        QApplication::exit(0);
     }
 }
 
 void Scene2D::wheelEvent(QWheelEvent* pe)
 {
-    Logger::getLogger()->writeLog("Scene2D::wheelEvent(QWheelEvent* pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::wheelEvent(QWheelEvent* pe)\n";
     if (fixedScale)
         return;
     if (sceneActive)
@@ -165,7 +180,9 @@ void Scene2D::wheelEvent(QWheelEvent* pe)
         else
         {
             QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::wheelEvent(QWheelEvent* pe) stopped", QMessageBox::Yes | QMessageBox::Default);
-            Logger::getLogger()->writeLog("Scene2D::stateManager = NULL, Scene2D::wheelEvent(QWheelEvent* pe) stopped");
+            if (log)
+            Logger::getLogger()->errorLog() << "Scene2D::stateManager = NULL, Scene2D::wheelEvent(QWheelEvent* pe) stopped\n";
+            QApplication::exit(0);
         }
         if (widget)
             qobject_cast<YandexMapsView*>(widget)->wheelEv(pe);
@@ -183,69 +200,81 @@ void Scene2D::wheelEvent(QWheelEvent* pe)
 
 void Scene2D::keyPressEvent(QKeyEvent* pe)
 {
-    Logger::getLogger()->writeLog("Scene2D::keyPressEvent(QKeyEvent* pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::keyPressEvent(QKeyEvent* pe)\n";
     if (stateManager)
         stateManager->keyPressEvent(pe);
     else
     {
         QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::keyPressEvent(QKeyEvent* pe) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("Scene2D::stateManager = NULL, Scene2D::keyPressEvent(QKeyEvent* pe) stopped");
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene2D::stateManager = NULL, Scene2D::keyPressEvent(QKeyEvent* pe) stopped\n";
+        QApplication::exit(0);
     }
 }
 
 void Scene2D::scalePlus()
 {
-    Logger::getLogger()->writeLog("Scene2D::scalePlus()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::scalePlus()\n";
     nSca = nSca*scaleStep;
     emit scaleChanged(nSca);
 }
 
 void Scene2D::scaleMinus()
 {
-    Logger::getLogger()->writeLog("Scene2D::scaleMinus()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::scaleMinus()\n";
     nSca = nSca/scaleStep;
     emit scaleChanged(nSca);
 }
 
 void Scene2D::rotateUp()
 {
-    Logger::getLogger()->writeLog("Scene2D::rotateUp()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::rotateUp()\n";
     xRot += 1.0;
 }
 
 void Scene2D::rotateDown()
 {
-    Logger::getLogger()->writeLog("Scene2D::rotateDown()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::rotateDown()\n";
     xRot -= 1.0;
 }
 
 void Scene2D::rotateLeft()
 {
-    Logger::getLogger()->writeLog("Scene2D::rotateLeft()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::rotateLeft()\n";
     zRot += 1.0;
 }
 
 void Scene2D::rotateRight()
 {
-    Logger::getLogger()->writeLog("Scene2D::rotateRight()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::rotateRight()\n";
     zRot -= 1.0;
 }
 
 void Scene2D::translateDown()
 {
-    Logger::getLogger()->writeLog("Scene2D::translateDown()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::translateDown()\n";
     zTra -= 0.05;
 }
 
 void Scene2D::translateUp()
 {
-    Logger::getLogger()->writeLog("Scene2D::translateUp()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::translateUp()\n";
     zTra += 0.05;
 }
 
 void Scene2D::defaultScene()
 {
-    Logger::getLogger()->writeLog("Scene2D::defaultScene()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::defaultScene()\n";
     xRot=0; yRot=0; zRot=0; zTra=0; nSca=1;
 }
 
@@ -420,7 +449,8 @@ void Scene2D::getWindowCoord(double x, double y, double z, double &wx, double &w
 
 void Scene2D::getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz)
 {
-    Logger::getLogger()->writeLog("Scene2D::getWorldCoord");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::getWorldCoord\n";
     GLint viewport[4];
     GLdouble mvmatrix[16], projmatrix[16];
 
@@ -435,7 +465,8 @@ void Scene2D::getWorldCoord(double x, double y, double z, double &wx, double &wy
 
 void Scene2D::drawAxis()
 {
-    Logger::getLogger()->writeLog("Scene2D::drawAxis()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::drawAxis()\n";
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
     glLineWidth(3.0f);
@@ -462,7 +493,8 @@ void Scene2D::drawAxis()
 
 void Scene2D::drawRect(QPoint p1, QPoint p2)
 {
-    Logger::getLogger()->writeLog("Scene2D::drawRect(QPoint p1, QPoint p2)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::drawRect(QPoint p1, QPoint p2)\n";
     GLdouble x1, y1, z1;
     GLdouble x2, y2, z2;
     getWorldCoord(p1.x(), p1.y(), 0, x1, y1, z1);
@@ -503,31 +535,36 @@ void Scene2D::drawRect(QPoint p1, QPoint p2)
 
 void Scene2D::dragEnterEvent(QDragEnterEvent* event)
 {
-    Logger::getLogger()->writeLog("Scene2D::dragEnterEvent(QDragEnterEvent* event)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::dragEnterEvent(QDragEnterEvent* event)\n";
     if (stateManager)
         stateManager->dragEnterEvent(event);
     else
     {
         QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::dragEnterEvent(QDragEnterEvent* event) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("Scene2D::stateManager = NULL, Scene2D::dragEnterEvent(QDragEnterEvent* event) stopped");
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene2D::stateManager = NULL, Scene2D::dragEnterEvent(QDragEnterEvent* event) stopped\n";
+        QApplication::exit(0);
     }
 }
 
 void Scene2D::dropEvent(QDropEvent* event)
 {
-    Logger::getLogger()->writeLog("Scene2D::dropEvent(QDropEvent* event)");
+    Logger::getLogger()->infoLog() << "Scene2D::dropEvent(QDropEvent* event)\n";
     if (stateManager)
         stateManager->dropEvent(event);
     else
     {
         QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::dropEvent(QDropEvent* event) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("Scene2D::stateManager = NULL, Scene2D::dropEvent(QDropEvent* event) stopped");
+        Logger::getLogger()->errorLog() << "Scene2D::stateManager = NULL, Scene2D::dropEvent(QDropEvent* event) stopped\n";
+        QApplication::exit(0);
     }
 }
 
 void Scene2D::drawGrid()
 {
-    Logger::getLogger()->writeLog("Scene2D::drawGrid()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::drawGrid()\n";
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
     if (showGrid)
@@ -557,14 +594,16 @@ void Scene2D::drawGrid()
 
 bool Scene2D::isRulerActive()
 {
-    Logger::getLogger()->writeLog("Scene2D::isRulerActive() = " + QString::number(rulerIsActive));
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::isRulerActive()\n";
     return rulerIsActive;
 }
 
 
 void Scene2D::setModel(Model *model)
 {
-    Logger::getLogger()->writeLog("Scene2D::setModel(Model *model)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::setModel(Model *model)\n";
     if (model)
     {
         this->model = model;
@@ -576,13 +615,17 @@ void Scene2D::setModel(Model *model)
         else
         {
             QMessageBox::critical(0, "Ошибка", "Scene2D::properties = NULL,\n cannot create StateManager", QMessageBox::Yes | QMessageBox::Default);
-            Logger::getLogger()->writeLog("Scene2D::properties = NULL, cannot create StateManager");
+            if (log)
+            Logger::getLogger()->errorLog() << "Scene2D::properties = NULL, cannot create StateManager\n";
+            QApplication::exit(0);
         }
     }
     else
     {
         QMessageBox::critical(0, "Ошибка", "Scene2D::setModel(Model *model), model = NULL,\n cannot work with models", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("Scene2D::setModel(Model *model), model = NULL, cannot work with models");
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene2D::setModel(Model *model), model = NULL, cannot work with models\n";
+        QApplication::exit(0);
     }
 
 }
@@ -590,13 +633,16 @@ void Scene2D::setModel(Model *model)
 
 void Scene2D::setProperties(QFormLayout *properties)
 {
-    Logger::getLogger()->writeLog("Scene2D::setProperties(QFormLayout *properties)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::setProperties(QFormLayout *properties)\n";
     if (properties)
         this->properties = properties;
     else
     {
         QMessageBox::critical(0, "Ошибка", "Scene2D::setProperties(QFormLayout *properties), properties = NULL,\n cannot use properties for object Inspector", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("Scene2D::setProperties(QFormLayout *properties), properties = NULL, cannot use properties for object Inspector");
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene2D::setProperties(QFormLayout *properties), properties = NULL, cannot use properties for object Inspector\n";
+        QApplication::exit(0);
     }
 
 }
@@ -611,17 +657,20 @@ void Scene2D::drawBackground(QPainter *painter)
 
 void Scene2D::setDrawRectStatus(bool status)
 {
-    Logger::getLogger()->writeLog("Scene2D::setDrawRectStatus(bool status)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::setDrawRectStatus(bool status)\n";
     drawRectStatus = status;
 }
 
 void Scene2D::setOverlayWidget(QWidget *widget)
 {
-    Logger::getLogger()->writeLog("Scene2D::setOverlayWidget(QWidget *widget)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::setOverlayWidget(QWidget *widget)\n";
     if (widget == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Scene2D::setOverlayWidget(QWidget *widget) widget = NULL, program terminates");
-        Logger::getLogger()->writeLog("Scene2D::setOverlayWidget(QWidget *widget) widget = NULL, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene2D::setOverlayWidget(QWidget *widget) widget = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->widget = widget;
@@ -631,6 +680,8 @@ void Scene2D::setOverlayWidget(QWidget *widget)
 
 void Scene2D::drawModel()
 {
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::drawModel()\n";
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glPushMatrix();
@@ -718,21 +769,29 @@ void Scene2D::drawModel()
     glPopMatrix();
 }
 
+bool Scene2D::getLogging()
+{
+    return log;
+}
+
 void Scene2D::activateRuler()
 {
-    Logger::getLogger()->writeLog("Scene2D::activateRuler()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::activateRuler()\n";
     rulerIsActive = true;
 }
 
 void Scene2D::deActivateRuler()
 {
-    Logger::getLogger()->writeLog("Scene2D::deActivateRuler()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::deActivateRuler()\n";
     rulerIsActive = false;
 }
 
 void Scene2D::setRulerActive(bool status)
 {
-    Logger::getLogger()->writeLog("Scene2D::setRulerActive(bool status)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::setRulerActive(bool status)\n";
     if (rulerIsActive == status)
         return;
     rulerIsActive = status;
@@ -817,14 +876,17 @@ void Scene2D::listItemClicked(QListWidgetItem *item)
 
 void Scene2D::setShowGrid(bool status)
 {
-    Logger::getLogger()->writeLog("Scene2D::setShowGrid = " + QString::number(status));
+    if (log)
+    Logger::getLogger()->infoLog() << "setShowGrid(bool status)"
+                                   << " status = " << status << "\n";
     showGrid = status;
 }
 
 void Scene2D::setScale(double scale)
 {
-    Logger::getLogger()->writeLog(QString("Scene2D::setScale(double scale), scale = ") +
-                                  QString::number(scale));
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::setScale(double scale)"
+                                   << " scale = " << scale << "\n";
     if (this->nSca == scale)
         return;
     this->nSca = scale;
@@ -834,8 +896,9 @@ void Scene2D::setScale(double scale)
 
 void Scene2D::setScaleStep(double step)
 {
-    Logger::getLogger()->writeLog(QString("Scene2D::setScaleStep(double step), step = ") +
-                                  QString::number(step));
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::setScaleStep(double step)"
+                                   << " step = " << step << "\n";
     if (this->scaleStep == step)
         return;
     this->scaleStep = step;
@@ -844,8 +907,9 @@ void Scene2D::setScaleStep(double step)
 
 void Scene2D::setGridStep(double step)
 {
-    Logger::getLogger()->writeLog(QString("Scene2D::setGridStep(double step), step = ") +
-                                  QString::number(step));
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::setGridStep(double step)"
+                                   << " step = " << step << "\n";
     if (this->gridStep == step)
         return;
     this->gridStep = step;
@@ -855,6 +919,16 @@ void Scene2D::setGridStep(double step)
 
 void Scene2D::getProperties(QFormLayout *layout)
 {
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::getProperties(QFormLayout *layout)\n";
+    if (layout == NULL)
+    {
+        QMessageBox::critical(0, "Ошибка", "Scene2D::getProperties(QFormLayout *layout) layout = NULL",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->errorLog() << "Scene2D::getProperties(QFormLayout *layout) layout = NULL\n";
+        QApplication::exit(0);
+    }
     //disconnect(stepDialog, 0, this, 0);
     while(layout->count() > 0)
     {
@@ -913,53 +987,77 @@ void Scene2D::getProperties(QFormLayout *layout)
 
 void Scene2D::setShowMapsStatus(bool status)
 {
-    Logger::getLogger()->writeLog("Scene2D::setShowMapsStatus(bool status)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::setShowMapsStatus(bool status)"
+                                   << " status = " << status << "\n";
     showMaps = status;
     updateGL();
 }
 
 void Scene2D::setShowSceneStatus(bool status)
 {
-    Logger::getLogger()->writeLog("Scene2D::setShowSceneStatus(bool status)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::setShowSceneStatus(bool status)"
+                                   << " status = " << status << "\n";
     showScene = status;
     updateGL();
 }
 
 void Scene2D::setSceneActive(bool status)
 {
-    Logger::getLogger()->writeLog("Scene2D::setSceneActive(bool status)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::setSceneActive(bool status)"
+                                   << " status = " << status << "\n";
     sceneActive = status;
 }
 
 void Scene2D::setFixedScaleStatus(bool status)
 {
-    Logger::getLogger()->writeLog("Scene2D::setFixedScaleStatus(bool status)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::setFixedScaleStatus(bool status)"
+                                   << " ststus = " << status << "\n";
     fixedScale = status;
+}
+
+void Scene2D::setLogging(bool status)
+{
+    log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "Scene2D::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
+
 }
 
 
 void Scene2D::keyReleaseEvent(QKeyEvent *pe)
 {
-    Logger::getLogger()->writeLog("Scene2D::keyReleaseEvent(QKeyEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::keyReleaseEvent(QKeyEvent *pe)\n";
     if (stateManager)
         stateManager->keyReleaseEvent(pe);
     else
     {
         QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::keyReleaseEvent(QKeyEvent *pe) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("Scene2D::stateManager = NULL, Scene2D::keyReleaseEvent(QKeyEvent *pe) stopped");
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene2D::stateManager = NULL, Scene2D::keyReleaseEvent(QKeyEvent *pe) stopped\n";
+        QApplication::exit(0);
     }
 }
 
 
 void Scene2D::contextMenuEvent(QContextMenuEvent *pe)
 {
-    Logger::getLogger()->writeLog("Scene2D::contextMenuEvent(QContextMenuEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::contextMenuEvent(QContextMenuEvent *pe)\n";
     if (stateManager)
         stateManager->contextMenuEvent(pe);
     else
     {
         QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::contextMenuEvent(QContextMenuEvent *pe) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("Scene2D::stateManager = NULL, Scene2D::contextMenuEvent(QContextMenuEvent *pe) stopped");
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene2D::stateManager = NULL, Scene2D::contextMenuEvent(QContextMenuEvent *pe) stopped\n";
+        QApplication::exit(0);
     }
 }
 

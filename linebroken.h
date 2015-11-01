@@ -25,6 +25,13 @@ public:
 
     virtual bool isSelected() { return selected; }
     virtual void setSelectedStatus(bool status) { selected = status; }
+
+    static bool getLogging() { return log; }
+    static void setLogging(bool status);
+
+private:
+    static bool log;
+
 protected:
 
     QVector<GLfloat> VertexArray;

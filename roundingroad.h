@@ -100,6 +100,7 @@ private:
 
     QFormLayout* layout;
     QGLWidget* render;
+    static bool log;
 
 public:
     RoundingRoad();
@@ -220,6 +221,8 @@ public:
     // RoadElement interface
 public:
     virtual void deleteLine(RoadElement *line);
+    static bool getLogging() { return log; }
+    static void setLogging(bool status);
 };
 
 #endif // ROUNDING

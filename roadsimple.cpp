@@ -350,7 +350,8 @@ void RoadSimple::setVertexArray(float x1, float y1, float x2, float y2, float wi
     vertexArrayLeft[29] = 0.1f;
 
 
-
+    elementX = (x1 + x2) / 2.0f;
+    elementY = (y1 + y2) / 2.0f;
 
 }
 
@@ -883,6 +884,9 @@ void RoadSimple::move(float dx, float dy, float dz)
     this->y1 += dy;
     this->x2 += dx;
     this->y2 += dy;
+
+    elementX += dx;
+    elementY += dy;
 }
 
 void RoadSimple::drawControlElement(int index, float lineWidth, float pointSize)
@@ -2687,6 +2691,10 @@ float RoadSimple::getLeftBoardWidth()
 void RoadSimple::setLogging(bool status)
 {
     log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "RoadSimple::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
 }
 
 

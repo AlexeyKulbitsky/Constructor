@@ -108,6 +108,8 @@ private:
     float texture1USize, texture1VSize;
     float texture2USize, texture2VSize;
 
+    static bool log;
+
 public:
     void calculateLine(vec3 p1, vec3 p2, float width);
     void calculateLine(float *pointsArray, int size,
@@ -129,6 +131,9 @@ public:
     void drawDescription(QGLWidget* render = 0, float red = 1.0f, float green = 1.0f, float blue = 1.0f);
     void rotate(float angle, float x, float y, float z);
     void addBreak(bool front);
+
+    static bool getLogging() { return log; }
+    static void setLogging(bool status);
 };
 
 #endif // SPLITZONE_H

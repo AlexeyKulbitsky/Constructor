@@ -2,6 +2,8 @@
 #include <GL/glu.h>
 #include <QApplication>
 
+bool SplitZone::log = true;
+
 SplitZone::SplitZone()
 {
 
@@ -269,17 +271,23 @@ SplitZone::~SplitZone()
 
 bool SplitZone::isSelected()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::isSelected()\n";
     return selected;
 }
 
 void SplitZone::setSelectedStatus(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::setSelectedStatus(bool status)"
+                                       << " status = " << status << "\n";
     selected = status;
 }
 
 void SplitZone::drawFigure(QGLWidget *render)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::drawFigure(QGLWidget *render)\n";
     switch (type)
     {
     case 0:
@@ -326,12 +334,16 @@ void SplitZone::drawFigure(QGLWidget *render)
 
 void SplitZone::drawSelectionFrame()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::drawSelectionFrame()\n";
     for (int i = 0; i < getNumberOfControls(); ++i)
         drawControlElement(i, 2.0f, 5.0f);
 }
 
 void SplitZone::drawMeasurements(QGLWidget *render)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::drawMeasurements(QGLWidget *render)\n";
     GLdouble x, y, z;
     GLdouble wx, wy, wz;
     QFont shrift = QFont("Times", 8, QFont::Black);
@@ -354,7 +366,11 @@ void SplitZone::drawMeasurements(QGLWidget *render)
 
 void SplitZone::move(float dx, float dy, float dz)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::move(float dx, float dy, float dz)"
+                                       << " dx = " << dx
+                                       << " dy = " << dy
+                                       << " dz = " << dz << "\n";
     for (int i = 0; i < size / 3; ++i)
     {
         this->lineAxisArray[i * 3] += dx;
@@ -420,6 +436,11 @@ void SplitZone::move(float dx, float dy, float dz)
 
 void SplitZone::drawControlElement(int index, float lineWidth, float pointSize)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::drawControlElement(int index, float lineWidth, float pointSize)"
+                                       << " index = " << index
+                                       << " lineWidth = " << lineWidth
+                                       << " pointSize = " << pointSize << "\n";
     glPointSize(pointSize + 5.0f);
     glBegin(GL_POINTS);
     glColor3f(0.0f, 0.0f, 0.0f);
@@ -432,11 +453,21 @@ void SplitZone::drawControlElement(int index, float lineWidth, float pointSize)
 
 QCursor SplitZone::getCursorForControlElement(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::getCursorForControlElement(int index)"
+                                       << " index = " << index << "\n";
     return Qt::CrossCursor;
 }
 
 void SplitZone::resizeByControl(int index, float dx, float dy, float x, float y)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::resizeByControl(int index, float dx, float dy, float x, float y)"
+                                       << " index = " << index
+                                       << " dx = " << dx
+                                       << " dy = " << dy
+                                       << " x = " << x
+                                       << " y = " << y << "\n";
         axisArray[index * 3] += dx;
         axisArray[index * 3 + 1] += dy;
         calculateLine(axisArray, width);
@@ -472,21 +503,28 @@ void SplitZone::resizeByControl(int index, float dx, float dy, float x, float y)
 
 int SplitZone::getNumberOfControls()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::getNumberOfControls()\n";
     return axisArray.size() / 3;
 }
 
 int SplitZone::controlsForPoint()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::controlsForPoint()\n";
     return 1;
 }
 
 void SplitZone::changeColorOfSelectedControl(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::changeColorOfSelectedControl(int index)"
+                                       << " index = " << index << "\n";
     if (index < 0 || index >= getNumberOfControls())
     {
         QMessageBox::critical(0, "Ошибка", "SplitZone::changeColorOfSelectedControl(int index), index is out of range",
                               QMessageBox::Yes);
-        Logger::getLogger()->writeLog("SplitZone::changeColorOfSelectedControl(int index), index is out of range");
+        Logger::getLogger()->errorLog() << "SplitZone::changeColorOfSelectedControl(int index), index is out of range\n";
         QApplication::exit(0);
     }
     indexOfSelectedControl = index;
@@ -494,12 +532,17 @@ void SplitZone::changeColorOfSelectedControl(int index)
 
 void SplitZone::getProperties(QFormLayout *layout, QGLWidget *render)
 {
-    clearProperties(layout);
-    while(QLayoutItem* child = layout->takeAt(0))
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::getProperties(QFormLayout *layout, QGLWidget *render)\n";
+    if (layout == NULL)
     {
-        delete child->widget();
-        delete child;
+        QMessageBox::critical(0, "Ошибка", "SplitZone::getProperties(QFormLayout *layout, QGLWidget *render) layout = NULL",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->errorLog() << "SplitZone::getProperties(QFormLayout *layout, QGLWidget *render) layout = NULL\n";
+        QApplication::exit(0);
     }
+    clearProperties(layout);
     QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
     widthSpinBox->setKeyboardTracking(false);
 
@@ -550,27 +593,39 @@ void SplitZone::getProperties(QFormLayout *layout, QGLWidget *render)
 
 bool SplitZone::isFixed()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::isFixed()\n";
     return fixed;
 }
 
 int SplitZone::getLayer()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::getLayer()\n";
     return layer;
 }
 
 void SplitZone::clear()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::clear()\n";
 }
 
 
 
 bool SplitZone::setFixed(bool fixed)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::setFixed(bool fixed)"
+                                       << " fixed = " << fixed << "\n";
     this->fixed = fixed;
 }
 
 void SplitZone::setHeight(double height)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::setHeight(double height)"
+                                       << " height = " << height << "\n";
     if (this->height == height)
         return;
     this->height = height;
@@ -606,6 +661,9 @@ void SplitZone::setHeight(double height)
 
 void SplitZone::setLineWidth(double value)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::setLineWidth(double value)"
+                                       << " value = " << value << "\n";
     if (this->lineWidth == value)
         return;
     this->lineWidth = value;
@@ -627,6 +685,9 @@ void SplitZone::setLineWidth(double value)
 
 void SplitZone::setWidth(double width)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::setWidth(double width)"
+                                       << " width = " << width << "\n";
     if (this->width == width)
         return;
     this->width = width;
@@ -665,7 +726,11 @@ void SplitZone::setWidth(double width)
 
 void SplitZone::calculateLine(vec3 p1, vec3 p2, float width)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::calculateLine(vec3 p1, vec3 p2, float width)"
+                                       << " p1.x = " << p1.x << " p1.y = " << p1.y << " p1.z = " << p1.z
+                                       << " p2.x = " << p2.x << " p2.y = " << p2.y << " p2.z = " << p2.z
+                                       << " width = " << width << "\n";
     if (axisArray.size() != 6)
         axisArray.resize(6);
     axisArray[0] = p1.x;
@@ -679,7 +744,12 @@ void SplitZone::calculateLine(vec3 p1, vec3 p2, float width)
     float r = sqrt((p1.x - p2.x)*(p1.x - p2.x) + (p1.y - p2.y)*(p1.y - p2.y));
     float xR1, yR1, xR2, yR2;
     float pi = 3.1415926f;
-    float alpha = acos((p1.x - p2.x) / r);
+    float t = (p1.x - p2.x) / r;
+    if (t > 1)
+        t = 1.0f;
+    if (t < -1)
+        t = -1.0f;
+    float alpha = acos(t);
 
     if ((p1.y - p2.y) < 0)
         alpha = 2.0f * pi - alpha;
@@ -888,7 +958,18 @@ void SplitZone::calculateLine(vec3 p1, vec3 p2, float width)
 
 void SplitZone::calculateLine(float *pointsArray, int size, float width)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::calculateLine(float *pointsArray, int size, float width)"
+                                       << " size = " << size
+                                       << " width = " << width << "\n";
+    if (pointsArray == NULL)
+    {
+        QMessageBox::critical(0, "Ошибка", "SplitZone::calculateLine(float *pointsArray, int size, float width) pointsArray = NULL",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->errorLog() << "SplitZone::calculateLine(float *pointsArray, int size, float width) pointsArray = NULL\n";
+        QApplication::exit(0);
+    }
     QVector<GLfloat> lineAxis;
     if (axisArray.size() != size)
         axisArray.resize(size);
@@ -911,8 +992,13 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
 
             float r = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
             float xR1, yR1, xR2, yR2;
-            float pi = 3.1415926f;
-            float alpha = acos((x1 - x2) / r);
+            float pi = 3.14159265f;
+            float t = (x1 - x2) / r;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float alpha = acos(t);
 
             if ((y1 - y2) < 0)
                 alpha = 2.0f * pi - alpha;
@@ -956,8 +1042,13 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
                 float y1 = pointsArray[(i - 1) * 3 + 1];
                 float r = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
                 float xR1, yR1, xR2, yR2;
-                float pi = 3.1415926f;
-                float alpha = acos((x1 - x2) / r);
+                float pi = 3.14159265f;
+                float t = (x1 - x2) / r;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float alpha = acos(t);
 
                 if ((y1 - y2) < 0)
                     alpha = 2.0f * pi - alpha;
@@ -1007,7 +1098,12 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
                 float y3 = pointsArray[(i + 1) * 3 + 1];
                 float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
                 float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
-                float alpha = (acos(num / den))/2.0f;
+                float t = num / den;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float alpha = (acos(t))/2.0f;
                 float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
                 float pi = 3.1415926f;
                 if(sa < 0) // Точка находится справа
@@ -1015,9 +1111,18 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
                     alpha = pi - alpha;
                 }
 
-
-                float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
-                if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
+                t = (x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float beta = acos(t);
+                t = (y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                if (asin(t) < 0)
                 {
                     beta *= -1.0f;
                 }
@@ -1052,8 +1157,13 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
 
                 float r = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
                 float xR1, yR1, xR2, yR2;
-                float pi = 3.1415926f;
-                float alpha = acos((x1 - x2) / r);
+                float pi = 3.14159265f;
+                float t = (x1 - x2) / r;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float alpha = acos(t);
 
                 if ((x1 - x2) < 0)
                     alpha = 2.0f * pi - alpha;
@@ -1094,17 +1204,31 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
             float y3 = pointsArray[(i + 1) * 3 + 1];
             float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
             float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
-            float alpha = (acos(num / den))/2.0f;
+            float t = num / den;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float alpha = (acos(t))/2.0f;
             float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
-            float pi = 3.1415926f;
+            float pi = 3.14159265f;
             if(sa < 0) // Точка находится справа
             {
                 alpha = pi - alpha;
             }
 
-
-            float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
-            if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
+            t = (x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float beta = acos(t);
+            t = (y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            if (asin(t) < 0)
             {
                 beta *= -1.0f;
             }
@@ -1152,12 +1276,15 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
 
 void SplitZone::calculateLine(float *pointsArray, int size)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::calculateLine(float *pointsArray, int size)\n";
     calculateLine(pointsArray, size, this->width);
 }
 
 void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)\n";
     QVector<GLfloat> lineAxis;
     int size = pointsArray.size();
     if (axisArray.size() != size)
@@ -1181,8 +1308,13 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
 
             float r = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
             float xR1, yR1, xR2, yR2;
-            float pi = 3.1415926f;
-            float alpha = acos((x1 - x2) / r);
+            float pi = 3.14159265f;
+            float t = (x1 - x2) / r;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float alpha = acos(t);
 
             if ((y1 - y2) < 0)
                 alpha = 2.0f * pi - alpha;
@@ -1226,8 +1358,13 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
                 float y1 = pointsArray[(i - 1) * 3 + 1];
                 float r = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
                 float xR1, yR1, xR2, yR2;
-                float pi = 3.1415926f;
-                float alpha = acos((x1 - x2) / r);
+                float pi = 3.14159265f;
+                float t = (x1 - x2) / r;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float alpha = acos(t);
 
                 if ((y1 - y2) < 0)
                     alpha = 2.0f * pi - alpha;
@@ -1277,7 +1414,12 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
                 float y3 = pointsArray[(i + 1) * 3 + 1];
                 float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
                 float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
-                float alpha = (acos(num / den))/2.0f;
+                float t = num / den;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float alpha = (acos(t))/2.0f;
                 float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
                 float pi = 3.1415926f;
                 if(sa < 0) // Точка находится справа
@@ -1285,9 +1427,18 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
                     alpha = pi - alpha;
                 }
 
-
-                float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
-                if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
+                t = (x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float beta = acos(t);
+                t = (y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                if (asin(t) < 0)
                 {
                     beta *= -1.0f;
                 }
@@ -1322,8 +1473,13 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
 
                 float r = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
                 float xR1, yR1, xR2, yR2;
-                float pi = 3.1415926f;
-                float alpha = acos((x1 - x2) / r);
+                float pi = 3.14159265f;
+                float t = (x1 - x2) / r;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float alpha = acos(t);
 
                 if ((x1 - x2) < 0)
                     alpha = 2.0f * pi - alpha;
@@ -1364,7 +1520,12 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
             float y3 = pointsArray[(i + 1) * 3 + 1];
             float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
             float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
-            float alpha = (acos(num / den))/2.0f;
+            float t = num / den;
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float alpha = (acos(t))/2.0f;
             float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
             float pi = 3.1415926f;
             if(sa < 0) // Точка находится справа
@@ -1372,9 +1533,19 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
                 alpha = pi - alpha;
             }
 
+            t = (x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            float beta = acos(t);
 
-            float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
-            if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
+            t = (y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+            if (t > 1)
+                t = 1.0f;
+            if (t < -1)
+                t = -1.0f;
+            if (asin(t) < 0)
             {
                 beta *= -1.0f;
             }
@@ -1421,6 +1592,8 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
 
 void SplitZone::reset()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::reset()\n";
     switch (type)
     {
     case 0:
@@ -1451,6 +1624,8 @@ void SplitZone::reset()
 
 void SplitZone::setBoardVertexArray()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::setBoardVertexArray()\n";
     boardVertexArray.clear();
     for (int i = 0; i < size / 3; ++i)
     {
@@ -1617,6 +1792,10 @@ void SplitZone::setBoardVertexArray()
 
 void SplitZone::setBoardTextureArray(float textureUsize, float textureVsize)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::setBoardTextureArray(float textureUsize, float textureVsize)"
+                                       << " textureUsize = " << textureUsize
+                                       << " textureVsize" << textureVsize << "\n";
     boardTextureArray.clear();
     for (int i = 0; i < boardVertexArray.size() / 3 - 4; i += 8)
     {
@@ -1703,6 +1882,8 @@ void SplitZone::setBoardTextureArray(float textureUsize, float textureVsize)
 
 void SplitZone::setBoardIndexArray()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::setBoardIndexArray()\n";
     boardIndexArray.clear();
     for (int i = 0; i < boardVertexArray.size() / 3; i += 8)
     {
@@ -1734,6 +1915,8 @@ void SplitZone::setBoardIndexArray()
 
 void SplitZone::setVertexArray()
 {    
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::setVertexArray()\n";
     vertexArray.clear();
     if ((!beginRounding && endRounding) || (beginRounding && !endRounding))
     {
@@ -1829,6 +2012,10 @@ void SplitZone::setVertexArray()
 
 void SplitZone::setTextureArray(float textureUSize, float textureVSize)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::setTextureArray(float textureUSize, float textureVSize)"
+                                       << " textureUSize = " << textureUSize
+                                       << " textureVSize = " << textureVSize << "\n";
     textureArray.clear();
 
     textureArray.push_back(0.0f);
@@ -1861,6 +2048,8 @@ void SplitZone::setTextureArray(float textureUSize, float textureVSize)
 
 void SplitZone::setIndexArray()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::setIndexArray()\n";
     indexArray.clear();
     for (int i = 0; i < vertexArray.size() / 3; ++i)
     {
@@ -1870,11 +2059,16 @@ void SplitZone::setIndexArray()
 
 float SplitZone::getWidth()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::getWidth()\n";
     return width;
 }
 
 void SplitZone::setDescription(const QString& description)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::setDescription(const QString& description)"
+                                       << " description = " << description << "\n";
     this->description = description;
 }
 
@@ -1896,6 +2090,12 @@ void SplitZone::drawDescription(QGLWidget *render, float red, float green, float
 
 void SplitZone::rotate(float angle, float x, float y, float z)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::rotate(float angle, float x, float y, float z)"
+                                       << " angle = " << angle
+                                       << " x = " << x
+                                       << " y = " << y
+                                       << " z = " << z << "\n";
     float tx = 0.0f, ty = 0.0f;
     for (int i = 0; i < axisArray.size() / 3; ++i)
     {
@@ -2029,6 +2229,9 @@ void SplitZone::rotate(float angle, float x, float y, float z)
 
 void SplitZone::addBreak(bool front)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::addBreak(bool front)"
+                                       << " front = " << front << "\n";
     switch (type)
     {
     case 0:
@@ -2129,4 +2332,13 @@ void SplitZone::addBreak(bool front)
     }
 
 
+}
+
+void SplitZone::setLogging(bool status)
+{
+    log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "SplitZone::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
 }

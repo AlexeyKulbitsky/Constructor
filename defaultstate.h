@@ -32,7 +32,7 @@ private:
     int selectedElementsCount;
     int selectedGroup;
     int selectedIndex;
-
+    static bool log;
     // State interface
 public:
     virtual void mousePressEvent(QMouseEvent *pe);
@@ -46,7 +46,8 @@ public:
 
     virtual QString getName();
     virtual void contextMenuEvent(QContextMenuEvent *pe);
-
+    static void setLogging(bool status);
+    static bool getLogging() { return log; }
 private:
     bool tryToSelectFigures(QPoint mp, bool withResult);
     bool tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult);

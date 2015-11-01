@@ -88,11 +88,12 @@ private:
     QVector<float> angles;
     QFormLayout* layout;
     QGLWidget* render;
-
+    static bool log;
     // RoadElement interface
 public:
     virtual void clear();
-
+    static bool getLogging(){ return log; }
+    static void setLogging(bool status);
     // RoadElement interface
 public:
     virtual void clearProperties(QLayout *layout);

@@ -37,6 +37,9 @@ public:
     void setTextureArray(float textureUsize, float textureVsize);
     void setIndexArray();
 
+    static bool getLogging() { return log; }
+    static void setLogging(bool status);
+
 signals:
     void widthChanged(double width);
 public slots:
@@ -51,6 +54,8 @@ private:
     QVector<GLfloat> vertexArray;
     QVector<GLfloat> textureArray;
     QVector<GLuint> indexArray;
+
+    static bool log;
 };
 
 #endif // RAILWAY_H

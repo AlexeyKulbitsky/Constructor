@@ -14,10 +14,9 @@ ObjectsList::ObjectsList(QWidget *parent)
 
     this->addItem("Дорога простая");
     this->addItem("Дорога ломаная");
-    //this->addItem("Круговой перекресток");
     this->addItem("Поворот дороги");
     this->addItem("Перекресток");
-    //this->addItem("Закругление");
+    this->addItem("Закругление");
     this->addItem("Разделительная зона (разметка)");
     this->addItem("Разделительная зона (газон)");
     this->addItem("Разделительная зона (тротуар)");
@@ -28,16 +27,15 @@ ObjectsList::ObjectsList(QWidget *parent)
     this->addItem("Пешеходный переход");
     this->addItem("Трамвайные пути");
     this->addItem("Железная дорога");
-    //this->addItem("Железная дорога (Новая)");
     //this->addItem("Провод");
     //this->addItem("Двойной провод");
    // this->addItem("Куб");
-    this->addItem("BMW M3");
-    this->addItem("Audi Q7");
+    //this->addItem("BMW M3");
+    //this->addItem("Audi Q7");
     //this->addItem("ВАЗ-2104");
-    this->addItem("ВАЗ-2106");
+   // this->addItem("ВАЗ-2106");
     //this->addItem("Dodge_Ram_2007");
-    this->addItem("Автобус ПАЗ");
+    //this->addItem("Автобус ПАЗ");
     //this->addItem("Микроавтобус Ford");
     //this->addItem("Грузовик Ford");
     //this->addItem("DAF XF");

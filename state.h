@@ -25,6 +25,8 @@ public:
     virtual void contextMenuEvent(QContextMenuEvent *pe) = 0;
     virtual QString getName() = 0;
     virtual ~State(){}
+    virtual void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
+    virtual void getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz);
 };
 
 #endif // STATE_H

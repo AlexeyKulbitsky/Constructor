@@ -1,5 +1,7 @@
 #include "statemanager.h"
 
+bool StateManager::log = true;
+
 StateManager::StateManager(QObject *parent) : QObject(parent)
 {
 
@@ -17,25 +19,29 @@ StateManager::StateManager(QObject *parent) : QObject(parent)
 
 StateManager::StateManager(Model *model, Scene2D* scene, QFormLayout *properties)
 {    
-    Logger::getLogger()->writeLog("Creating StateManager");
+    if (log)
+    Logger::getLogger()->infoLog() << "StateManager::StateManager(Model *model, Scene2D* scene, QFormLayout *properties)\n";
     if (model == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Model* model = NULL, cannot create StateManager, program terminates");
-        Logger::getLogger()->writeLog("Model* model = NULL, cannot create StateManager, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Model* model = NULL, cannot create StateManager, program terminates\n";
         QApplication::exit(0);
     }
     this->model = model;
     if (scene == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Scene2D* scene = NULL, cannot create StateManager, program terminates");
-        Logger::getLogger()->writeLog("Scene2D* scene = NULL, cannot create StateManager, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene2D* scene = NULL, cannot create StateManager, program terminates\n";
         QApplication::exit(0);
     }
     this->scene = scene;
     if (properties == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "QFormLayout *properties = NULL, cannot create StateManager, program terminates");
-        Logger::getLogger()->writeLog("QFormLayout *properties, cannot create StateManager, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "QFormLayout *properties, cannot create StateManager, program terminates\n";
         QApplication::exit(0);
     }
     this->rulerActive = false;
@@ -110,127 +116,169 @@ StateManager::~StateManager()
 
 void StateManager::setState(State *state)
 {
-    Logger::getLogger()->writeLog("StateManager::setState(State *state)");
+    if (log)
+    Logger::getLogger()->infoLog() << "StateManager::setState(State *state)\n";
     if (state != NULL)
         currentState = state;
     else
     {
         QMessageBox::critical(0, "Ошибка", "StateManager::setState(State *state), state = NULL, currentState = NULL", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("StateManager::setState(State *state), state = NULL, currentState = NULL");
+        if (log)
+        Logger::getLogger()->errorLog() << "StateManager::setState(State *state), state = NULL, currentState = NULL\n";
+        QApplication::exit(0);
     }
 }
 
 
 void StateManager::mousePressEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("StateManager::mousePressEvent(QMouseEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "StateManager::mousePressEvent(QMouseEvent *pe)\n";
     if (currentState)
         currentState->mousePressEvent(pe);
     else
     {
         QMessageBox::critical(0, "Ошибка", "StateManager::currentState = NULL,\n StateManager::mousePressEvent(QMouseEvent *pe) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("StateManager::currentState = NULL, StateManager::mousePressEvent(QMouseEvent *pe) stopped");
+        if (log)
+        Logger::getLogger()->errorLog() << "StateManager::currentState = NULL, StateManager::mousePressEvent(QMouseEvent *pe) stopped\n";
+        QApplication::exit(0);
     }
 }
 
 void StateManager::mouseMoveEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("StateManager::mouseMoveEvent(QMouseEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "StateManager::mouseMoveEvent(QMouseEvent *pe)\n";
     if (currentState)
         currentState->mouseMoveEvent(pe);
     else
     {
         QMessageBox::critical(0, "Ошибка", "StateManager::currentState = NULL,\n StateManager::mouseMoveEvent(QMouseEvent *pe) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("StateManager::currentState = NULL, StateManager::mouseMoveEvent(QMouseEvent *pe) stopped");
+        if (log)
+        Logger::getLogger()->errorLog() << "StateManager::currentState = NULL, StateManager::mouseMoveEvent(QMouseEvent *pe) stopped\n";
+        QApplication::exit(0);
     }
 }
 
 void StateManager::mouseReleaseEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("StateManager::mouseReleaseEvent(QMouseEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "StateManager::mouseReleaseEvent(QMouseEvent *pe)\n";
     if (currentState)
         currentState->mouseReleaseEvent(pe);
     else
     {
         QMessageBox::critical(0, "Ошибка", "StateManager::currentState = NULL,\n StateManager::mouseReleaseEvent(QMouseEvent *pe) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("StateManager::currentState = NULL, StateManager::mouseReleaseEvent(QMouseEvent *pe) stopped");
+        if (log)
+        Logger::getLogger()->errorLog() << "StateManager::currentState = NULL, StateManager::mouseReleaseEvent(QMouseEvent *pe) stopped\n";
+        QApplication::exit(0);
     }
 }
 
 void StateManager::wheelEvent(QWheelEvent *pe)
 {
-    Logger::getLogger()->writeLog("StateManager::wheelEvent(QWheelEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "StateManager::wheelEvent(QWheelEvent *pe)\n";
     if (currentState)
         currentState->wheelEvent(pe);
     else
     {
         QMessageBox::critical(0, "Ошибка", "StateManager::currentState = NULL,\n StateManager::wheelEvent(QWheelEvent *pe) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("StateManager::currentState = NULL, StateManager::wheelEvent(QWheelEvent *pe) stopped");
+        if (log)
+        Logger::getLogger()->errorLog() << "StateManager::currentState = NULL, StateManager::wheelEvent(QWheelEvent *pe) stopped\n";
+        QApplication::exit(0);
     }
 }
 
 void StateManager::keyPressEvent(QKeyEvent *pe)
 {
-    Logger::getLogger()->writeLog("StateManager::keyPressEvent(QKeyEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "StateManager::keyPressEvent(QKeyEvent *pe)\n";
     if (currentState)
         currentState->keyPressEvent(pe);
     else
     {
         QMessageBox::critical(0, "Ошибка", "StateManager::currentState = NULL,\n StateManager::keyPressEvent(QKeyEvent *pe) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("StateManager::currentState = NULL, StateManager::keyPressEvent(QKeyEvent *pe) stopped");
+        if (log)
+        Logger::getLogger()->errorLog() << "StateManager::currentState = NULL, StateManager::keyPressEvent(QKeyEvent *pe) stopped\n";
+        QApplication::exit(0);
     }
 }
 
 void StateManager::keyReleaseEvent(QKeyEvent *pe)
 {
-    Logger::getLogger()->writeLog("StateManager::keyReleaseEvent(QKeyEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "StateManager::keyReleaseEvent(QKeyEvent *pe)\n";
     if (currentState)
         currentState->keyReleaseEvent(pe);
     else
     {
         QMessageBox::critical(0, "Ошибка", "StateManager::currentState = NULL,\n StateManager::keyReleaseEvent(QKeyEvent *pe) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("StateManager::currentState = NULL, StateManager::keyReleaseEvent(QKeyEvent *pe) stopped");
+        if (log)
+        Logger::getLogger()->errorLog() << "StateManager::currentState = NULL, StateManager::keyReleaseEvent(QKeyEvent *pe) stopped\n";
+        QApplication::exit(0);
     }
 }
 
 void StateManager::dragEnterEvent(QDragEnterEvent *event)
 {
-    Logger::getLogger()->writeLog("StateManager::dragEnterEvent(QDragEnterEvent *event)");
+    if (log)
+    Logger::getLogger()->infoLog() << "StateManager::dragEnterEvent(QDragEnterEvent *event)\n";
     if (currentState)
         currentState->dragEnterEvent(event);
     else
     {
         QMessageBox::critical(0, "Ошибка", "StateManager::currentState = NULL,\n StateManager::dragEnterEvent(QDragEnterEvent *event) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("StateManager::currentState = NULL, StateManager::dragEnterEvent(QDragEnterEvent *event) stopped");
+        if (log)
+        Logger::getLogger()->errorLog() << "StateManager::currentState = NULL, StateManager::dragEnterEvent(QDragEnterEvent *event) stopped\n";
+        QApplication::exit(0);
     }
 }
 
 void StateManager::dropEvent(QDropEvent *event)
 {
-    Logger::getLogger()->writeLog("StateManager::dropEvent(QDropEvent *event)");
+    if (log)
+    Logger::getLogger()->infoLog() << "StateManager::dropEvent(QDropEvent *event)\n";
     if (currentState)
         currentState->dropEvent(event);
     else
     {
         QMessageBox::critical(0, "Ошибка", "StateManager::currentState = NULL,\n StateManager::dropEvent(QDropEvent *event) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("StateManager::currentState = NULL, StateManager::dropEvent(QDropEvent *event) stopped");
+        if (log)
+        Logger::getLogger()->errorLog() << "StateManager::currentState = NULL, StateManager::dropEvent(QDropEvent *event) stopped\n";
+        QApplication::exit(0);
     }
 }
 
 void StateManager::contextMenuEvent(QContextMenuEvent *pe)
 {
-    Logger::getLogger()->writeLog("StateManager::contextMenuEvent(QContextMenuEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "StateManager::contextMenuEvent(QContextMenuEvent *pe)\n";
     if (currentState)
         currentState->contextMenuEvent(pe);
     else
     {
         QMessageBox::critical(0, "Ошибка", "StateManager::currentState = NULL,\n StateManager::contextMenuEvent(QContextMenuEvent *pe) stopped", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("StateManager::currentState = NULL, StateManager::contextMenuEvent(QContextMenuEvent *pe) stopped");
+        if (log)
+        Logger::getLogger()->errorLog() << "StateManager::currentState = NULL, StateManager::contextMenuEvent(QContextMenuEvent *pe) stopped\n";
+        QApplication::exit(0);
     }
+}
+
+void StateManager::setLogging(bool status)
+{
+    log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "StateManager::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
 }
 
 void StateManager::setRulerActive(bool status)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "StateManager::setRulerActive(bool status)\n"
+                                       << " status = " << status << "\n";
     /*
     if (rulerActive == status)
         return;

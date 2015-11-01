@@ -1,6 +1,8 @@
 #include "linebuilderstate.h"
 #include <QApplication>
 
+bool LineBuilderState::log = true;
+
 LineBuilderState::LineBuilderState()
 {
     this->stateManager = NULL;
@@ -18,32 +20,37 @@ LineBuilderState::LineBuilderState()
 
 LineBuilderState::LineBuilderState(StateManager *manager, Model *model, Scene2D *scene, QFormLayout *properties)
 {
-    Logger::getLogger()->writeLog("Creating LineBuilderState");
+    if (log)
+    Logger::getLogger()->infoLog() << "Creating LineBuilderState\n";
     if (manager == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Cannot create LineBuilderState: StateManager = NULL, program terminates");
-        Logger::getLogger()->writeLog("Cannot create LineBuilderState: StateManager = NULL, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Cannot create LineBuilderState: StateManager = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->stateManager = manager;
     if (model == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Cannot create LineBuilderState: Model = NULL, program terminates");
-        Logger::getLogger()->writeLog("Cannot create LineBuilderState: Model = NULL, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Cannot create LineBuilderState: Model = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->model = model;
     if (scene == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Cannot create LineBuilderState: Scene2D = NULL, program terminates");
-        Logger::getLogger()->writeLog("Cannot create LineBuilderState: Scene2D = NULL, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Cannot create LineBuilderState: Scene2D = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->scene = scene;
     if (properties == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "Cannot create LineBuilderState: QFormLayout(properties) = NULL, program terminates");
-        Logger::getLogger()->writeLog("Cannot create LineBuilderState: QFormLayout(properties) = NULL, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Cannot create LineBuilderState: QFormLayout(properties) = NULL, program terminates\n";
         QApplication::exit(0);
     }
     this->properties = properties;
@@ -60,7 +67,8 @@ LineBuilderState::LineBuilderState(StateManager *manager, Model *model, Scene2D 
 
 void LineBuilderState::mousePressEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::mousePressEvent(QMouseEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::mousePressEvent(QMouseEvent *pe)\n";
     ptrMousePosition = pe->pos();
     switch (pe->button())
     {
@@ -172,7 +180,8 @@ void LineBuilderState::mousePressEvent(QMouseEvent *pe)
 
 void LineBuilderState::mouseMoveEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::mouseMoveEvent(QMouseEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::mouseMoveEvent(QMouseEvent *pe)\n";
     if (rightButtonIsPressed == true)
     {
         // двигать камеру
@@ -253,7 +262,8 @@ void LineBuilderState::mouseMoveEvent(QMouseEvent *pe)
 
 void LineBuilderState::mouseReleaseEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::mouseReleaseEvent(QMouseEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::mouseReleaseEvent(QMouseEvent *pe)\n";
     if(pe->button() == Qt::RightButton)
     {
         rightButtonIsPressed = false;
@@ -270,7 +280,8 @@ void LineBuilderState::mouseReleaseEvent(QMouseEvent *pe)
 
 void LineBuilderState::wheelEvent(QWheelEvent *pe)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::wheelEvent(QWheelEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::wheelEvent(QWheelEvent *pe)\n";
     if ((pe->delta())>0) scene->scalePlus();
     else
         if ((pe->delta())<0) scene->scaleMinus();
@@ -376,19 +387,22 @@ void LineBuilderState::keyPressEvent(QKeyEvent *pe)
     default:
         break;
     }
-    Logger::getLogger()->writeLog(QString("LineBuilderState::keyPressEvent(QKeyEvent *pe), key = ") + s);
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::keyPressEvent(QKeyEvent *pe), key = " << s << "\n";
     scene->updateGL();
 }
 
 void LineBuilderState::dragEnterEvent(QDragEnterEvent *event)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::dragEnterEvent(QDragEnterEvent *event)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::dragEnterEvent(QDragEnterEvent *event)\n";
     event->acceptProposedAction();
 }
 
 void LineBuilderState::dropEvent(QDropEvent *event)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::dropEvent(QDropEvent *event)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::dropEvent(QDropEvent *event)\n";
     GLint viewport[4];
     GLdouble modelview[16];
     GLdouble projection[16];
@@ -416,7 +430,8 @@ void LineBuilderState::dropEvent(QDropEvent *event)
 
 void LineBuilderState::setTexture(QString source, float size)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::setTexture(QString source, float size)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::setTexture(QString source, float size)\n";
     textureSource = source;
     textureSize = size;
     useColor = false;
@@ -424,25 +439,29 @@ void LineBuilderState::setTexture(QString source, float size)
 
 void LineBuilderState::setWidth(float width)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::setWidth(float width)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::setWidth(float width)\n";
     this->width = width;
 }
 
 void LineBuilderState::setName(QString name)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::setName(QString name)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::setName(QString name)\n";
     this->name = name;
 }
 
 void LineBuilderState::setLayer(int layer)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::setLayer(int layer)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::setLayer(int layer)\n";
     this->layer = layer;
 }
 
 bool LineBuilderState::tryToSelectControlsInSelectedFigure(QPoint mp)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::tryToSelectControlsInSelectedFigure(QPoint mp)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::tryToSelectControlsInSelectedFigure(QPoint mp)\n";
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
     GLint viewport[4]; // декларируем матрицу поля просмотра
     glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
@@ -493,9 +512,9 @@ bool LineBuilderState::tryToSelectControlsInSelectedFigure(QPoint mp)
 
 
     hitsForControl = glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
-
-    Logger::getLogger()->writeLog(QString("LineBuilderState::tryToSelectControlsInSelectedFigure(QPoint mp), hits = ") +
-                                  QString::number(hitsForControl));
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::tryToSelectControlsInSelectedFigure(QPoint mp), hits = "
+                                   << hitsForControl << "\n";
     if (hitsForControl > 0) // есть совпадания и нет ошибок
     {
         controlIndex = selectBuffer[3] - 1;
@@ -514,7 +533,8 @@ bool LineBuilderState::tryToSelectControlsInSelectedFigure(QPoint mp)
 
 bool LineBuilderState::tryToSelectFigures(QPoint mp)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::tryToSelectFigures(QPoint mp)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::tryToSelectFigures(QPoint mp)\n";
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
     GLint viewport[4]; // декларируем матрицу поля просмотра
     glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
@@ -562,9 +582,9 @@ bool LineBuilderState::tryToSelectFigures(QPoint mp)
     glPopMatrix();
 
     hitsForFigure=glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
-
-    Logger::getLogger()->writeLog(QString("LineBuilderState::tryToSelectFigures(QPoint mp), hits = ") +
-                                  QString::number(hitsForFigure));
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::tryToSelectFigures(QPoint mp), hits = "
+                                   << hitsForFigure << "\n";
     if (hitsForFigure > 0) // есть совпадания и нет ошибок
     {
         glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
@@ -583,11 +603,13 @@ bool LineBuilderState::tryToSelectFigures(QPoint mp)
 
 void LineBuilderState::clearProperties(QFormLayout *layout)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::clearProperties(QFormLayout *layout)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::clearProperties(QFormLayout *layout)\n";
     if (layout == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "QFormLayout* layout = NULL, cannot clearProperties, program terminates");
-        Logger::getLogger()->writeLog("QFormLayout* layout = NULL, cannot clearProperties, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "QFormLayout* layout = NULL, cannot clearProperties, program terminates\n";
         QApplication::exit(0);
     }
     while(layout->count() > 0)
@@ -600,11 +622,13 @@ void LineBuilderState::clearProperties(QFormLayout *layout)
 
 void LineBuilderState::setGroupIndex(int index)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::setGroupIndex(int index)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::setGroupIndex(int index)\n";
     if (index < 0 || index >= model->getNumberOfGroups())
     {
         QMessageBox::critical(0, "Ошибка", "Group index out of range, program terminates");
-        Logger::getLogger()->writeLog("Group index out of range, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Group index out of range, program terminates\n";
         QApplication::exit(0);
     }
     groupIndex = index;
@@ -612,17 +636,20 @@ void LineBuilderState::setGroupIndex(int index)
 
 void LineBuilderState::setElementIndex(int index)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::setElementIndex(int index)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::setElementIndex(int index)\n";
     if (groupIndex < 0 || groupIndex >= model->getNumberOfGroups())
     {
         QMessageBox::critical(0, "Ошибка", "Group index out of range, program terminates");
-        Logger::getLogger()->writeLog("Group index out of range, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Group index out of range, program terminates\n";
         QApplication::exit(0);
     }
     if (index < 0 || index >= model->getGroup(groupIndex).size())
     {
         QMessageBox::critical(0, "Ошибка", "Element index out of range, program terminates");
-        Logger::getLogger()->writeLog("Element index out of range, program terminates");
+        if (log)
+        Logger::getLogger()->errorLog() << "Element index out of range, program terminates\n";
         QApplication::exit(0);
     }
     elementIndex = index;
@@ -630,7 +657,8 @@ void LineBuilderState::setElementIndex(int index)
 
 void LineBuilderState::clear()
 {
-    Logger::getLogger()->writeLog("LineBuilderState::clear()");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::clear()\n";
     lineBroken = NULL;
     ptrMousePosition;
     rightButtonIsPressed = false;
@@ -641,6 +669,15 @@ void LineBuilderState::clear()
     controlIsSelected = false;
     key = -1;
     linking = false;
+}
+
+void LineBuilderState::setLogging(bool status)
+{
+    log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "LineBuilderState::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
 }
 
 LineBuilderState::~LineBuilderState()
@@ -655,7 +692,8 @@ LineBuilderState::~LineBuilderState()
 
 void LineBuilderState::keyReleaseEvent(QKeyEvent *pe)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::keyReleaseEvent(QKeyEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::keyReleaseEvent(QKeyEvent *pe)\n";
     key = 0;
 }
 
@@ -664,17 +702,20 @@ void LineBuilderState::keyReleaseEvent(QKeyEvent *pe)
 
 QString LineBuilderState::getName()
 {
-    Logger::getLogger()->writeLog("LineBuilderState::getName()");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::getName()\n";
     return "LineBuilderState";
 }
 
 void LineBuilderState::setLine(LineBroken *lineBroken)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::setLine(LineBroken *lineBroken)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::setLine(LineBroken *lineBroken)\n";
     if (lineBroken == NULL)
     {
         QMessageBox::critical(0, "Ошибка", "LineBroken* lineBroken = NULL, cannot setLine, program terminate");
-        Logger::getLogger()->writeLog("LineBroken* lineBroken = NULL, cannot setLine, program terminate");
+        if (log)
+        Logger::getLogger()->errorLog() << "LineBroken* lineBroken = NULL, cannot setLine, program terminate\n";
         QApplication::exit(0);
     }
     this->lineBroken = lineBroken;
@@ -683,11 +724,12 @@ void LineBuilderState::setLine(LineBroken *lineBroken)
 
 void LineBuilderState::contextMenuEvent(QContextMenuEvent *pe)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::contextMenuEvent(QContextMenuEvent *pe)");
+    Logger::getLogger()->infoLog() << "LineBuilderState::contextMenuEvent(QContextMenuEvent *pe)\n";
 }
 
 void LineBuilderState::setLinking(bool state)
 {
-    Logger::getLogger()->writeLog("LineBuilderState::setLinking(bool state)");
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBuilderState::setLinking(bool state)\n";
     this->linking = state;
 }

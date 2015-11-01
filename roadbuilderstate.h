@@ -36,6 +36,7 @@ private:
     int layer;
     QString name;
     int groupIndex, elementIndex;
+    static bool log;
     // State interface
 public:
     virtual void mousePressEvent(QMouseEvent *pe);
@@ -53,7 +54,8 @@ public:
     void setLayer(int layer);
     void setGroupIndex(int index);
     void setElementIndex(int index);
-
+    static void setLogging(bool status);
+    static bool getLogging() { return log; }
     // State interface
 public:
     virtual QString getName();

@@ -2,6 +2,8 @@
 #include <QtGui>
 #include <math.h>
 
+bool Scene3D::log = true;
+
 Scene3D::Scene3D(QWidget *parent, QGLWidget* shared) : QGLWidget(parent, shared)
 {
 
@@ -28,57 +30,67 @@ Scene3D::~Scene3D()
 
 void Scene3D::setModel(Model *model)
 {
-    Logger::getLogger()->writeLog("Scene3D::setModel(Model *model)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::setModel(Model *model)\n";
     if (model != NULL)
         this->model = model;
     else
     {
         QMessageBox::critical(0, "Ошибка", "Scene3D::setModel(Model *model), model = NULL,\n cannot work with models", QMessageBox::Yes | QMessageBox::Default);
-        Logger::getLogger()->writeLog("Scene3D::setModel(Model *model), model = NULL, cannot work with models");
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene3D::setModel(Model *model), model = NULL, cannot work with models\n";
+        QApplication::exit(0);
     }
 }
 
 
 void Scene3D::scalePlus()
 {
-    Logger::getLogger()->writeLog("Scene3D::scale_plus()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::scale_plus()\n";
     nSca = nSca * 1.05;
 }
 
 void Scene3D::scaleMinus()
 {
-    Logger::getLogger()->writeLog("Scene3D::scale_minus()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::scale_minus()\n";
     nSca = nSca / 1.05;
 }
 
 void Scene3D::rotateUp()
 {
-    Logger::getLogger()->writeLog("Scene3D::rotate_up()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::rotate_up()\n";
     xRot += 1.0;
 }
 
 void Scene3D::rotateDown()
 {
-    Logger::getLogger()->writeLog("Scene3D::rotate_down()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::rotate_down()\n";
     xRot -= 1.0;
 }
 
 void Scene3D::rotateLeft()
 {
-    Logger::getLogger()->writeLog("Scene3D::rotate_left()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::rotate_left()\n";
     zRot += 1.0;
 }
 
 void Scene3D::rotateRight()
 {
-    Logger::getLogger()->writeLog("Scene3D::rotate_right()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::rotate_right()\n";
     zRot -= 1.0;
 }
 
 
 void Scene3D::mousePressEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("Scene3D::mousePressEvent(QMouseEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::mousePressEvent(QMouseEvent *pe)\n";
     ptrMousePosition = pe->pos();
     switch (pe->button())
     {
@@ -97,7 +109,8 @@ void Scene3D::mousePressEvent(QMouseEvent *pe)
 
 void Scene3D::mouseReleaseEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("Scene3D::mouseReleaseEvent(QMouseEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::mouseReleaseEvent(QMouseEvent *pe)\n";
     rightButtonIsPressed = false;
     leftButtonIsPressed = false;
     middleButtonIsPressed = false;
@@ -105,7 +118,8 @@ void Scene3D::mouseReleaseEvent(QMouseEvent *pe)
 
 void Scene3D::mouseMoveEvent(QMouseEvent *pe)
 {
-    Logger::getLogger()->writeLog("Scene3D::mouseMoveEvent(QMouseEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::mouseMoveEvent(QMouseEvent *pe)\n";
     if (rightButtonIsPressed)
     {
         // Поворот сцены
@@ -133,7 +147,8 @@ void Scene3D::mouseMoveEvent(QMouseEvent *pe)
 
 void Scene3D::wheelEvent(QWheelEvent *pe)
 {
-    Logger::getLogger()->writeLog("Scene3D::wheelEvent(QWheelEvent *pe)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::wheelEvent(QWheelEvent *pe)\n";
     if ((pe->delta())>0) scalePlus();
     else
         if ((pe->delta())<0) scaleMinus();
@@ -142,18 +157,20 @@ void Scene3D::wheelEvent(QWheelEvent *pe)
 
 void Scene3D::keyPressEvent(QKeyEvent *)
 {
-    Logger::getLogger()->writeLog("Scene3D::keyPressEvent(QKeyEvent *)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::keyPressEvent(QKeyEvent *)\n";
 }
 
 void Scene3D::keyReleaseEvent(QKeyEvent *)
 {
-    Logger::getLogger()->writeLog("Scene3D::keyReleaseEvent(QKeyEvent *)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::keyReleaseEvent(QKeyEvent *)\n";
 }
 
 void Scene3D::initializeGL()
 {
-
-    Logger::getLogger()->writeLog("Scene3D::initializeGL()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::initializeGL()\n";
     qglClearColor(Qt::white);
     glEnable(GL_DEPTH_TEST);
     glShadeModel(GL_FLAT);
@@ -197,7 +214,10 @@ void Scene3D::initializeGL()
 
 void Scene3D::resizeGL(int nWidth, int nHeight)
 {
-    Logger::getLogger()->writeLog("Scene3D::resizeGL(int nWidth, int nHeight)");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::resizeGL(int nWidth, int nHeight)"
+                                   << " nWidth = " << nWidth
+                                   << " nHeight = " << nHeight << "\n";
     /*
     glViewport(0, 0, (GLint)nWidth, (GLint)nHeight);
     glMatrixMode(GL_PROJECTION);
@@ -238,7 +258,8 @@ void Scene3D::resizeGL(int nWidth, int nHeight)
 
 void Scene3D::paintGL()
 {
-    Logger::getLogger()->writeLog("Scene3D::paintGL()");
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::paintGL()\n";
     glClearColor(0.9, 0.9, 0.9, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -287,5 +308,14 @@ void Scene3D::paintGL()
     glDisable(GL_LIGHTING);
 
     glPopMatrix();
+}
+
+void Scene3D::setLogging(bool status)
+{
+    log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "Scene3D::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
 }
 

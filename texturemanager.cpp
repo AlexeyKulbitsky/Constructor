@@ -10,7 +10,7 @@ TextureManager* TextureManager::manager = NULL;
 
 int TextureManager::getTextureID(QString textureSource)
 {
-    Logger::getLogger()->writeLog(QString("Reading texture from ") + textureSource);
+    Logger::getLogger()->infoLog() << "Reading texture from " << textureSource << "\n";
     QImage image1;
 
     GLuint ID;
@@ -18,7 +18,7 @@ int TextureManager::getTextureID(QString textureSource)
     {
         QMessageBox::critical(0, "Ошибка", QString("Cannot read texture from ") + textureSource,
                               QMessageBox::Yes);
-        Logger::getLogger()->writeLog(QString("Cannot read texture from ") + textureSource);
+        Logger::getLogger()->errorLog() << "Cannot read texture from " << textureSource << "\n";
         return 0;
     }
     image1 = QGLWidget::convertToGLFormat(image1);

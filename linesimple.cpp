@@ -1,6 +1,7 @@
 #include "linesimple.h"
 #include <GL/glu.h>
 
+bool LineSimple::log = true;
 
 LineSimple::LineSimple()
 {
@@ -134,6 +135,11 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QStr
 // Индексы вершины для отрисовки
 void LineSimple::setVertexArray(float x1, float y1, float x2, float y2, float width)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::setVertexArray(float x1, float y1, float x2, float y2, float width)"
+                                       << " x1 = " << x1 << " y1 = " << y1
+                                       << " x2 = " << x2 << " y2 = " << y2
+                                       << " width = " << width << "\n";
     this->x1 = x1;
     this->y1 = y1;
     this->x2 = x2;
@@ -179,6 +185,10 @@ void LineSimple::setVertexArray(float x1, float y1, float x2, float y2, float wi
 // Индексы каждой вершины
 void LineSimple::setColorArray(float red, float green, float blue, float alpha)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::setColorArray(float red, float green, float blue, float alpha)"
+                                       << " red = " << red << " green = " << green
+                                       << " blue = " << blue << " alpha = " << alpha << "\n";
     for (int i=0; i<4; i++)
     {
         ColorArray[i][0]=red;
@@ -190,6 +200,8 @@ void LineSimple::setColorArray(float red, float green, float blue, float alpha)
 
 void LineSimple::setTextureArray()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::setTextureArray()\n";
     GLfloat x1 = VertexArray[0][0];
     GLfloat y1 = VertexArray[0][1];
     GLfloat x2 = VertexArray[3][0];
@@ -213,6 +225,8 @@ void LineSimple::setTextureArray()
 // Индексы для отрисовки фигуры
 void LineSimple::setIndexArray()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::setIndexArray()\n";
     // Порядок обхода - по часовой стрелке
 
     // 1-ый полигон
@@ -231,6 +245,8 @@ void LineSimple::setIndexArray()
 
 void LineSimple::drawFigure(QGLWidget* render)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::drawFigure(QGLWidget* render)\n";
     /*
     if (selected == true)
     {
@@ -298,6 +314,8 @@ void LineSimple::drawFigure(QGLWidget* render)
 
 void LineSimple::setIndexArrayForSelectionFrame()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::setIndexArrayForSelectionFrame()\n";
     IndexArrayForSelection[0] = 0;
     IndexArrayForSelection[1] = 1;
     IndexArrayForSelection[2] = 2;
@@ -312,6 +330,11 @@ void LineSimple::setIndexArrayForSelectionFrame()
 
 void LineSimple::setColorArrayForSelectionFrame(float red, float green, float blue)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::setColorArrayForSelectionFrame(float red, float green, float blue)"
+                                       << " red = " << red
+                                       << " green = " << green
+                                       << " blue = " << blue << "\n";
     for (int i = 0; i < 4; ++i)
     {
         ColorArrayForSelection[i][0] = red;
@@ -324,7 +347,8 @@ void LineSimple::setColorArrayForSelectionFrame(float red, float green, float bl
 
 void LineSimple::drawSelectionFrame()
 {
-
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::drawSelectionFrame()\n";
     // Боковые грани для изменения размера
     glVertexPointer(3, GL_FLOAT, 0, VertexArray);
     glColorPointer(3, GL_FLOAT, 0, ColorArrayForSelection);
@@ -339,6 +363,11 @@ void LineSimple::drawSelectionFrame()
 
 void LineSimple::move(float dx, float dy, float dz)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::move(float dx, float dy, float dz)"
+                                       << " dx = " << dx
+                                       << " dy = " << dy
+                                       << " dz = " << dz << "\n";
     if (fixed)
     {
         return;
@@ -358,6 +387,11 @@ void LineSimple::move(float dx, float dy, float dz)
 
 void LineSimple::drawControlElement(int index, float lineWidth, float pointSize)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::drawControlElement(int index, float lineWidth, float pointSize)"
+                                       << " index = " << index
+                                       << " lineWidth = " << lineWidth
+                                       << " pointSize = " << pointSize << "\n";
     switch (index)
     {
     case 0:
@@ -391,6 +425,11 @@ void LineSimple::drawControlElement(int index, float lineWidth, float pointSize)
 
 void LineSimple::resizeByControl(int index, float dx, float dy, float x, float y)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::resizeByControl(int index, float dx, float dy, float x, float y)"
+                                       << " index = " << index
+                                       << " dx = " << dx << " dy = " << dy
+                                       << " x = " << x << " y = " << y << "\n";
     if (fixed)
     {
         return;
@@ -432,11 +471,17 @@ void LineSimple::resizeByControl(int index, float dx, float dy, float x, float y
 
 void LineSimple::changeColorOfSelectedControl(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::changeColorOfSelectedControl(int index)"
+                                       << " index = " << index << "\n";
     indexOfSelectedControl = index;
 }
 
 QCursor LineSimple::getCursorForControlElement(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::getCursorForControlElement(int index)"
+                                       << " index = " << index << "\n";
     switch (index)
     {
     // Углы для изменения размера
@@ -455,6 +500,10 @@ QCursor LineSimple::getCursorForControlElement(int index)
 
 bool LineSimple::hasPoint(GLfloat x, GLfloat y)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::hasPoint(GLfloat x, GLfloat y)"
+                                       << " x = " << x
+                                       << " y = " << y << "\n";
     if (x >= VertexArray[0][0] &&
             x <= VertexArray[2][0] &&
             y >= VertexArray[0][1] &&
@@ -470,6 +519,17 @@ bool LineSimple::hasPoint(GLfloat x, GLfloat y)
 
 QPoint LineSimple::getCoorninateOfPointControl(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::getCoorninateOfPointControl(int index)"
+                                       << " index = " << index << "\n";
+    if (index < 0 || index > 3)
+    {
+        QMessageBox::critical(0, "Ошибка", "LineSimple::getCoorninateOfPointControl(int index) index out of range",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->errorLog() << "LineSimple::getCoorninateOfPointControl(int index) index out of range\n";
+        QApplication::exit(0);
+    }
     QPoint p;
     p.setX(VertexArray[index][0]);
     p.setY(VertexArray[index][1]);
@@ -481,6 +541,18 @@ QPoint LineSimple::getCoorninateOfPointControl(int index)
 
 void LineSimple::drawDescription(QGLWidget *render, float red, float green, float blue)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::drawDescription(QGLWidget *render, float red, float green, float blue)"
+                                       << " red = " << red
+                                       << " green = " << green
+                                       << " blue = " << blue << "\n";
+    if (render == NULL)
+    {
+        QMessageBox::warning(0, "Внимание", "LineSimple::drawDescription(QGLWidget *render, float red, float green, float blue) render = NULL",
+                             QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->warningLog() << "LineSimple::drawDescription(QGLWidget *render, float red, float green, float blue) render = NULL\n";
+    }
     glColor3f(red, green, blue);
     if (render && description[0] != '\0')
     {
@@ -495,9 +567,20 @@ void LineSimple::drawDescription(QGLWidget *render, float red, float green, floa
     }
 }
 
+void LineSimple::setLogging(bool status)
+{
+    log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "LineSimple::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
+}
+
 
 QJsonObject LineSimple::getJSONInfo()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::getJSONInfo()\n";
     QJsonObject element;
 
     element["Name"] = name;
@@ -536,11 +619,15 @@ QJsonObject LineSimple::getJSONInfo()
 
 void LineSimple::getProperties(QFormLayout *layout, QGLWidget* render)
 {
-
-    while(QLayoutItem* child = layout->takeAt(0))
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::getProperties(QFormLayout *layout, QGLWidget* render)\n";
+    if (layout == NULL)
     {
-        delete child->widget();
-        delete child;
+        QMessageBox::critical(0, "Ошибка", "LineSimple::getProperties(QFormLayout *layout, QGLWidget* render) layout = NULL",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->errorLog() << "LineSimple::getProperties(QFormLayout *layout, QGLWidget* render) layout = NULL\n";
+        QApplication::exit(0);
     }
 
     QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
@@ -572,6 +659,9 @@ void LineSimple::getProperties(QFormLayout *layout, QGLWidget* render)
 
 void LineSimple::setWidth(double width)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::setWidth(double width)"
+                                       << " width = " << width << "\n";
     if (this->width != width)
     {
         this->width = width;
@@ -586,6 +676,9 @@ void LineSimple::setWidth(double width)
 
 void LineSimple::setLength(double length)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::setLength(double length)"
+                                       << " length = " << length << "\n";
     if (this->length != length)
     {
         x2 = x1 + (x2 - x1) * (length / this->length);
@@ -602,40 +695,57 @@ void LineSimple::setLength(double length)
 
 void LineSimple::setDescription(QString description)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::setDescription(QString description)"
+                                       << " description = " << description << "\n";
     this->description = description;
 }
 
 
 bool LineSimple::isFixed()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::isFixed()\n";
     return fixed;
 }
 
 
 void LineSimple::drawMeasurements(QGLWidget *render)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::drawMeasurements(QGLWidget *render)\n";
 }
 
 
 bool LineSimple::setFixed(bool fixed)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::setFixed(bool fixed)"
+                                       << " fixed = " << fixed << "\n";
     this->fixed = fixed;
 }
 
 
 int LineSimple::getLayer()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::getLayer()\n";
     return layer;
 }
 
 
 void LineSimple::clear()
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::clear()\n";
 }
 
 
 std::vector<vec3> LineSimple::getCoordOfControl(int index)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::getCoordOfControl(int index)"
+                                       << " index = " << index << "\n";
     std::vector<vec3> res;
 
     switch (index)
@@ -671,6 +781,12 @@ std::vector<vec3> LineSimple::getCoordOfControl(int index)
 
 void LineSimple::rotate(float angle, float x, float y, float z)
 {
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::rotate(float angle, float x, float y, float z)"
+                                       << " angle = " << angle
+                                       << " x = " << x
+                                       << " y = " << y
+                                       << " z = " << z << "\n";
     float tx = 0.0f, ty = 0.0f;
     x1 -= x;
     y1 -= y;

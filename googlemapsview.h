@@ -3,6 +3,7 @@
 
 #include <QWebView>
 class QNetworkAccessManager;
+#include "logger.h"
 
 class GoogleMapsView: public QWebView
 {
@@ -10,6 +11,8 @@ class GoogleMapsView: public QWebView
 
 public:
     GoogleMapsView(QWidget *parent=0);
+    static void setLogging(bool status);
+    static bool getLogging() { return log; }
 
 public slots:
     void replyFinished(QNetworkReply*);
@@ -27,6 +30,7 @@ private:
     QNetworkAccessManager *manager;
     QList<QPointF> coordinates;
     int pendingRequests;
+    static bool log;
 };
 
 #endif // GOOGLEMAPSVIEW_H

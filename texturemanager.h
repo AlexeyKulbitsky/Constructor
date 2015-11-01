@@ -12,7 +12,6 @@ class TextureManager
 protected:
     static TextureManager* manager;
     TextureManager(){}
-    TextureManager(const TextureManager &source){}
     virtual ~TextureManager(){}
 protected:
     QMap<QString, unsigned int> textureMap;

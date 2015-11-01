@@ -194,6 +194,10 @@ bool CompositeRoad::setFixed(bool fixed)
 void CompositeRoad::setLogging(bool status)
 {
     log = status;
+    Logger::getLogger()->infoLog() << "--------------------\n";
+    Logger::getLogger()->infoLog() << "CompositeRoad::setLogging(bool status)"
+                                   << " status = " << status << "\n";
+    Logger::getLogger()->infoLog() << "--------------------\n";
 }
 
 
