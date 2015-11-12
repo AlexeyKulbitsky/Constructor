@@ -136,7 +136,7 @@ struct Material
         name = '\0';
         ambientColor[0] = ambientColor[1] = ambientColor[2] = 0.0f;
         diffuseColor[0] = diffuseColor[1] = diffuseColor[2] = 0.0f;
-        specularColor[0] = specularColor[1] = specularColor[1] = 0.0f;
+        specularColor[0] = specularColor[1] = specularColor[2] = 0.0f;
         textureSource = '\0';
         textureID = 0;
     }
@@ -151,8 +151,9 @@ enum RoadElementName{ROAD_SIMPLE = 0, ROAD_BROKEN,
 class RoadElement: public QObject
 {
     Q_OBJECT
-
 public:
+    RoadElement();
+    virtual ~RoadElement();
     static QUndoStack* undoStack;
     virtual bool isSelected() = 0;
     virtual void setSelectedStatus(bool status) = 0;
@@ -162,7 +163,7 @@ public:
     virtual void move(float dx, float dy, float dz = 0) = 0;
     virtual void drawControlElement(int index, float lineWidth, float pointSize) = 0;
     virtual std::vector<vec3> getCoordOfControl(int index);
-    virtual void setCoordForControl(int index);
+    virtual void setCoordForControl(int index, std::vector<vec3>& controls);
     virtual QCursor getCursorForControlElement(int index) = 0;
     virtual void resizeByControl(int index, float dx, float dy, float x, float y) = 0;
     virtual int getNumberOfControls() = 0;
@@ -177,8 +178,7 @@ public:
     virtual void addElement(RoadElement* element);
     virtual void deleteElement(int index);
     virtual int getNumberOfElements();
-    virtual RoadElement* getElement(int index);
-    virtual ~RoadElement();
+    virtual RoadElement* getElement(int index);    
     virtual int getLayer() = 0;
     virtual void clear() = 0;
     virtual void rotate(float angle, float x, float y, float z);
@@ -189,8 +189,13 @@ public:
     virtual void getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz);
     virtual float getElementX() { return elementX; }
     virtual float getElementY() { return elementY; }
+    virtual RoadElement* getCopy() = 0;
+    virtual int getId() { return Id; }
+    virtual void setId(int Id);
+
 public slots:
     virtual bool setFixed(bool fixed) = 0;
+    virtual setShowMeasurements(bool status);
 
 protected:
     QString name;
@@ -198,6 +203,35 @@ protected:
     StepDialog* stepDialogs[10];
     Model* model;
     float elementX, elementY;
+    int Id;
+    bool showMeasurements;
+
+private:
+    static const unsigned SIZE = 10000;
+    static bool Ids[SIZE];
+};
+Q_DECLARE_METATYPE(RoadElement*)
+
+class RoadElementMimeData : public QMimeData
+{
+    Q_OBJECT
+    // QMimeData interface
+public:
+    RoadElementMimeData(RoadElement* element);
+    RoadElementMimeData(QList<RoadElement*>& elements);
+    RoadElementMimeData();
+    ~RoadElementMimeData();
+    QList<RoadElement *> getElements() const;
+protected:
+    virtual QVariant retrieveData(const QString &mimetype, QVariant::Type preferredType) const;
+
+private:
+    QList<RoadElement*> elements;
+    QStringList myFormats;
+    // QMimeData interface
+public:
+    virtual QStringList formats() const;
+    virtual bool hasFormat(const QString &mimetype) const;
 };
 
 

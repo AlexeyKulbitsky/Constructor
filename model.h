@@ -9,10 +9,7 @@ class RoadElement;
 
 //#include "road.h"
 #include "roundingroad.h"
-
-
 #include "linesimple.h"
-
 #include "roadsimple.h"
 #include "linebroken.h"
 #include "roadbroken.h"

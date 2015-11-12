@@ -24,6 +24,7 @@ Model::~Model()
             if (group[i].elements.at(j))
             {
                 delete group[i].elements.at(j);
+                group[i].elements.replace(j, NULL);
             }
             else
             {
@@ -54,9 +55,9 @@ void Model::addElement(RoadElement *element, int groupIndex)
     }
     if (groupIndex >= numberOfGroups || groupIndex < 0)
     {
-        QMessageBox::critical(0, "Ошибка", "In model group index = " + QString::number(groupIndex) + " out of range",
+        QMessageBox::critical(0, "Ошибка", "Model::addElement(RoadElement *element, int groupIndex) In model group index = " + QString::number(groupIndex) + " out of range",
                               QMessageBox::Yes);
-        Logger::getLogger()->writeLog("In model group index = " + QString::number(groupIndex) + " out of range");
+        Logger::getLogger()->writeLog("Model::addElement(RoadElement *element, int groupIndex) In model group index = " + QString::number(groupIndex) + " out of range");
         QApplication::exit(0);
     }
     group[groupIndex].elements.push_back(element);
@@ -71,9 +72,9 @@ void Model::deleteElement(int elementId, int groupIndex)
 
     if (groupIndex >= numberOfGroups || groupIndex < 0)
     {
-        QMessageBox::critical(0, "Ошибка", "In model group index = " + QString::number(groupIndex) + " out of range",
+        QMessageBox::critical(0, "Ошибка", "Model::deleteElement(int elementId, int groupIndex) In model group index = " + QString::number(groupIndex) + " out of range",
                               QMessageBox::Yes);
-        Logger::getLogger()->writeLog("In model group index = " + QString::number(groupIndex) + " out of range");
+        Logger::getLogger()->writeLog("Model::deleteElement(int elementId, int groupIndex) In model group index = " + QString::number(groupIndex) + " out of range");
         QApplication::exit(0);
     }
     if (elementId >= group[groupIndex].elements.size() || elementId < 0)
@@ -93,9 +94,9 @@ QList<RoadElement *> &Model::getGroup(int groupIndex)
 {
     if (groupIndex < 0 || groupIndex >= numberOfGroups)
     {
-        QMessageBox::critical(0, "Ошибка", "In model group index = " + QString::number(groupIndex) + " out of range",
+        QMessageBox::critical(0, "Ошибка", "Model::getGroup(int groupIndex) In model group index = " + QString::number(groupIndex) + " out of range",
                               QMessageBox::Yes);
-        Logger::getLogger()->writeLog("In model group index = " + QString::number(groupIndex) + " out of range");
+        Logger::getLogger()->writeLog("Model::getGroup(int groupIndex) In model group index = " + QString::number(groupIndex) + " out of range");
         QApplication::exit(0);
     }
     return group[groupIndex].elements;
@@ -105,9 +106,9 @@ bool Model::isGroupVisible(int index)
 {
     if (index >= numberOfGroups || index < 0)
     {
-        QMessageBox::critical(0, "Ошибка", "In model group index = " + QString::number(index) + " out of range",
+        QMessageBox::critical(0, "Ошибка", "Model::isGroupVisible(int index) In model group index = " + QString::number(index) + " out of range",
                               QMessageBox::Yes);
-        Logger::getLogger()->writeLog("In model group index = " + QString::number(index) + " out of range");
+        Logger::getLogger()->writeLog("Model::isGroupVisible(int index) In model group index = " + QString::number(index) + " out of range");
         QApplication::exit(0);
     }
     return group[index].visible;

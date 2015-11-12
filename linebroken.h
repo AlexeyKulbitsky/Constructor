@@ -71,6 +71,7 @@ public:
     LineBroken(float width, float* axisVertices, int size, float red, float green, float blue, float alpha, QString name, int layer);
     LineBroken(float width, float* axisVertices, int size, QString source, float textureSize, QString name, int layer);
     LineBroken(float width, float* axisVertices, int size, QString source, float textureSize, QString name, int layer, QString description);
+    LineBroken(const LineBroken& source);
     virtual ~LineBroken();
     bool hasPoint(GLfloat x, GLfloat y);
     void drawFigure(QGLWidget* render = 0);
@@ -88,6 +89,7 @@ public:
     virtual void getProperties(QFormLayout *layout, QGLWidget* render = 0);
     virtual bool isFixed();
     virtual void addBreak(bool front);
+    virtual void deleteBreak(bool front);
     virtual void drawMeasurements(QGLWidget *render);
     virtual int getLayer();
     virtual void clear();
@@ -102,6 +104,18 @@ protected:
 public slots:
     virtual bool setFixed(bool fixed);
     void setDescription(QString description);
+
+    // RoadElement interface
+public:
+    virtual RoadElement *getCopy();
+
+    // RoadElement interface
+public:
+    virtual void setCoordForControl(int index, std::vector<vec3> &controls);
+
+    // RoadElement interface
+public:
+    virtual void clearProperties(QLayout *layout);
 };
 
 #endif // LINEBROKEN_H

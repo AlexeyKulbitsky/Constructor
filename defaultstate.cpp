@@ -353,9 +353,7 @@ void DefaultState::dropEvent(QDropEvent *event)
                                            QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
                                            "RoadSimple", 0);
         road->setModel(model);
-        model->getGroup(0).push_back(road);
-        model->setModified(true);
-        scene->updateGL();
+        RoadElement::undoStack->push(new InsertCommand(road, stateManager, properties, model, 0, scene));
         return;
     }
     if (s == "Дорога ломаная")
@@ -366,9 +364,7 @@ void DefaultState::dropEvent(QDropEvent *event)
                                           QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
                                           "RoadBroken", 0);
         road->setModel(model);
-        model->getGroup(0).push_back(road);
-        model->setModified(true);
-        scene->updateGL();
+        RoadElement::undoStack->push(new InsertCommand(road, stateManager, properties, model, 0, scene));
         return;
     }
     if (s == "Поворот дороги")
@@ -379,8 +375,7 @@ void DefaultState::dropEvent(QDropEvent *event)
                                               QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
                                               QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f);
         road->setModel(model);
-        model->getGroup(0).push_back(road);
-        model->setModified(true);
+        RoadElement::undoStack->push(new InsertCommand(road, stateManager, properties, model, 0, scene));
     } else
         if (s == "Закругление")
         {
@@ -391,18 +386,14 @@ void DefaultState::dropEvent(QDropEvent *event)
                                      QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
                                      10);
             curve->setModel(model);
-            model->getGroup(0).push_back(curve);
-            model->setModified(true);
-            scene->updateGL();
+            RoadElement::undoStack->push(new InsertCommand(curve, stateManager, properties, model, 0, scene));
             return;
         }
     if (s == "Перекресток")
     {
         Intersection* intersection = new Intersection(x, y);
         intersection->setModel(model);
-        model->getGroup(0).push_back(intersection);
-        model->setModified(true);
-        scene->updateGL();
+        RoadElement::undoStack->push(new InsertCommand(intersection, stateManager, properties, model, 0, scene));
         return;
     }
     if (s == "Разделительная зона (разметка)")
@@ -414,9 +405,7 @@ void DefaultState::dropEvent(QDropEvent *event)
                                              true);
 
         splitZone->setModel(model);
-        model->getGroup(0).push_back(splitZone);
-        model->setModified(true);
-        scene->updateGL();
+        RoadElement::undoStack->push(new InsertCommand(splitZone, stateManager, properties, model, 1, scene));
         return;
     }
     if (s == "Разделительная зона (газон)")
@@ -434,9 +423,7 @@ void DefaultState::dropEvent(QDropEvent *event)
                                              3.0f, 3.0f);
 
         splitZone->setModel(model);
-        model->getGroup(0).push_back(splitZone);
-        model->setModified(true);
-        scene->updateGL();
+        RoadElement::undoStack->push(new InsertCommand(splitZone, stateManager, properties, model, 1, scene));
         return;
     }
     if (s == "Разделительная зона (тротуар)")
@@ -453,9 +440,7 @@ void DefaultState::dropEvent(QDropEvent *event)
                                              QApplication::applicationDirPath() + "/models/city_roads/nr_07S.jpg",
                                              6.0f, 6.0f);
         splitZone->setModel(model);
-        model->getGroup(0).push_back(splitZone);
-        model->setModified(true);
-        scene->updateGL();
+        RoadElement::undoStack->push(new InsertCommand(splitZone, stateManager, properties, model, 1, scene));
         return;
     }
     if (s == "Сплошная")
@@ -469,9 +454,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[5] = 0.02f;
         LineBroken* line = new LineBroken(0.1f, axis, 6, QApplication::applicationDirPath() + "/models/city_roads/solid.png", 6.0f, QString("LineBroken"), 1);
         line->setModel(model);
-        model->getGroup(1).push_back(line);
-        model->setModified(true);
-        scene->updateGL();
+        RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, 1, scene));
         return;
     }
     if (s == "Прерывистая")
@@ -485,9 +468,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[5] = 0.02f;
         LineBroken* line = new LineBroken(0.1f, axis, 6, QApplication::applicationDirPath() + "/models/city_roads/inter.png", 6.0f, QString("LineBroken"), 1);
         line->setModel(model);
-        model->getGroup(1).push_back(line);
-        model->setModified(true);
-        scene->updateGL();
+        RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, 1, scene));
         return;
     }
     if (s == "Двойная сплошая")
@@ -501,9 +482,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[5] = 0.02f;
         LineBroken* line = new LineBroken(0.25f, axis, 6, QApplication::applicationDirPath() + "/models/city_roads/d_solid.png", 6.0f, QString("LineBroken"), 1);
         line->setModel(model);
-        model->getGroup(1).push_back(line);
-        model->setModified(true);
-        scene->updateGL();
+        RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, 1, scene));
         return;
     }
     if (s == "Двойная прерывистая")
@@ -517,9 +496,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[5] = 0.02f;
         LineBroken* line = new LineBroken(0.25f, axis, 6, QApplication::applicationDirPath() + "/models/city_roads/d_inter.png", 6.0f, QString("LineBroken"), 1);
         line->setModel(model);
-        model->getGroup(1).push_back(line);
-        model->setModified(true);
-        scene->updateGL();
+        RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, 1, scene));
         return;
     }
     if (s == "Двойная прерывистая")
@@ -533,9 +510,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[5] = 0.02f;
         LineBroken* line = new LineBroken(0.25f, axis, 6, QApplication::applicationDirPath() + "/models/city_roads/d_inter.png", 6.0f, QString("LineBroken"), 1);
         line->setModel(model);
-        model->getGroup(1).push_back(line);
-        model->setModified(true);
-        scene->updateGL();
+        RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, 1, scene));
         return;
     }
     if (s == "Пешеходный переход")
@@ -545,9 +520,7 @@ void DefaultState::dropEvent(QDropEvent *event)
                                                QString(":/textures/crosswalk.png"), 1.0f, 1.0f,
                                                "Crosswalk", 1);
         crosswalk->setModel(model);
-        model->getGroup(1).push_back(crosswalk);
-        model->setModified(true);
-        scene->updateGL();
+        RoadElement::undoStack->push(new InsertCommand(crosswalk, stateManager, properties, model, 1, scene));
         return;
     }
     if (s == "Трамвайные пути")
@@ -561,9 +534,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[5] = 0.02f;
         LineBroken* tramways = new LineBroken(1.5f, axis, 6, QString(":/textures/tramways.png"), 1.5f, "Tramways", 1);
         tramways->setModel(model);
-        model->getGroup(1).push_back(tramways);
-        model->setModified(true);
-        scene->updateGL();
+        RoadElement::undoStack->push(new InsertCommand(tramways, stateManager, properties, model, 1, scene));
         return;
     }
     if (s == "Железная дорога")
@@ -579,9 +550,7 @@ void DefaultState::dropEvent(QDropEvent *event)
                                        QApplication::applicationDirPath() + "/models/city_roads/railway.jpg",
                                        2.65f, 6.0f);
         railway->setModel(model);
-        model->getGroup(1).push_back(railway);
-        model->setModified(true);
-        scene->updateGL();
+        RoadElement::undoStack->push(new InsertCommand(railway, stateManager, properties, model, 1, scene));
         return;
     }
     /*
@@ -996,21 +965,6 @@ bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
 
                 selectedGroup = j;
                 selectedIndex = i;
-                //QList<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
-                //for(int k = 0; k < selectedIndex; ++k)
-                //    ++it;
-                //if ((*it)->getName() != "RoadBroken")
-                //{
-                //    stateManager->selectedState->setSelectedElement(i, j);
-                //    stateManager->selectedState->setSelectedElement(*it);
-                //}
-
-                //(*it)->setSelectedStatus(true);
-                //(*it)->setStepDialog(stateManager->stepDialog);
-                //(*it)->setStepDialogs(stateManager->stepDialogs, 10);
-                //(*it)->getProperties(properties, scene);
-
-                //scene->setCursor(Qt::SizeAllCursor);
                 glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
                 glPopMatrix(); // извлечь матрицу из стека матриц
                 scene->updateGL(); // обновить изображение
@@ -1107,21 +1061,6 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
 
                     selectedGroup = j;
                     selectedIndex = i;
-                    // QList<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
-                    // for(int k = 0; k < selectedIndex; ++k)
-                    //    ++it;
-                    //if ((*it)->getName() != "RoadBroken")
-                    //{
-                    //   stateManager->selectedState->setSelectedElement(i, j);
-                    //    stateManager->selectedState->setSelectedElement(*it);
-                    //}
-
-                    //(*it)->setSelectedStatus(true);
-                    //(*it)->setStepDialog(stateManager->stepDialog);
-                    //(*it)->setStepDialogs(stateManager->stepDialogs, 10);
-                    //(*it)->getProperties(properties, scene);
-
-                    //scene->setCursor(Qt::SizeAllCursor);
                     glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
                     glPopMatrix(); // извлечь матрицу из стека матриц
                     scene->updateGL(); // обновить изображение
@@ -1262,4 +1201,37 @@ void DefaultState::setLogging(bool status)
     Logger::getLogger()->infoLog() << "DefaultState::setLogging(bool status)"
                                    << " status = " << status << "\n";
     Logger::getLogger()->infoLog() << "--------------------\n";
+}
+
+
+void DefaultState::copy()
+{
+}
+
+void DefaultState::paste()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "DefaultState::paste()\n";
+//    QClipboard *buffer = QApplication::clipboard();
+//    const RoadElementMimeData* data = qobject_cast<const RoadElementMimeData*>(buffer->mimeData());
+//    QList<RoadElement*> elements = data->getElements();
+//    for (int i = 0; i < elements.size(); ++i)
+//        model->getGroup(elements[i]->getLayer()).push_back(elements[i]->getCopy());
+//    scene->updateGL();
+
+    RoadElement::undoStack->push(new PasteCommand(stateManager,properties,scene,model));
+}
+
+
+void DefaultState::cut()
+{
+}
+
+void DefaultState::del()
+{
+}
+
+
+void DefaultState::clear()
+{
 }

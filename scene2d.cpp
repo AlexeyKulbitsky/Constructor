@@ -279,157 +279,6 @@ void Scene2D::defaultScene()
 }
 
 
-/*
-bool Scene2D::tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement *element, int &index)
-{
-
-    Logger::getLogger()->writeLog("Scene2D::tryToSelectControlsInSelectedFigure");
-    GLint viewport[4]; // декларируем матрицу поля просмотра
-    glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
-    GLuint selectBuffer[16]; // буфер выбора (буфер совпадений)
-    GLint hitsForControl = 0;
-
-    glSelectBuffer(16, selectBuffer); // использовать указанный буфер выбора
-    glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
-    glPushMatrix(); // поместить текущую матрицу в стек матриц
-    glRenderMode(GL_SELECT); // переход в режим выбора
-    glLoadIdentity(); // загрузить единичную матрицу
-
-    // новый объём под указателем мыши
-    gluPickMatrix((GLdouble)mp.x(), (GLdouble)(viewport[3]-mp.y()), 10.0, 10.0, viewport);
-    // мировое окно
-    if (width() >= height())
-        glOrtho(-1.0/ratio, 1.0/ratio, -1.0, 1.0, -10.0, 1.0);
-    else
-        glOrtho(-1.0, 1.0, -1.0*ratio, 1.0*ratio, -10.0, 1.0);
-
-
-    glMatrixMode(GL_MODELVIEW); // модельно-видовая матрица стала активной
-    glLoadIdentity();           // загружается единичная матрица моделирования
-
-    glInitNames(); // инициализируется и очищается стек имён
-    glPushName(0); // в стек имён помещается значение 0 (обязательно должен храниться хотя бы один элемент)
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-
-    for (int i = 1; i < element->getNumberOfControls() + 1; ++i)
-    {
-        glPushMatrix();
-        glScalef(nSca, nSca, nSca);
-        gluLookAt(xDelta,yDelta,0.5,
-                  xDelta,yDelta,-10,
-                  0,1,0);
-        glLoadName(i); // загрузить имя на вершину стека имён
-        element->drawControlElement(i - 1, 15.0f, 30.0f);
-        glPopMatrix();
-    }
-
-
-    hitsForControl = glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
-
-    if (hitsForControl > 0) // есть совпадания и нет ошибок
-    {
-        index = selectBuffer[3] - 1;
-        glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
-        glPopMatrix(); // извлечь матрицу из стека матриц
-        updateGL(); // обновить изображение
-        return true;
-    }
-
-    glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
-    glPopMatrix(); // извлечь матрицу из стека матриц
-    updateGL(); // обновить изображение
-    return false;
-}
-*/
-
-
-/*
-bool Scene2D::tryToSelectFigures(QPoint mp, RoadElement *&element)
-{
-    Logger::getLogger()->writeLog("Scene2D::tryToSelectFigures");
-    GLint viewport[4]; // декларируем матрицу поля просмотра
-    glGetIntegerv(GL_VIEWPORT, viewport); // извлечь матрицу поля просмотра в viewport
-    GLuint selectBuffer[40]; // буфер выбора (буфер совпадений)
-    GLint hitsForFigure = 0;
-
-    glSelectBuffer(40, selectBuffer); // использовать указанный буфер выбора
-    glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
-    glPushMatrix(); // поместить текущую матрицу в стек матриц
-    glRenderMode(GL_SELECT); // переход в режим выбора
-    glLoadIdentity(); // загрузить единичную матрицу
-
-    // новый объём под указателем мыши
-    gluPickMatrix((GLdouble)mp.x(), (GLdouble)(viewport[3]-mp.y()), 1.0, 1.0, viewport);
-    // мировое окно
-    if (width() >= height())
-        glOrtho(-1.0/ratio, 1.0/ratio, -1.0, 1.0, -10.0, 1.0);
-    else
-        glOrtho(-1.0, 1.0, -1.0*ratio, 1.0*ratio, -10.0, 1.0);
-
-
-    glMatrixMode(GL_MODELVIEW); // модельно-видовая матрица стала активной
-    glLoadIdentity();           // загружается единичная матрица моделирования
-
-    glInitNames(); // инициализируется и очищается стек имён
-    glPushName(0); // в стек имён помещается значение 0 (обязательно должен храниться хотя бы один элемент)
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    int i = 1;
-    for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
-    {
-        for (std::list<RoadElement*>::iterator it = model->getGroup(j).begin();
-             it != model->getGroup(j).end(); ++it)
-        {
-            glPushMatrix();
-            glScalef(nSca, nSca, nSca);
-            gluLookAt(xDelta,yDelta,0.5,
-                      xDelta,yDelta,-10,
-                      0,1,0);
-            glLoadName(i++); // загрузить имя на вершину стека имён
-            (*it)->drawFigure();
-            glPopMatrix();
-
-        }
-    }
-
-    hitsForFigure=glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
-
-    if (hitsForFigure > 0) // есть совпадания и нет ошибок
-    {
-        i = selectBuffer[3] - 1; // имя фигуры верхняя фигура
-        for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
-        {
-            if (i < model->getGroup(j).size())
-            {
-                std::list<RoadElement*>::iterator it = model->getGroup(j).begin();
-                for(int k = 0; k < i; ++k)
-                    ++it;
-                element = *it;
-                glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
-                glPopMatrix(); // извлечь матрицу из стека матриц
-                updateGL(); // обновить изображение
-                return true;
-            }
-            else
-            {
-                i -= model->getGroup(j).size();
-            }
-        }
-    }
-
-    glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
-    glPopMatrix(); // извлечь матрицу из стека матриц
-    updateGL(); // обновить изображение
-    */
-/*
-    return false;
-}
-*/
 
 void Scene2D::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)
 {
@@ -726,12 +575,12 @@ void Scene2D::drawModel()
     }
     }
     ////////////////////////////
-    /*
+
     for (int i =  0; i < model->getNumberOfGroups(); ++i)
     {
         if (model->isGroupVisible(i) == true)
         {
-        for(std::list<RoadElement*>::iterator it = model->getGroup(i).begin();
+        for(QList<RoadElement*>::iterator it = model->getGroup(i).begin();
             it != model->getGroup(i).end(); ++it)
         {
             if ((*it)->isSelected() == true)
@@ -748,7 +597,7 @@ void Scene2D::drawModel()
         int count = model->getNumberOfGroups();
         if (model->isGroupVisible(count - 1) == true)
         {
-        for(std::list<RoadElement*>::iterator it = model->getGroup(count - 1).begin();
+        for(QList<RoadElement*>::iterator it = model->getGroup(count - 1).begin();
             it != model->getGroup(count - 1).end(); ++it)
         {
             if ((*it)->getName() == "Ruler")
@@ -756,13 +605,13 @@ void Scene2D::drawModel()
         }
         }
 
-    }
+
     //shrift = QFont("Times", 15, QFont::Black);
     // renderText (ptrMousePosition.x(), ptrMousePosition.y(), "HELLO", shrift);
 
     //glDisable(GL_LIGHT1);
     //glDisable(GL_LIGHTING);
-    */
+
     if (drawRectStatus == true)
         drawRect(rectPoint1, rectPoint2);
 
@@ -772,6 +621,66 @@ void Scene2D::drawModel()
 bool Scene2D::getLogging()
 {
     return log;
+}
+
+void Scene2D::copy()
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::copy()\n";
+    if (stateManager)
+        stateManager->copy();
+    else
+    {
+        QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::copy() stopped", QMessageBox::Yes | QMessageBox::Default);
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene2D::stateManager = NULL, Scene2D::copy() stopped\n";
+        QApplication::exit(0);
+    }
+}
+
+void Scene2D::paste()
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::paste()\n";
+    if (stateManager)
+        stateManager->paste();
+    else
+    {
+        QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::paste() stopped", QMessageBox::Yes | QMessageBox::Default);
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene2D::stateManager = NULL, Scene2D::paste() stopped\n";
+        QApplication::exit(0);
+    }
+}
+
+void Scene2D::cut()
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::cut()\n";
+    if (stateManager)
+        stateManager->cut();
+    else
+    {
+        QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::cut() stopped", QMessageBox::Yes | QMessageBox::Default);
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene2D::stateManager = NULL, Scene2D::cut() stopped\n";
+        QApplication::exit(0);
+    }
+}
+
+void Scene2D::del()
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene2D::del()\n";
+    if (stateManager)
+        stateManager->del();
+    else
+    {
+        QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::del() stopped", QMessageBox::Yes | QMessageBox::Default);
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene2D::stateManager = NULL, Scene2D::del() stopped\n";
+        QApplication::exit(0);
+    }
 }
 
 void Scene2D::activateRuler()

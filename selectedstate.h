@@ -23,7 +23,7 @@ private:
     QFormLayout* properties;
     QList<RoadElement*>::iterator it;
     RoadElement* selectedElement;
-
+    ResizeByControlCommand* resizeByControlCommand;
     QMenu* contextMenu;
 
     QAction* fixAction;
@@ -84,7 +84,15 @@ public:
 public slots:
     void combineElements();
     void breakElements();
-    void clear();
+    virtual void clear();
+
+
+    // State interface
+public:
+    virtual void copy();
+    virtual void paste();
+    virtual void cut();
+    virtual void del();
 };
 
 #endif // SELECTEDSTATE_H

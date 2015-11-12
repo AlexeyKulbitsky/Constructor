@@ -12,6 +12,8 @@ class Intersection: public RoadElement
 public:
     Intersection();
     Intersection(float x, float y);
+    Intersection(const Intersection& source);
+    Intersection(QVector<RoadSimple*>& roads, QVector<Curve*>& curves);
     virtual ~Intersection();
     // RoadElement interface
 public:
@@ -51,6 +53,7 @@ public slots:
     virtual void getProperties(QFormLayout *layout, QGLWidget *render);
 
     bool calculateRoadIntersections();
+    void calculateRoadIntersections(int roadIndex, int controlIndex);
     void calculateRoundings();
 
     void setVertexArray();
@@ -79,6 +82,7 @@ private:
     GLuint textureID[2];
     float texture1USize, texture1VSize;
     float texture2USize, texture2VSize;
+    QString texture1, texture2;
     QVector<GLfloat> vertexArray;
     QVector<GLfloat> textureArray;
     QVector<GLubyte> indexArray;
@@ -105,6 +109,18 @@ public:
     // RoadElement interface
 public:
     virtual std::vector<vec3> getCoordOfControl(int index);
+
+    // RoadElement interface
+public:
+    virtual RoadElement *getCopy();
+
+    // RoadElement interface
+public:
+    virtual void setCoordForControl(int index, std::vector<vec3> &controls);
+
+    // RoadElement interface
+public:
+    virtual QJsonObject getJSONInfo();
 };
 
 #endif // INTERSECTION_H

@@ -31,6 +31,8 @@ private:
     bool leftButtonIsPressed;
     bool controlIsSelected;
 
+    float oldX, oldY, newX, newY;
+    ResizeByControlCommand* resizeByControlCommand;
     int key;
     GLint controlIndex;
     int layer;
@@ -60,11 +62,21 @@ public:
 public:
     virtual QString getName();
     void clearProperties(QFormLayout* layout);
-    void clear();
+    virtual void clear();
     void setRoad(RoadBroken *roadBroken);
     // State interface
 public:
     virtual void contextMenuEvent(QContextMenuEvent *pe);
+
+    // State interface
+public:
+    virtual void copy();
+    virtual void paste();
+
+    // State interface
+public:
+    virtual void cut();
+    virtual void del();
 };
 
 #endif // ROADBUILDERSTATE_H

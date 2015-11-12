@@ -131,6 +131,35 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QStr
     this->description = description;
 }
 
+LineSimple::LineSimple(const LineSimple &source)
+{
+    layer = source.layer;
+    name = source.name;
+    textureSize = source.textureSize;
+    textureSource = source.textureSource;
+    useColor = source.useColor;
+    size = source.size;
+    width = source.width;
+
+    x1 = source.x1;
+    y1 = source.y1;
+    x2 = source.x2;
+    y2 = source.y2;
+
+    textureID[0] = source.textureID[0];
+
+    setVertexArray(x1, y1, x2, y2, width);
+    setTextureArray();
+    setIndexArray();
+
+    setIndexArrayForSelectionFrame();
+    setColorArrayForSelectionFrame(0.0f, 0.0f, 0.0f);
+
+    selected = source.selected;
+    fixed = source.fixed;
+    description = source.description;
+}
+
 
 // Индексы вершины для отрисовки
 void LineSimple::setVertexArray(float x1, float y1, float x2, float y2, float width)
@@ -586,30 +615,17 @@ QJsonObject LineSimple::getJSONInfo()
     element["Name"] = name;
     element["Layer"] = layer;
     element["UseColor"] = useColor;
-    if (useColor)
-    {
-        QJsonArray temp;
-        temp.append(QJsonValue(red));
-        temp.append(QJsonValue(green));
-        temp.append(QJsonValue(blue));
-        temp.append(QJsonValue(alpha));
-
-        element["Color"] = temp;
-    }
-    else
-    {
-        element["TextureSource"] = textureSource;
-        element["TextureSize"] = textureSize;
-    }
-
+    element["TextureSource"] = textureSource;
+    element["TextureSize"] = textureSize;
     element["Width"] = width;
+    element["Fixed"] = fixed;
+    element["Id"] = Id;
 
     QJsonArray temp;
     temp.append(QJsonValue(x1));
     temp.append(QJsonValue(y1));
     temp.append(QJsonValue(x2));
     temp.append(QJsonValue(y2));
-
     element["Vertices"] = temp;
 
     return element;
@@ -651,6 +667,12 @@ void LineSimple::getProperties(QFormLayout *layout, QGLWidget* render)
         connect(widthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
         connect(lengthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
     }
+
+    QCheckBox *showMeasurementsCheckBox = new QCheckBox();
+    showMeasurementsCheckBox->setChecked(showMeasurements);
+    connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setShowMeasurements(bool)));
+    connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
+    layout->addRow("Размеры", showMeasurementsCheckBox);
 
     layout->addRow("Длина", lengthSpinBox);
     layout->addRow("Ширина", widthSpinBox);
@@ -712,6 +734,8 @@ bool LineSimple::isFixed()
 
 void LineSimple::drawMeasurements(QGLWidget *render)
 {
+    if (!showMeasurements)
+        return;
     if (log)
         Logger::getLogger()->infoLog() << "LineSimple::drawMeasurements(QGLWidget *render)\n";
 }
@@ -807,4 +831,55 @@ void LineSimple::rotate(float angle, float x, float y, float z)
     y2 += y;
 
     setVertexArray(x1, y1, x2, y2, width);
+}
+
+
+RoadElement *LineSimple::getCopy()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::getCopy()\n";
+    LineSimple* copyElement = new LineSimple(*this);
+    return copyElement;
+}
+
+
+void LineSimple::setCoordForControl(int index, std::vector<vec3> &controls)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::setCoordForControl(int index, std::vector<vec3> &controls)"
+                                       << " index = " << index << "\n";
+    switch (index)
+    {
+    case 0:
+    {
+        float x, y;
+        x = x1;
+        y = y1;
+        resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+    }
+        break;
+    case 1:
+    {
+        float x, y;
+        x = x2;
+        y = y2;
+        resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+    }
+        break;
+    default:
+        break;
+    }
+}
+
+
+void LineSimple::clearProperties(QLayout *layout)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "LineSimple::clearProperties(QLayout *layout)\n";
+    while(layout->count() > 0)
+    {
+        QLayoutItem *item = layout->takeAt(0);
+        delete item->widget();
+        delete item;
+    }
 }

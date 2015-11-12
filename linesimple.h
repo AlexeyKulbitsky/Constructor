@@ -51,6 +51,7 @@ public:
     LineSimple(float x1, float y1, float x2, float y2, float width, float red, float green, float blue, float alpha, QString name,int layer);
     LineSimple(float x1, float y1, float x2, float y2, float width, QString source, float textureSize, QString name, int layer);
     LineSimple(float x1, float y1, float x2, float y2, float width, QString source, float textureSize, QString name, int layer, QString description);
+    LineSimple(const LineSimple& source);
 
     bool hasPoint(GLfloat x, GLfloat y);
     void drawFigure(QGLWidget* render = 0);
@@ -108,6 +109,18 @@ public:
 public:
     virtual std::vector<vec3> getCoordOfControl(int index);
     void rotate(float angle, float x, float y, float z);
+
+    // RoadElement interface
+public:
+    virtual RoadElement *getCopy();
+
+    // RoadElement interface
+public:
+    virtual void setCoordForControl(int index, std::vector<vec3> &controls);
+
+    // RoadElement interface
+public:
+    virtual void clearProperties(QLayout *layout);
 };
 
 #endif // LINESIMPLE_H

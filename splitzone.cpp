@@ -79,6 +79,8 @@ SplitZone::SplitZone(float *pointsArray, int size,
         this->height = height;
         textureID[0] = TextureManager::getInstance()->getID(texture_1);
         textureID[1] = TextureManager::getInstance()->getID(texture_2);
+        texture1 = texture_1;
+        texture2 = texture_2;
         this->texture1USize = texture1USize;
         this->texture1VSize = texture1VSize;
         this->texture2USize = texture2USize;
@@ -105,6 +107,8 @@ SplitZone::SplitZone(float *pointsArray, int size,
         this->height = height;
         textureID[0] = TextureManager::getInstance()->getID(texture_1);
         textureID[1] = TextureManager::getInstance()->getID(texture_2);
+        texture1 = texture_1;
+        texture2 = texture_2;
         this->texture1USize = texture1USize;
         this->texture1VSize = texture1VSize;
         this->texture2USize = texture2USize;
@@ -204,6 +208,8 @@ SplitZone::SplitZone(float x1, float y1, float z1,
         this->height = height;
         textureID[0] = TextureManager::getInstance()->getID(texture_1);
         textureID[1] = TextureManager::getInstance()->getID(texture_2);
+        texture1 = texture_1;
+        texture2 = texture_2;
         this->texture1USize = texture1USize;
         this->texture1VSize = texture1VSize;
         this->texture2USize = texture2USize;
@@ -239,6 +245,8 @@ SplitZone::SplitZone(float x1, float y1, float z1,
         this->height = height;
         textureID[0] = TextureManager::getInstance()->getID(texture_1);
         textureID[1] = TextureManager::getInstance()->getID(texture_2);
+        texture1 = texture_1;
+        texture2 = texture_2;
         this->texture1USize = texture1USize;
         this->texture1VSize = texture1VSize;
         this->texture2USize = texture2USize;
@@ -254,6 +262,82 @@ SplitZone::SplitZone(float x1, float y1, float z1,
     default:
         break;
     }
+}
+
+SplitZone::SplitZone(const SplitZone &source)
+{
+    if (source.line)
+        line = qobject_cast<LineBroken*>(source.line->getCopy());
+    selected = source.selected;
+    fixed = source.fixed;
+    layer = source.layer;
+
+    beginRounding = source.beginRounding;
+    endRounding = source.endRounding;
+    pBegin = source.pBegin;
+    pEnd = source.pEnd;
+    pPerpBegin = source.pPerpBegin;
+    pPerpEnd = source.pPerpEnd;
+    width = source.width;
+    numberOfSides = source.numberOfSides;
+    texture1 = source.texture1;
+    texture2 = source.texture2;
+    size = source.size;
+    lineAxisArray = new GLfloat[size];
+    for (int i = 0; i < size; ++i)
+        lineAxisArray[i] = source.lineAxisArray[i];
+
+    axisArray.resize(source.axisArray.size());
+    for (int i = 0; i < source.axisArray.size(); ++i)
+        axisArray[i] = source.axisArray[i];
+
+    lineWidth = source.lineWidth;
+    p1 = source.p1;
+    p2 = source.p2;
+    p3 = source.p3;
+    p4 = source.p1;
+    line1_p1 = source.line1_p1;
+    line1_p2 = source.line1_p1;
+    line2_p1 = source.line1_p1;
+    line2_p2 = source.line1_p1;
+    description = source.description;
+    xCenter = source.xCenter;
+    yCenter = source.yCenter;
+    type = source.type;
+    height = source.height;
+    indexOfSelectedControl = source.indexOfSelectedControl;
+
+    boardVertexArray.resize(source.boardVertexArray.size());
+    for (int i = 0; i < source.boardVertexArray.size(); ++i)
+        boardVertexArray[i] = source.boardVertexArray[i];
+
+    boardTextureArray.resize(source.boardTextureArray.size());
+    for (int i = 0; i < source.boardTextureArray.size(); ++i)
+        boardTextureArray[i] = source.boardTextureArray[i];
+
+    boardIndexArray.resize(source.boardIndexArray.size());
+    for (int i = 0; i < source.boardIndexArray.size(); ++i)
+        boardIndexArray[i] = source.boardIndexArray[i];
+
+    vertexArray.resize(source.vertexArray.size());
+    for (int i = 0; i < source.vertexArray.size(); ++i)
+        vertexArray[i] = source.vertexArray[i];
+
+    textureArray.resize(source.textureArray.size());
+    for (int i = 0; i < source.textureArray.size(); ++i)
+        textureArray[i] = source.textureArray[i];
+
+    indexArray.resize(source.indexArray.size());
+    for (int i = 0; i < source.indexArray.size(); ++i)
+        indexArray[i] = source.indexArray[i];
+
+
+    textureID[0] = source.textureID[0];
+    textureID[1] = source.textureID[1];
+    texture1USize = source.texture1USize;
+    texture1VSize = source.texture1VSize;
+    texture2USize = source.texture2USize;
+    texture2VSize = source.texture2VSize;
 }
 
 SplitZone::~SplitZone()
@@ -342,6 +426,8 @@ void SplitZone::drawSelectionFrame()
 
 void SplitZone::drawMeasurements(QGLWidget *render)
 {
+    if (!showMeasurements)
+        return;
     if (log)
         Logger::getLogger()->infoLog() << "SplitZone::drawMeasurements(QGLWidget *render)\n";
     GLdouble x, y, z;
@@ -557,6 +643,13 @@ void SplitZone::getProperties(QFormLayout *layout, QGLWidget *render)
 
     connect(widthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
     layout->addRow("Зафиксировать", fixedCheckBox);
+
+    QCheckBox *showMeasurementsCheckBox = new QCheckBox();
+    showMeasurementsCheckBox->setChecked(showMeasurements);
+    connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setShowMeasurements(bool)));
+    connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
+    layout->addRow("Размеры", showMeasurementsCheckBox);
+
     layout->addRow("Ширина", widthSpinBox);
 
     switch (type)
@@ -2334,6 +2427,87 @@ void SplitZone::addBreak(bool front)
 
 }
 
+void SplitZone::deleteBreak(bool front)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::deleteBreak(bool front)"
+                                       << " front = " << front << "\n";
+    switch (type)
+    {
+    case 0:
+    {
+        if (front)
+        {
+            axisArray.pop_front();
+            axisArray.pop_front();
+            axisArray.pop_front();
+
+        }
+        else
+        {
+            axisArray.pop_back();
+            axisArray.pop_back();
+            axisArray.pop_back();
+        }
+        calculateLine(axisArray, width);
+        line->setVertexArray(lineWidth, lineAxisArray, size);
+        line->setTextureArray();
+        line->setIndexArray();
+    }
+        break;
+    case 1:
+    {
+        if (front)
+        {
+            axisArray.pop_front();
+            axisArray.pop_front();
+            axisArray.pop_front();
+
+        }
+        else
+        {
+            axisArray.pop_back();
+            axisArray.pop_back();
+            axisArray.pop_back();
+        }
+        calculateLine(axisArray, width);
+        setBoardVertexArray();
+        setBoardTextureArray(texture1USize, texture1VSize);
+        setBoardIndexArray();
+        setVertexArray();
+        setTextureArray(texture2USize, texture2VSize);
+        setIndexArray();
+    }
+        break;
+    case 2:
+    {
+        if (front)
+        {
+            axisArray.pop_front();
+            axisArray.pop_front();
+            axisArray.pop_front();
+
+        }
+        else
+        {
+            axisArray.pop_back();
+            axisArray.pop_back();
+            axisArray.pop_back();
+        }
+        calculateLine(axisArray, width);
+        setBoardVertexArray();
+        setBoardTextureArray(texture1USize, texture1VSize);
+        setBoardIndexArray();
+        setVertexArray();
+        setTextureArray(texture2USize, texture2VSize);
+        setIndexArray();
+    }
+        break;
+    default:
+        break;
+    }
+}
+
 void SplitZone::setLogging(bool status)
 {
     log = status;
@@ -2341,4 +2515,123 @@ void SplitZone::setLogging(bool status)
     Logger::getLogger()->infoLog() << "SplitZone::setLogging(bool status)"
                                    << " status = " << status << "\n";
     Logger::getLogger()->infoLog() << "--------------------\n";
+}
+
+
+RoadElement *SplitZone::getCopy()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::getCopy()\n";
+    SplitZone* copyElement = new SplitZone(*this);
+    return copyElement;
+}
+
+
+std::vector<vec3> SplitZone::getCoordOfControl(int index)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::getCoordOfControl(int index)"
+                                   << " index = " << index << "\n";
+
+    switch (type)
+    {
+    case 0:
+    case 1:
+    case 2:
+    {
+        std::vector<vec3> res;
+        vec3 p(axisArray[index * 3],
+                axisArray[index * 3 + 1],
+                axisArray[index * 3 + 2]);
+        res.push_back(p);
+        return res;
+    }
+        break;
+    default:
+        break;
+    }
+
+}
+
+void SplitZone::setCoordForControl(int index, std::vector<vec3> &controls)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::setCoordForControl(int index, std::vector<vec3> &controls)"
+                                   << " index = " << index << "\n";
+    switch (type)
+    {
+    case 0:
+    case 1:
+    case 2:
+    {
+        float x, y;
+        x = axisArray[index * 3];
+        y = axisArray[index * 3 + 1];
+        resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+    }
+        break;
+    default:
+        break;
+    }
+}
+
+
+void SplitZone::clearProperties(QLayout *layout)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "SplitZone::clearProperties(QLayout *layout)\n";
+    while(layout->count() > 0)
+    {
+        QLayoutItem *item = layout->takeAt(0);
+        delete item->widget();
+        delete item;
+    }
+}
+
+
+QJsonObject SplitZone::getJSONInfo()
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::getJSONInfo()\n";
+    QJsonObject element;
+
+    element["Name"] = name;
+    element["Layer"] = layer;
+    element["Width"] = width;
+    element["Fixed"] = fixed;
+    element["Type"] = type;
+    element["BeginRounding"] = beginRounding;
+    element["EndRounding"] = endRounding;
+    element["Description"] = description;
+    element["Id"] = Id;
+
+    QJsonArray temp;
+
+    for (int i = 0; i < axisArray.size(); ++i)
+    {
+        temp.append(QJsonValue(axisArray[i]));
+    }
+    element["AxisArray"] = temp;
+
+    switch (type)
+    {
+    case 0:
+        break;
+    case 1:
+    case 2:
+    {
+        element["Height"] = height;
+        element["Texture1Source"] = texture1;
+        element["Texture1USize"] = texture1USize;
+        element["Texture1VSize"] = texture1VSize;
+        element["Texture2Source"] = texture2;
+        element["Texture2USize"] = texture2USize;
+        element["Texture2VSize"] = texture2VSize;
+    }
+        break;
+    default:
+        break;
+    }
+
+    return element;
 }

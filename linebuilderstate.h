@@ -29,7 +29,8 @@ private:
 
     LineBroken* lineBroken;
 
-
+    ResizeByControlCommand* resizeByControlCommand;
+    float oldX, oldY, newX, newY;
     QPoint ptrMousePosition;
     bool rightButtonIsPressed;
     bool leftButtonIsPressed;
@@ -69,7 +70,7 @@ public:
     void clearProperties(QFormLayout* layout);
     void setGroupIndex(int index);
     void setElementIndex(int index);
-    void clear();
+    virtual void clear();
 
     static void setLogging(bool status);
     static bool getLogging() { return log; }
@@ -88,6 +89,16 @@ public:
 
 public slots:
     void setLinking(bool state);
+
+    // State interface
+public:
+    virtual void copy();
+    virtual void paste();
+
+    // State interface
+public:
+    virtual void cut();
+    virtual void del();
 };
 
 #endif // LINEBUILDERSTATE_H

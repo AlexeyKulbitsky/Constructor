@@ -29,7 +29,8 @@ Curve::Curve(float xCenter, float yCenter, float zCenter,
 
     //leftLength = sqrt((xLeft - xCenter)*(xLeft - xCenter) + (yLeft - yCenter)*(yLeft - yCenter));
     //rightLength = sqrt((xRight - xCenter)*(xRight - xCenter) + (yRight - yCenter)*(yRight - yCenter));
-
+    texture1 = texture_1;
+    texture2 = texture_2;
     textureID[0] = TextureManager::getInstance()->getID(texture_1);
     //textureID[0] = getTextures(texture_1);
     this->texture1USize = texture_1Usize;
@@ -57,8 +58,93 @@ Curve::Curve(float xCenter, float yCenter, float zCenter,
     fixed = selected = false;
     showBoard = true;
     layer = 0;
-    ////qDebug() << "New Curve";
-    ////qDebug() << "Vertex Size: " << vertexArray.size() / 3;
+    name = "Curve";
+}
+
+Curve::Curve(float *controls, int size, QString texture_1, float texture_1Usize, float texture_1Vsize, QString texture_2, float texture_2Usize, float texture_2Vsize, int numberOfSides, float angleRounding, float boardWidth, bool fixed, bool showBoard, int layer, QString name)
+{
+    this->numberOfSides = numberOfSides;
+    this->name = name;
+
+    if (size == 9)
+    {
+        for (int i = 0; i < size; ++i)
+            controlPoints[i] = controls[i];
+    }
+
+    texture1 = texture_1;
+    texture2 = texture_2;
+    textureID[0] = TextureManager::getInstance()->getID(texture_1);
+    this->texture1USize = texture_1Usize;
+    this->texture1VSize = texture_1Vsize;
+
+    textureID[1] = TextureManager::getInstance()->getID(texture_2);
+    this->texture2USize = texture_2Usize;
+    this->texture2VSize = texture_2Vsize;
+    this->angleRounding = angleRounding;
+    this->boardWidth = boardWidth;
+    setVertexArray();
+    setTextureArray();
+    setIndexArray();
+
+    setVertexArrayBoard();
+    setTextureArrayBoard(texture2USize, texture2VSize);
+    setIndexArrayBoard();
+
+    calculateAngle();
+    setAngleVertexArray();
+    setAngleColorArray(1.0f, 0.0f, 0.0f);
+    setAngleIndexArray();
+    this->fixed = fixed;
+    selected = false;
+    this->showBoard = showBoard;
+    this->layer = layer;
+}
+
+Curve::Curve(const Curve &source)
+{
+    this->numberOfSides = source.numberOfSides;
+    controlPoints[0] = source.controlPoints[0];
+    controlPoints[1] = source.controlPoints[1];
+    controlPoints[2] = source.controlPoints[2];
+
+    controlPoints[3] = source.controlPoints[3];
+    controlPoints[4] = source.controlPoints[4];
+    controlPoints[5] = source.controlPoints[5];
+
+    controlPoints[6] = source.controlPoints[6];
+    controlPoints[7] = source.controlPoints[7];
+    controlPoints[8] = source.controlPoints[8];
+
+    texture1 = source.texture1;
+    texture2 = source.texture2;
+
+    textureID[0] = source.textureID[0];
+    this->texture1USize = source.texture1USize;
+    this->texture1VSize = source.texture1VSize;
+
+    textureID[1] = source.textureID[1];
+    this->texture2USize = source.texture2USize;
+    this->texture2VSize = source.texture2VSize;
+    angleRounding = source.angleRounding;
+    this->boardWidth = source.boardWidth;
+    setVertexArray();
+    setTextureArray();
+    setIndexArray();
+
+    setVertexArrayBoard();
+    setTextureArrayBoard(texture2USize, texture2VSize);
+    setIndexArrayBoard();
+
+    calculateAngle();
+    setAngleVertexArray();
+    setAngleColorArray(1.0f, 0.0f, 0.0f);
+    setAngleIndexArray();
+    name = source.name;
+    fixed = source.fixed;
+    selected = source.selected;
+    showBoard = source.showBoard;
+    layer = source.layer;
 }
 
 Curve::~Curve()
@@ -97,16 +183,7 @@ void Curve::drawFigure(QGLWidget *render)
             drawControlElement(indexOfSelectedControl, 5.0f, 10.0);
         }
         for (int i = 0; i < 4; ++i)
-            drawControlElement(i, 5.0f, 10.f);
-
-        glEnable(GL_LINE_STIPPLE);
-        glLineStipple(1, 0x0FFF);
-        glLineWidth(1.5f);
-        glVertexPointer(3, GL_FLOAT, 0, angleVertexArray.begin());
-        glColorPointer(3, GL_FLOAT, 0, angleColorArray.begin());
-        glDrawElements(GL_LINE_STRIP,angleIndexArray.size(),GL_UNSIGNED_BYTE, angleIndexArray.begin());
-
-        glDisable(GL_LINE_STIPPLE);
+            drawControlElement(i, 5.0f, 10.f);       
     }
     ////qDebug() << "Vertices: " << vertexArray.size() / 3;
     ////qDebug() << "Textures: " << textureArray.size() / 2;
@@ -165,8 +242,19 @@ void Curve::drawSelectionFrame()
 
 void Curve::drawMeasurements(QGLWidget *render)
 {
+    if (!showMeasurements)
+        return;
     if (log)
         Logger::getLogger()->infoLog() << "Curve::drawMeasurements(QGLWidget *render)\n";
+
+    glEnable(GL_LINE_STIPPLE);
+    glLineStipple(1, 0x0FFF);
+    glLineWidth(1.5f);
+    glVertexPointer(3, GL_FLOAT, 0, angleVertexArray.begin());
+    glColorPointer(3, GL_FLOAT, 0, angleColorArray.begin());
+    glDrawElements(GL_LINE_STRIP,angleIndexArray.size(),GL_UNSIGNED_BYTE, angleIndexArray.begin());
+    glDisable(GL_LINE_STIPPLE);
+
     GLdouble x, y, z;
     GLdouble wx, wy, wz;
     QFont shrift = QFont("Times", 8, QFont::Black);
@@ -509,6 +597,10 @@ void Curve::getProperties(QFormLayout *layout, QGLWidget *render)
     connect(this, SIGNAL(angleChanged(double)), angleDoubleSpinBox, SLOT(setValue(double)));
     connect(angleDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setAngle(double)));
 
+    QCheckBox *showMeasurementsCheckBox = new QCheckBox();
+    showMeasurementsCheckBox->setChecked(showMeasurements);
+    connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setShowMeasurements(bool)));
+
     if (render)
     {
         connect(leftLengthDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
@@ -516,7 +608,7 @@ void Curve::getProperties(QFormLayout *layout, QGLWidget *render)
         connect(showBoardCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
         connect(boardWidthDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
         connect(angleDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
-
+        connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
     }
     layout->addRow("Зафиксировать", fixedCheckBox);
     layout->addRow("Левая сторона", leftLengthDoubleSpinBox);
@@ -524,7 +616,7 @@ void Curve::getProperties(QFormLayout *layout, QGLWidget *render)
     layout->addRow("Угол", angleDoubleSpinBox);
     layout->addRow("Тротуар", showBoardCheckBox);
     layout->addRow("Ширина", boardWidthDoubleSpinBox);
-
+    layout->addRow("Размеры", showMeasurementsCheckBox);
 }
 
 bool Curve::isFixed()
@@ -1650,27 +1742,17 @@ std::vector<vec3> Curve::getCoordOfControl(int index)
         break;
     case 3:
     {
-        /*
-        if (showBoard)
-        {
-        glLineWidth(lineWidth);
-        glBegin(GL_LINES);
         for (int i = 0; i < vertexArrayBoard.size() / 3 - 5; i += 10)
         {
-
-            glColor3f(0.0f, 1.0f, 0.0f);
-            glVertex3f(vertexArrayBoard[(i + 4) * 3],
+            vec3 p(vertexArrayBoard[(i + 4) * 3],
                     vertexArrayBoard[(i + 4) * 3 + 1],
                     vertexArrayBoard[(i + 4) * 3 + 2]);
-            glColor3f(0.0f, 1.0f, 0.0f);
-            glVertex3f(vertexArrayBoard[(i + 9) * 3],
+            vec3 s(vertexArrayBoard[(i + 9) * 3],
                     vertexArrayBoard[(i + 9) * 3 + 1],
                     vertexArrayBoard[(i + 9) * 3 + 2]);
-
+            res.push_back(p);
+            res.push_back(s);
         }
-        glEnd();
-        }
-        */
     }
         break;
     case 4:
@@ -1696,3 +1778,120 @@ std::vector<vec3> Curve::getCoordOfControl(int index)
 }
 
 
+
+
+RoadElement *Curve::getCopy()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::getCopy()\n";
+    Curve* copyElement = new Curve(*this);
+    return copyElement;
+}
+
+
+void Curve::setCoordForControl(int index, std::vector<vec3> &controls)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setCoordForControl(int index, std::vector<vec3> &controls)"
+                                       << " index = " << index << "\n";
+    switch (index)
+    {
+    case 0:
+    {
+        float x, y;
+        x = controlPoints[0];
+        y = controlPoints[1];
+        resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+    }
+        break;
+    case 1:
+    {
+        float x, y;
+        x = controlPoints[3];
+        y = controlPoints[4];
+        resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+    }
+        break;
+    case 2:
+    {
+        float x, y;
+        x = controlPoints[6];
+        y = controlPoints[7];
+        resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+    }
+        break;
+    case 3:
+    {
+        int i = 0;
+        float x, y;
+        x = vertexArrayBoard[(i + 4) * 3];
+        y = vertexArrayBoard[(i + 4) * 3 + 1];
+        resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+    }
+        break;
+    case 4:
+    {
+        float x, y;
+        x = controlPoints[0];
+        y = controlPoints[1];
+        resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+    }
+        break;
+    case 5:
+    {
+        float x, y;
+        x = controlPoints[0];
+        y = controlPoints[1];
+        resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+    }
+        break;
+    default:
+        break;
+    }
+}
+
+
+void Curve::clearProperties(QLayout *layout)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::clearProperties(QLayout *layout)\n";
+    while(layout->count() > 0)
+    {
+        QLayoutItem *item = layout->takeAt(0);
+        delete item->widget();
+        delete item;
+    }
+}
+
+
+QJsonObject Curve::getJSONInfo()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::getJSONInfo()\n";
+    QJsonObject element;
+    element["Name"] = name;
+    element["Layer"] = layer;
+    element["Texture1Source"] = texture1;
+    element["Texture1USize"] = texture1USize;
+    element["Texture1VSize"] = texture1VSize;
+    element["Texture2Source"] = texture2;
+    element["Texture2USize"] = texture2USize;
+    element["Texture2VSize"] = texture2VSize;
+
+    element["BoardWidth"] = boardWidth;
+    element["AngleRounding"] = angleRounding;
+    element["NumberOfSides"] = numberOfSides;
+
+    element["Id"] = Id;
+
+    QJsonArray tempControlPoints;
+    for (int i = 0; i < 9; ++i)
+        tempControlPoints.append(QJsonValue(controlPoints[i]));
+    element["ControlPoints"] = tempControlPoints;
+
+    element["Fixed"] = fixed;
+    element["ShowBoard"] = showBoard;
+
+    return element;
+
+}

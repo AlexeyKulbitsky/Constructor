@@ -16,6 +16,7 @@ RailWay::RailWay(float *axisArray, int size,
     selected = fixed = false;
     layer = 1;
     textureID[0] = TextureManager::getInstance()->getID(textureSource);
+    texture = textureSource;
     this->textureUsize = textureUsize;
     this->textureVsize = textureVsize;
     axisVertexArray.resize(size);
@@ -33,12 +34,31 @@ RailWay::RailWay(QVector<float> &axisArray,
     name = "RailWay";
     selected = fixed = false;
     layer = 1;
+    texture = textureSource;
     textureID[0] = TextureManager::getInstance()->getID(textureSource);
     this->textureUsize = textureUsize;
     this->textureVsize = textureVsize;
     axisVertexArray.resize(axisArray.size());
     for (int i = 0; i < axisArray.size(); ++i)
         axisVertexArray[i] = axisArray[i];
+    setVertexArray();
+    setTextureArray(textureUsize, textureVsize);
+    setIndexArray();
+}
+
+RailWay::RailWay(const RailWay &source)
+{
+    name = source.name;
+    selected = source.selected;
+    fixed = source.fixed;
+    layer = source.layer;
+    texture = source.texture;
+    textureID[0] = source.textureID[0];
+    textureUsize = source.textureUsize;
+    textureVsize = source.textureVsize;
+    axisVertexArray.resize(source.axisVertexArray.size());
+    for (int i = 0; i < source.axisVertexArray.size(); ++i)
+        axisVertexArray[i] = source.axisVertexArray[i];
     setVertexArray();
     setTextureArray(textureUsize, textureVsize);
     setIndexArray();
@@ -99,6 +119,8 @@ void RailWay::drawSelectionFrame()
 
 void RailWay::drawMeasurements(QGLWidget *render)
 {
+    if (!showMeasurements)
+        return;
     if (log)
         Logger::getLogger()->infoLog() << "RailWay::drawMeasurements(QGLWidget *render)\n";
 }
@@ -258,6 +280,29 @@ void RailWay::addBreak(bool front)
         axisVertexArray.push_back(x);
         axisVertexArray.push_back(y);
         axisVertexArray.push_back(z);
+    }
+    setVertexArray();
+    setTextureArray(textureUsize, textureVsize);
+    setIndexArray();
+}
+
+void RailWay::deleteBreak(bool front)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::deleteBreak(bool front)"
+                                       << " front = " << front << "\n";
+    float x, y, z;
+    if (front)
+    {
+        axisVertexArray.pop_front();
+        axisVertexArray.pop_front();
+        axisVertexArray.pop_front();
+    }
+    else
+    {
+        axisVertexArray.pop_back();
+        axisVertexArray.pop_back();
+        axisVertexArray.pop_back();
     }
     setVertexArray();
     setTextureArray(textureUsize, textureVsize);
@@ -946,3 +991,74 @@ bool RailWay::setFixed(bool fixed)
     return true;
 }
 
+
+
+RoadElement *RailWay::getCopy()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::getCopy()\n";
+    RailWay* copyElement = new RailWay(*this);
+    return copyElement;
+}
+
+
+std::vector<vec3> RailWay::getCoordOfControl(int index)
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "RailWay::getCoordOfControl(int index)"
+                                   << " index = " << index << "\n";
+    std::vector<vec3> res;
+    vec3 p(axisVertexArray[index * 3],
+            axisVertexArray[index * 3 + 1],
+            axisVertexArray[index * 3 + 2]);
+    res.push_back(p);
+    return res;
+}
+
+void RailWay::setCoordForControl(int index, std::vector<vec3> &controls)
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "RailWay::setCoordForControl(int index, std::vector<vec3> &controls)"
+                                   << " index = " << index << "\n";
+    float x, y;
+    x = axisVertexArray[index * 3];
+    y = axisVertexArray[index * 3 + 1];
+    resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+}
+
+
+void RailWay::clearProperties(QLayout *layout)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::clearProperties(QLayout *layout)\n";
+    while(layout->count() > 0)
+    {
+        QLayoutItem *item = layout->takeAt(0);
+        delete item->widget();
+        delete item;
+    }
+}
+
+
+QJsonObject RailWay::getJSONInfo()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "RailWay::getJSONInfo()\n";
+    QJsonObject element;
+    element["Name"] = name;
+    element["Fixed"] = fixed;
+    element["TextureSource"] = texture;
+    element["TextureUSize"] = textureUsize;
+    element["TextureVSize"] = textureVsize;
+    element["Id"] = Id;
+
+    QJsonArray temp;
+
+    for (int i = 0; i < axisVertexArray.size(); ++i)
+    {
+        temp.append(QJsonValue(axisVertexArray[i]));
+    }
+    element["AxisVertexArray"] = temp;
+
+    return element;
+}

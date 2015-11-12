@@ -60,6 +60,20 @@ public:
     void getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz);
     void clearProperties(QFormLayout* layout);
 
+
+    // State interface
+public:
+    virtual void copy();
+    virtual void paste();
+
+    // State interface
+public:
+    virtual void cut();
+    virtual void del();
+
+    // State interface
+public:
+    virtual void clear();
 };
 
 #endif // DEFAULTSTATE_H

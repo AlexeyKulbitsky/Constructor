@@ -8,8 +8,8 @@
 #include <QMainWindow>
 #include <QFileDialog>
 #include "model.h"
-//#include "filemanager.h"
-//#include "jsonfilemanager.h"
+#include "filemanager.h"
+#include "jsonfilemanager.h"
 #include <QLineEdit>
 #include <QScrollArea>
 #include <QFormLayout>
@@ -90,7 +90,7 @@ public:
     writeSettings();
 
 private:
-    //JSONFileManager* jsonFileManager;
+    JSONFileManager* jsonFileManager;
     QSettings settings;
 
 private slots:
@@ -101,12 +101,11 @@ private slots:
     void on_tabWidget_currentChanged(int index);
 
 public slots:
-    //void setFileManager(FileManager* manager);
+    void setFileManager(FileManager* manager);
 
 private:
     Ui::MainWindow *ui;
-    //FileManager* fileManager;
-
+    FileManager* fileManager;
     // QWidget interface
 protected:
     virtual void contextMenuEvent(QContextMenuEvent *pe);

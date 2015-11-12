@@ -146,6 +146,58 @@ LineBroken::LineBroken(float width, float *axisVertices, int size, QString sourc
     this->description = description;
 }
 
+LineBroken::LineBroken(const LineBroken &source)
+{
+    layer = source.layer;
+    name = source.name;
+    textureSize = source.textureSize;
+    textureSource = source.textureSource;
+    useColor = source.useColor;
+    width = source.width;
+    hits = source.hits;
+    indexOfSelectedControl = source.indexOfSelectedControl;
+    numberOfVerticesOfAxis = source.numberOfVerticesOfAxis;
+    numberOfAxises = source.numberOfAxises;
+    selected = source.selected;
+    description = source.description;
+    fixed = source.fixed;
+
+
+    textureID[0] = source.textureID[0];
+    numberOfVertices = numberOfVertices;
+    numberOfPolygones = numberOfPolygones;
+    red = source.red;
+    green = source.green;
+    blue = source.blue;
+    alpha = source.alpha;
+
+    vertexArrayForAxis.resize(source.vertexArrayForAxis.size());
+    for (int i = 0 ; i < source.vertexArrayForAxis.size(); ++i)
+    {
+        vertexArrayForAxis[i] = source.vertexArrayForAxis[i];
+    }
+
+    setColorArrayForAxis(0.0f, 0.0f, 0.0f);
+
+    // Заполняем массив индексов для осевых точек
+    setIndexArrayForAxis();
+
+    int size = vertexArrayForAxis.size();
+    float axisVertices[size];
+    for (int i = 0; i < size; ++i)
+        axisVertices[i] = vertexArrayForAxis[i];
+    setVertexArray(width, axisVertices, size);
+    //getTextures(source);
+    textureID[0] = source.textureID[0];
+    setTextureArray();
+    setColorArray(red, green, blue, alpha);
+
+    setIndexArray();
+
+    setIndexArrayForSelectionFrame();
+    setColorArrayForSelectionFrame(0.0f, 0.0f, 0.0f);
+}
+
 LineBroken::~LineBroken()
 {
 
@@ -773,24 +825,11 @@ QJsonObject LineBroken::getJSONInfo()
 
     element["Name"] = name;
     element["Layer"] = layer;
-    element["UseColor"] = useColor;
-    if (useColor)
-    {
-        QJsonArray temp;
-        temp.append(QJsonValue(red));
-        temp.append(QJsonValue(green));
-        temp.append(QJsonValue(blue));
-        temp.append(QJsonValue(alpha));
-
-        element["Color"] = temp;
-    }
-    else
-    {
-        element["TextureSource"] = textureSource;
-        element["TextureSize"] = textureSize;
-    }
+    element["TextureSource"] = textureSource;
+    element["TextureSize"] = textureSize;
     element["Width"] = width;
-
+    element["Fixed"] = fixed;
+    element["Id"] = Id;
 
     QJsonArray temp;
 
@@ -798,11 +837,9 @@ QJsonObject LineBroken::getJSONInfo()
     {
         temp.append(QJsonValue(vertexArrayForAxis[i]));
     }
-    element["Vertices"] = temp;
+    element["VertexArrayForAxis"] = temp;
 
     return element;
-
-
 }
 
 
@@ -864,9 +901,39 @@ void LineBroken::addBreak(bool front)
     setColorArrayForSelectionFrame(0.0f, 0.0f, 0.0f);
 }
 
+void LineBroken::deleteBreak(bool front)
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "LineBroken::deleteBreak(bool front)"
+                                   << " front = " << front << "\n";
+    float x, y, z;
+    if (front)
+    {
+        vertexArrayForAxis.pop_front();
+        vertexArrayForAxis.pop_front();
+        vertexArrayForAxis.pop_front();
+    }
+    else
+    {
+        vertexArrayForAxis.pop_back();
+        vertexArrayForAxis.pop_back();
+        vertexArrayForAxis.pop_back();
+    }
+    setColorArrayForAxis(0.0f, 0.0f, 0.0f);
+    setIndexArrayForAxis();
+    setVertexArray(this->width, vertexArrayForAxis.begin(), vertexArrayForAxis.size());
+    setTextureArray();
+    setColorArray(red, green, blue, alpha);
+    setIndexArray();
+    setIndexArrayForSelectionFrame();
+    setColorArrayForSelectionFrame(0.0f, 0.0f, 0.0f);
+}
+
 
 void LineBroken::drawMeasurements(QGLWidget *render)
 {
+    if (!showMeasurements)
+        return;
     if (log)
     Logger::getLogger()->infoLog() << "LineBroken::drawMeasurements(QGLWidget *render)\n";
 }
@@ -935,4 +1002,38 @@ void LineBroken::rotate(float angle, float x, float y, float z)
     }
     setVertexArray(this->width, vertexArrayForAxis.begin(), vertexArrayForAxis.size());
     setTextureArray();
+}
+
+
+RoadElement *LineBroken::getCopy()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "LineBroken::getCopy()\n";
+    LineBroken* copyElement = new LineBroken(*this);
+    return copyElement;
+}
+
+
+void LineBroken::setCoordForControl(int index, std::vector<vec3> &controls)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "LineBroken::setCoordForControl(int index, std::vector<vec3> &controls)"
+                                   << " index = " << index << "\n";
+    float x, y;
+    x = vertexArrayForAxis[index * 3];
+    y = vertexArrayForAxis[index * 3 + 1];
+    resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+}
+
+
+void LineBroken::clearProperties(QLayout *layout)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "LineBroken::clearProperties(QLayout *layout)\n";
+    while(layout->count() > 0)
+    {
+        QLayoutItem *item = layout->takeAt(0);
+        delete item->widget();
+        delete item;
+    }
 }

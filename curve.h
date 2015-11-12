@@ -13,6 +13,12 @@ public:
           QString texture_1, float texture_1Usize, float texture_1Vsize,
           QString texture_2, float texture_2Usize, float texture_2Vsize,
           int numberOfSides);
+    Curve(float *controls, int size,
+          QString texture_1, float texture_1Usize, float texture_1Vsize,
+          QString texture_2, float texture_2Usize, float texture_2Vsize,
+          int numberOfSides, float angleRounding, float boardWidth,
+          bool fixed, bool showBoard, int layer, QString name);
+    Curve(const Curve& source);
     ~Curve();
     // RoadElement interface
 public:
@@ -84,6 +90,7 @@ public:
     QVector<GLfloat> vertexArrayBoard;
     float texture1USize, texture1VSize;
     float texture2USize, texture2VSize;
+    QString texture1, texture2;
     float angleRounding;
 
 private:
@@ -115,6 +122,22 @@ private:
     // RoadElement interface
 public:
     virtual std::vector<vec3> getCoordOfControl(int index);
+
+    // RoadElement interface
+public:
+    virtual RoadElement *getCopy();
+
+    // RoadElement interface
+public:
+    virtual void setCoordForControl(int index, std::vector<vec3> &controls);
+
+    // RoadElement interface
+public:
+    virtual void clearProperties(QLayout *layout);
+
+    // RoadElement interface
+public:
+    virtual QJsonObject getJSONInfo();
 };
 
 #endif // CURVE_H

@@ -35,6 +35,15 @@ public:
                QString texture_1, float texture_1Usize, float texture_1Vsize,
                QString texture_2, float texture_2Usize, float texture_2Vsize,
                QString name, int layer);
+    RoadBroken(QVector<float>& vertexArray,
+               QVector<float>& vertexArrayRight,
+               QVector<float>& vertexArrayLeft,
+               QString texture_1, float texture_1Usize, float texture_1Vsize,
+               QString texture_2, float texture_2Usize, float texture_2Vsize,
+               bool showRightBoard, bool showLeftBoard, bool fixed,
+               QString name, int layer);
+
+    RoadBroken(const RoadBroken& source);
     ~RoadBroken();
 protected:
     QVector<GLfloat> vertexArray;
@@ -60,6 +69,7 @@ protected:
     int textureID[2];
     float texture_1Usize, texture_1Vsize;
     float texture_2Usize, texture_2Vsize;
+    QString texture1, texture2;
     float rightBoardWidth;
     float leftBoardWidth;
     bool showRightBoard;
@@ -118,6 +128,7 @@ public:
     GLuint getTextures(QString source);
     void setIndexArray();
     void addBreak(bool front);
+    void deleteBreak(bool front);
     void setIndexArrayForSelectionFrame();
     void setColorArrayForSelectionFrame(float red, float green, float blue);
 
@@ -142,7 +153,7 @@ public:
 
     virtual QJsonObject getJSONInfo();
     void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
-    static bool getLogging() { return log; }
+    static bool getLogging();
 signals:
     void rightBoardWidthChanged(double width);
     void leftBoardWidthChanged(double width);
@@ -163,11 +174,13 @@ public slots:
 
     void addLine(float step, QString textureSource, float textureSize, float lineWidth, int lineType, bool rightSide);
     void addLine();
+    void addLine(LineBrokenLinkedToRoadBroken line);
 
     void setRightSide(bool status);
     void setStep(double value);
     void setLineType(int type);
     void deleteLine();
+    void deleteLine(LineBrokenLinkedToRoadBroken line);
     void resetLines();
     void setBeginStep(double step);
     void setEndStep(double step);
@@ -190,6 +203,14 @@ public:
     // RoadElement interface
 public:
     virtual void deleteLine(RoadElement *line);
+
+    // RoadElement interface
+public:
+    virtual RoadElement *getCopy();
+
+    // RoadElement interface
+public:
+    virtual void setCoordForControl(int index, std::vector<vec3> &controls);
 };
 
 #endif // ROADBROKEN_H

@@ -67,6 +67,7 @@ private:
     int layer;
     float texture_1Usize, texture_1Vsize;
     float texture_2Usize, texture_2Vsize;
+    QString texture1, texture2;
     bool showNearBoard;
     bool showFarBoard;
     float nearBoardWidth;
@@ -112,6 +113,14 @@ public:
                  int numberOfSides, QString name, int layer,
                  QString texture_1, float texture_1Usize, float texture_1Vsize,
                  QString texture_2, float texture_2Usize, float texture_2Vsize);
+    RoundingRoad(float x1, float y1, float nearRadius, float angel1NearRadius, float angel2NearRadius,
+                 float x2, float y2, float farRadius, float angel1FarRadius, float angel2FarRadius,
+                 int numberOfSides, QString name, int layer,
+                 float nearBoardWidth, float farBoardWidth,
+                 bool showNearBoard, bool showFarBoard, bool fixed,
+                 QString texture_1, float texture_1Usize, float texture_1Vsize,
+                 QString texture_2, float texture_2Usize, float texture_2Vsize);
+    RoundingRoad(const RoundingRoad& source);
     ~RoundingRoad();
 
 private:
@@ -165,11 +174,13 @@ public slots:
 
     void addLine(float step, QString textureSource, float textureSize, float lineWidth, int lineType, bool nearSide);
     void addLine();
+    void addLine(LineBrokenLinked line);
 
     void setNearSide(bool status);
     void setStep(double value);
     void setLineType(int type);
     void deleteLine();
+    void deleteLine(LineBrokenLinked line);
     void resetLines();
     void setBeginStep(double step);
     void setEndStep(double step);
@@ -223,6 +234,14 @@ public:
     virtual void deleteLine(RoadElement *line);
     static bool getLogging() { return log; }
     static void setLogging(bool status);
+
+    // RoadElement interface
+public:
+    virtual RoadElement *getCopy();
+
+    // RoadElement interface
+public:
+    virtual void setCoordForControl(int index, std::vector<vec3> &controls);
 };
 
 #endif // ROUNDING

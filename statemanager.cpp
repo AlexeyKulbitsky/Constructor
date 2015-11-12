@@ -6,12 +6,12 @@ StateManager::StateManager(QObject *parent) : QObject(parent)
 {
 
     defaultState = NULL;
-    //selectedState = NULL;
+    selectedState = NULL;
     //multiSelectedState = NULL;
     currentState = NULL;
-    //rulerState = NULL;
-    //lineBuilderState = NULL;
-    //roadBuilderState = NULL;
+    rulerState = NULL;
+    lineBuilderState = NULL;
+    roadBuilderState = NULL;
     //stepDialog = NULL;
     scene = NULL;
     model = NULL;
@@ -48,7 +48,8 @@ StateManager::StateManager(Model *model, Scene2D* scene, QFormLayout *properties
     defaultState = new DefaultState(this, model, scene, properties);
     selectedState = new SelectedState(this, model, scene, properties);
     //multiSelectedState = new MultiSelectedState(this, model, scene, properties);
-    //rulerState = new RulerState(this, model, scene);
+    rulerState = new RulerState(this, model, scene);
+    connect(rulerState, SIGNAL(rulerStatusChanged(bool)), this, SLOT(setRulerActive(bool)));
     lineBuilderState = new LineBuilderState(this, model, scene, properties);
     roadBuilderState = new RoadBuilderState(this, model, scene, properties);
     stepDialog = new StepDialog(scene);
@@ -58,7 +59,6 @@ StateManager::StateManager(Model *model, Scene2D* scene, QFormLayout *properties
     }
     //fileManager3DS = new _3DsFileManager();
     //fileManagerOBJ = new OBJFileManager(model);
-    //connect(rulerState, SIGNAL(rulerStatusChanged(bool)), this, SLOT(setRulerActive(bool)));
     currentState = defaultState;
 }
 
@@ -81,6 +81,9 @@ StateManager::~StateManager()
     if (roadBuilderState)
         delete roadBuilderState;
     roadBuilderState = NULL;
+    if (rulerState)
+        delete rulerState;
+    rulerState = NULL;
     /*
     for (int i = 0; i < 10; ++i)
     {
@@ -97,9 +100,7 @@ StateManager::~StateManager()
     if (multiSelectedState)
         delete multiSelectedState;
     multiSelectedState = NULL;
-    if (rulerState)
-        delete rulerState;
-    rulerState = NULL;
+
 
     if (stepDialog)
         delete stepDialog;
@@ -265,6 +266,66 @@ void StateManager::contextMenuEvent(QContextMenuEvent *pe)
     }
 }
 
+void StateManager::copy()
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "StateManager::copy()\n";
+    if (currentState)
+        currentState->copy();
+    else
+    {
+        QMessageBox::critical(0, "Ошибка", "StateManager::currentState = NULL,\n StateManager::copy() stopped", QMessageBox::Yes | QMessageBox::Default);
+        if (log)
+        Logger::getLogger()->errorLog() << "StateManager::currentState = NULL, StateManager::copy() stopped\n";
+        QApplication::exit(0);
+    }
+}
+
+void StateManager::paste()
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "StateManager::paste()\n";
+    if (currentState)
+        currentState->paste();
+    else
+    {
+        QMessageBox::critical(0, "Ошибка", "StateManager::currentState = NULL,\n StateManager::paste() stopped", QMessageBox::Yes | QMessageBox::Default);
+        if (log)
+        Logger::getLogger()->errorLog() << "StateManager::currentState = NULL, StateManager::paste() stopped\n";
+        QApplication::exit(0);
+    }
+}
+
+void StateManager::cut()
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "StateManager::cut()\n";
+    if (currentState)
+        currentState->cut();
+    else
+    {
+        QMessageBox::critical(0, "Ошибка", "StateManager::currentState = NULL,\n StateManager::cut() stopped", QMessageBox::Yes | QMessageBox::Default);
+        if (log)
+        Logger::getLogger()->errorLog() << "StateManager::currentState = NULL, StateManager::cut() stopped\n";
+        QApplication::exit(0);
+    }
+}
+
+void StateManager::del()
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "StateManager::del()\n";
+    if (currentState)
+        currentState->del();
+    else
+    {
+        QMessageBox::critical(0, "Ошибка", "StateManager::currentState = NULL,\n StateManager::del() stopped", QMessageBox::Yes | QMessageBox::Default);
+        if (log)
+        Logger::getLogger()->errorLog() << "StateManager::currentState = NULL, StateManager::del() stopped\n";
+        QApplication::exit(0);
+    }
+}
+
 void StateManager::setLogging(bool status)
 {
     log = status;
@@ -279,7 +340,7 @@ void StateManager::setRulerActive(bool status)
     if (log)
         Logger::getLogger()->infoLog() << "StateManager::setRulerActive(bool status)\n"
                                        << " status = " << status << "\n";
-    /*
+
     if (rulerActive == status)
         return;
     rulerActive = status;
@@ -295,6 +356,6 @@ void StateManager::setRulerActive(bool status)
     }
 
     emit scene->rulerStatusChanged(status);
-    */
+
 }
 

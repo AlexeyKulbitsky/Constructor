@@ -67,14 +67,17 @@ RoundingRoad::RoundingRoad(float x1, float y1, float nearRadius, float angel1Nea
     this->texture_1Vsize = texture_1Vsize;
     this->texture_2Usize = texture_2Usize;
     this->texture_2Vsize = texture_2Vsize;
+    this->texture1 = texture_1;
+    this->texture2 = texture_2;
     showNearBoard = true;
     showFarBoard = true;
     nearBoardWidth = farBoardWidth = 2.75f;
     this->layer = layer;
     this->name = name;
+    this->numberOfSides = numberOfSides;
     numberOfVertices = numberOfSides * 4;
     numberOfPolygones = numberOfSides * 2;
-    this->numberOfSides = numberOfSides;
+
 
 
     indexArrayForSelection = new GLubyte[numberOfVertices * 2];
@@ -121,20 +124,139 @@ RoundingRoad::RoundingRoad(float x1, float y1, float nearRadius, float angel1Nea
     connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
 }
 
+RoundingRoad::RoundingRoad(float x1, float y1, float nearRadius, float angel1NearRadius, float angel2NearRadius, float x2, float y2, float farRadius, float angel1FarRadius, float angel2FarRadius, int numberOfSides, QString name, int layer, float nearBoardWidth, float farBoardWidth, bool showNearBoard, bool showFarBoard, bool fixed, QString texture_1, float texture_1Usize, float texture_1Vsize, QString texture_2, float texture_2Usize, float texture_2Vsize)
+{
+    this->texture_1Usize = texture_1Usize;
+    this->texture_1Vsize = texture_1Vsize;
+    this->texture_2Usize = texture_2Usize;
+    this->texture_2Vsize = texture_2Vsize;
+    this->texture1 = texture_1;
+    this->texture2 = texture_2;
+    this->showNearBoard = showNearBoard;
+    this->showFarBoard = showFarBoard;
+    this->nearBoardWidth = nearBoardWidth;
+    this->farBoardWidth = farBoardWidth;
+    this->layer = layer;
+    this->name = name;
+    this->numberOfSides = numberOfSides;
+    numberOfVertices = numberOfSides * 4;
+    numberOfPolygones = numberOfSides * 2;
+
+    indexArrayForSelection = new GLubyte[numberOfVertices * 2];
+    colorArrayForSelection = new GLfloat[numberOfVertices * 3];
+
+    setVertexArray(x1, y1, nearRadius, angel1NearRadius, angel2NearRadius,
+                   x2, y2, farRadius, angel1FarRadius, angel2FarRadius,
+                   numberOfSides);
+    setIndexArray();
+    setTextureArray(texture_1Usize, texture_1Vsize);
+    setNearTextureArray(texture_2Usize, texture_2Vsize);
+    setFarTextureArray(texture_2Usize, texture_2Vsize);
+    textureID[0] = TextureManager::getInstance()->getID(texture_1);
+    textureID[1] = TextureManager::getInstance()->getID(texture_2);
+    setIndexArrayForSelectionFrame();
+    setColorArrayForSelectionFrame(0.0f, 0.0f, 0.0f);
+
+    this->xCenterNearRadius = x1;
+    this->yCenterNearRadius = y1;
+    this->angel1NearRadius = angel1NearRadius;
+    this->angel2NearRadius = angel2NearRadius;
+    this->nearRadius = nearRadius;
+
+    this->xCenterFarRadius = x2;
+    this->yCenterFarRadius = y2;
+    this->angel1FarRadius = angel1FarRadius;
+    this->angel2FarRadius = angel2FarRadius;
+    this->farRadius = farRadius;
+
+    this->indexOfSelectedControl = -1;
+    selected = false;
+    this->fixed = fixed;
+    connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
+}
+
+RoundingRoad::RoundingRoad(const RoundingRoad &source)
+{
+    this->texture_1Usize = source.texture_1Usize;
+    this->texture_1Vsize = source.texture_1Vsize;
+    this->texture_2Usize = source.texture_2Usize;
+    this->texture_2Vsize = source.texture_2Vsize;
+    this->showNearBoard = source.showNearBoard;
+    this->showFarBoard = source.showFarBoard;
+    this->nearBoardWidth = source.nearBoardWidth;
+    this->farBoardWidth = source.farBoardWidth;
+    this->layer = source.layer;
+    this->name = source.name;
+    this->numberOfVertices = source.numberOfVertices;
+    this->numberOfPolygones = source.numberOfPolygones;
+    this->numberOfSides = source.numberOfSides;
+    this->xCenterNearRadius = source.xCenterNearRadius;
+    this->yCenterNearRadius = source.yCenterNearRadius;
+    this->angel1NearRadius = source.angel1NearRadius;
+    this->angel2NearRadius = source.angel2NearRadius;
+    this->nearRadius = source.nearRadius;
+
+    this->xCenterFarRadius = source.xCenterFarRadius;
+    this->yCenterFarRadius = source.yCenterFarRadius;
+    this->angel1FarRadius = source.angel1FarRadius;
+    this->angel2FarRadius = source.angel2FarRadius;
+    this->farRadius = source.farRadius;
+
+    this->numberOfSides = source.numberOfSides;
+    this->indexOfSelectedControl = source.indexOfSelectedControl;
+    this->selected = source.selected;
+    this->fixed = source.fixed;
+    this->texture1 = source.texture1;
+    this->texture2 = source.texture2;
+    this->textureID[0] = source.textureID[0];
+    this->textureID[1] = source.textureID[1];
+
+    indexArrayForSelection = new GLubyte[numberOfVertices * 2];
+    colorArrayForSelection = new GLfloat[numberOfVertices * 3];
+
+
+    setVertexArray(xCenterNearRadius, yCenterNearRadius, nearRadius, angel1NearRadius, angel2NearRadius,
+                   xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
+                   numberOfSides);
+    setIndexArray();
+    setTextureArray(texture_1Usize, texture_1Vsize);
+    setNearTextureArray(texture_2Usize, texture_2Vsize);
+    setFarTextureArray(texture_2Usize, texture_2Vsize);
+    setIndexArrayForSelectionFrame();
+    setColorArrayForSelectionFrame(0.0f, 0.0f, 0.0f);
+
+    lines.resize(source.lines.size());
+    for (int i = 0; i < source.lines.size(); ++i)
+    {
+        lines[i].line = source.lines[i].line->getCopy();
+        lines[i].lineType = source.lines[i].lineType;
+        lines[i].lineWidth = source.lines[i].lineWidth;
+        lines[i].nearSide = source.lines[i].nearSide;
+        lines[i].beginSide = source.lines[i].beginSide;
+        lines[i].step = source.lines[i].step;
+        lines[i].beginStep = source.lines[i].beginStep;
+        lines[i].endStep = source.lines[i].endStep;
+        lines[i].differentDirections = source.lines[i].differentDirections;
+        lines[i].splitZoneWidth = source.lines[i].splitZoneWidth;
+    }
+
+    connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
+}
+
 RoundingRoad::~RoundingRoad()
 {
 
     for (int i = 0; i < lines.size(); ++i)
     {
-        for (QList<RoadElement*>::iterator it = model->getGroup(1).begin();
-             it != model->getGroup(1).end(); ++it)
-        {
-            if (lines[i].line == (*it))
-            {
-                model->getGroup(1).erase(it);
-                break;
-            }
-        }
+//        for (QList<RoadElement*>::iterator it = model->getGroup(1).begin();
+//             it != model->getGroup(1).end(); ++it)
+//        {
+//            if (lines[i].line == (*it))
+//            {
+//                model->getGroup(1).erase(it);
+//                break;
+//            }
+//        }
         delete lines[i].line;
     }
     lines.clear();
@@ -1477,14 +1599,6 @@ QJsonObject RoundingRoad::getJSONInfo()
 
     element["Name"] = name;
     element["Layer"] = layer;
-    {
-        QJsonArray temp;
-        temp.append(QJsonValue(0.5f));
-        temp.append(QJsonValue(0.5f));
-        temp.append(QJsonValue(0.5f));
-
-        element["Color"] = temp;
-    }
 
     element["xCenterNearRadius"] = xCenterNearRadius;
     element["yCenterNearRadius"] = yCenterNearRadius;
@@ -1499,8 +1613,42 @@ QJsonObject RoundingRoad::getJSONInfo()
     element["FarRadius"] = farRadius;
 
     element["NumberOfSides"] = numberOfSides;
+    element["NumberOfVertices"] = numberOfVertices;
+    element["NumberOfPolygones"] = numberOfPolygones;
 
-    return element;
+    element["ShowNearBoard"] = showNearBoard;
+    element["ShowFarBoard"] = showFarBoard;
+    element["NearBoardWidth"] = nearBoardWidth;
+    element["FarBoardWidth"] = farBoardWidth;
+
+    element["Texture1Source"] = texture1;
+    element["Texture1USize"] = texture_1Usize;
+    element["Texture1VSize"] = texture_1Vsize;
+    element["Texture2Source"] = texture2;
+    element["Texture2USize"] = texture_2Usize;
+    element["Texture2VSize"] = texture_2Vsize;
+
+    element["Fixed"] = fixed;
+    element["Id"] = Id;
+
+    QJsonArray linesArray;
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        QJsonObject line;
+        line["Line"] = lines[i].line->getJSONInfo();
+        line["LineType"] = lines[i].lineType;
+        line["LineWidth"] = lines[i].lineWidth;
+        line["NearSide"] = lines[i].nearSide;
+        line["Step"] = lines[i].step;
+        line["BeginSide"] = lines[i].beginSide;
+        line["BeginStep"] = lines[i].beginStep;
+        line["EndStep"] = lines[i].endStep;
+        line["DifferentDirections"] = lines[i].differentDirections;
+        line["SplitZoneWidth"] = lines[i].splitZoneWidth;
+        linesArray.append(line);
+    }
+    element["Lines"] = linesArray;
+    return element;    
 }
 
 
@@ -1643,6 +1791,12 @@ void RoundingRoad::getProperties(QFormLayout *layout, QGLWidget* render)
     layout->addRow("Радиус", farRadiusSpinBox);
     layout->addRow("Угол 1", angel_1_FarRadiusSpinBox);
     layout->addRow("Угол 2", angel_2_FarRadiusSpinBox);
+
+    QCheckBox *showMeasurementsCheckBox = new QCheckBox();
+    showMeasurementsCheckBox->setChecked(showMeasurements);
+    connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setShowMeasurements(bool)));
+    connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
+    layout->addRow("Размеры", showMeasurementsCheckBox);
 
     layout->addRow("Зафиксировать", fixedCheckBox);
     layout->addRow("Ближний тротуар",showNearBoardCheckBox);
@@ -1940,12 +2094,13 @@ void RoundingRoad::addLine(float step, QString textureSource, float textureSize,
     line.endStep = endStep;
     line.beginSide = beginSide;
     line.differentDirections = differentDirections;
-    model->getGroup(1).push_back(line.line);
+    //model->getGroup(1).push_back(line.line);
     line.line->setSelectedStatus(false);
-    lines.push_back(line);
+    RoadElement::undoStack->push(new AddLineCommand(this, line, render));
+    //lines.push_back(line);
     delete[] lineVertexArray;
     lineVertexArray = NULL;
-    emit linesChanged(layout, render);
+    //emit linesChanged(layout, render);
 }
 
 void RoundingRoad::addLine()
@@ -2006,6 +2161,12 @@ void RoundingRoad::addLine()
     addLine(step, textSource, 6.0f, lWidth, lineType, nearSide);
 }
 
+void RoundingRoad::addLine(LineBrokenLinked line)
+{
+    lines.push_back(line);
+    emit linesChanged(layout, render);
+}
+
 
 
 void RoundingRoad::setNearSide(bool status)
@@ -2040,16 +2201,6 @@ void RoundingRoad::deleteLine()
     if (!b) return;
     ////qDebug() << "delete line " << b->text();
     int i = b->text().toInt() - 1;
-
-        for (QList<RoadElement*>::iterator it = model->getGroup(1).begin();
-             it != model->getGroup(1).end(); ++it)
-        {
-            if (lines[i].line == (*it))
-            {
-                model->getGroup(1).erase(it);
-                break;
-            }
-        }
     delete lines[i].line;
     lines.remove(i);
     for (int i = 0; i < lines.size(); ++i)
@@ -2065,6 +2216,18 @@ void RoundingRoad::deleteLine()
             line->setDescription(QString("Линия №") + QString::number(i + 1));
         }
     }
+    emit linesChanged(layout, render);
+}
+
+void RoundingRoad::deleteLine(LineBrokenLinked line)
+{
+    int i;
+    for (i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].line == line.line)
+            break;
+    }
+    lines.removeAt(i);
     emit linesChanged(layout, render);
 }
 
@@ -2323,6 +2486,8 @@ bool RoundingRoad::isFixed()
 
 void RoundingRoad::drawMeasurements(QGLWidget *render)
 {
+    if (!showMeasurements)
+        return;
     if (log)
         Logger::getLogger()->infoLog() << "RoundingRoad::drawMeasurements(QGLWidget *render)\n";
     GLdouble x, y, z;
@@ -2445,152 +2610,173 @@ std::vector<vec3> RoundingRoad::getCoordOfControl(int index)
                                        << " index = " << index << "\n";
     std::vector<vec3> res;
 
-    switch (index)
-    {
+    int linesCount = 0;
+    for (int i = 0; i < lines.size(); ++i)
+        linesCount += lines[i].line->getNumberOfControls();
 
-    case 0:
-        // Дуга внутреннего радиуса
-        /*
+    if (index >= linesCount)
     {
-        glLineWidth(lineWidth + 5.0f);
-        glBegin(GL_LINE_STRIP);
-        for (int i = 0; i < vertexArray.size() / 3; i += 2)
+        index -= linesCount;
+
+        switch (index)
         {
-            glColor3f(1.0f, 0.0f, 0.0f);
-            glVertex3f(vertexArray[i * 3],
-                        vertexArray[i * 3 + 1],
-                        vertexArray[i * 3 + 2]);
+
+        case 0:
+            // Правая угловая точка внутреннего радиуса
+        {
+            int i = 0;
+            vec3 p(vertexArray[i * 3],
+                    vertexArray[i * 3 + 1],
+                    vertexArray[i * 3 + 2]);
+            res.push_back(p);
         }
-        glEnd();
-
-    }
-    */
-        break;
-
-    case 1:
-        // Дуга наружного радиуса
-        /*
-    {
-        glLineWidth(lineWidth + 5.0f);
-        glBegin(GL_LINE_STRIP);
-        for (int i = 1; i < vertexArray.size() / 3; i += 2)
+            break;
+        case 1:
+            // Левая угловая точка внутреннего радиуса
         {
-            glColor3f(0.0f, 0.0f, 1.0f);
-            glVertex3f(vertexArray[i * 3],
-                        vertexArray[i * 3 + 1],
-                        vertexArray[i * 3 + 2]);
+            int i = numberOfVertices - 2;
+            vec3 p(vertexArray[i * 3],
+                    vertexArray[i * 3 + 1],
+                    vertexArray[i * 3 + 2]);
+            res.push_back(p);
         }
-        glEnd();
-    }
-    */
-        break;
-
-    case 2:
-        // Правая угловая точка внутреннего радиуса
-    {
-        int i = 0;
-        vec3 p(vertexArray[i * 3],
-                vertexArray[i * 3 + 1],
-                vertexArray[i * 3 + 2]);
-        res.push_back(p);
-    }
-        break;
-    case 3:
-        // Левая угловая точка внутреннего радиуса
-    {
-        int i = numberOfVertices - 2;
-        vec3 p(vertexArray[i * 3],
-                vertexArray[i * 3 + 1],
-                vertexArray[i * 3 + 2]);
-        res.push_back(p);
-    }
-        break;
-    case 4:
-        // Правая угловая точка наружного радиуса
-    {
-        int i = 1;
-        vec3 p(vertexArray[i * 3],
-                vertexArray[i * 3 + 1],
-                vertexArray[i * 3 + 2]);
-        res.push_back(p);
-    }
-        break;
-    case 5:
-        // Левая угловая точка наружного радиуса
-    {
-        int i = numberOfVertices - 1;
-        vec3 p(vertexArray[i * 3],
-                vertexArray[i * 3 + 1],
-                vertexArray[i * 3 + 2]);
-        res.push_back(p);
-    }
-        break;
-    case 6:
-        // Центр окружности внутреннего радиуса
-    {
-        int i = 0;
-        vec3 p(xCenterNearRadius,
-               yCenterNearRadius,
-               vertexArray[i * 3 + 2]);
-        res.push_back(p);
-    }
-        break;
-    case 7:
-        // Центр окружности наружного радиуса
-    {
-        int i = 0;
-        vec3 p(xCenterFarRadius,
-               yCenterFarRadius,
-               vertexArray[i * 3 + 2]);
-        res.push_back(p);
-    }
-        break;
-    case 8:
-    {
-        /*
-        if (showNearBoard)
+            break;
+        case 2:
+            // Правая угловая точка наружного радиуса
         {
-            glLineWidth(lineWidth);
-            glBegin(GL_LINES);
-            for (int i = 0; i < vertexArrayNear.size() / 3; i += 10)
+            int i = 1;
+            vec3 p(vertexArray[i * 3],
+                    vertexArray[i * 3 + 1],
+                    vertexArray[i * 3 + 2]);
+            res.push_back(p);
+        }
+            break;
+        case 3:
+            // Левая угловая точка наружного радиуса
+        {
+            int i = numberOfVertices - 1;
+            vec3 p(vertexArray[i * 3],
+                    vertexArray[i * 3 + 1],
+                    vertexArray[i * 3 + 2]);
+            res.push_back(p);
+        }
+            break;
+        case 4:
+            // Дуга внутреннего радиуса
+
+        {
+            for (int i = 0; i < vertexArray.size() / 3; i += 2)
             {
-                glColor3f(0.0f, 1.0f, 0.0f);
-                glVertex3f(vertexArrayNear[(i + 4)*3], vertexArrayNear[(i + 4)*3 + 1], vertexArrayNear[(i + 4)*3 + 2]);
-                glColor3f(0.0f, 1.0f, 0.0f);
-                glVertex3f(vertexArrayNear[(i + 9)*3], vertexArrayNear[(i + 9)*3 + 1], vertexArrayNear[(i + 9)*3 + 2]);
+                vec3 p;
+                p.x = vertexArray[i * 3];
+                p.y = vertexArray[i * 3 + 1];
+                p.z = vertexArray[i * 3 + 2];
+                res.push_back(p);
             }
-            glEnd();
         }
-        */
-    }
-        break;
-    case 9:
-    {
-        /*
-        if (showFarBoard)
+            break;
+
+        case 5:
+            // Дуга наружного радиуса
+
         {
-            glLineWidth(lineWidth);
-            glBegin(GL_LINES);
-            for (int i = 0; i < vertexArrayFar.size() / 3; i += 10)
+            for (int i = 1; i < vertexArray.size() / 3; i += 2)
             {
-                glColor3f(0.0f, 1.0f, 0.0f);
-                glVertex3f(vertexArrayFar[(i + 4)*3], vertexArrayFar[(i + 4)*3 + 1], vertexArrayFar[(i + 4)*3 + 2]);
-                glColor3f(0.0f, 1.0f, 0.0f);
-                glVertex3f(vertexArrayFar[(i + 9)*3], vertexArrayFar[(i + 9)*3 + 1], vertexArrayFar[(i + 9)*3 + 2]);
+                vec3 p;
+                p.x = vertexArray[i * 3];
+                p.y = vertexArray[i * 3 + 1];
+                p.z = vertexArray[i * 3 + 2];
+                res.push_back(p);
             }
-            glEnd();
         }
-        */
+
+            break;
+        case 6:
+            // Центр окружности внутреннего радиуса
+        {
+            int i = 0;
+            vec3 p(xCenterNearRadius,
+                   yCenterNearRadius,
+                   vertexArray[i * 3 + 2]);
+            res.push_back(p);
+        }
+            break;
+        case 7:
+            // Центр окружности наружного радиуса
+        {
+            int i = 0;
+            vec3 p(xCenterFarRadius,
+                   yCenterFarRadius,
+                   vertexArray[i * 3 + 2]);
+            res.push_back(p);
+        }
+            break;
+        case 8:
+        {
+            for (int i = 0 ; i < vertexArrayNear.size() / 3; i += 10)
+            {
+                vec3 p;
+                p.x = vertexArrayNear[(i + 4) * 3];
+                p.y = vertexArrayNear[(i + 4) * 3 + 1];
+                p.z = vertexArrayNear[(i + 4) * 3 + 2];
+                res.push_back(p);
+            }
+        }
+            break;
+        case 9:
+        {
+            for (int i = 0 ; i < vertexArrayFar.size() / 3; i += 10)
+            {
+                vec3 p;
+                p.x = vertexArrayFar[(i + 4) * 3];
+                p.y = vertexArrayFar[(i + 4) * 3 + 1];
+                p.z = vertexArrayFar[(i + 4) * 3 + 2];
+                res.push_back(p);
+            }
+        }
+            break;
+
+        case 10:
+        {
+            int i = 0;
+            vec3 p(vertexArray[i * 3],vertexArray[i * 3 + 1],vertexArray[i * 3 + 2]);
+            vec3 s(vertexArray[(i + 1) * 3],vertexArray[(i + 1) * 3 + 1],vertexArray[(i + 1) * 3 + 2]);
+            res.push_back(p);
+            res.push_back(s);
+        }
+            break;
+        case 11:
+        {
+            int i = numberOfVertices - 2;
+            vec3 p(vertexArray[i * 3],vertexArray[i * 3 + 1],vertexArray[i * 3 + 2]);
+            vec3 s(vertexArray[(i + 1) * 3],vertexArray[(i + 1) * 3 + 1],vertexArray[(i + 1) * 3 + 2]);
+            res.push_back(p);
+            res.push_back(s);
+        }
+            break;
+
+        default:
+            break;
+        }
     }
-        break;
-    default:
+    else
     {
-        vec3 p(vertexArray[(index - 10) * 3],
-                vertexArray[(index - 10) * 3 + 1],
-                vertexArray[(index - 10) * 3] + 2);
-        res.push_back(p);
-    }
-        break;
+        int i;
+        for (i = 0; i < lines.size(); ++i)
+        {
+            if (index >= lines[i].line->getNumberOfControls())
+            {
+                index -= lines[i].line->getNumberOfControls();
+            }
+            else
+            {
+                break;
+            }
+        }
+        for (int j = 0; j < lines[i].line->getCoordOfControl(index).size(); ++j)
+        {
+            res.push_back(lines[i].line->getCoordOfControl(index)[j]);
+        }
     }
     return res;
 }
@@ -2601,6 +2787,12 @@ void RoundingRoad::clearProperties(QLayout *layout)
     if (log)
         Logger::getLogger()->infoLog() << "RoundingRoad::clearProperties(QLayout *layout)\n";
     disconnect(stepDialog, 0, this, 0);
+    while(layout->count() > 0)
+    {
+        QLayoutItem *item = layout->takeAt(0);
+        delete item->widget();
+        delete item;
+    }
 }
 
 
@@ -2628,4 +2820,171 @@ void RoundingRoad::setLogging(bool status)
     Logger::getLogger()->infoLog() << "RoundingRoad::setLogging(bool status)"
                                    << " status = " << status << "\n";
     Logger::getLogger()->infoLog() << "--------------------\n";
+}
+
+
+RoadElement *RoundingRoad::getCopy()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::getCopy()\n";
+    RoundingRoad* copyElement = new RoundingRoad(*this);
+    return copyElement;
+}
+
+
+void RoundingRoad::setCoordForControl(int index, std::vector<vec3> &controls)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "RoundingRoad::setCoordForControl(int index, std::vector<vec3> &controls)"
+                                       << " index = " << index << "\n";
+
+    int linesCount = 0;
+    for (int i = 0; i < lines.size(); ++i)
+        linesCount += lines[i].line->getNumberOfControls();
+
+    if (index >= linesCount)
+    {
+        index -= linesCount;
+
+        switch (index)
+        {
+
+        case 0:
+            // Правая угловая точка внутреннего радиуса
+        {
+            int i = 0;
+            float x, y;
+            x = vertexArray[i * 3];
+            y = vertexArray[i * 3 + 1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 1:
+            // Левая угловая точка внутреннего радиуса
+        {
+            int i = numberOfVertices - 2;
+            float x, y;
+            x = vertexArray[i * 3];
+            y = vertexArray[i * 3 + 1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 2:
+            // Правая угловая точка наружного радиуса
+        {
+            int i = 1;
+            float x, y;
+            x = vertexArray[i * 3];
+            y = vertexArray[i * 3 + 1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 3:
+            // Левая угловая точка наружного радиуса
+        {
+            int i = numberOfVertices - 1;
+            float x, y;
+            x = vertexArray[i * 3];
+            y = vertexArray[i * 3 + 1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 4:
+            // Дуга внутреннего радиуса
+        {
+            float x, y;
+            x = vertexArray[0];
+            y = vertexArray[1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+
+        case 5:
+            // Дуга наружного радиуса
+
+        {
+            float x, y;
+            x = vertexArray[3];
+            y = vertexArray[4];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+
+            break;
+        case 6:
+            // Центр окружности внутреннего радиуса
+        {
+            float x, y;
+            x = xCenterNearRadius;
+            y = yCenterNearRadius;
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 7:
+            // Центр окружности наружного радиуса
+        {
+            float x, y;
+            x = xCenterFarRadius;
+            y = yCenterFarRadius;
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 8:
+        {
+            int i = 0;
+            float x, y;
+            x = vertexArrayNear[(i + 4) * 3];
+            y = vertexArrayNear[(i + 4) * 3 + 1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 9:
+        {
+            int i = 0;
+            float x, y;
+            x = vertexArrayFar[(i + 4) * 3];
+            y = vertexArrayFar[(i + 4) * 3 + 1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+
+        case 10:
+        {
+            int i = 0;
+            float x, y;
+            x = vertexArray[i * 3];
+            y = vertexArray[i * 3 + 1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 11:
+        {
+            int i = numberOfVertices - 2;
+            float x, y;
+            x = vertexArray[i * 3];
+            y = vertexArray[i * 3 + 1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+
+        default:
+            break;
+        }
+    }
+    else
+    {
+        int i;
+        for (i = 0; i < lines.size(); ++i)
+        {
+            if (index >= lines[i].line->getNumberOfControls())
+            {
+                index -= lines[i].line->getNumberOfControls();
+            }
+            else
+            {
+                break;
+            }
+        }
+        lines[i].line->setCoordForControl(index, controls);
+    }
+
 }

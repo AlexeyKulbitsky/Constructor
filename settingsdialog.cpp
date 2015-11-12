@@ -1,15 +1,27 @@
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
+#include <QFontDialog>
 
 SettingsDialog::SettingsDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SettingsDialog)
 {
     ui->setupUi(this);
+
+    connect(ui->autoSaveCheckBox, SIGNAL(toggled(bool)), this, SLOT(setAutoSaveOn(bool)));
+    connect(ui->autoSaveCheckBox, SIGNAL(toggled(bool)), ui->autoSvaeFileNameLineEdit, SLOT(setEnabled(bool)));
+    connect(ui->autoSaveCheckBox, SIGNAL(toggled(bool)), ui->autoSaveIntervalDoubleSpinBox, SLOT(setEnabled(bool)));
+    connect(ui->autoSaveIntervalDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setAutoSaveTime(double)));
+    connect(ui->autoSvaeFileNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(setAutoSaveFileName(QString)));
+
+    connect(ui->fontPushButton, SIGNAL(clicked(bool)), this, SLOT(setFont()));
+
     connect(ui->okButton, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
     connect(ui->acceptButton, SIGNAL(clicked()), this, SLOT(acceptButtonClicked()));
     connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
+
     setLogTreeView();
+    loadAutoSave();
 }
 
 SettingsDialog::SettingsDialog(QSettings *settings, QWidget *parent) :
@@ -17,11 +29,23 @@ SettingsDialog::SettingsDialog(QSettings *settings, QWidget *parent) :
     ui(new Ui::SettingsDialog)
 {
     ui->setupUi(this);
+
+    connect(ui->autoSaveCheckBox, SIGNAL(toggled(bool)), this, SLOT(setAutoSaveOn(bool)));
+    connect(ui->autoSaveCheckBox, SIGNAL(toggled(bool)), ui->autoSvaeFileNameLineEdit, SLOT(setEnabled(bool)));
+    connect(ui->autoSaveCheckBox, SIGNAL(toggled(bool)), ui->autoSaveIntervalDoubleSpinBox, SLOT(setEnabled(bool)));
+    connect(ui->autoSaveIntervalDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setAutoSaveTime(double)));
+    connect(ui->autoSvaeFileNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(setAutoSaveFileName(QString)));
+
+    connect(ui->fontPushButton, SIGNAL(clicked(bool)), this, SLOT(setFont()));
+
     connect(ui->okButton, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
     connect(ui->acceptButton, SIGNAL(clicked()), this, SLOT(acceptButtonClicked()));
     connect(ui->cancelButton, SIGNAL(clicked()), this, SLOT(okButtonClicked()));
+
     this->settings = settings;
-    setLogTreeView();
+
+    setLogTreeView();    
+    loadAutoSave();
 }
 
 SettingsDialog::~SettingsDialog()
@@ -79,6 +103,11 @@ void SettingsDialog::setLoggingSplitZone(bool status)
     SplitZone::setLogging(status);
 }
 
+void SettingsDialog::setLoggingRuler(bool status)
+{
+    Ruler::setLogging(status);
+}
+
 void SettingsDialog::setLoggingScene2D(bool status)
 {
     Scene2D::setLogging(status);
@@ -124,6 +153,42 @@ void SettingsDialog::setLoggingLineBuilderState(bool status)
     LineBuilderState::setLogging(status);
 }
 
+void SettingsDialog::setLoggingRulerState(bool status)
+{
+    RulerState::setLogging(status);
+}
+
+void SettingsDialog::setLoggingMoveCommand(bool status)
+{
+    MoveCommand::setLogging(status);
+}
+
+void SettingsDialog::setLoggingResizeByControlCommand(bool status)
+{
+    ResizeByControlCommand::setLogging(status);
+}
+
+void SettingsDialog::setLoggingDeleteCommand(bool status)
+{
+    DeleteCommand::setLogging(status);
+}
+
+void SettingsDialog::setLoggingInsertCommand(bool status)
+{
+    InsertCommand::setLogging(status);
+}
+
+void SettingsDialog::setLoggingAddBreakCommand(bool status)
+{
+    AddRoadBrokenBreakCommand::setLogging(status);
+    AddLineBrokenBreakCommand::setLogging(status);
+}
+
+void SettingsDialog::setLoggingPasteCommand(bool status)
+{
+    PasteCommand::setLogging(status);
+}
+
 void SettingsDialog::setLoggingModel(bool status)
 {
     setLoggingRoadBroken(status);
@@ -136,6 +201,7 @@ void SettingsDialog::setLoggingModel(bool status)
     setLoggingLineBroken(status);
     setLoggingRailway(status);
     setLoggingSplitZone(status);
+    setLoggingRuler(status);
 }
 
 void SettingsDialog::setLoggingStates(bool status)
@@ -145,6 +211,7 @@ void SettingsDialog::setLoggingStates(bool status)
     setLoggingSelectedState(status);
     setLoggingRoadBuilderState(status);
     setLoggingLineBuilderState(status);
+    setLoggingRulerState(status);
 }
 
 void SettingsDialog::setLoggingView(bool status)
@@ -155,21 +222,31 @@ void SettingsDialog::setLoggingView(bool status)
     setLoggingGoogleMaps(status);
 }
 
+void SettingsDialog::setLoggingUndoStack(bool status)
+{
+    setLoggingMoveCommand(status);
+    setLoggingResizeByControlCommand(status);
+    setLoggingDeleteCommand(status);
+    setLoggingInsertCommand(status);
+    setLoggingAddBreakCommand(status);
+    setLoggingPasteCommand(status);
+}
+
 void SettingsDialog::setLoggingAll(bool status)
 {
     setLoggingModel(status);
     setLoggingStates(status);
     setLoggingView(status);
+    setLoggingUndoStack(status);
 }
 
 void SettingsDialog::processTreeClick(QTreeWidgetItem *item, int column)
 {
     Qt::CheckState state = item->checkState(column);
-    bool status = state == Qt::Checked ? true : false;
-    (this->*logTreeSlots[item])(status);
     for (int i = 0; i < item->childCount(); i++)
     {
         item->child(i)->setCheckState(column, state);
+        processTreeClick(item->child(i), column);
     }
 }
 
@@ -183,12 +260,54 @@ void SettingsDialog::acceptButtonClicked()
 {
     processTreeItemsStates();
     saveLogTreeSettings();
+    saveAutoSave();
 }
 
 void SettingsDialog::cancelButtonClicked()
 {
     loadLogTreeSettings();
+    loadAutoSave();
     this->reject();
+}
+
+void SettingsDialog::setAutoSaveOn(bool status)
+{
+    if (autoSaveOn == status)
+        return;
+    autoSaveOn = status;
+    FileManager::setAutoSaveOn(status);
+    emit autoSaveOnChanged(status);
+}
+
+void SettingsDialog::setAutoSaveFileName(QString name)
+{
+    if (autoSaveFile == name)
+        return;
+    autoSaveFile = name;
+    FileManager::setAutoSaveFileName(name);
+    emit autoSaveFileNameChanged(name);
+}
+
+void SettingsDialog::setAutoSaveTime(double time)
+{
+    if (autoSaveTime == time)
+        return;
+    autoSaveTime = time;
+    FileManager::setAutoSaveTime(int(time));
+    emit autoSaveTimeChanged(time);
+}
+
+void SettingsDialog::setFont()
+{
+    bool ok;
+        QFont font = QFontDialog::getFont(
+                        &ok, QFont("Helvetica [Cronyx]", 10), this);
+        if (ok) {
+            // the user clicked OK and font is set to the font the user selected
+        } else {
+            // the user canceled the dialog; font is set to the initial
+            // value, in this case Helvetica [Cronyx], 10
+        }
 }
 
 void SettingsDialog::setLogTreeView()
@@ -263,6 +382,15 @@ void SettingsDialog::setLogTreeView()
     logLineBuilderStateItem->setText(0, "Line builder state");
     logTreeSlots[logLineBuilderStateItem] = &SettingsDialog::setLoggingLineBuilderState;
     logSettingsNames[logLineBuilderStateItem] = "/All/States/LineBuilderState";
+
+    QTreeWidgetItem *logRulerStateItem = new QTreeWidgetItem(logStatesItem);
+    logRulerStateItem->setFlags(logRulerStateItem->flags() | Qt::ItemIsUserCheckable);
+    checked = settings->value("/All/States/RulerState", RulerState::getLogging()).toBool();
+    state = checked ? Qt::Checked : Qt::Unchecked;
+    logRulerStateItem->setCheckState(0, state);
+    logRulerStateItem->setText(0, "Ruler state");
+    logTreeSlots[logRulerStateItem] = &SettingsDialog::setLoggingLineBuilderState;
+    logSettingsNames[logRulerStateItem] = "/All/States/RulerState";
 
     QTreeWidgetItem *logModelItem = new QTreeWidgetItem(logAllItem);
     logModelItem->setFlags(logModelItem->flags() | Qt::ItemIsUserCheckable);
@@ -363,6 +491,15 @@ void SettingsDialog::setLogTreeView()
     logTreeSlots[logSplitZoneItem] = &SettingsDialog::setLoggingSplitZone;
     logSettingsNames[logSplitZoneItem] = "/All/Model/SplitZone";
 
+    QTreeWidgetItem *logRulerItem = new QTreeWidgetItem(logModelItem);
+    logRulerItem->setFlags(logRulerItem->flags() | Qt::ItemIsUserCheckable);
+    checked = settings->value("/All/Model/Ruler", Ruler::getLogging()).toBool();
+    state = checked ? Qt::Checked : Qt::Unchecked;
+    logRulerItem->setCheckState(0, state);
+    logRulerItem->setText(0, "Линейка");
+    logTreeSlots[logRulerItem] = &SettingsDialog::setLoggingRuler;
+    logSettingsNames[logRulerItem] = "/All/Model/Ruler";
+
     QTreeWidgetItem *logViewItem = new QTreeWidgetItem(logAllItem);
     logViewItem->setFlags(logViewItem->flags() | Qt::ItemIsUserCheckable);
     checked = settings->value("/All/View", true).toBool();
@@ -408,8 +545,95 @@ void SettingsDialog::setLogTreeView()
     logTreeSlots[logGoogleMapsItem] = &SettingsDialog::setLoggingGoogleMaps;
     logSettingsNames[logGoogleMapsItem] = "/All/View/GoogleMaps";
 
+    QTreeWidgetItem *logUndoStactkItem = new QTreeWidgetItem(logAllItem);
+    logUndoStactkItem->setFlags(logUndoStactkItem->flags() | Qt::ItemIsUserCheckable);
+    checked = settings->value("/All/UndoStack", true).toBool();
+    state = checked ? Qt::Checked : Qt::Unchecked;
+    logUndoStactkItem->setCheckState(0, state);
+    logUndoStactkItem->setText(0, "Стек действий");
+    logTreeSlots[logUndoStactkItem] = &SettingsDialog::setLoggingUndoStack;
+    logSettingsNames[logUndoStactkItem] = "/All/UndoStack";
+
+    QTreeWidgetItem *logMoveCommandItem = new QTreeWidgetItem(logUndoStactkItem);
+    logMoveCommandItem->setFlags(logMoveCommandItem->flags() | Qt::ItemIsUserCheckable);
+    checked = settings->value("/All/UndoStack/MoveCommand", MoveCommand::getLogging()).toBool();
+    state = checked ? Qt::Checked : Qt::Unchecked;
+    logMoveCommandItem->setCheckState(0, state);
+    logMoveCommandItem->setText(0, "Move");
+    logTreeSlots[logMoveCommandItem] = &SettingsDialog::setLoggingMoveCommand;
+    logSettingsNames[logMoveCommandItem] = "/All/UndoStack/MoveCommand";
+
+    QTreeWidgetItem *logResizeByControlCommandItem = new QTreeWidgetItem(logUndoStactkItem);
+    logResizeByControlCommandItem->setFlags(logResizeByControlCommandItem->flags() | Qt::ItemIsUserCheckable);
+    checked = settings->value("/All/UndoStack/ResizeByControlCommand", ResizeByControlCommand::getLogging()).toBool();
+    state = checked ? Qt::Checked : Qt::Unchecked;
+    logResizeByControlCommandItem->setCheckState(0, state);
+    logResizeByControlCommandItem->setText(0, "ResizeByControl");
+    logTreeSlots[logResizeByControlCommandItem] = &SettingsDialog::setLoggingResizeByControlCommand;
+    logSettingsNames[logResizeByControlCommandItem] = "/All/UndoStack/ResizeByControlCommand";
+
+    QTreeWidgetItem *logDeleteCommandItem = new QTreeWidgetItem(logUndoStactkItem);
+    logDeleteCommandItem->setFlags(logDeleteCommandItem->flags() | Qt::ItemIsUserCheckable);
+    checked = settings->value("/All/UndoStack/DeleteCommand", DeleteCommand::getLogging()).toBool();
+    state = checked ? Qt::Checked : Qt::Unchecked;
+    logDeleteCommandItem->setCheckState(0, state);
+    logDeleteCommandItem->setText(0, "Delete");
+    logTreeSlots[logDeleteCommandItem] = &SettingsDialog::setLoggingDeleteCommand;
+    logSettingsNames[logDeleteCommandItem] = "/All/UndoStack/DeleteCommand";
+
+    QTreeWidgetItem *logInsertCommandItem = new QTreeWidgetItem(logUndoStactkItem);
+    logInsertCommandItem->setFlags(logInsertCommandItem->flags() | Qt::ItemIsUserCheckable);
+    checked = settings->value("/All/UndoStack/InsertCommand", InsertCommand::getLogging()).toBool();
+    state = checked ? Qt::Checked : Qt::Unchecked;
+    logInsertCommandItem->setCheckState(0, state);
+    logInsertCommandItem->setText(0, "Insert");
+    logTreeSlots[logInsertCommandItem] = &SettingsDialog::setLoggingInsertCommand;
+    logSettingsNames[logInsertCommandItem] = "/All/UndoStack/InsertCommand";
+
+    QTreeWidgetItem *logAddBreakCommandItem = new QTreeWidgetItem(logUndoStactkItem);
+    logAddBreakCommandItem->setFlags(logAddBreakCommandItem->flags() | Qt::ItemIsUserCheckable);
+    checked = settings->value("/All/UndoStack/AddBreakCommand", true).toBool();
+    state = checked ? Qt::Checked : Qt::Unchecked;
+    logAddBreakCommandItem->setCheckState(0, state);
+    logAddBreakCommandItem->setText(0, "Add break");
+    logTreeSlots[logAddBreakCommandItem] = &SettingsDialog::setLoggingAddBreakCommand;
+    logSettingsNames[logAddBreakCommandItem] = "/All/UndoStack/AddBreakCommand";
+
+    QTreeWidgetItem *logPasteCommandItem = new QTreeWidgetItem(logUndoStactkItem);
+    logPasteCommandItem->setFlags(logPasteCommandItem->flags() | Qt::ItemIsUserCheckable);
+    checked = settings->value("/All/UndoStack/PasteCommand", PasteCommand::getLogging()).toBool();
+    state = checked ? Qt::Checked : Qt::Unchecked;
+    logPasteCommandItem->setCheckState(0, state);
+    logPasteCommandItem->setText(0, "Paste");
+    logTreeSlots[logPasteCommandItem] = &SettingsDialog::setLoggingPasteCommand;
+    logSettingsNames[logPasteCommandItem] = "/All/UndoStack/PasteCommand";
+
     settings->endGroup();
     processTreeItemsStates();
+}
+
+void SettingsDialog::loadAutoSave()
+{
+    settings->beginGroup("/Settings/AutoSave");
+    bool on = settings->value("/On",true).toBool();
+    ui->autoSaveCheckBox->setChecked(on);
+    setAutoSaveOn(on);
+    double time = settings->value("/Time", 5.0).toDouble();
+    ui->autoSaveIntervalDoubleSpinBox->setValue(time);
+    setAutoSaveTime(time);
+    QString fileName = settings->value("/Name",QString("auto_save")).toString();
+    ui->autoSvaeFileNameLineEdit->setText(fileName);
+    setAutoSaveFileName(fileName);
+    settings->endGroup();
+}
+
+void SettingsDialog::saveAutoSave()
+{
+    settings->beginGroup("/Settings/AutoSave");
+    settings->setValue("/On", autoSaveOn);
+    settings->setValue("/Time", autoSaveTime);
+    settings->setValue("/Name", autoSaveFile);
+    settings->endGroup();
 }
 
 void SettingsDialog::saveLogTreeSettings()

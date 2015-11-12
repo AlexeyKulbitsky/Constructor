@@ -24,7 +24,6 @@ RoadSimple::RoadSimple()
 }
 RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, QString name, int layer, QString description)
 {
-
     this->description = description;
     this->layer = layer;
     this->name = name;
@@ -173,13 +172,203 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, float width,
     connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
 }
 
+RoadSimple::RoadSimple(float x1, float y1, float x2, float y2,
+                       float leftWidth, float rightWidth, float leftBoardWidth, float rightBoardWidth,
+                       bool showRightBoard, bool showLeftBoard,
+                       QString source_1, float textureSize_1_Usize, float textureSize_1_Vsize,
+                       QString source_2, float textureSize_2_Usize, float textureSize_2_Vsize,
+                       QString name, int layer, bool fixed, QString description)
+{
+    this->description = description;
+    this->layer = layer;
+    this->name = name;
+    indexOfSelectedControl = -1;
+    this->texture1Source = source_1;
+    this->texture1USize = textureSize_1_Usize;
+    this->texture1VSize = textureSize_1_Vsize;
+    this->texture2Source = source_2;
+    this->texture2USize = textureSize_2_Usize;
+    this->texture2VSize = textureSize_2_Vsize;
+    this->rightBoardWidth = rightBoardWidth;
+    this->leftBoardWidth = leftBoardWidth;
+    this->showRightBoard = showRightBoard;
+    this->showLeftBoard = showLeftBoard;
+
+    if (name == "Crosswalk")
+    {
+        z = 0.02f;
+    }
+    else
+    {
+        z = 0.0f;
+    }
+    useColor = false;
+    this->size = size;
+    this->rightWidth = rightWidth;
+    this->leftWidth = leftWidth;
+    this->width = rightWidth + leftWidth;
+    this->leftBoardWidth = leftBoardWidth;
+    this->rightBoardWidth = rightBoardWidth;
+    vertexArrayRight.resize(30);
+    indexArrayRight.resize(24);
+    textureArrayRight.resize(20);
+
+    vertexArrayLeft.resize(30);
+    indexArrayLeft.resize(24);
+    textureArrayLeft.resize(20);
+
+    setVertexArray(x1, y1, x2, y2, width);
+    textureID[0] = TextureManager::getInstance()->getID(source_1);
+    textureID[1] = TextureManager::getInstance()->getID(source_2);
+
+    setTextureArray();
+    setIndexArray();
+
+    this->x1 = x1;
+    this->y1 = y1;
+    this->x2 = x2;
+    this->y2 = y2;
+
+    setIndexArrayForSelectionFrame();
+    setColorArrayForSelectionFrame(1.0f, 1.0f, 1.0f);
+
+    selected = false;
+    this->fixed = fixed;
+    layout = NULL;
+    render = NULL;
+    connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
+}
+
+RoadSimple::RoadSimple(const RoadSimple &source)
+{
+    this->description = source.description;
+    this->layer = source.layer;
+    this->name = source.name;
+    this->indexOfSelectedControl = source.indexOfSelectedControl;
+    this->texture1Source = source.texture1Source;
+    this->texture1USize = source.texture1USize;
+    this->texture1VSize = source.texture1VSize;
+    this->texture2Source = source.texture2Source;
+    this->texture2USize = source.texture2USize;
+    this->texture2VSize = source.texture2VSize;
+    this->rightBoardWidth = source.rightBoardWidth;
+    this->leftBoardWidth = source.leftBoardWidth;
+    this->showRightBoard = source.showRightBoard;
+    this->showLeftBoard = source.showLeftBoard;
+    this->useColor = source.useColor;
+    this->size = source.size;
+    this->width = source.width;
+    this->length = source.length;
+    this->rightWidth = source.rightWidth;
+    this->leftWidth = source.leftWidth;
+    this->x1 = source.x1;
+    this->y1 = source.y1;
+    this->x2 = source.x2;
+    this->y2 = source.y2;
+    this->xP1 = source.xP1;
+    this->yP1 = source.yP1;
+    this->xP2 = source.xP2;
+    this->yP2 = source.yP2;
+    this->z = source.z;
+    this->red = source.red;
+    this->green = source.green;
+    this->blue = source.blue;
+    this->alpha = source.alpha;
+
+    this->hits = source.hits;
+
+    this->selected = source.selected;
+    this->fixed = source.fixed;
+    this->layout = source.layout;
+    this->render = source.render;
+
+    textureID[0] = source.textureID[0];
+    textureID[1] = source.textureID[1];
+
+    vertexArrayRight.resize(source.vertexArrayRight.size());
+    for (int i = 0; i < vertexArrayRight.size(); ++i)
+        vertexArrayRight[i] = source.vertexArrayRight[i];
+
+    vertexArrayLeft.resize(source.vertexArrayLeft.size());
+    for (int i = 0; i < vertexArrayLeft.size(); ++i)
+        vertexArrayLeft[i] = source.vertexArrayLeft[i];
+
+    textureArrayRight.resize(source.textureArrayRight.size());
+    for (int i = 0; i < textureArrayRight.size(); ++i)
+        textureArrayRight[i] = source.textureArrayRight[i];
+
+    textureArrayLeft.resize(source.textureArrayLeft.size());
+    for (int i = 0; i < textureArrayLeft.size(); ++i)
+        textureArrayLeft[i] = source.textureArrayLeft[i];
+
+    indexArrayLeft.resize(source.indexArrayLeft.size());
+    for (int i = 0; i < indexArrayLeft.size(); ++i)
+        indexArrayLeft[i] = source.indexArrayLeft[i];
+
+    indexArrayRight.resize(source.indexArrayRight.size());
+    for (int i = 0; i < indexArrayRight.size(); ++i)
+        indexArrayRight[i] = source.indexArrayRight[i];
+
+    for (int i = 0; i < 4; ++i)
+    {
+        VertexArray[i][0] = source.VertexArray[i][0];
+        VertexArray[i][1] = source.VertexArray[i][1];
+        VertexArray[i][2] = source.VertexArray[i][2];
+
+        ColorArray[i][0] = source.ColorArray[i][0];
+        ColorArray[i][1] = source.ColorArray[i][1];
+        ColorArray[i][2] = source.ColorArray[i][2];
+        ColorArray[i][3] = source.ColorArray[i][3];
+
+        TextureArray[i][0] = source.TextureArray[i][0];
+        TextureArray[i][1] = source.TextureArray[i][1];
+
+        IndexArrayForSelection[i] = source.IndexArrayForSelection[i];
+
+        ColorArrayForSelection[i][0] = source.ColorArrayForSelection[i][0];
+        ColorArrayForSelection[i][1] = source.ColorArrayForSelection[i][1];
+        ColorArrayForSelection[i][2] = source.ColorArrayForSelection[i][2];
+    }
+    for (int i = 0; i < 2; ++i)
+    {
+        IndexArray[i][0] = source.IndexArray[i][0];
+        IndexArray[i][1] = source.IndexArray[i][1];
+        IndexArray[i][2] = source.IndexArray[i][2];
+    }
+
+    for (int i = 0; i < 8; ++i)
+    {
+        VertexArrayForSelection[i][0] = source.VertexArrayForSelection[i][0];
+        VertexArrayForSelection[i][1] = source.VertexArrayForSelection[i][1];
+        VertexArrayForSelection[i][2] = source.VertexArrayForSelection[i][2];
+    }
+
+
+
+
+
+    lines.resize(source.lines.size());
+    for (int i = 0; i < source.lines.size(); ++i)
+    {
+        lines[i].line = source.lines[i].line->getCopy();
+        lines[i].beginSide = source.lines[i].beginSide;
+        lines[i].lineType = source.lines[i].lineType;
+        lines[i].lineWidth = source.lines[i].lineWidth;
+        lines[i].rightSide = source.lines[i].rightSide;
+        lines[i].step = source.lines[i].step;
+        lines[i].beginStep = source.lines[i].beginStep;
+        lines[i].endStep = source.lines[i].endStep;
+        lines[i].differentDirections = source.lines[i].differentDirections;
+        lines[i].splitZoneWidth = source.lines[i].splitZoneWidth;
+    }
+    connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
+
+}
+
 RoadSimple::~RoadSimple()
 {
     for (int i = 0; i < lines.size(); ++i)
     {
-        int index = model->getGroup(1).indexOf(lines[i].line);
-        if (index >= 0)
-            model->getGroup(1).removeAt(index);
         delete lines[i].line;
     }
     lines.clear();
@@ -202,12 +391,12 @@ RoadSimple::~RoadSimple()
 void RoadSimple::setVertexArray(float x1, float y1, float x2, float y2, float width)
 {
     if (log)
-    Logger::getLogger()->infoLog() << "RoadSimple::setVertexArray(float x1, float y1, float x2, float y2, float width)"
-                                   << " x1 = " << x1
-                                   << " y1 = " << y1
-                                   << " x2 = " << x2
-                                   << " y2 = " << y2
-                                   << " width = " << width << "\n";
+        Logger::getLogger()->infoLog() << "RoadSimple::setVertexArray(float x1, float y1, float x2, float y2, float width)"
+                                       << " x1 = " << x1
+                                       << " y1 = " << y1
+                                       << " x2 = " << x2
+                                       << " y2 = " << y2
+                                       << " width = " << width << "\n";
     this->x1 = x1;
     this->y1 = y1;
     this->x2 = x2;
@@ -383,7 +572,7 @@ void RoadSimple::setColorArray(float red, float green, float blue, float alpha)
 void RoadSimple::setTextureArray()
 {
     if (log)
-    Logger::getLogger()->infoLog() << "RoadSimple::setTextureArray()\n";
+        Logger::getLogger()->infoLog() << "RoadSimple::setTextureArray()\n";
     GLfloat x1 = VertexArray[0][0];
     GLfloat y1 = VertexArray[0][1];
     GLfloat x2 = VertexArray[3][0];
@@ -781,14 +970,14 @@ vec3 RoadSimple::getCoordOfPoint(int index)
 void RoadSimple::setDescription(const QString &description)
 {
     if (log)
-    Logger::getLogger()->infoLog() << "RoadSimple::setDescription(const QString &description)\n";
+        Logger::getLogger()->infoLog() << "RoadSimple::setDescription(const QString &description)\n";
     this->description = description;
 }
 
 void RoadSimple::drawDescription(QGLWidget *render, float red, float green, float blue)
 {
     if (log)
-    Logger::getLogger()->infoLog() << "RoadSimple::drawDescription(QGLWidget *render, float red, float green, float blue)";
+        Logger::getLogger()->infoLog() << "RoadSimple::drawDescription(QGLWidget *render, float red, float green, float blue)";
     if (render == NULL)
     {
         if (log)
@@ -1600,11 +1789,18 @@ QJsonObject RoadSimple::getJSONInfo()
     }
     else
     {
-        //element["TextureSource"] = textureSource;
-        // element["TextureSize"] = textureSize_1;
+        element["Texture1Source"] = texture1Source;
+        element["Texture1USize"] = texture1USize;
+        element["Texture1VSize"] = texture1VSize;
+        element["Texture2Source"] = texture2Source;
+        element["Texture2USize"] = texture2USize;
+        element["Texture2VSize"] = texture2VSize;
     }
+    element["LeftWidth"] = leftWidth;
+    element["RightWidth"] = rightWidth;
+    element["LeftBoardWidth"] = leftBoardWidth;
+    element["RightBoardWidth"] = rightBoardWidth;
     element["Width"] = width;
-
     QJsonArray temp;
     temp.append(QJsonValue(x1));
     temp.append(QJsonValue(y1));
@@ -1612,7 +1808,28 @@ QJsonObject RoadSimple::getJSONInfo()
     temp.append(QJsonValue(y2));
 
     element["Vertices"] = temp;
+    element["Fixed"] = fixed;
+    element["ShowRightBoard"] = showRightBoard;
+    element["ShowLeftBoard"] = showLeftBoard;
+    element["Id"] = Id;
 
+    QJsonArray linesArray;
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        QJsonObject line;
+        line["Line"] = lines[i].line->getJSONInfo();
+        line["LineType"] = lines[i].lineType;
+        line["LineWidth"] = lines[i].lineWidth;
+        line["RightSide"] = lines[i].rightSide;
+        line["Step"] = lines[i].step;
+        line["BeginSide"] = lines[i].beginSide;
+        line["BeginStep"] = lines[i].beginStep;
+        line["EndStep"] = lines[i].endStep;
+        line["DifferentDirections"] = lines[i].differentDirections;
+        line["SplitZoneWidth"] = lines[i].splitZoneWidth;
+        linesArray.append(line);
+    }
+    element["Lines"] = linesArray;
     return element;
 
 }
@@ -1630,11 +1847,12 @@ void RoadSimple::setSelectedStatus(bool status)
 
 void RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)
 {
+
     if (log)
         Logger::getLogger()->infoLog() << "RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)\n";
     this->layout = layout;
     this->render = render;
-
+    this->clearProperties(layout);
     QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
     widthSpinBox->setKeyboardTracking(false);
     QDoubleSpinBox* lengthSpinBox = new QDoubleSpinBox();
@@ -1656,6 +1874,12 @@ void RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)
     layout->addRow("Длина", lengthSpinBox);
     layout->addRow("Ширина", widthSpinBox);
     layout->addRow("Зафиксировать", fixedCheckBox);
+
+    QCheckBox *showMeasurementsCheckBox = new QCheckBox();
+    showMeasurementsCheckBox->setChecked(showMeasurements);
+    connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setShowMeasurements(bool)));
+    connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
+    layout->addRow("Размеры", showMeasurementsCheckBox);
 
     if (render)
     {
@@ -1969,6 +2193,7 @@ void RoadSimple::setWidth(double width)
         this->leftWidth += delta;
         this->width = width;
         setVertexArray(x1, y1, x2, y2, width);
+        setTextureArray();
         //resetLines();
         emit widthChanged((double)width);
         emit rightWidthChanged((double)rightWidth);
@@ -1992,6 +2217,7 @@ void RoadSimple::setRightWidth(double width)
         this->width += delta;
         this->rightWidth = width;
         setVertexArray(x1, y1, x2, y2, width);
+        setTextureArray();
         //resetLines();
         emit rightWidthChanged((double)rightWidth);
         emit widthChanged((double)width);
@@ -2014,6 +2240,7 @@ void RoadSimple::setLeftWidth(double width)
         this->width += delta;
         this->leftWidth = width;
         setVertexArray(x1, y1, x2, y2, width);
+        setTextureArray();
         //resetLines();
         emit leftWidthChanged((double)leftWidth);
         emit widthChanged((double)width);
@@ -2034,6 +2261,7 @@ void RoadSimple::setLength(double length)
         x2 = x1 + (x2 - x1) * (length / this->length);
         y2 = y1 + (y2 - y1) * (length / this->length);
         setVertexArray(x1, y1, x2, y2, width);
+        setTextureArray();
         this->length = length;
         //resetLines();
         emit lengthChanged(length);
@@ -2069,6 +2297,7 @@ void RoadSimple::setRightBoardWidth(double width)
         return;
     rightBoardWidth = width;
     setVertexArray(x1,y1,x2,y2,this->width);
+    setTextureArrayBoard();
     emit rightBoardWidthChanged(width);
 }
 
@@ -2081,6 +2310,7 @@ void RoadSimple::setLeftBoardWidth(double width)
         return;
     leftBoardWidth = width;
     setVertexArray(x1,y1,x2,y2,this->width);
+    setTextureArrayBoard();
     emit leftBoardWidthChanged(width);
 }
 
@@ -2317,10 +2547,10 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
     line.beginSide = beginSide;
     line.differentDirections = differentDirections;
     line.line->setSelectedStatus(false);
-    lines.push_back(line);
-    model->getGroup(1).push_back(line.line);
-    if (this->layout && this->render)
-        emit linesChanged(layout, render);
+    RoadElement::undoStack->push(new AddLineCommand(this, line, render));
+//    lines.push_back(line);
+//    if (this->layout && this->render)
+//        emit linesChanged(layout, render);
 }
 
 void RoadSimple::addLine()
@@ -2384,6 +2614,13 @@ void RoadSimple::addLine()
 
     addLine(step, textSource, 6.0f, lWidth, lineType, rightSide, beginStep, endStep);
     //LineSimple *line = new LineSimple(float x1, float y1, float x2, float y2, float width, QString source, float textureSize, QString name, int layer)
+}
+
+void RoadSimple::addLine(LineLinked line)
+{
+    lines.push_back(line);
+    if (this->layout && this->render)
+        emit linesChanged(layout, render);
 }
 
 
@@ -2458,10 +2695,6 @@ void RoadSimple::deleteLine()
     if (!b) return;
     ////qDebug() << "delete line " << b->text();
     int i = b->text().toInt() - 1;
-    int index = model->getGroup(1).indexOf(lines[i].line);
-    if (index >= 0)
-        model->getGroup(1).removeAt(index);
-    delete lines[i].line;
     lines.remove(i);
 
     for (int i = 0; i < lines.size(); ++i)
@@ -2477,6 +2710,19 @@ void RoadSimple::deleteLine()
             line->setDescription(QString("Линия №") + QString::number(i + 1));
         }
     }
+    if (this->layout && this->render)
+        emit linesChanged(layout, render);
+}
+
+void RoadSimple::deleteLine(LineLinked line)
+{
+    int i;
+    for (i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].line == line.line)
+            break;
+    }
+    lines.removeAt(i);
     if (this->layout && this->render)
         emit linesChanged(layout, render);
 }
@@ -2550,6 +2796,8 @@ bool RoadSimple::isFixed()
 
 void RoadSimple::drawMeasurements(QGLWidget *render)
 {
+    if (!showMeasurements)
+        return;
     if (log)
     {
         Logger::getLogger()->infoLog() << "RoadSimple::drawMeasurements(QGLWidget *render)\n";
@@ -2688,6 +2936,13 @@ float RoadSimple::getLeftBoardWidth()
     return leftBoardWidth;
 }
 
+float RoadSimple::getLength()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::getLength()\n";
+    return length;
+}
+
 void RoadSimple::setLogging(bool status)
 {
     log = status;
@@ -2704,105 +2959,143 @@ std::vector<vec3> RoadSimple::getCoordOfControl(int index)
         Logger::getLogger()->infoLog() << "RoadSimple::getCoordOfControl(int index)"
                                        << " index = " << index << "\n";
     std::vector<vec3> res;
-    switch(index)
-    {
-    case 4:
-    {
-        vec3 p(VertexArray[0][0],
-                VertexArray[0][1],
-                VertexArray[0][2]);
-        vec3 s(VertexArray[1][0],
-                VertexArray[1][1],
-                VertexArray[1][2]);
-        res.push_back(p);
-        res.push_back(s);
 
-    }
-        break;
-    case 5:
+    int lineControls = getNumberOfControls() - 12;
+    if (index >= lineControls)
     {
-        vec3 p(VertexArray[2][0],
-                VertexArray[2][1],
-                VertexArray[2][2]);
-        vec3 s(VertexArray[3][0],
-                VertexArray[3][1],
-                VertexArray[3][2]);
-        res.push_back(p);
-        res.push_back(s);
-    }
-        break;
-    case 6:
-    {
-        vec3 p(VertexArray[0][0],
-                VertexArray[0][1],
-                VertexArray[0][2]);
-        vec3 s(VertexArray[3][0],
-                VertexArray[3][1],
-                VertexArray[3][2]);
-        res.push_back(p);
-        res.push_back(s);
-    }
-        break;
-    case 7:
-    {
-        vec3 p(VertexArray[1][0],
-                VertexArray[1][1],
-                VertexArray[1][2]);
-        vec3 s(VertexArray[2][0],
-                VertexArray[2][1],
-                VertexArray[2][2]);
-        res.push_back(p);
-        res.push_back(s);
-    }
-        break;
-    case 8:
-    {
-        if (showRightBoard)
+        index -= lineControls;
+        switch(index)
         {
-            vec3 p(vertexArrayRight[12],vertexArrayRight[13],vertexArrayRight[14]);
-            vec3 s(vertexArrayRight[27],vertexArrayRight[28],vertexArrayRight[29]);
+        case 0:
+        {
+            vec3 p(VertexArray[0][0],VertexArray[0][1],VertexArray[0][2]);
+            res.push_back(p);
+        }
+            break;
+        case 1:
+        {
+            vec3 p(VertexArray[1][0],VertexArray[1][1],VertexArray[1][2]);
+            res.push_back(p);
+        }
+            break;
+        case 2:
+        {
+            vec3 p(VertexArray[2][0],VertexArray[2][1],VertexArray[2][2]);
+            res.push_back(p);
+        }
+            break;
+        case 3:
+        {
+            vec3 p(VertexArray[3][0],VertexArray[3][1],VertexArray[3][2]);
+            res.push_back(p);
+        }
+            break;
+        case 4:
+        {
+            vec3 p(x1,y1,VertexArray[1][2]);
+            res.push_back(p);
+        }
+            break;
+        case 5:
+        {
+            vec3 p(x2,y2,VertexArray[1][2]);
+            res.push_back(p);
+        }
+            break;
+        case 6:
+        {
+            vec3 p(VertexArray[0][0],
+                    VertexArray[0][1],
+                    VertexArray[0][2]);
+            vec3 s(VertexArray[1][0],
+                    VertexArray[1][1],
+                    VertexArray[1][2]);
+            res.push_back(p);
+            res.push_back(s);
+
+        }
+            break;
+        case 7:
+        {
+            vec3 p(VertexArray[2][0],
+                    VertexArray[2][1],
+                    VertexArray[2][2]);
+            vec3 s(VertexArray[3][0],
+                    VertexArray[3][1],
+                    VertexArray[3][2]);
             res.push_back(p);
             res.push_back(s);
         }
-    }
-        break;
-    case 9:
-    {
-        if (showLeftBoard)
+            break;
+        case 8:
         {
-            vec3 p(vertexArrayLeft[12],vertexArrayLeft[13],vertexArrayLeft[14]);
-            vec3 s(vertexArrayLeft[27],vertexArrayLeft[28],vertexArrayLeft[29]);
+            vec3 p(VertexArray[0][0],
+                    VertexArray[0][1],
+                    VertexArray[0][2]);
+            vec3 s(VertexArray[3][0],
+                    VertexArray[3][1],
+                    VertexArray[3][2]);
             res.push_back(p);
             res.push_back(s);
         }
+            break;
+        case 9:
+        {
+            vec3 p(VertexArray[1][0],
+                    VertexArray[1][1],
+                    VertexArray[1][2]);
+            vec3 s(VertexArray[2][0],
+                    VertexArray[2][1],
+                    VertexArray[2][2]);
+            res.push_back(p);
+            res.push_back(s);
+        }
+            break;
+        case 10:
+        {
+            if (showRightBoard)
+            {
+                vec3 p(vertexArrayRight[12],vertexArrayRight[13],vertexArrayRight[14]);
+                vec3 s(vertexArrayRight[27],vertexArrayRight[28],vertexArrayRight[29]);
+                res.push_back(p);
+                res.push_back(s);
+            }
+        }
+            break;
+        case 11:
+        {
+            if (showLeftBoard)
+            {
+                vec3 p(vertexArrayLeft[12],vertexArrayLeft[13],vertexArrayLeft[14]);
+                vec3 s(vertexArrayLeft[27],vertexArrayLeft[28],vertexArrayLeft[29]);
+                res.push_back(p);
+                res.push_back(s);
+            }
+        }
+            break;
+
+        default:
+            break;
+        }
     }
-        break;
-    case 0:
+    else
     {
-        vec3 p(VertexArray[0][0],VertexArray[0][1],VertexArray[0][2]);
-        res.push_back(p);
-    }
-        break;
-    case 1:
-    {
-        vec3 p(VertexArray[1][0],VertexArray[1][1],VertexArray[1][2]);
-        res.push_back(p);
-    }
-        break;
-    case 2:
-    {
-        vec3 p(VertexArray[2][0],VertexArray[2][1],VertexArray[2][2]);
-        res.push_back(p);
-    }
-        break;
-    case 3:
-    {
-        vec3 p(VertexArray[3][0],VertexArray[3][1],VertexArray[3][2]);
-        res.push_back(p);
-    }
-        break;
-    default:
-        break;
+        int i;
+        for (i = 0; i < lines.size(); ++i)
+        {
+            if (index >= lines[i].line->getNumberOfControls())
+            {
+                index -= lines[i].line->getNumberOfControls();
+            }
+            else
+            {
+                break;
+            }
+        }
+        for (int j = 0; j < lines[i].line->getCoordOfControl(index).size(); ++j)
+        {
+            res.push_back(lines[i].line->getCoordOfControl(index)[j]);
+        }
     }
     return res;
 }
@@ -2814,9 +3107,9 @@ void RoadSimple::clearProperties(QLayout *layout)
         Logger::getLogger()->infoLog() << "RoadSimple::clearProperties(QLayout *layout)\n";
     if (layout == NULL)
     {
-        QMessageBox::critical(0, "Ошибка", "QLayout *layout = NULL, cannot clearProperties, program terminates");
+        QMessageBox::critical(0, "Ошибка", "RoadSimple::clearProperties(QLayout *layout) QLayout *layout = NULL, cannot clearProperties, program terminates");
         if (log)
-        Logger::getLogger()->warningLog() << "QLayout *layout = NULL, cannot clearProperties, program terminates\n";
+            Logger::getLogger()->warningLog() << "RoadSimple::clearProperties(QLayout *layout) QLayout *layout = NULL, cannot clearProperties, program terminates\n";
         QApplication::exit(0);
     }
     disconnect(stepDialog, 0, this, 0);
@@ -2852,4 +3145,151 @@ void RoadSimple::deleteLine(RoadElement *line)
     }
     if (index >=0)
         lines.remove(index);
+}
+
+
+RoadElement *RoadSimple::getCopy()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::getCopy()\n";
+    RoadSimple* copyElement = new RoadSimple(*this);
+    return copyElement;
+}
+
+
+void RoadSimple::setCoordForControl(int index, std::vector<vec3> &controls)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadSimple::setCoordForControl(int index, std::vector<vec3> &controls)"
+                                       << " index = " << index << "\n";
+
+    int lineControls = getNumberOfControls() - 12;
+    if (index >= lineControls)
+    {
+        switch(index)
+        {
+        case 0:
+        {
+            float x, y;
+            x = VertexArray[0][0];
+            y = VertexArray[0][1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 1:
+        {
+            float x, y;
+            x = VertexArray[1][0];
+            y = VertexArray[1][1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 2:
+        {
+            float x, y;
+            x = VertexArray[2][0];
+            y = VertexArray[2][1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 3:
+        {
+            float x, y;
+            x = VertexArray[3][0];
+            y = VertexArray[3][1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 4:
+        {
+            float x, y;
+            x = x1;
+            y = y1;
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 5:
+        {
+            float x, y;
+            x = x2;
+            y = y2;
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 6:
+        {
+            float x, y;
+            x = VertexArray[0][0];
+            y = VertexArray[0][1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 7:
+        {
+            float x, y;
+            x = VertexArray[2][0];
+            y = VertexArray[2][1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 8:
+        {
+            float x, y;
+            x = VertexArray[0][0];
+            y = VertexArray[0][1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 9:
+        {
+            float x, y;
+            x = VertexArray[1][0];
+            y = VertexArray[1][1];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 10:
+        {
+            float x, y;
+            x = vertexArrayRight[12];
+            y = vertexArrayRight[13];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+        case 11:
+        {
+            float x, y;
+            x = vertexArrayLeft[12];
+            y = vertexArrayLeft[13];
+            resizeByControl(index, controls[0].x - x, controls[0].y - y, x, y);
+        }
+            break;
+
+        default:
+            break;
+        }
+    }
+    else
+    {
+        int i;
+        for (i = 0; i < lines.size(); ++i)
+        {
+            if (index >= lines[i].line->getNumberOfControls())
+            {
+                index -= lines[i].line->getNumberOfControls();
+            }
+            else
+            {
+                break;
+            }
+        }
+        lines[i].line->setCoordForControl(index, controls);
+    }
+}
+
+
+
+QString RoadSimple::getName()
+{
+    return "RoadSimple";
 }

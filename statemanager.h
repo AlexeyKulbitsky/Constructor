@@ -16,8 +16,8 @@ class SelectedState;
 //class MultiSelectedState;
 //#include "multiselectedstate.h"
 
-//class RulerState;
-//#include "rulerstate.h"
+class RulerState;
+#include "rulerstate.h"
 
 class LineBuilderState;
 #include "linebuilderstate.h"
@@ -44,8 +44,6 @@ private:
     Model* model;
     Scene2D* scene;
 
-    State* currentState;
-
     bool rulerActive;
     static bool log;
 public:
@@ -53,7 +51,7 @@ public:
     DefaultState* defaultState;
     SelectedState* selectedState;
     //MultiSelectedState* multiSelectedState;
-    //RulerState* rulerState;
+    RulerState* rulerState;
     LineBuilderState* lineBuilderState;
     RoadBuilderState* roadBuilderState;
 
@@ -61,6 +59,7 @@ public:
     StepDialog* stepDialogs[10];
     //_3DsFileManager* fileManager3DS;
     //OBJFileManager* fileManagerOBJ;
+    State* currentState;
 
 public:
     void setState(State* state);
@@ -76,6 +75,11 @@ public:
     void dropEvent(QDropEvent * event);
 
     void contextMenuEvent(QContextMenuEvent *pe);
+
+    void copy();
+    void paste();
+    void cut();
+    void del();
     static void setLogging(bool status);
     static bool getLogging() { return log; }
 signals:

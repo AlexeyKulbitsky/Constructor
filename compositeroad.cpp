@@ -10,6 +10,19 @@ CompositeRoad::CompositeRoad()
     layer = 0;
 }
 
+CompositeRoad::CompositeRoad(const CompositeRoad &source)
+{
+    selected = source.selected;
+    fixed = source.fixed;
+    name = source.name;
+    layer = source.layer;
+    for (QList<RoadElement*>::const_iterator it = source.elements.begin();
+         it != source.elements.end(); ++it)
+    {
+        elements.push_back((*it)->getCopy());
+    }
+}
+
 CompositeRoad::~CompositeRoad()
 {
     for (int i = 0; i < elements.size(); ++i)
@@ -78,6 +91,8 @@ void CompositeRoad::drawSelectionFrame()
 
 void CompositeRoad::drawMeasurements(QGLWidget *render)
 {
+    if (!showMeasurements)
+        return;
     if (log)
     Logger::getLogger()->infoLog() << "CompositeRoad::drawMeasurements(QGLWidget *render)\n";
 }
@@ -251,4 +266,46 @@ void CompositeRoad::clear()
 {
     if (log)
     Logger::getLogger()->infoLog() << "CompositeRoad::clear()\n";
+}
+
+
+RoadElement *CompositeRoad::getCopy()
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "CompositeRoad::getCopy()\n";
+    CompositeRoad* copyElement = new CompositeRoad(*this);
+    return copyElement;
+}
+
+
+void CompositeRoad::clearProperties(QLayout *layout)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "CompositeRoad::clearProperties(QLayout *layout)\n";
+    while(layout->count() > 0)
+    {
+        QLayoutItem *item = layout->takeAt(0);
+        delete item->widget();
+        delete item;
+    }
+}
+
+
+QJsonObject CompositeRoad::getJSONInfo()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "CompositeRoad::getJSONInfo()\n";
+    QJsonObject element;
+
+    element["Name"] = name;
+    element["Layer"] = layer;
+    element["Fixed"] = fixed;
+    element["Id"] = Id;
+    QJsonArray tempElements;
+    for (int i = 0; i < elements.size(); ++i)
+    {
+        tempElements.append(elements[i]->getJSONInfo());
+    }
+    element["Elements"] = tempElements;
+    return element;
 }

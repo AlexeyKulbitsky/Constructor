@@ -29,6 +29,8 @@ private:
     QPoint ptrMousePosition;
     bool rightButtonIsPressed;
     bool leftButtonIsPressed;
+
+    static bool log;
     // State interface
 public:
     virtual void mousePressEvent(QMouseEvent *pe);
@@ -46,9 +48,20 @@ public:
     virtual QString getName();
     void getGlobalCoord(double wx, double wy, double wz, double &x, double &y, double &z);
     void clear();
-
+    static bool getLogging();
+    static void setLogging(bool status);
 signals:
     void rulerStatusChanged(bool status);
+
+    // State interface
+public:
+    virtual void copy();
+    virtual void paste();
+    virtual void cut();
+    virtual void del();
+    virtual void clearProperties(QFormLayout *layout);
+    bool tryToSelectFigures(QPoint mp, RoadElement*& element);
+    bool tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement* element, int& index);
 };
 
 #endif // RULERSTATE_H

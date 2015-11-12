@@ -9,6 +9,7 @@ class CompositeRoad: public RoadElement
     Q_OBJECT
 public:
     CompositeRoad();
+    CompositeRoad(const CompositeRoad& source);
     virtual ~CompositeRoad();
     // RoadElement interface
 public:
@@ -52,6 +53,18 @@ public:
     // RoadElement interface
 public:
     virtual void clear();
+
+    // RoadElement interface
+public:
+    virtual RoadElement *getCopy();
+
+    // RoadElement interface
+public:
+    virtual void clearProperties(QLayout *layout);
+
+    // RoadElement interface
+public:
+    virtual QJsonObject getJSONInfo();
 };
 
 #endif // COMPOSITEROAD_H

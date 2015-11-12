@@ -13,6 +13,7 @@ RoadBuilderState::RoadBuilderState()
     this->scene = NULL;
     this->roadBroken = NULL;
     this->properties = NULL;
+    resizeByControlCommand = NULL;
     rightButtonIsPressed = false;
     leftButtonIsPressed = false;
 
@@ -58,6 +59,7 @@ RoadBuilderState::RoadBuilderState(StateManager *manager, Model *model, Scene2D 
     }
     this->properties = properties;
     this->roadBroken = NULL;
+    resizeByControlCommand = NULL;
     rightButtonIsPressed = false;
     leftButtonIsPressed = false;
     controlIsSelected = false;
@@ -71,7 +73,7 @@ RoadBuilderState::~RoadBuilderState()
     model = NULL;
     scene = NULL;
     properties = NULL;
-
+    resizeByControlCommand = NULL;
     roadBroken = NULL;
 }
 
@@ -134,16 +136,20 @@ void RoadBuilderState::mousePressEvent(QMouseEvent *pe)
                 {
                     if (controlIndex == roadBroken->getNumberOfControls() - 1)
                     {
-                        roadBroken->addBreak(false);
+                        //roadBroken->addBreak(false);
+                        RoadElement::undoStack->push(new AddRoadBrokenBreakCommand(roadBroken, false, scene));
                         controlIndex = roadBroken->getNumberOfControls() - 1;
                     }
                     else
                         if (controlIndex == roadBroken->getNumberOfControls() - 2)
                         {
-                            roadBroken->addBreak(true);
+                            //roadBroken->addBreak(true);
+                            RoadElement::undoStack->push(new AddRoadBrokenBreakCommand(roadBroken, true, scene));
                             controlIndex = roadBroken->getNumberOfControls() - 2;
                         }
                 }
+                if (resizeByControlCommand == NULL)
+                    resizeByControlCommand = new ResizeByControlCommand(roadBroken,controlIndex, scene);
                 scene->setCursor(roadBroken->getCursorForControlElement(controlIndex));
                 scene->updateGL();
             }
@@ -151,18 +157,19 @@ void RoadBuilderState::mousePressEvent(QMouseEvent *pe)
             {
                 if (this->tryToSelectFigures(ptrMousePosition) == true)
                 {
+                    oldX = (GLdouble)ptrMousePosition.x()/
+                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+                    oldY = (GLdouble)(scene->height() -  ptrMousePosition.y())/
+                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
                     scene->setCursor(Qt::SizeAllCursor);
                     scene->updateGL();
                 }
                 else
                 {
                     // Переключить в состояние по умолчанию
-                    roadBroken->setSelectedStatus(false);
-                    //roadBroken->clearProperties(properties);
                     clear();
                     scene->setMouseTracking(false);
                     scene->setCursor(Qt::ArrowCursor);
-                    clearProperties(properties);
                     scene->updateGL();
                     stateManager->setState(stateManager->defaultState);
                 }
@@ -280,6 +287,20 @@ void RoadBuilderState::mouseReleaseEvent(QMouseEvent *pe)
     }
     if(pe->button() == Qt::LeftButton)
     {
+        if (controlIsSelected)
+        {
+            resizeByControlCommand->setNewPosition();
+            RoadElement::undoStack->push(resizeByControlCommand);
+            resizeByControlCommand = NULL;
+        }
+        else
+        {
+            newX = (GLdouble)pe->x()/
+                    scene->width()/(scene->nSca * scene->ratio) * 2.0;
+            newY = (GLdouble)(scene->height() -  pe->y())/
+                    scene->width()/(scene->nSca * scene->ratio) * 2.0;
+            RoadElement::undoStack->push(new MoveCommand(roadBroken, oldX, oldY, newX, newY, scene));
+        }
         leftButtonIsPressed = false;
         controlIsSelected = false;
         controlIndex = -1;
@@ -356,43 +377,8 @@ void RoadBuilderState::keyPressEvent(QKeyEvent *pe)
         break;
     case Qt::Key_Return:
         s = "Qt::Key_Return";
-       // roadBroken->setSelectedStatus(false);
-       // scene->setCursor(Qt::ArrowCursor);
-       // model->getGroup(layer).push_back(roadBroken);
-       // model->getGroup(model->getNumberOfGroups() - 1).pop_back();
-       // roadBroken = NULL;
-       // stateManager->setState(stateManager->defaultState);
         break;
 
-    case Qt::Key_Delete:
-        s = "Qt::Key_Delete";
-        //model->getGroup(model->getNumberOfGroups() - 1).pop_back();
-       // model->getGroup(layer).pop_back();
-       // scene->setCursor(Qt::ArrowCursor);
-       // delete roadBroken;
-       // roadBroken = NULL;
-       // clearProperties(properties);
-       // stateManager->setState(stateManager->defaultState);
-       // break;
-/////////////////////////////
-
-    {
-        QList<RoadElement*>::iterator it = model->getGroup(groupIndex).begin();
-        for (int j = 0; j < elementIndex; ++j)
-            ++it;
-        (*it)->clear();
-        delete (*it);
-        model->getGroup(groupIndex).erase(it);
-        clearProperties(properties);
-        scene->updateGL();
-        groupIndex = -1;
-        elementIndex = -1;
-
-        scene->setMouseTracking(false);
-        scene->setCursor(Qt::ArrowCursor);
-        stateManager->setState(stateManager->defaultState);
-    }
-        break;
     default:
         break;
     }
@@ -686,6 +672,11 @@ void RoadBuilderState::clear()
 {
     if (log)
     Logger::getLogger()->infoLog() << "RoadBuilderState::clear()\n";
+    if (roadBroken)
+    {
+        roadBroken->setSelectedStatus(false);
+        roadBroken->clearProperties(properties);
+    }
     roadBroken = NULL;
     rightButtonIsPressed = false;
     leftButtonIsPressed = false;
@@ -694,6 +685,8 @@ void RoadBuilderState::clear()
     controlIndex = -1;
     groupIndex = -1;
     elementIndex = -1;
+    resizeByControlCommand = NULL;
+    layer = -1;
 }
 
 void RoadBuilderState::setRoad(RoadBroken *roadBroken)
@@ -716,4 +709,37 @@ void RoadBuilderState::contextMenuEvent(QContextMenuEvent *pe)
 {
     if (log)
     Logger::getLogger()->infoLog() << "RoadBuilderState::contextMenuEvent(QContextMenuEvent *pe)\n";
+}
+
+
+void RoadBuilderState::copy()
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::copy()\n";
+    QClipboard *buffer = QApplication::clipboard();
+    RoadElementMimeData* data = new RoadElementMimeData(roadBroken);
+    buffer->setMimeData(data);
+}
+
+void RoadBuilderState::paste()
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::paste()\n";
+    RoadElement::undoStack->push(new PasteCommand(stateManager,properties,scene,model));
+}
+
+
+void RoadBuilderState::cut()
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::cut()\n";
+    copy();
+    del();
+}
+
+void RoadBuilderState::del()
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "RoadBuilderState::del()\n";
+    RoadElement::undoStack->push(new DeleteCommand(roadBroken, model, stateManager, properties, groupIndex, elementIndex, scene));
 }

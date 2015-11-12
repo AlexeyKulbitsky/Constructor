@@ -26,14 +26,15 @@ MainWindow::MainWindow(QWidget *parent) :
 {    
     Logger::getLogger()->startLogging();
     ui->setupUi(this);
-
+    model = new Model(this);
+    jsonFileManager = new JSONFileManager(model);
+    setFileManager(jsonFileManager);
     settingsDialog = new SettingsDialog(&settings, this);
 
-
-    RoadElement::undoStack = new QUndoStack(this);
+    RoadElement::undoStack = new QUndoStack();////////////????????????????????????
     undoStack = RoadElement::undoStack;
 
-    model = new Model(this);
+
 
     propertiesDockWidget = new QDockWidget("Инспектор", this);
     propertiesDockWidget->setFeatures(QDockWidget::DockWidgetMovable |
@@ -97,27 +98,19 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(on_tabWidget_currentChanged(int)));
 
 
-    //Scene2D* scene2D = new Scene2D(view);
-    //scene2D->show();
 
     /*
-    ui->scene2D->setProperties(propertiesLayout);
-    ui->scene2D->setModel(model);
-    ui->scene3D->setModel(model);
-    ui->scene2D->setAcceptDrops(true);
-    ui->scene2D->setFocus();
     ui->tabWidget->setFocusPolicy(Qt::StrongFocus);
     */
 
     createActions();
     createMenu();
-
-     /*
     createToolBar();
-    jsonFileManager = new JSONFileManager(model);
-    setFileManager(jsonFileManager);
 
 
+
+
+    /*
 
 
 
@@ -215,17 +208,19 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete undoStack;
+    undoStack = NULL;
+    RoadElement::undoStack = undoStack;
     settingsDialog->saveLogTreeSettings();
     writeSettings();
     Logger::getLogger()->stopLogging();
     Logger::deleteLogger();
-
     delete ui;
 }
 
 void MainWindow::createMenu()
 {
-    /*
+
     fileMenu = menuBar()->addMenu(tr("&Файл"));
     fileMenu->addAction(newAction);
     fileMenu->addSeparator();
@@ -234,16 +229,19 @@ void MainWindow::createMenu()
     fileMenu->addAction(saveAsAction);
     fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
-    */
+
 
     editMenu = menuBar()->addMenu(tr("&Правка"));
     editMenu->addAction(undoAction);
     editMenu->addAction(redoAction);
-    /*
+    editMenu->addSeparator();
     editMenu->addAction(copyAction);
-    editMenu->addAction(cutAction);
     editMenu->addAction(pasteAction);
+    editMenu->addAction(cutAction);
     editMenu->addAction(deleteAction);
+
+
+
 
     toolsMenu = menuBar()->addMenu(tr("&Инструменты"));
     toolsMenu->addAction(showGridAction);
@@ -252,7 +250,7 @@ void MainWindow::createMenu()
     toolsMenu->addAction(showProperties);
 
     contextMenu = new QMenu(this);
-    */
+
 
     optionsMenu = menuBar()->addMenu(tr("&Настройки"));
     optionsMenu->addAction(optionsAction);
@@ -268,7 +266,7 @@ void MainWindow::createActions()
     redoAction = undoStack->createRedoAction(this, tr("&Повторить"));
     redoAction->setShortcuts(QKeySequence::Redo);
 
-    /*
+
     newAction = new QAction(tr("&Новый"), this);
     //newAction->setIcon(QIcon(":/images/new.png"));
     newAction->setShortcut(QKeySequence::New);
@@ -300,22 +298,22 @@ void MainWindow::createActions()
     copyAction = new QAction(tr("&Копировать"), this);
     copyAction->setShortcut(QKeySequence::Copy);
     copyAction->setStatusTip(tr("Скопировать объект в буфер обмена"));
-    //connect(copyAction, SIGNAL(triggered()), this, SLOT(saveFile()));
+    connect(copyAction, SIGNAL(triggered()), scene2D, SLOT(copy()));
 
     cutAction = new QAction(tr("&Вырезать"), this);
     cutAction->setShortcut(QKeySequence::Cut);
     cutAction->setStatusTip(tr("Вырезать объект"));
-    //connect(cutAction, SIGNAL(triggered()), this, SLOT(saveFile()));
+    connect(cutAction, SIGNAL(triggered()), scene2D, SLOT(cut()));
 
     pasteAction = new QAction(tr("&Вставить"), this);
     pasteAction->setShortcut(QKeySequence::Paste);
     pasteAction->setStatusTip(tr("Вставить объект из буфера обмена"));
-    //connect(pasteAction, SIGNAL(triggered()), this, SLOT(saveFile()));
+    connect(pasteAction, SIGNAL(triggered()), scene2D, SLOT(paste()));
 
     deleteAction = new QAction(tr("&Удалить"), this);
-    //deleteAction->setShortcut(QKeySequence::Delete);
+    deleteAction->setShortcut(QKeySequence::Delete);
     deleteAction->setStatusTip(tr("Удалить объект"));
-    //connect(deleteAction, SIGNAL(triggered()), this, SLOT(saveFile()));
+    connect(deleteAction, SIGNAL(triggered()), scene2D, SLOT(del()));
 
     ///////////////////////////////////////////
 
@@ -348,8 +346,8 @@ void MainWindow::createActions()
     rulerAction->setIcon(QIcon("://icons/ruler.png"));
     rulerAction->setCheckable(true);
     rulerAction->setChecked(false);
-    //connect(rulerAction, SIGNAL(toggled(bool)), ui->scene2D, SLOT(setRulerActive(bool)));
-    //connect(ui->scene2D, SIGNAL(rulerStatusChanged(bool)), rulerAction, SLOT(setChecked(bool)));
+    connect(rulerAction, SIGNAL(toggled(bool)), scene2D, SLOT(setRulerActive(bool)));
+    connect(scene2D, SIGNAL(rulerStatusChanged(bool)), rulerAction, SLOT(setChecked(bool)));
 
     showProperties = new QAction(tr("Инспектор объектов"), this);
     showProperties->setStatusTip(tr("Отображать/прятать инспектор объектов"));
@@ -357,7 +355,7 @@ void MainWindow::createActions()
     showProperties->setChecked(true);
     showProperties->setShortcut(tr("Ctrl+I"));
     connect(showProperties, SIGNAL(toggled(bool)), propertiesDockWidget, SLOT(setVisible(bool)));
-    */
+
     optionsAction = new QAction(tr("Настройки"), this);
     optionsAction->setStatusTip(tr("Показать настройки приложения"));
     connect(optionsAction, SIGNAL(triggered()), settingsDialog, SLOT(exec()));
@@ -365,7 +363,7 @@ void MainWindow::createActions()
 
 void MainWindow::createToolBar()
 {
-    //ui->mainToolBar->addAction(rulerAction);
+    ui->mainToolBar->addAction(rulerAction);
 }
 
 MainWindow::readSettings()
@@ -392,7 +390,7 @@ MainWindow::writeSettings()
 
 void MainWindow::newFile()
 {
-    /*
+
     if (model->isModified())
     {
         int r = QMessageBox::warning(this, tr("Spreadsheet"),
@@ -406,8 +404,8 @@ void MainWindow::newFile()
         }
     }
     model->clear();
-    ui->scene2D->updateGL();
-    */
+    scene2D->updateGL();
+
 }
 
 
@@ -415,8 +413,8 @@ void MainWindow::newFile()
 
 void MainWindow::openFile()
 {
-    /*
-    QString fileName = QFileDialog::getOpenFileName(this, tr("0pen Spreadsheet"),".",
+
+    QString fileName = QFileDialog::getOpenFileName(this, tr("0pen Spreadsheet"),QApplication::applicationDirPath(),
                                                     tr("Spreadsheet files (*.json)"));
 
     if (fileManager->openFile(fileName))
@@ -427,13 +425,13 @@ void MainWindow::openFile()
     {
         ui->statusBar->showMessage("Не удалось загрузить файл");
     }
-    */
+
 }
 
 void MainWindow::saveFile()
 {
-    /*
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Document"), QDir::currentPath(), tr("JSON files (*.json)") );
+
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Document"), QApplication::applicationDirPath(), tr("JSON files (*.json)") );
 
     if (fileManager->saveFile(fileName))
     {
@@ -443,15 +441,19 @@ void MainWindow::saveFile()
     {
         ui->statusBar->showMessage("Не удалось сохранить файл");
     }
-    */
+
 }
 
-/*
+
+
+
 void MainWindow::setFileManager(FileManager *manager)
 {
-    //fileManager = manager;
+    fileManager = manager;
 }
-*/
+
+
+
 
 
 void MainWindow::on_tabWidget_currentChanged(int index)
@@ -463,6 +465,7 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         scene2D->getProperties(scenePropertiesLayout);
         break;
     case 1:
+        scene3D->getProperties(scenePropertiesLayout);
         break;
     case 2:
 

@@ -1,5 +1,7 @@
 #include "roadelement.h"
 
+bool RoadElement::Ids[SIZE] = {false};
+
 QUndoStack* RoadElement::undoStack = NULL;
 
 std::vector<vec3> RoadElement::getCoordOfControl(int index)
@@ -8,7 +10,7 @@ std::vector<vec3> RoadElement::getCoordOfControl(int index)
 }
 
 
-void RoadElement::setCoordForControl(int index)
+void RoadElement::setCoordForControl(int index, std::vector<vec3> &controls)
 {
 
 }
@@ -80,9 +82,23 @@ RoadElement *RoadElement::getElement(int index)
 }
 
 
+RoadElement::RoadElement()
+{
+    for (int i = 0; i < SIZE; ++i)
+    {
+        if (Ids[i] == false)
+        {
+            Id = i;
+            Ids[i] = true;
+            break;
+        }
+    }
+    showMeasurements = true;
+}
+
 RoadElement::~RoadElement()
 {
-
+    Ids[Id] = false;
 }
 
 
@@ -138,4 +154,74 @@ void RoadElement::getWorldCoord(double x, double y, double z, double &wx, double
     glGetDoublev(GL_PROJECTION_MATRIX,projmatrix);
     y = viewport[3]-y;
     gluUnProject(x, y, z, mvmatrix, projmatrix, viewport, &wx, &wy, &wz);
+}
+
+void RoadElement::setId(int Id)
+{
+    Ids[this->Id] = false;
+    this->Id = Id;
+    Ids[Id] = true;
+}
+
+RoadElement::setShowMeasurements(bool status)
+{
+    showMeasurements = status;
+}
+
+
+RoadElementMimeData::RoadElementMimeData(RoadElement *element)
+{
+    this->elements << element->getCopy();
+    myFormats << "constructor/roadelement";
+}
+
+RoadElementMimeData::RoadElementMimeData(QList<RoadElement *> &elements)
+{
+    for (int i = 0; i < elements.size(); ++i)
+        this->elements << elements[i]->getCopy();
+    myFormats << "constructor/roadelement";
+}
+
+RoadElementMimeData::RoadElementMimeData()
+{
+    myFormats << "constructor/roadelement";
+}
+
+RoadElementMimeData::~RoadElementMimeData()
+{
+    //QMessageBox::about(0, "JHF","RoadElementMimeData::~RoadElementMimeData()");
+    for (int i = 0; i < elements.size(); ++i)
+    {
+        if (elements[i])
+            delete elements[i];
+        elements[i] = NULL;
+    }
+}
+
+QList<RoadElement *> RoadElementMimeData::getElements() const
+{
+    return elements;
+}
+
+
+QVariant RoadElementMimeData::retrieveData(const QString &mimetype, QVariant::Type preferredType) const
+{
+    if (mimetype == "constructor/roadelement")
+        return QVariant::fromValue(elements);
+    else
+        return QMimeData::retrieveData(mimetype, preferredType);
+}
+
+QStringList RoadElementMimeData::formats() const
+{
+    return myFormats;
+}
+
+
+bool RoadElementMimeData::hasFormat(const QString &mimetype) const
+{
+    if (mimetype == "constructor/roadelement")
+        return true;
+    else
+        return false;
 }

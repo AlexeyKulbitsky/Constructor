@@ -34,6 +34,14 @@ public:
                QString source_2, float textureSize_2_Usize, float textureSize_2_Vsize,
                QString name, int layer,
                QString description = '\0');
+    RoadSimple(float x1, float y1, float x2, float y2,
+               float leftWidth, float rightWidth, float leftBoardWidth, float rightBoardWidth,
+               bool showRightBoard, bool showLeftBoard,
+               QString source_1, float textureSize_1_Usize, float textureSize_1_Vsize,
+               QString source_2, float textureSize_2_Usize, float textureSize_2_Vsize,
+               QString name, int layer, bool fixed,
+               QString description = '\0');
+    RoadSimple(const RoadSimple& source);
     virtual ~RoadSimple();
 
     void setVertexArray(float x1, float y1, float x2, float y2, float width);
@@ -145,7 +153,7 @@ public:
     float getRightBoardWidth();
     float getLeftBoardWidth();
     static bool getLogging() { return log; }
-
+    float getLength();
 signals:
     void widthChanged(double width);
     void lengthChanged(double length);
@@ -169,6 +177,7 @@ public slots:
 
     void addLine(float step, QString textureSource, float textureSize, float lineWidth, int lineType, bool rightSide, float beginStep, float endStep);
     void addLine();
+    void addLine(LineLinked line);
 
     void setRightSide(bool status);
     void setBeginSide(bool status);
@@ -178,6 +187,7 @@ public slots:
     void setStep(double value);
     void setLineType(int type);
     void deleteLine();
+    void deleteLine(LineLinked line);
     void setBeginStep(double step);
     void setEndStep(double step);
     void setSplitZoneWidth(double value);
@@ -200,6 +210,18 @@ public:
     // RoadElement interface
 public:
     virtual void deleteLine(RoadElement *line);
+
+    // RoadElement interface
+public:
+    virtual RoadElement *getCopy();
+
+    // RoadElement interface
+public:
+    virtual void setCoordForControl(int index, std::vector<vec3> &controls);
+
+    // RoadElement interface
+public:
+    virtual QString getName();
 };
 
 #endif // ROADSIMPLE_H

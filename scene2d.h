@@ -93,6 +93,7 @@ public:
     void drawModel();
     static bool getLogging();
 
+
 signals:
     //void selectedFigureChanged(RoadElement* roadElement);
     void rulerStatusChanged(bool status);
@@ -116,6 +117,10 @@ public slots:
     void setSceneActive(bool status);
     void setFixedScaleStatus(bool status);
     static void setLogging(bool status);
+    void copy();
+    void paste();
+    void cut();
+    void del();
 private:
     StateManager* stateManager;
     Model* model;

@@ -12,6 +12,7 @@ public:
     RailWay();
     RailWay(float* axisArray, int size, QString textureSource, float textureUsize, float textureVsize);
     RailWay(QVector<float>& axisArray, QString textureSource, float textureUsize, float textureVsize);
+    RailWay(const RailWay& source);
     ~RailWay();
 
 public:
@@ -33,6 +34,7 @@ public:
     virtual void clear();
 
     virtual void addBreak(bool front);
+    virtual void deleteBreak(bool front);
     void setVertexArray();
     void setTextureArray(float textureUsize, float textureVsize);
     void setIndexArray();
@@ -49,6 +51,7 @@ private:
     bool selected, fixed;
     int layer;
     int textureID[1];
+    QString texture;
     float textureVsize, textureUsize;
     QVector<GLfloat> axisVertexArray;
     QVector<GLfloat> vertexArray;
@@ -56,6 +59,23 @@ private:
     QVector<GLuint> indexArray;
 
     static bool log;
+
+    // RoadElement interface
+public:
+    virtual RoadElement *getCopy();
+
+    // RoadElement interface
+public:
+    virtual std::vector<vec3> getCoordOfControl(int index);
+    virtual void setCoordForControl(int index, std::vector<vec3> &controls);
+
+    // RoadElement interface
+public:
+    virtual void clearProperties(QLayout *layout);
+
+    // RoadElement interface
+public:
+    virtual QJsonObject getJSONInfo();
 };
 
 #endif // RAILWAY_H

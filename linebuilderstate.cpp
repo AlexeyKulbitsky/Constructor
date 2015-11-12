@@ -10,6 +10,7 @@ LineBuilderState::LineBuilderState()
     this->scene = NULL;
     this->properties = NULL;
     lineBroken = NULL;
+    resizeByControlCommand = NULL;
     scene->setMouseTracking(true);
     rightButtonIsPressed = false;
     leftButtonIsPressed = false;
@@ -55,6 +56,7 @@ LineBuilderState::LineBuilderState(StateManager *manager, Model *model, Scene2D 
     }
     this->properties = properties;
     lineBroken = NULL;
+    resizeByControlCommand = NULL;
     scene->setMouseTracking(true);
     rightButtonIsPressed = false;
     leftButtonIsPressed = false;
@@ -127,13 +129,15 @@ void LineBuilderState::mousePressEvent(QMouseEvent *pe)
                 {
                     if (controlIndex == lineBroken->getNumberOfControls() - 1)
                     {
-                        lineBroken->addBreak(false);
+                        //lineBroken->addBreak(false);
+                        RoadElement::undoStack->push(new AddLineBrokenBreakCommand(lineBroken, false, scene));
                         controlIndex = lineBroken->getNumberOfControls() - 1;
                     }
                     else
                         if (controlIndex == 0)
                         {
-                            lineBroken->addBreak(true);
+                            //lineBroken->addBreak(true);
+                            RoadElement::undoStack->push(new AddLineBrokenBreakCommand(lineBroken, true, scene));
                             controlIndex = 0;
                         }
                 }
@@ -141,6 +145,8 @@ void LineBuilderState::mousePressEvent(QMouseEvent *pe)
                 default:
                     break;
                 }
+                if (resizeByControlCommand == NULL)
+                    resizeByControlCommand = new ResizeByControlCommand(lineBroken,controlIndex, scene);
                 scene->setCursor(lineBroken->getCursorForControlElement(controlIndex));
                 scene->updateGL();
             }
@@ -148,17 +154,19 @@ void LineBuilderState::mousePressEvent(QMouseEvent *pe)
             {
                 if (this->tryToSelectFigures(ptrMousePosition) == true)
                 {
+                    oldX = (GLdouble)ptrMousePosition.x()/
+                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+                    oldY = (GLdouble)(scene->height() -  ptrMousePosition.y())/
+                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
                     scene->setCursor(Qt::SizeAllCursor);
                     scene->updateGL();
                 }
                 else
                 {
                     // Переключить в состояние по умолчанию
-                    lineBroken->setSelectedStatus(false);
                     clear();
                     scene->setMouseTracking(false);
                     scene->setCursor(Qt::ArrowCursor);
-                    clearProperties(properties);
                     scene->updateGL();
                     stateManager->setState(stateManager->defaultState);
                 }
@@ -270,6 +278,20 @@ void LineBuilderState::mouseReleaseEvent(QMouseEvent *pe)
     }
     if(pe->button() == Qt::LeftButton)
     {
+        if (controlIsSelected)
+        {
+            resizeByControlCommand->setNewPosition();
+            RoadElement::undoStack->push(resizeByControlCommand);
+            resizeByControlCommand = NULL;
+        }
+        else
+        {
+            newX = (GLdouble)pe->x()/
+                    scene->width()/(scene->nSca * scene->ratio) * 2.0;
+            newY = (GLdouble)(scene->height() -  pe->y())/
+                    scene->width()/(scene->nSca * scene->ratio) * 2.0;
+            RoadElement::undoStack->push(new MoveCommand(lineBroken, oldX, oldY, newX, newY, scene));
+        }
         leftButtonIsPressed = false;
         controlIsSelected = false;
         controlIndex = -1;
@@ -354,36 +376,36 @@ void LineBuilderState::keyPressEvent(QKeyEvent *pe)
        // stateManager->setState(stateManager->defaultState);
         break;
 
-    case Qt::Key_Delete:
-        s = "Qt::Key_Delete";
-        //model->getGroup(model->getNumberOfGroups() - 1).pop_back();
-       // model->getGroup(layer).pop_back();
-       // scene->setCursor(Qt::ArrowCursor);
-       // delete roadBroken;
-       // roadBroken = NULL;
-       // clearProperties(properties);
-       // stateManager->setState(stateManager->defaultState);
-       // break;
-/////////////////////////////
+//    case Qt::Key_Delete:
+//        s = "Qt::Key_Delete";
+//        //model->getGroup(model->getNumberOfGroups() - 1).pop_back();
+//       // model->getGroup(layer).pop_back();
+//       // scene->setCursor(Qt::ArrowCursor);
+//       // delete roadBroken;
+//       // roadBroken = NULL;
+//       // clearProperties(properties);
+//       // stateManager->setState(stateManager->defaultState);
+//       // break;
+///////////////////////////////
 
-    {
-        QList<RoadElement*>::iterator it = model->getGroup(groupIndex).begin();
-        for (int j = 0; j < elementIndex; ++j)
-            ++it;
-        (*it)->clear();
-        delete (*it);
-        model->getGroup(groupIndex).erase(it);
-        clearProperties(properties);
-        scene->updateGL();
-        groupIndex = -1;
-        elementIndex = -1;
-        key = -1;
-        scene->setMouseTracking(false);
-        scene->setCursor(Qt::ArrowCursor);
-        lineBroken = NULL;
-        stateManager->setState(stateManager->defaultState);
-    }
-        break;
+//    {
+//        QList<RoadElement*>::iterator it = model->getGroup(groupIndex).begin();
+//        for (int j = 0; j < elementIndex; ++j)
+//            ++it;
+//        (*it)->clear();
+//        delete (*it);
+//        model->getGroup(groupIndex).erase(it);
+//        clearProperties(properties);
+//        scene->updateGL();
+//        groupIndex = -1;
+//        elementIndex = -1;
+//        key = -1;
+//        scene->setMouseTracking(false);
+//        scene->setCursor(Qt::ArrowCursor);
+//        lineBroken = NULL;
+//        stateManager->setState(stateManager->defaultState);
+//    }
+//        break;
     default:
         break;
     }
@@ -659,8 +681,12 @@ void LineBuilderState::clear()
 {
     if (log)
     Logger::getLogger()->infoLog() << "LineBuilderState::clear()\n";
+    if (lineBroken)
+    {
+        lineBroken->setSelectedStatus(false);
+        lineBroken->clearProperties(properties);
+    }
     lineBroken = NULL;
-    ptrMousePosition;
     rightButtonIsPressed = false;
     leftButtonIsPressed = false;
     controlIndex = 1;
@@ -669,6 +695,8 @@ void LineBuilderState::clear()
     controlIsSelected = false;
     key = -1;
     linking = false;
+    resizeByControlCommand = NULL;
+    layer = -1;
 }
 
 void LineBuilderState::setLogging(bool status)
@@ -732,4 +760,37 @@ void LineBuilderState::setLinking(bool state)
     if (log)
     Logger::getLogger()->infoLog() << "LineBuilderState::setLinking(bool state)\n";
     this->linking = state;
+}
+
+
+void LineBuilderState::copy()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "LineBuilderState::copy()\n";
+    QClipboard *buffer = QApplication::clipboard();
+    RoadElementMimeData* data = new RoadElementMimeData(lineBroken);
+    buffer->setMimeData(data);
+}
+
+void LineBuilderState::paste()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "LineBuilderState::paste()\n";
+    RoadElement::undoStack->push(new PasteCommand(stateManager,properties,scene,model));
+}
+
+
+void LineBuilderState::cut()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "LineBuilderState::cut()\n";
+    copy();
+    del();
+}
+
+void LineBuilderState::del()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "LineBuilderState::del()\n";
+    RoadElement::undoStack->push(new DeleteCommand(lineBroken, model, stateManager, properties, groupIndex, elementIndex, scene));
 }

@@ -18,18 +18,18 @@ SOURCES += main.cpp\
     roundingroad.cpp \
     objectslist.cpp \
     linesimple.cpp \
-#    ruler.cpp \
+    ruler.cpp \
     roadsimple.cpp \
     linebroken.cpp \
     statemanager.cpp \
     model.cpp \
     defaultstate.cpp \
     selectedstate.cpp \
-#    rulerstate.cpp \
+    rulerstate.cpp \
     linebuilderstate.cpp \
     roadbuilderstate.cpp \
     roadbroken.cpp \
-#    jsonfilemanager.cpp \
+    jsonfilemanager.cpp \
     scene2d.cpp \
     scene3d.cpp \
     compositeroad.cpp \
@@ -56,7 +56,8 @@ SOURCES += main.cpp\
     overlayedmapswidget.cpp \
     yandexmapsview.cpp \
     googlemapsview.cpp \
-    settingsdialog.cpp
+    settingsdialog.cpp \
+    filemanager.cpp
 
 
 
@@ -67,7 +68,7 @@ HEADERS  += mainwindow.h\
     roundingroad.h \
     objectslist.h \
     linesimple.h \
-#    ruler.h \
+    ruler.h \
     roadsimple.h \
     linebroken.h \
     statemanager.h \
@@ -75,12 +76,12 @@ HEADERS  += mainwindow.h\
     model.h \
     defaultstate.h \
     selectedstate.h \
-#    rulerstate.h \
+    rulerstate.h \
     linebuilderstate.h \
     roadbuilderstate.h \
     roadbroken.h \
-#    filemanager.h \
-#    jsonfilemanager.h \
+    filemanager.h \
+    jsonfilemanager.h \
     scene2d.h \
     scene3d.h \
     compositeroad.h \

@@ -1,6 +1,7 @@
 #include "scene3d.h"
 #include <QtGui>
 #include <math.h>
+#include <QColorDialog>
 
 bool Scene3D::log = true;
 
@@ -84,6 +85,34 @@ void Scene3D::rotateRight()
     if (log)
     Logger::getLogger()->infoLog() << "Scene3D::rotate_right()\n";
     zRot -= 1.0;
+}
+
+void Scene3D::getProperties(QFormLayout *layout)
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::getProperties(QFormLayout *layout)\n";
+    if (layout == NULL)
+    {
+        QMessageBox::critical(0, "Ошибка", "Scene3D::getProperties(QFormLayout *layout) layout = NULL",
+                              QMessageBox::Yes);
+        if (log)
+            Logger::getLogger()->errorLog() << "Scene3D::getProperties(QFormLayout *layout) layout = NULL\n";
+        QApplication::exit(0);
+    }
+    this->layout = layout;
+    while(layout->count() > 0)
+    {
+        QLayoutItem *item = layout->takeAt(0);
+        delete item->widget();
+        delete item;
+    }
+
+    QPushButton* backgroundColorButton = new QPushButton();
+    QString style = "background: rgba(%1, %2, %3, %4);";
+    backgroundColorButton->setStyleSheet(style.arg(backgroundColor.red()).arg(backgroundColor.green()).arg(backgroundColor.blue()).arg(backgroundColor.alpha()));
+    connect(backgroundColorButton, SIGNAL(clicked(bool)), this, SLOT(setBackGroundColor()));
+
+    layout->addRow("Цвет фона", backgroundColorButton);
 }
 
 
@@ -260,7 +289,8 @@ void Scene3D::paintGL()
 {
     if (log)
     Logger::getLogger()->infoLog() << "Scene3D::paintGL()\n";
-    glClearColor(0.9, 0.9, 0.9, 1);
+    //glClearColor(0.9, 0.9, 0.9, 1);
+    qglClearColor(backgroundColor);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       // Позиция света
@@ -275,6 +305,7 @@ void Scene3D::paintGL()
     GLfloat LightSpecular[]= { 1.0f, 1.0f, 1.0f, 1.0f }; // Значения фонового света ( НОВОЕ )
     GLfloat LightDiffuse[]= { 1.0f, 1.0f, 1.0f, 1.0f }; // Значения диффузного света ( НОВОЕ )
     GLfloat LightPosition[]= { 0.0f, 0.0f, 2000.0f, 0.0f };     // Позиция света ( НОВОЕ )
+
 
     glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);    // Установка Фонового Света
     glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);    // Установка Диффузного Света
@@ -317,5 +348,12 @@ void Scene3D::setLogging(bool status)
     Logger::getLogger()->infoLog() << "Scene3D::setLogging(bool status)"
                                    << " status = " << status << "\n";
     Logger::getLogger()->infoLog() << "--------------------\n";
+}
+
+void Scene3D::setBackGroundColor()
+{
+    backgroundColor = QColorDialog::getColor(backgroundColor);
+    getProperties(layout);
+    updateGL();
 }
 

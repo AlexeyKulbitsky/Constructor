@@ -42,6 +42,7 @@ public:
               QString texture_2,
               float texture2USize, float texture2VSize,
               QString description = '\0');
+    SplitZone(const SplitZone& source);
     virtual ~SplitZone();
     // RoadElement interface
 public:
@@ -107,7 +108,7 @@ private:
     int textureID[2];
     float texture1USize, texture1VSize;
     float texture2USize, texture2VSize;
-
+    QString texture1, texture2;
     static bool log;
 
 public:
@@ -131,9 +132,26 @@ public:
     void drawDescription(QGLWidget* render = 0, float red = 1.0f, float green = 1.0f, float blue = 1.0f);
     void rotate(float angle, float x, float y, float z);
     void addBreak(bool front);
-
+    void deleteBreak(bool front);
     static bool getLogging() { return log; }
     static void setLogging(bool status);
+
+    // RoadElement interface
+public:
+    virtual RoadElement *getCopy();
+
+    // RoadElement interface
+public:
+    virtual std::vector<vec3> getCoordOfControl(int index);
+    virtual void setCoordForControl(int index, std::vector<vec3> &controls);
+
+    // RoadElement interface
+public:
+    virtual void clearProperties(QLayout *layout);
+
+    // RoadElement interface
+public:
+    virtual QJsonObject getJSONInfo();
 };
 
 #endif // SPLITZONE_H

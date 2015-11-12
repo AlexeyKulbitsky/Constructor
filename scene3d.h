@@ -24,6 +24,7 @@ public:
     void rotateDown();
     void rotateLeft();
     void rotateRight();
+    void getProperties(QFormLayout* layout);
     static bool getLogging() { return log; }
     // QWidget interface
 protected:
@@ -44,6 +45,8 @@ signals:
 
 public slots:
     static void setLogging(bool status);
+    void setBackGroundColor();
+
 public:
     bool rightButtonIsPressed;
     bool leftButtonIsPressed;
@@ -68,7 +71,8 @@ public:
 private:
     StateManager* stateManager;
     Model* model;
-
+    QFormLayout* layout;
+    QColor backgroundColor;
     static bool log;
 };
 

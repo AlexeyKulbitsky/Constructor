@@ -9,6 +9,8 @@ class Model;
 #include <QAction>
 #include <QString>
 #include <QObject>
+#include <QClipboard>
+#include <QApplication>
 
 class State: public QObject
 {
@@ -23,6 +25,12 @@ public:
     virtual void dragEnterEvent(QDragEnterEvent* event) = 0;
     virtual void dropEvent(QDropEvent * event);
     virtual void contextMenuEvent(QContextMenuEvent *pe) = 0;
+    virtual void copy() = 0;
+    virtual void paste() = 0;
+    virtual void cut() = 0;
+    virtual void del() = 0;
+    virtual void clear() = 0;
+    virtual void clearProperties(QFormLayout *layout) = 0;
     virtual QString getName() = 0;
     virtual ~State(){}
     virtual void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);

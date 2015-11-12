@@ -10,6 +10,7 @@ class Ruler: public RoadElement
     Q_OBJECT
 public:
     Ruler();
+    Ruler(const Ruler& source);
     virtual ~Ruler();
 private:
     float x1, y1, z1;
@@ -25,8 +26,10 @@ private:
 
     RoadElement* element1;
     RoadElement* element2;
+    int elementId1, elementId2;
     int index1, index2;
     float partOfStartLine, partOfEndLine;
+    static bool log;
 
 public:
     void activateStartPoint();
@@ -51,6 +54,10 @@ public:
     void setEndLinkPoint(RoadElement* element, int indexOfControl, float x, float y, float z);
     void clearStartLinkPoint();
     void clearEndLinkPoint();
+
+    static bool getLogging();
+    static void setLogging(bool status);
+
     // RoadElement interface
 public:
     virtual bool isSelected();
@@ -77,6 +84,14 @@ public slots:
     // RoadElement interface
 public:
     virtual void clear();
+
+    // RoadElement interface
+public:
+    virtual RoadElement *getCopy();
+
+    // RoadElement interface
+public:
+    virtual QJsonObject getJSONInfo();
 };
 
 #endif // RULER_H
