@@ -14,6 +14,9 @@ public:
 public:
     virtual bool openFile(QString source);
     virtual bool saveFile(QString source);
+    static bool saveFile(QString source, QList<RoadElement*> &elements);
+    static bool saveFile(QString source, RoadElement* element);
+    RoadElement* readElementFromFile(QString source);
 
 private:
     RoadSimple* readRoadSimple(QJsonObject& obj);

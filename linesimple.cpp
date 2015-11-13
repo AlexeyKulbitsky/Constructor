@@ -158,6 +158,7 @@ LineSimple::LineSimple(const LineSimple &source)
     selected = source.selected;
     fixed = source.fixed;
     description = source.description;
+    indexOfSelectedControl = -1;
 }
 
 
@@ -209,6 +210,9 @@ void LineSimple::setVertexArray(float x1, float y1, float x2, float y2, float wi
     VertexArray[3][0]=x2 + dx;
     VertexArray[3][1]=y2 - dy;
     VertexArray[3][2]=0.001f;
+
+    elementX = (x1 + x2) / 2.0f;
+    elementY = (y1 + y2) / 2.0f;
 }
 
 // Индексы каждой вершины
@@ -411,6 +415,8 @@ void LineSimple::move(float dx, float dy, float dz)
     this->y1 += dy;
     this->x2 += dx;
     this->y2 += dy;
+    elementX += dx;
+    elementY += dy;
 
 }
 

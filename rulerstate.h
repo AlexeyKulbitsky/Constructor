@@ -62,6 +62,10 @@ public:
     virtual void clearProperties(QFormLayout *layout);
     bool tryToSelectFigures(QPoint mp, RoadElement*& element);
     bool tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement* element, int& index);
+
+    // State interface
+public:
+    virtual void saveToPresets();
 };
 
 #endif // RULERSTATE_H

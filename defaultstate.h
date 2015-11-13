@@ -74,6 +74,10 @@ public:
     // State interface
 public:
     virtual void clear();
+
+    // State interface
+public:
+    virtual void saveToPresets();
 };
 
 #endif // DEFAULTSTATE_H

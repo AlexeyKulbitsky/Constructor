@@ -93,6 +93,10 @@ public:
     virtual void paste();
     virtual void cut();
     virtual void del();
+
+    // State interface
+public:
+    virtual void saveToPresets();
 };
 
 #endif // SELECTEDSTATE_H

@@ -743,3 +743,25 @@ void RoadBuilderState::del()
     Logger::getLogger()->infoLog() << "RoadBuilderState::del()\n";
     RoadElement::undoStack->push(new DeleteCommand(roadBroken, model, stateManager, properties, groupIndex, elementIndex, scene));
 }
+
+
+void RoadBuilderState::saveToPresets()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadBuilderState::saveToPresets()\n";
+    bool ok;
+    QString text = QInputDialog::getText(0, tr("Введите название шаблона"),
+                                             tr("Название шаблона:"), QLineEdit::Normal,
+                                              tr("template"), &ok);
+    if (text.size() == 0)
+    {
+        QMessageBox::warning(0, "Ошибка ввода", "Имя отсутствует! Шаблон не сохранен!");
+        return;
+    }
+    if (ok)
+    {
+        QString fileName = QApplication::applicationDirPath() + "/models/user/" + text + ".json";
+        JSONFileManager::saveFile(fileName, roadBroken);
+        stateManager->processTemplate();
+    }
+}

@@ -162,6 +162,7 @@ signals:
     void leftBoardWidthChanged(double width);
     void rightWidthChanged(double width);
     void leftWidthChanged(double width);
+    void lineDeleted();
 
 public slots:
     static void setLogging(bool status);

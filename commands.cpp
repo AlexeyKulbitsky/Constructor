@@ -725,7 +725,8 @@ void AddLineCommand::undo()
         break;
     }
     isInFigure = false;
-    scene->updateGL();
+    if (scene)
+        scene->updateGL();
 }
 
 void AddLineCommand::redo()
@@ -745,5 +746,109 @@ void AddLineCommand::redo()
         break;
     }
     isInFigure = true;
-    scene->updateGL();
+    if (scene)
+        scene->updateGL();
+}
+
+
+DeleteLineCommand::DeleteLineCommand(RoadSimple *roadSimple, LineLinked linked, QGLWidget *scene, QUndoCommand *parent)
+    : QUndoCommand(parent)
+{
+    type = 0;
+    isInFigure = false;
+    this->roadSimple = roadSimple;
+    lineLinked = new LineLinked();
+    *lineLinked = linked;
+    this->scene = scene;
+}
+
+DeleteLineCommand::DeleteLineCommand(RoadBroken *roadBroken, LineBrokenLinkedToRoadBroken brokenLinkedToRoadBroken, QGLWidget *scene, QUndoCommand *parent)
+    : QUndoCommand(parent)
+{
+    type = 1;
+    isInFigure = false;
+    this->roadBroken = roadBroken;
+    lineBrokenLinkedToRoadBroken = new LineBrokenLinkedToRoadBroken();
+    *lineBrokenLinkedToRoadBroken = brokenLinkedToRoadBroken;
+    this->scene = scene;
+}
+
+DeleteLineCommand::DeleteLineCommand(RoundingRoad *roundingRoad, LineBrokenLinked brokenLinked, QGLWidget *scene, QUndoCommand *parent)
+    : QUndoCommand(parent)
+{
+    type = 2;
+    isInFigure = false;
+    this->roundingRoad = roundingRoad;
+    lineBrokenLinked = new LineBrokenLinked();
+    *lineBrokenLinked = brokenLinked;
+    this->scene = scene;
+}
+
+DeleteLineCommand::~DeleteLineCommand()
+{
+    if (!isInFigure)
+    {
+        switch (type)
+        {
+        case 0:
+            roadSimple = NULL;
+            delete lineLinked->line;
+            delete lineLinked;
+            break;
+        case 1:
+            roadBroken = NULL;
+            delete lineBrokenLinkedToRoadBroken->line;
+            delete lineBrokenLinkedToRoadBroken;
+            break;
+        case 2:
+            roundingRoad = NULL;
+            delete lineBrokenLinked->line;
+            delete lineBrokenLinked;
+            break;
+        default:
+            break;
+        }
+    }
+}
+
+void DeleteLineCommand::undo()
+{
+    switch (type)
+    {
+    case 0:
+        roadSimple->addLine(*lineLinked);
+        break;
+    case 1:
+        roadBroken->addLine(*lineBrokenLinkedToRoadBroken);
+        break;
+    case 2:
+        roundingRoad->addLine(*lineBrokenLinked);
+        break;
+    default:
+        break;
+    }
+    isInFigure = true;
+    if (scene)
+        scene->updateGL();
+}
+
+void DeleteLineCommand::redo()
+{
+    switch (type)
+    {
+    case 0:
+        roadSimple->deleteLine(*lineLinked);
+        break;
+    case 1:
+        roadBroken->deleteLine(*lineBrokenLinkedToRoadBroken);
+        break;
+    case 2:
+        roundingRoad->deleteLine(*lineBrokenLinked);
+        break;
+    default:
+        break;
+    }
+    isInFigure = false;
+    if (scene)
+        scene->updateGL();
 }

@@ -19,7 +19,7 @@ class Scene2D : public QGLWidget
 {
     Q_OBJECT
 public:
-
+    StateManager* stateManager;
     QFont shrift;
     bool rulerIsActive;
     bool rightButtonIsPressed;
@@ -121,8 +121,10 @@ public slots:
     void paste();
     void cut();
     void del();
+    void saveToPresets();
+
 private:
-    StateManager* stateManager;
+
     Model* model;
     QFormLayout* properties;
     bool showGrid;

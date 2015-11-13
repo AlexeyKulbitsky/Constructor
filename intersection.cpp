@@ -129,6 +129,8 @@ Intersection::Intersection(const Intersection &source)
     setIndexArray();
     selected = source.selected;
     fixed = source.fixed;
+    elementX = source.elementX;
+    elementY = source.elementY;
     connect(this, SIGNAL(intersectionsChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
     connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
 }
@@ -313,6 +315,8 @@ void Intersection::move(float dx, float dy, float dz)
         vertexArray[i * 3] += dx;
         vertexArray[i * 3 + 1] += dy;
     }
+    elementX += dx;
+    elementY += dy;
 }
 
 void Intersection::drawControlElement(int index, float lineWidth, float pointSize)
@@ -737,7 +741,7 @@ void Intersection::getProperties(QFormLayout *layout, QGLWidget *render)
                 connect(b, SIGNAL(clicked(bool)), this, SLOT(deleteLine()));
                 layout->addRow("Удалить линию ",b);
             }
-
+            connect(roads[i], SIGNAL(lineDeleted()), this, SLOT(deleteLine()));
             layout->addRow("Добавить разметку", addLinePushButton);
         }
 
@@ -1481,7 +1485,14 @@ void Intersection::setVertexArray()
         vertexArray.push_back(p.y);
         vertexArray.push_back(p.z);
     }
-
+    float sumX = 0.0f, sumY = 0.0f;
+    for (int i = 0; i < vertexArray.size() / 3; ++i)
+    {
+        sumX += vertexArray[i * 3];
+        sumY += vertexArray[i * 3 + 1];
+    }
+    elementX = sumX / float(vertexArray.size() / 3);
+    elementY = sumY / float(vertexArray.size() / 3);
 }
 
 void Intersection::setIndexArray()

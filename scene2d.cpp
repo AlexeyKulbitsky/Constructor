@@ -671,7 +671,7 @@ void Scene2D::cut()
 void Scene2D::del()
 {
     if (log)
-    Logger::getLogger()->infoLog() << "Scene2D::del()\n";
+        Logger::getLogger()->infoLog() << "Scene2D::del()\n";
     if (stateManager)
         stateManager->del();
     else
@@ -679,6 +679,21 @@ void Scene2D::del()
         QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::del() stopped", QMessageBox::Yes | QMessageBox::Default);
         if (log)
         Logger::getLogger()->errorLog() << "Scene2D::stateManager = NULL, Scene2D::del() stopped\n";
+        QApplication::exit(0);
+    }
+}
+
+void Scene2D::saveToPresets()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "Scene2D::saveToPresets()\n";
+    if (stateManager)
+        stateManager->saveToPresets();
+    else
+    {
+        QMessageBox::critical(0, "Ошибка", "Scene2D::stateManager = NULL,\n Scene2D::saveToPresets() stopped", QMessageBox::Yes | QMessageBox::Default);
+        if (log)
+        Logger::getLogger()->errorLog() << "Scene2D::stateManager = NULL, Scene2D::saveToPresets() stopped\n";
         QApplication::exit(0);
     }
 }

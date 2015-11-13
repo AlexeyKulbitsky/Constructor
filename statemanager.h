@@ -28,8 +28,9 @@ class RoadBuilderState;
 //class Model;////////////////
 #include "scene2d.h"
 
-//#include "_3dsfilemanager.h"
-//#include "objfilemanager.h"
+#include "_3dsfilemanager.h"
+#include "objfilemanager.h"
+#include "jsonfilemanager.h"
 //#include "stepdialog.h"
 
 class StateManager : public QObject
@@ -57,8 +58,9 @@ public:
 
     StepDialog* stepDialog;
     StepDialog* stepDialogs[10];
-    //_3DsFileManager* fileManager3DS;
-    //OBJFileManager* fileManagerOBJ;
+    _3DsFileManager* fileManager3DS;
+    OBJFileManager* fileManagerOBJ;
+    JSONFileManager* fileManagerJSON;
     State* currentState;
 
 public:
@@ -80,9 +82,14 @@ public:
     void paste();
     void cut();
     void del();
+
+    void saveToPresets();
+    void processTemplate();
     static void setLogging(bool status);
     static bool getLogging() { return log; }
+
 signals:
+    void templtateAdded();
 
 public slots:
     void setRulerActive(bool status);

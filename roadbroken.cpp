@@ -126,6 +126,15 @@ RoadBroken::RoadBroken(QVector<float> &vertexArray,
     for (int i = 0; i < vertexArray.size(); ++i)
         this->vertexArray[i] = vertexArray[i];
 
+    float sumX = 0.0f, sumY = 0.0f;
+    for (int i = 0; i < this->vertexArray.size() / 3; ++i)
+    {
+        sumX += this->vertexArray[i * 3];
+        sumY += this->vertexArray[i * 3 + 1];
+    }
+    elementX = sumX / float(this->vertexArray.size() / 3);
+    elementY = sumY / float(this->vertexArray.size() / 3);
+
     this->vertexArrayRight.resize(vertexArrayRight.size());
     for (int i = 0; i < vertexArrayRight.size(); ++i)
         this->vertexArrayRight[i] = vertexArrayRight[i];
@@ -264,7 +273,8 @@ RoadBroken::RoadBroken(const RoadBroken &source)
     size = source.size;
     layer = source.layer;
     hits = source.hits;
-
+    elementX = source.elementX;
+    elementY = source.elementY;
     layout = source.layout;
     render = source.render;
     connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
@@ -338,6 +348,15 @@ void RoadBroken::setVertexArray(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, 
     vertexArray.push_back(x2 - dx);
     vertexArray.push_back(y2 + dy);
     vertexArray.push_back(0.0f);
+
+    float sumX = 0.0f, sumY = 0.0f;
+    for (int i = 0; i < this->vertexArray.size() / 3; ++i)
+    {
+        sumX += this->vertexArray[i * 3];
+        sumY += this->vertexArray[i * 3 + 1];
+    }
+    elementX = sumX / float(this->vertexArray.size() / 3);
+    elementY = sumY / float(this->vertexArray.size() / 3);
 }
 
 void RoadBroken::setVertexArray(QVector<GLfloat> &vertexArray)
@@ -349,6 +368,15 @@ void RoadBroken::setVertexArray(QVector<GLfloat> &vertexArray)
     {
         this->vertexArray[i] = vertexArray[i];
     }
+
+    float sumX = 0.0f, sumY = 0.0f;
+    for (int i = 0; i < this->vertexArray.size() / 3; ++i)
+    {
+        sumX += this->vertexArray[i * 3];
+        sumY += this->vertexArray[i * 3 + 1];
+    }
+    elementX = sumX / float(this->vertexArray.size() / 3);
+    elementY = sumY / float(this->vertexArray.size() / 3);
 }
 
 void RoadBroken::resetVertexArray(float dx, float dy, bool right)
@@ -375,6 +403,15 @@ void RoadBroken::resetVertexArray(float dx, float dy, bool right)
         vertexArray[i * 3] += dX;
         vertexArray[i * 3 + 1] += dY;
     }
+
+    float sumX = 0.0f, sumY = 0.0f;
+    for (int i = 0; i < this->vertexArray.size() / 3; ++i)
+    {
+        sumX += this->vertexArray[i * 3];
+        sumY += this->vertexArray[i * 3 + 1];
+    }
+    elementX = sumX / float(this->vertexArray.size() / 3);
+    elementY = sumY / float(this->vertexArray.size() / 3);
 }
 
 void RoadBroken::setColorArray(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
@@ -2345,6 +2382,8 @@ void RoadBroken::move(float dx, float dy, float dz)
     }
     for (int i = 0; i < lines.size(); ++i)
         lines[i].line->move(dx, dy, dz);
+    elementX += dx;
+    elementY += dy;
 
 }
 
@@ -3202,6 +3241,16 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
                         }
             }
     }
+
+    float sumX = 0.0f, sumY = 0.0f;
+    for (int i = 0; i < this->vertexArray.size() / 3; ++i)
+    {
+        sumX += this->vertexArray[i * 3];
+        sumY += this->vertexArray[i * 3 + 1];
+    }
+    elementX = sumX / float(this->vertexArray.size() / 3);
+    elementY = sumY / float(this->vertexArray.size() / 3);
+
     setTextureArray(texture_1Usize, texture_1Vsize);
     // if (fixedRightWidth)
     //     setRightVertexArray();
@@ -3643,7 +3692,8 @@ void RoadBroken::addLine()
 void RoadBroken::addLine(LineBrokenLinkedToRoadBroken line)
 {
     lines.push_back(line);
-    emit linesChanged(layout, render);
+    if (layout && render)
+        emit linesChanged(layout, render);
 }
 
 void RoadBroken::setRightSide(bool status)

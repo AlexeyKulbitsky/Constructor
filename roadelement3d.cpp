@@ -476,3 +476,10 @@ std::vector<vec3> RoadElement3D::getCoordOfControl(int index)
 void RoadElement3D::clear()
 {
 }
+
+
+RoadElement *RoadElement3D::getCopy()
+{
+    RoadElement* r  = NULL;
+    return r;
+}

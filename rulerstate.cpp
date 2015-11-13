@@ -535,3 +535,8 @@ bool RulerState::tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement *ele
     //scene->updateGL(); // обновить изображение
     return false;
 }
+
+
+void RulerState::saveToPresets()
+{
+}

@@ -99,6 +99,123 @@ bool JSONFileManager::saveFile(QString source)
     return true;
 }
 
+bool JSONFileManager::saveFile(QString source, QList<RoadElement*> &elements)
+{
+    QJsonArray elementsArray;
+
+    for (int i = 0; i < elements.size(); ++i)
+    {
+        elementsArray.append(elements[i]->getJSONInfo());
+    }
+    QFile file(source);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        return false;
+    }
+    else
+    {
+        QJsonDocument saveDoc(elementsArray);
+        file.write(saveDoc.toJson());
+        file.close();
+    }
+    return true;
+}
+
+bool JSONFileManager::saveFile(QString source, RoadElement *element)
+{
+    QJsonArray elementsArray;
+
+    elementsArray.append(element->getJSONInfo());
+
+    QFile file(source);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        return false;
+    }
+    else
+    {
+        QJsonDocument saveDoc(elementsArray);
+        file.write(saveDoc.toJson());
+        file.close();
+    }
+    return true;
+}
+
+RoadElement *JSONFileManager::readElementFromFile(QString source)
+{
+    QFile file(source);
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        return NULL;
+    }
+    else
+    {
+        QByteArray saveData = file.readAll();
+
+        QJsonDocument loadDoc(QJsonDocument::fromJson(saveData));
+
+        QJsonArray ar = loadDoc.array();
+
+        QList<RoadElement*> elements;
+
+        for (int i = 0; i < ar.size(); ++i)
+        {
+            RoadElement* element = NULL;
+            QJsonObject obj = ar[i].toObject();
+            QString name = obj["Name"].toString();
+            if (name == "RoadSimple" ||
+                name == "Crosswalk")
+                element = readRoadSimple(obj);
+            else
+            if (name == "RoundingRoad")
+                element = readRoundingRoad(obj);
+            else
+            if (name == "Curve")
+                element = readCurve(obj);
+            else
+            if (name == "LineBroken" ||
+                    name == "Tramways")
+                element = readLineBroken(obj);
+            else
+            if (name == "LineSimple")
+                element = readLineSimple(obj);
+            else
+            if (name == "RoadBroken")
+                element = readRoadBroken(obj);
+            else
+            if (name == "SplitZone")
+                element = readSplitZone(obj);
+            else
+            if (name == "RailWay")
+                element = readRailWay(obj);
+            else
+            if (name == "Ruler")
+                element = readRuler(obj);
+            else
+            if (name == "Intersection")
+                element = readIntersection(obj);
+
+            elements.push_back(element);
+        }
+        file.close();
+        RoadElement* result = NULL;
+        if (elements.size() > 1)
+        {
+            CompositeRoad* road = new CompositeRoad();
+            for (int i = 0; i < elements.size(); ++i)
+            {
+                road->addElement(elements[i]);
+            }
+            result = road;
+        }
+        else
+        {
+            result = elements[0];
+        }
+        return result;
+    }
+}
+
 RoadSimple *JSONFileManager::readRoadSimple(QJsonObject &obj)
 {
     QJsonArray coordAr = obj["Vertices"].toArray();
@@ -239,7 +356,6 @@ RoadBroken* JSONFileManager::readRoadBroken(QJsonObject &obj)
         QJsonObject lineElement = line["Line"].toObject();
         QString name = lineElement["Name"].toString();
         LineBrokenLinkedToRoadBroken lineLinked;
-
         if (name == "LineBroken" ||
             name == "Tramways")
         {
@@ -247,7 +363,6 @@ RoadBroken* JSONFileManager::readRoadBroken(QJsonObject &obj)
         } else
         if (name == "SplitZone")
             lineLinked.line = readSplitZone(lineElement);
-
         lineLinked.lineType = line["LineType"].toInt();
         lineLinked.lineWidth = line["LineWidth"].toDouble();
         lineLinked.rightSide = line["RightSide"].toBool();

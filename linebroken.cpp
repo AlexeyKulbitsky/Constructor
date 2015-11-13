@@ -196,6 +196,8 @@ LineBroken::LineBroken(const LineBroken &source)
 
     setIndexArrayForSelectionFrame();
     setColorArrayForSelectionFrame(0.0f, 0.0f, 0.0f);
+    elementX = source.elementX;
+    elementY = source.elementY;
 }
 
 LineBroken::~LineBroken()
@@ -363,7 +365,14 @@ void LineBroken::setVertexArray(float width, float* axisVertices, int size)
             }
         }
     }
-
+    float sumX = 0.0f, sumY = 0.0f;
+    for (int i = 0; i < vertexArrayForAxis.size() / 3; ++i)
+    {
+        sumX += vertexArrayForAxis[i * 3];
+        sumY += vertexArrayForAxis[i * 3 + 1];
+    }
+    elementX = sumX / float(vertexArrayForAxis.size() / 3);
+    elementY = sumY / float(vertexArrayForAxis.size() / 3);
 }
 
 // Индексы каждой вершины
@@ -487,6 +496,7 @@ void LineBroken::setVertexArrayForAxis(float *axisVertices, int size)
     {
         vertexArrayForAxis[i] = axisVertices[i];
     }
+
     numberOfVerticesOfAxis = size / 3;
 }
 
@@ -697,6 +707,8 @@ void LineBroken::move(float dx, float dy, float dz)
         vertexArrayForAxis[i * 3] += dx;
         vertexArrayForAxis[i * 3 + 1] += dy;
     }
+    elementX += dx;
+    elementY += dy;
     setTextureArray();
 }
 

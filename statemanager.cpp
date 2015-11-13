@@ -57,8 +57,9 @@ StateManager::StateManager(Model *model, Scene2D* scene, QFormLayout *properties
     {
         stepDialogs[i] = new StepDialog(scene);
     }
-    //fileManager3DS = new _3DsFileManager();
-    //fileManagerOBJ = new OBJFileManager(model);
+    fileManager3DS = new _3DsFileManager();
+    fileManagerOBJ = new OBJFileManager(model);
+    fileManagerJSON = new JSONFileManager(model);
     currentState = defaultState;
 }
 
@@ -84,6 +85,13 @@ StateManager::~StateManager()
     if (rulerState)
         delete rulerState;
     rulerState = NULL;
+    if (fileManagerOBJ)
+        delete fileManagerOBJ;
+    fileManagerOBJ = NULL;
+    if (fileManager3DS)
+        delete fileManager3DS;
+    fileManager3DS = NULL;
+
     /*
     for (int i = 0; i < 10; ++i)
     {
@@ -105,12 +113,8 @@ StateManager::~StateManager()
     if (stepDialog)
         delete stepDialog;
     stepDialog = NULL;
-    if (fileManager3DS)
-        delete fileManager3DS;
-    fileManager3DS = NULL;
-    if (fileManagerOBJ)
-        delete fileManagerOBJ;
-    fileManagerOBJ = NULL;
+
+
     */
 }
 
@@ -324,6 +328,26 @@ void StateManager::del()
         Logger::getLogger()->errorLog() << "StateManager::currentState = NULL, StateManager::del() stopped\n";
         QApplication::exit(0);
     }
+}
+
+void StateManager::saveToPresets()
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "StateManager::saveToPresets()\n";
+    if (currentState)
+        currentState->saveToPresets();
+    else
+    {
+        QMessageBox::critical(0, "Ошибка", "StateManager::currentState = NULL,\n StateManager::saveToPresets() stopped", QMessageBox::Yes | QMessageBox::Default);
+        if (log)
+        Logger::getLogger()->errorLog() << "StateManager::currentState = NULL, StateManager::saveToPresets() stopped\n";
+        QApplication::exit(0);
+    }
+}
+
+void StateManager::processTemplate()
+{
+    emit templtateAdded();
 }
 
 void StateManager::setLogging(bool status)

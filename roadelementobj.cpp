@@ -27,6 +27,10 @@ RoadElementOBJ::RoadElementOBJ(float x, float y)
     figureList = selectedFigureList = 0;
 }
 
+RoadElementOBJ::RoadElementOBJ(const RoadElementOBJ &source)
+{
+}
+
 RoadElementOBJ::~RoadElementOBJ()
 {
 
@@ -313,4 +317,11 @@ void RoadElementOBJ::setScale(double scale)
 
 void RoadElementOBJ::clear()
 {
+}
+
+
+RoadElement *RoadElementOBJ::getCopy()
+{
+    RoadElement* r  = NULL;
+    return r;
 }

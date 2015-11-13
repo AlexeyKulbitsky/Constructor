@@ -21,6 +21,8 @@ CompositeRoad::CompositeRoad(const CompositeRoad &source)
     {
         elements.push_back((*it)->getCopy());
     }
+    elementX = source.elementX;
+    elementY = source.elementY;
 }
 
 CompositeRoad::~CompositeRoad()
@@ -114,6 +116,8 @@ void CompositeRoad::move(float dx, float dy, float dz)
     {
         (*it)->move(dx, dy);
     }
+    elementX += dx;
+    elementY += dy;
 }
 
 void CompositeRoad::drawControlElement(int index, float lineWidth, float pointSize)
@@ -195,6 +199,14 @@ void CompositeRoad::addElement(RoadElement *element)
         return;
     }
     elements.push_back(element);
+    float sumX = 0.0f, sumY = 0.0f;
+    for (int i = 0; i < elements.size(); ++i)
+    {
+        sumX += elements[i]->getElementX();
+        sumY += elements[i]->getElementY();
+    }
+    elementX = sumX / float(elements.size());
+    elementY = sumY / float(elements.size());
 }
 
 

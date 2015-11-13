@@ -26,7 +26,8 @@ Curve::Curve(float xCenter, float yCenter, float zCenter,
     controlPoints[6] = xRight;
     controlPoints[7] = yRight;
     controlPoints[8] = zRight;
-
+    elementX = xCenter;
+    elementY = yCenter;
     //leftLength = sqrt((xLeft - xCenter)*(xLeft - xCenter) + (yLeft - yCenter)*(yLeft - yCenter));
     //rightLength = sqrt((xRight - xCenter)*(xRight - xCenter) + (yRight - yCenter)*(yRight - yCenter));
     texture1 = texture_1;
@@ -71,7 +72,8 @@ Curve::Curve(float *controls, int size, QString texture_1, float texture_1Usize,
         for (int i = 0; i < size; ++i)
             controlPoints[i] = controls[i];
     }
-
+    elementX = controlPoints[0];
+    elementY = controlPoints[1];
     texture1 = texture_1;
     texture2 = texture_2;
     textureID[0] = TextureManager::getInstance()->getID(texture_1);
@@ -118,7 +120,8 @@ Curve::Curve(const Curve &source)
 
     texture1 = source.texture1;
     texture2 = source.texture2;
-
+    elementX = source.elementX;
+    elementY = source.elementY;
     textureID[0] = source.textureID[0];
     this->texture1USize = source.texture1USize;
     this->texture1VSize = source.texture1VSize;
@@ -352,6 +355,8 @@ void Curve::move(float dx, float dy, float dz)
     }
     xRadius += dx;
     yRadius += dy;
+    elementX = controlPoints[0];
+    elementY = controlPoints[1];
 }
 
 void Curve::drawControlElement(int index, float lineWidth, float pointSize)
@@ -466,6 +471,8 @@ void Curve::resizeByControl(int index, float dx, float dy, float x, float y)
     {
         controlPoints[0] += dx;
         controlPoints[1] += dy;
+        elementX = controlPoints[0];
+        elementY = controlPoints[1];
         calculateControlsForAngle(index);
         setVertexArray();
         setTextureArray();
@@ -1128,7 +1135,8 @@ void Curve::setCoordForPoint(int index, float x, float y, float z)
     controlPoints[index * 3] = x;
     controlPoints[index * 3 + 1] = y;
     controlPoints[index * 3 + 2] = z;
-
+    elementX = controlPoints[0];
+    elementY = controlPoints[1];
     calculateControlsForAngle(index);
     setVertexArray();
     setTextureArray();

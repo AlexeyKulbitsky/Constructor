@@ -274,7 +274,8 @@ RoadSimple::RoadSimple(const RoadSimple &source)
     this->green = source.green;
     this->blue = source.blue;
     this->alpha = source.alpha;
-
+    elementX = source.elementX;
+    elementY = source.elementY;
     this->hits = source.hits;
 
     this->selected = source.selected;
@@ -2548,9 +2549,10 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
     line.differentDirections = differentDirections;
     line.line->setSelectedStatus(false);
     RoadElement::undoStack->push(new AddLineCommand(this, line, render));
-//    lines.push_back(line);
-//    if (this->layout && this->render)
-//        emit linesChanged(layout, render);
+    //lines.push_back(line);
+    //addLine(line);
+    //if (this->layout && this->render)
+    //    emit linesChanged(layout, render);
 }
 
 void RoadSimple::addLine()
@@ -2725,6 +2727,7 @@ void RoadSimple::deleteLine(LineLinked line)
     lines.removeAt(i);
     if (this->layout && this->render)
         emit linesChanged(layout, render);
+    emit lineDeleted();
 }
 
 void RoadSimple::setBeginStep(double step)

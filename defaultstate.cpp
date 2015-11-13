@@ -1,6 +1,6 @@
 #include "defaultstate.h"
-//#include "objfilemanager.h"
-//#include "_3dsfilemanager.h"
+#include "objfilemanager.h"
+#include "_3dsfilemanager.h"
 #include <QApplication>
 #include <GL/glu.h>
 
@@ -553,6 +553,70 @@ void DefaultState::dropEvent(QDropEvent *event)
         RoadElement::undoStack->push(new InsertCommand(railway, stateManager, properties, model, 1, scene));
         return;
     }
+
+
+    else
+    {
+
+        QStringList lst =  QString(event->mimeData()->data("text/plain")).split(' ');
+        if (lst.at(1)[lst.at(1).size() - 1] == 's')
+        {
+
+            RoadElement3D* element = new RoadElement3D(x, y);
+            stateManager->fileManager3DS->load3DS(lst.at(0).toStdString().c_str(),
+                                 lst.at(1).toStdString().c_str(),
+                                 element->meshes,
+                                 element->materials);
+
+            element->setModel(model);
+//            model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
+//            model->setModified(true);
+//            element->setSelectedStatus(false);
+            RoadElement::undoStack->push(new InsertCommand(element, stateManager, properties, model, model->getNumberOfGroups() - 1, scene));
+
+        }
+        else
+            if (lst.at(1)[lst.at(1).size() - 1] == 'j')
+            {
+                RoadElementOBJ* element = new RoadElementOBJ(x, y);
+                stateManager->fileManagerOBJ->loadOBJ(lst.at(0),
+                                     lst.at(1),
+                                     element->meshes,2.374f, element->scaleFactor);
+                element->setModel(model);
+//                model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
+//                model->setModified(true);
+//                element->setSelectedStatus(false);
+                RoadElement::undoStack->push(new InsertCommand(element, stateManager, properties, model, model->getNumberOfGroups() - 1, scene));
+            }
+        else
+            if (lst.at(1)[lst.at(1).size() - 1] == 'n')
+            {
+                RoadElement* element = NULL;
+                QString source = lst.at(0) + lst.at(1);
+                element = stateManager->fileManagerJSON->readElementFromFile(source);
+                if (element)
+                {
+                    float dx = x - element->getElementX();
+                    float dy = y - element->getElementY();
+                    element->move(dx, dy);
+                    RoadElement::undoStack->push(new InsertCommand(element, stateManager, properties, model, element->getLayer(), scene));
+                }
+            }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
     /*
 
          else
@@ -1234,4 +1298,34 @@ void DefaultState::del()
 
 void DefaultState::clear()
 {
+}
+
+
+void DefaultState::saveToPresets()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadBuilderState::saveToPresets()\n";
+    bool ok;
+    QString text = QInputDialog::getText(0, tr("Введите название шаблона"),
+                                             tr("Название шаблона:"), QLineEdit::Normal,
+                                              tr("template"), &ok);
+    if (text.size() == 0)
+    {
+        QMessageBox::warning(0, "Ошибка ввода", "Имя отсутствует! Шаблон не сохранен!");
+        return;
+    }
+    if (ok)
+    {
+        QString fileName = QApplication::applicationDirPath() + "/models/user/" + text + ".json";
+        QList<RoadElement*> elements;
+        for (int i = 0; i < model->getNumberOfGroups(); ++i)
+        {
+            for (int j = 0; j < model->getGroup(i).size(); ++j)
+            {
+                elements.push_back(model->getGroup(i)[j]);
+            }
+        }
+        JSONFileManager::saveFile(fileName, elements);
+        stateManager->processTemplate();
+    }
 }

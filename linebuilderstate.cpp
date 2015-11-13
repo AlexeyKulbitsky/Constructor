@@ -794,3 +794,25 @@ void LineBuilderState::del()
         Logger::getLogger()->infoLog() << "LineBuilderState::del()\n";
     RoadElement::undoStack->push(new DeleteCommand(lineBroken, model, stateManager, properties, groupIndex, elementIndex, scene));
 }
+
+
+void LineBuilderState::saveToPresets()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "LineBuilderState::saveToPresets()\n";
+    bool ok;
+    QString text = QInputDialog::getText(0, tr("Введите название шаблона"),
+                                             tr("Название шаблона:"), QLineEdit::Normal,
+                                              tr("template"), &ok);
+    if (text.size() == 0)
+    {
+        QMessageBox::warning(0, "Ошибка ввода", "Имя отсутствует! Шаблон не сохранен!");
+        return;
+    }
+    if (ok)
+    {
+        QString fileName = QApplication::applicationDirPath() + "/models/user/" + text + ".json";
+        JSONFileManager::saveFile(fileName, lineBroken);
+        stateManager->processTemplate();
+    }
+}

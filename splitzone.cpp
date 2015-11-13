@@ -290,7 +290,8 @@ SplitZone::SplitZone(const SplitZone &source)
     axisArray.resize(source.axisArray.size());
     for (int i = 0; i < source.axisArray.size(); ++i)
         axisArray[i] = source.axisArray[i];
-
+    elementX = source.elementX;
+    elementY = source.elementY;
     lineWidth = source.lineWidth;
     p1 = source.p1;
     p2 = source.p2;
@@ -517,7 +518,8 @@ void SplitZone::move(float dx, float dy, float dz)
     default:
         break;
     }
-
+    elementX += dx;
+    elementY += dy;
 }
 
 void SplitZone::drawControlElement(int index, float lineWidth, float pointSize)
@@ -1681,6 +1683,14 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
         line->setVertexArray(lineWidth,lineAxisArray, this->size);
         line->setTextureArray();
     }
+    float sumX = 0.0f, sumY = 0.0f;
+    for (int i = 0; i < this->axisArray.size() / 3; ++i)
+    {
+        sumX += this->axisArray[i * 3];
+        sumY += this->axisArray[i * 3 + 1];
+    }
+    elementX = sumX / float(this->axisArray.size() / 3);
+    elementY = sumY / float(this->axisArray.size() / 3);
 }
 
 void SplitZone::reset()
@@ -2281,6 +2291,15 @@ void SplitZone::rotate(float angle, float x, float y, float z)
     yCenter = tx * sin(angle) + ty * cos(angle);
     xCenter += x;
     yCenter += y;
+
+    elementX -= x;
+    elementY -= y;
+    tx = elementX;
+    ty = elementY;
+    elementX = tx * cos(angle) - ty * sin(angle);
+    elementY = tx * sin(angle) + ty * cos(angle);
+    elementX += x;
+    elementY += y;
 
     switch (type)
     {

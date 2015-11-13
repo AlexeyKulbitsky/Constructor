@@ -195,5 +195,28 @@ public:
     virtual void redo();
 };
 
+class DeleteLineCommand : public QUndoCommand
+{
+public:
+    DeleteLineCommand(RoadSimple* roadSimple, LineLinked linked, QGLWidget* scene, QUndoCommand* parent = 0);
+    DeleteLineCommand(RoadBroken* roadBroken, LineBrokenLinkedToRoadBroken brokenLinkedToRoadBroken, QGLWidget *scene, QUndoCommand* parent = 0);
+    DeleteLineCommand(RoundingRoad* roundingRoad, LineBrokenLinked brokenLinked, QGLWidget *scene, QUndoCommand* parent = 0);
+    ~DeleteLineCommand();
+private:
+    int type;
+    bool isInFigure;
+    RoadSimple* roadSimple;
+    RoadBroken* roadBroken;
+    RoundingRoad* roundingRoad;
+    LineLinked* lineLinked;
+    LineBrokenLinkedToRoadBroken* lineBrokenLinkedToRoadBroken;
+    LineBrokenLinked* lineBrokenLinked;
+    QGLWidget* scene;
+    // QUndoCommand interface
+public:
+    virtual void undo();
+    virtual void redo();
+};
+
 #endif // COMMANDS
 

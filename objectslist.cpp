@@ -52,8 +52,11 @@ ObjectsList::ObjectsList(QWidget *parent)
 
 }
 
-ObjectsList::ObjectsList(QDir directory, QString fileType, QWidget *parent): QListWidget(parent)
+ObjectsList::ObjectsList(QDir directory, QString fileType, QWidget *parent)
+    : QListWidget(parent)
 {
+    this->directory = directory;
+    this->fileType = fileType;
     QStringList list(directory.entryList(QStringList() << fileType));
     for (int i = 0; i < list.size(); ++i)
         this->addItem(list.at(i));
@@ -108,6 +111,15 @@ void ObjectsList::mouseMoveEvent(QMouseEvent *event)
 
     Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
 
+}
+
+void ObjectsList::resetObjects()
+{
+    this->clear();
+    QStringList list(directory.entryList(QStringList() << fileType));
+    for (int i = 0; i < list.size(); ++i)
+        this->addItem(list.at(i));
+    filePath = directory.absolutePath();
 }
 
 

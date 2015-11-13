@@ -11,6 +11,7 @@ class Model;
 #include <QObject>
 #include <QClipboard>
 #include <QApplication>
+#include <QInputDialog>
 
 class State: public QObject
 {
@@ -30,6 +31,7 @@ public:
     virtual void cut() = 0;
     virtual void del() = 0;
     virtual void clear() = 0;
+    virtual void saveToPresets() = 0;
     virtual void clearProperties(QFormLayout *layout) = 0;
     virtual QString getName() = 0;
     virtual ~State(){}

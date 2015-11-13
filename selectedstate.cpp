@@ -2,6 +2,7 @@
 //#include "objfilemanager.h"
 //#include "_3dsfilemanager.h"
 #include <QApplication>
+#include <QInputDialog>
 
 bool SelectedState::log = true;
 
@@ -1260,5 +1261,38 @@ void SelectedState::del()
     else
     {
         RoadElement::undoStack->push(new DeleteCommand(selectedElement, model, stateManager, properties, groupIndex, elementIndex, scene));
+    }
+}
+
+
+void SelectedState::saveToPresets()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "SelectedState::saveToPresets()\n";
+    bool ok;
+    QString text = QInputDialog::getText(0, tr("Введите название шаблона"),
+                                             tr("Название шаблона:"), QLineEdit::Normal,
+                                              tr("template"), &ok);
+    if (text.size() == 0)
+    {
+        QMessageBox::warning(0, "Ошибка ввода", "Имя отсутствует! Шаблон не сохранен!");
+        return;
+    }
+    if (ok)
+    {
+        QString fileName = QApplication::applicationDirPath() + "/models/user/" + text + ".json";
+        if (selectedElements.size() > 0)
+        {
+            CompositeRoad* road = new CompositeRoad();
+            for (int i = 0; i < selectedElements.size(); ++i)
+            {
+                road->addElement(selectedElements[i]);
+            }
+            JSONFileManager::saveFile(fileName, road);
+        }
+        else
+            JSONFileManager::saveFile(fileName, selectedElement);
+        stateManager->processTemplate();
+
     }
 }

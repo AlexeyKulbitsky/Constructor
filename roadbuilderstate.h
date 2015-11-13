@@ -77,6 +77,10 @@ public:
 public:
     virtual void cut();
     virtual void del();
+
+    // State interface
+public:
+    virtual void saveToPresets();
 };
 
 #endif // ROADBUILDERSTATE_H

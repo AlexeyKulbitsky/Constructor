@@ -86,6 +86,10 @@ public:
     // RoadElement interface
 public:
     virtual void clear();
+
+    // RoadElement interface
+public:
+    virtual RoadElement *getCopy();
 };
 
 #endif // ROADELEMENT3D_H

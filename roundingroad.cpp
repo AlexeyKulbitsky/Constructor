@@ -415,6 +415,9 @@ void RoundingRoad::setVertexArray(float x1, float y1, float nearRadius, float an
     this->angel2NearRadius = angel2NearRadius;
     this->angel1FarRadius = angel1FarRadius;
     this->angel2FarRadius = angel2FarRadius;
+
+    elementX = (xCenterFarRadius + xCenterNearRadius) / 2.0f;
+    elementY = (yCenterFarRadius + yCenterNearRadius) / 2.0f;
     ////qDebug() << "Number of vertices: " << vertexArray.size() / 3;
 }
 
@@ -988,6 +991,8 @@ void RoundingRoad::move(float dx, float dy, float dz)
 
     this->xCenterFarRadius += dx;
     this->yCenterFarRadius += dy;
+    elementX += dx;
+    elementY += dy;
 
 }
 
@@ -2164,7 +2169,8 @@ void RoundingRoad::addLine()
 void RoundingRoad::addLine(LineBrokenLinked line)
 {
     lines.push_back(line);
-    emit linesChanged(layout, render);
+    if (layout && render)
+        emit linesChanged(layout, render);
 }
 
 

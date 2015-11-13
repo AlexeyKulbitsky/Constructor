@@ -9,19 +9,26 @@
 
 class ObjectsList : public QListWidget
 {
-    public:
+    Q_OBJECT
+public:
 
     ObjectsList(QWidget *parent = 0);
     ObjectsList(QDir directory, QString fileType, QWidget *parent = 0);
 
-    protected:
+protected:
     void dropEvent(QDropEvent* event);
     void mousePressEvent(QMouseEvent* event);
     void mouseMoveEvent(QMouseEvent *event);
+signals:
+
+public slots:
+    void resetObjects();
 
 private:
     QPoint dragStartPosition;
     QString filePath;
+    QDir directory;
+    QString fileType;
     // QWidget interface
 protected:
     virtual void mouseReleaseEvent(QMouseEvent *event);

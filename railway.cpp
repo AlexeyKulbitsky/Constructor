@@ -142,6 +142,8 @@ void RailWay::move(float dx, float dy, float dz)
         vertexArray[i * 3] += dx;
         vertexArray[i * 3 + 1] += dy;
     }
+    elementX += dx;
+    elementY += dy;
 }
 
 void RailWay::drawControlElement(int index, float lineWidth, float pointSize)
@@ -624,6 +626,15 @@ void RailWay::setVertexArray()
     {
         vertexArray[i * 3 + 2] -= 0.25f;
     }
+
+    float sumX = 0.0f, sumY = 0.0f;
+    for (int i = 0; i < axisVertexArray.size() / 3; ++i)
+    {
+        sumX += axisVertexArray[i * 3];
+        sumY += axisVertexArray[i * 3 + 1];
+    }
+    elementX = sumX / float(axisVertexArray.size() / 3);
+    elementY = sumY / float(axisVertexArray.size() / 3);
 }
 
 void RailWay::setTextureArray(float textureUsize, float textureVsize)

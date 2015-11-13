@@ -9,6 +9,7 @@ class RoadElementOBJ: public RoadElement
 public:
     RoadElementOBJ();
     RoadElementOBJ(float x, float y);
+    RoadElementOBJ(const RoadElementOBJ &source);
     virtual ~RoadElementOBJ();
     // RoadElement interface
 public:
@@ -79,6 +80,10 @@ public:
      // RoadElement interface
 public:
      virtual void clear();
+
+     // RoadElement interface
+public:
+     virtual RoadElement *getCopy();
 };
 
 #endif // ROADELEMENTOBJ_H

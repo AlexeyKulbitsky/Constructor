@@ -52,6 +52,9 @@ public:
     QToolBar *propertiesToolBar;
     QLineEdit* ed;
 
+    QComboBox* elementsComboBox;
+    QStackedLayout* elementsLayout;
+
     QMenu* fileMenu;
     QMenu* editMenu;
     QMenu* toolsMenu;
@@ -72,7 +75,7 @@ public:
     QAction* showGridAction;
     QAction* showRoadAction;
     QAction* showLinesAction;
-
+    QAction* saveToPresetAction;
     QAction* rulerAction;
 
     QAction* showProperties;

@@ -36,11 +36,11 @@ SOURCES += main.cpp\
 #    multiselectedstate.cpp \
 #    cube.cpp \
 #    objectstoolbox.cpp \
-#    objfilemanager.cpp \
-#    roadelement3d.cpp \
-#    _3dsfilemanager.cpp \
+    objfilemanager.cpp \
+    roadelement3d.cpp \
+    _3dsfilemanager.cpp \
     stepdialog.cpp \
-#    roadelementobj.cpp \
+    roadelementobj.cpp \
     intersection.cpp \
     texturemanager.cpp \
     curve.cpp \
@@ -88,11 +88,11 @@ HEADERS  += mainwindow.h\
 #    multiselectedstate.h \
 #    cube.h \
 #    objectstoolbox.h \
-#    objfilemanager.h \
-#    roadelement3d.h \
-#    _3dsfilemanager.h \
+    objfilemanager.h \
+    roadelement3d.h \
+    _3dsfilemanager.h \
     stepdialog.h \
-#    roadelementobj.h \
+    roadelementobj.h \
     intersection.h \
     texturemanager.h \
     curve.h \

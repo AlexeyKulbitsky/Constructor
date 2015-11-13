@@ -130,31 +130,126 @@ MainWindow::MainWindow(QWidget *parent) :
     */
 
 
+//    elementsDockWidget = new QDockWidget("Элементы", this);
+//    QScrollArea* elementsScrollArea = new QScrollArea(elementsDockWidget);
+//    elementsDockWidget->setFeatures(QDockWidget::DockWidgetMovable |
+//                                    QDockWidget::DockWidgetFloatable);
+//    QToolBox* elementsToolBox = new QToolBox(elementsDockWidget);
+//    elementsToolBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+//    elementsDockWidget->setWidget(elementsScrollArea);
+//    elementsScrollArea->setWidgetResizable(true);
+//    elementsScrollArea->setWidget(elementsToolBox);
+//    elementsScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+//    addDockWidget(Qt::LeftDockWidgetArea, elementsDockWidget);
+//    this->tabifyDockWidget ( elementsDockWidget, scenePropertiesDockWidget);
+//    elementsDockWidget->raise();
+//    QListWidget* objectList = new ObjectsList(elementsDockWidget);
+//    //connect(objectList, SIGNAL(itemClicked(QListWidgetItem*)), ui->scene2D, SLOT(listItemClicked(QListWidgetItem*)));
+//    elementsToolBox->addItem(objectList, "Части дорог");
+
     elementsDockWidget = new QDockWidget("Элементы", this);
-    QScrollArea* elementsScrollArea = new QScrollArea(elementsDockWidget);
     elementsDockWidget->setFeatures(QDockWidget::DockWidgetMovable |
-                                    QDockWidget::DockWidgetFloatable);
+                                        QDockWidget::DockWidgetFloatable);
+    QWidget* backgroundWidget = new QWidget(elementsDockWidget);
+    QVBoxLayout* backgroundLayout = new QVBoxLayout(backgroundWidget);
+    backgroundWidget->setLayout(backgroundLayout);
+    elementsDockWidget->setWidget(backgroundWidget);
+
     QToolBox* elementsToolBox = new QToolBox(elementsDockWidget);
     elementsToolBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    elementsDockWidget->setWidget(elementsScrollArea);
+    QScrollArea* elementsScrollArea = new QScrollArea(elementsDockWidget);
     elementsScrollArea->setWidgetResizable(true);
     elementsScrollArea->setWidget(elementsToolBox);
     elementsScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    QListWidget* objectList = new ObjectsList(elementsDockWidget);
+    elementsToolBox->addItem(objectList, "Основные элементы");
+    QDir dir(QApplication::applicationDirPath());
+    dir.cd("models/user/");
+    ObjectsList* templtatesList = new ObjectsList(dir, QString("*.json"));
+    connect(scene2D->stateManager, SIGNAL(templtateAdded()), templtatesList, SLOT(resetObjects()));
+    elementsToolBox->addItem(templtatesList, "Пользовательские шаблоны");
+    backgroundLayout->addWidget(elementsScrollArea);
+
+    elementsComboBox = new QComboBox(elementsDockWidget);
+    elementsComboBox->addItem("Транспорт");
+    elementsComboBox->addItem("Люди");
+    elementsComboBox->addItem("Деревья, растения");
+    elementsComboBox->addItem("Знаки");
+    elementsComboBox->addItem("Строения");
+    backgroundLayout->addWidget(elementsComboBox);
+
+    elementsLayout = new QStackedLayout();
+    backgroundLayout->addLayout(elementsLayout);
+
+    connect(elementsComboBox, SIGNAL(currentIndexChanged(int)), elementsLayout, SLOT(setCurrentIndex(int)));
+
+    QToolBox* transportToolBox = new QToolBox(elementsDockWidget);
+    transportToolBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    QScrollArea* transportScrollArea = new QScrollArea(elementsDockWidget);
+    transportScrollArea->setWidgetResizable(true);
+    transportScrollArea->setWidget(transportToolBox);
+    transportScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    dir.cdUp();
+    dir.cd("transport/buses/");
+    transportToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Пассажирский транспорт");
+    dir.cdUp();
+    dir.cd("lorries/");
+    transportToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Для небольших грузов");
+    dir.cdUp();
+    dir.cd("machinery/");
+    transportToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Machinery");
+    dir.cdUp();
+    dir.cd("scooter/");
+    transportToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Scooter");
+    dir.cdUp();
+    dir.cd("TGV/");
+    transportToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Ж/д траспорт");
+    dir.cdUp();
+    dir.cd("trucks/");
+    transportToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Грузовики");
+    dir.cdUp();
+    dir.cd("cars/");
+    transportToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Легковые автомобили");
+    elementsLayout->addWidget(transportScrollArea);
+
+    QToolBox* humansToolBox = new QToolBox(elementsDockWidget);
+    humansToolBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    QScrollArea* humnasScrollArea = new QScrollArea(elementsDockWidget);
+    humnasScrollArea->setWidgetResizable(true);
+    humnasScrollArea->setWidget(humansToolBox);
+    humnasScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    dir.cdUp();
+    dir.cdUp();
+    dir.cd("humans/men/");
+    humansToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Мужчины");
+    dir.cdUp();
+    dir.cd("women/");
+    humansToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Женщины");
+    elementsLayout->addWidget(humnasScrollArea);
 
     addDockWidget(Qt::LeftDockWidgetArea, elementsDockWidget);
     this->tabifyDockWidget ( elementsDockWidget, scenePropertiesDockWidget);
     elementsDockWidget->raise();
-    QListWidget* objectList = new ObjectsList(elementsDockWidget);
-    //connect(objectList, SIGNAL(itemClicked(QListWidgetItem*)), ui->scene2D, SLOT(listItemClicked(QListWidgetItem*)));
-    elementsToolBox->addItem(objectList, "Части дорог");
 
+    QToolBox* plantsToolBox = new QToolBox(elementsDockWidget);
+    plantsToolBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    QScrollArea* plantsScrollArea = new QScrollArea(elementsDockWidget);
+    plantsScrollArea->setWidgetResizable(true);
+    plantsScrollArea->setWidget(plantsToolBox);
+    plantsScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    dir.cdUp();
+    dir.cdUp();
+    dir.cd("plants/");
+    plantsToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Деревья");
+    elementsLayout->addWidget(plantsScrollArea);
 
-
+    addDockWidget(Qt::LeftDockWidgetArea, elementsDockWidget);
+    this->tabifyDockWidget ( elementsDockWidget, scenePropertiesDockWidget);
+    elementsDockWidget->raise();
 
     /*
     QDir dir(QApplication::applicationDirPath());
-    ////qDebug() << QApplication::applicationDirPath();
-    //QDir dir("models/city_roads/");
     dir.cd("models/city_roads/");
     elementsToolBox->addItem(new ObjectsList(dir, QString("*.3ds")), "Городские дороги");
     dir.cdUp();
@@ -248,6 +343,7 @@ void MainWindow::createMenu()
     toolsMenu->addAction(showRoadAction);
     toolsMenu->addAction(showLinesAction);
     toolsMenu->addAction(showProperties);
+    toolsMenu->addAction(saveToPresetAction);
 
     contextMenu = new QMenu(this);
 
@@ -359,6 +455,10 @@ void MainWindow::createActions()
     optionsAction = new QAction(tr("Настройки"), this);
     optionsAction->setStatusTip(tr("Показать настройки приложения"));
     connect(optionsAction, SIGNAL(triggered()), settingsDialog, SLOT(exec()));
+
+    saveToPresetAction = new QAction(tr("Сохранить в шаблон"), this);
+    saveToPresetAction->setStatusTip(tr("Сохранить объект/сцену в пользовательские шаблоны"));
+    connect(saveToPresetAction, SIGNAL(triggered()), scene2D, SLOT(saveToPresets()));
 }
 
 void MainWindow::createToolBar()
