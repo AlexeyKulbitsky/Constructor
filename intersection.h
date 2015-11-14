@@ -12,6 +12,7 @@ class Intersection: public RoadElement
 public:
     Intersection();
     Intersection(float x, float y);
+    Intersection(float x, float y, int numberOfRoads);
     Intersection(const Intersection& source);
     Intersection(QVector<RoadSimple*>& roads, QVector<Curve*>& curves);
     virtual ~Intersection();

@@ -20,6 +20,7 @@ class Scene2D : public QGLWidget
     Q_OBJECT
 public:
     StateManager* stateManager;
+    QSettings* settings;
     QFont shrift;
     bool rulerIsActive;
     bool rightButtonIsPressed;
@@ -79,6 +80,7 @@ protected:
 
 public:
     explicit Scene2D(QWidget* parent = 0);
+    explicit Scene2D(QSettings* settings, QWidget* parent = 0);
     ~Scene2D();
     void drawGrid();
     void drawAxis();
@@ -88,9 +90,11 @@ public:
     void setProperties(QFormLayout* properties);
     void drawBackground(QPainter *painter);
     void setDrawRectStatus(bool status);
-
+    void setSettings(QSettings* settings);
     void setOverlayWidget(QWidget *widget);
     void drawModel();
+    void loadSettings();
+    void saveSettings();
     static bool getLogging();
 
 

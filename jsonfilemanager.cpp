@@ -67,6 +67,9 @@ bool JSONFileManager::openFile(QString source)
             else
             if (name == "Intersection")
                 element = readIntersection(obj);
+            else
+            if (name == "RoadElementOBJ")
+                element = readRoadElementOBJ(obj);
             model->getGroup(element->getLayer()).push_back(element);
         }
         file.close();
@@ -194,7 +197,9 @@ RoadElement *JSONFileManager::readElementFromFile(QString source)
             else
             if (name == "Intersection")
                 element = readIntersection(obj);
-
+            else
+            if (name == "RoadElementOBJ")
+                element = readRoadElementOBJ(obj);
             elements.push_back(element);
         }
         file.close();
@@ -539,6 +544,9 @@ CompositeRoad* JSONFileManager::readCompositeRoad(QJsonObject &obj)
         else
         if (name == "RailWay")
             element = readRailWay(obj);
+        else
+        if (name == "RoadElementOBJ")
+            element = readRoadElementOBJ(obj);
         road->addElement(element);
     }
 
@@ -780,6 +788,36 @@ Intersection *JSONFileManager::readIntersection(QJsonObject &obj)
     bool fixed = obj["Fixed"].toBool();
     intersection->setFixed(fixed);
     return intersection;
+}
+
+RoadElementOBJ *JSONFileManager::readRoadElementOBJ(QJsonObject &obj)
+{
+    bool fixed = obj["Fixed"].toBool();
+    int Id = obj["Id"].toInt();
+    QString folder = obj["Folder"].toString();
+    QString filename = obj["Filemane"].toString();
+
+    float x = obj["DeltaX"].toDouble();
+    float y = obj["DeltaY"].toDouble();
+    float zRot = obj["ZRot"].toDouble();
+    float xScale = obj["XScale"].toDouble();
+    float yScale = obj["XScale"].toDouble();
+    float zScale = obj["YScale"].toDouble();
+
+    RoadElementOBJ* element = new RoadElementOBJ(x,y,folder,filename);
+
+    OBJFileManager* manager = new OBJFileManager(model);
+    manager->loadOBJ(folder,filename, element->meshes, 2.374f, element->scaleFactor);
+
+    float scaleFactor = obj["ScaleFactor"].toDouble();
+    element->setId(Id);
+    element->setFixed(fixed);
+    element->setXScale(xScale);
+    element->setYScale(yScale);
+    element->setZScale(zScale);
+    element->setZRotation(zRot);
+    element->setScale(scaleFactor);
+    return element;
 }
 
 

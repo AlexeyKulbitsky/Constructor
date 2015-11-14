@@ -28,13 +28,20 @@ public:
     virtual void getProperties(QFormLayout *layout, QGLWidget *render);
     virtual bool isFixed();
     virtual void addElement(RoadElement *element);
-
+    setZRotVertexArray();
+    setZRotColorArray(float r, float g, float b);
+    setZRotIndexArray();
 private:
     bool selected;
     bool fixed;
     QList<RoadElement*> elements;
     int layer;
     static bool log;
+    float zRadius;
+    QVector<float> zRotVertexArray;
+    QVector<float> zRotColorArray;
+    QVector<unsigned> zRotIndexArray;
+
     // RoadElement interface
 public slots:
     virtual bool setFixed(bool fixed);

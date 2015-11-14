@@ -2,6 +2,7 @@
 
 RoadElementOBJ::RoadElementOBJ()
 {
+    name = "RoadElementOBJ";
     selected = false;
     fixed = false;
     layer = 2;
@@ -13,10 +14,13 @@ RoadElementOBJ::RoadElementOBJ()
     figureList = selectedFigureList = 0;
 }
 
-RoadElementOBJ::RoadElementOBJ(float x, float y)
+RoadElementOBJ::RoadElementOBJ(float x, float y, QString folder, QString filename)
 {
+    name = "RoadElementOBJ";
     deltaX = x;
     deltaY = y;
+    elementX = deltaX;
+    elementY = deltaY;
     selected = false;
     fixed = false;
     layer = 2;
@@ -25,10 +29,87 @@ RoadElementOBJ::RoadElementOBJ(float x, float y)
     xScale = yScale = zScale = 1.0f;
     indexOfSelectedControl = -1;
     figureList = selectedFigureList = 0;
+    zRadius = 2.0f;
+    this->folder = folder;
+    this->filename = filename;
+    setZRotVertexArray();
+    setZRotColorArray(0.0f, 1.0f, 0.0f);
+    setZRotIndexArray();
 }
 
 RoadElementOBJ::RoadElementOBJ(const RoadElementOBJ &source)
 {
+    name = "RoadElementOBJ";
+    deltaX = source.deltaX;
+    deltaY = source.deltaY;
+    elementX = deltaX;
+    elementY = deltaY;
+    selected = source.selected;
+    fixed = source.fixed;
+    layer = 2;
+    listNumber = -1;
+    xRot = source.xRot;
+    yRot = source.yRot;
+    zRot = source.zRot;
+    xScale = source.xScale;
+    yScale = source.yScale;
+    zScale = source.zScale;
+    indexOfSelectedControl = -1;
+    figureList = selectedFigureList = 0;
+    zRadius = 2.0f;
+    this->folder = source.folder;
+    this->filename = source.filename;
+    scaleFactor = source.scaleFactor;
+    setZRotVertexArray();
+    setZRotColorArray(0.0f, 1.0f, 0.0f);
+    setZRotIndexArray();
+
+    for (int i = 0; i < source.meshes.size(); ++i)
+    {
+        Mesh* mesh = new Mesh();
+        strncpy(mesh->name, source.meshes[i]->name,20);
+        mesh->Ka[0] = source.meshes[i]->Ka[0];
+        mesh->Ka[1] = source.meshes[i]->Ka[1];
+        mesh->Ka[2] = source.meshes[i]->Ka[2];
+
+        mesh->Kd[0] = source.meshes[i]->Kd[0];
+        mesh->Kd[1] = source.meshes[i]->Kd[1];
+        mesh->Kd[2] = source.meshes[i]->Kd[2];
+
+        mesh->Ks[0] = source.meshes[i]->Ks[0];
+        mesh->Ks[1] = source.meshes[i]->Ks[1];
+        mesh->Ks[2] = source.meshes[i]->Ks[2];
+
+        mesh->d = source.meshes[i]->d;
+        mesh->Ns = source.meshes[i]->Ns;
+        mesh->illum = source.meshes[i]->illum;
+
+        strncpy(mesh->map_Ka, source.meshes[i]->map_Ka, 255);
+        strncpy(mesh->map_Kd, source.meshes[i]->map_Kd, 255);
+        strncpy(mesh->map_Ks, source.meshes[i]->map_Ks, 255);
+
+        mesh->map_Ka_ID = source.meshes[i]->map_Ka_ID;
+        mesh->map_Kd_ID = source.meshes[i]->map_Kd_ID;
+        mesh->map_Ks_ID = source.meshes[i]->map_Ks_ID;
+
+
+        for (int j = 0; j < source.meshes[i]->vertices.size(); ++j)
+        {
+            Vertex vertex;
+            for (int k = 0; k < 3; ++k)
+            {
+                vertex.position[k] = source.meshes[i]->vertices[j].position[k];
+                vertex.color[k] = source.meshes[i]->vertices[j].color[k];
+                vertex.normal[k] = source.meshes[i]->vertices[j].normal[k];
+            }
+            vertex.texture[0] = source.meshes[i]->vertices[j].texture[0];
+            vertex.texture[1] = source.meshes[i]->vertices[j].texture[1];
+            mesh->vertices.push_back(vertex);
+        }
+        meshes.push_back(mesh);
+    }
+
+
 }
 
 RoadElementOBJ::~RoadElementOBJ()
@@ -68,7 +149,7 @@ void RoadElementOBJ::drawFigure(QGLWidget *render)
     //glDisableClientState(GL_NORMAL_ARRAY);
 
 
-    ////qDebug() << "Number of meshes: " << meshes.size();
+    //qDebug() << "Number of meshes: " << meshes.size();
     for (int i = 0; i < meshes.size(); ++i)
    {
 
@@ -83,7 +164,7 @@ void RoadElementOBJ::drawFigure(QGLWidget *render)
        {
            glEnable(GL_TEXTURE_2D);
            glBindTexture(GL_TEXTURE_2D, meshes[i]->map_Ka_ID);
-           ////qDebug() << meshes[i]->map_Ka_ID;
+
        }
        else if (meshes[i]->map_Ks_ID > 0)
        {
@@ -149,11 +230,19 @@ void RoadElementOBJ::drawFigure(QGLWidget *render)
     glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
     glMaterialf(GL_FRONT, GL_SHININESS, 0.0f);
 
+
     glPopMatrix();
+    if (selected)
+    {
+        glDisable(GL_DEPTH_TEST);
+        drawSelectionFrame();
+        glEnable(GL_DEPTH_TEST);
+    }
 }
 
 void RoadElementOBJ::drawSelectionFrame()
 {
+    drawControlElement(0, 5.0f, 5.0f);
 }
 
 void RoadElementOBJ::drawMeasurements(QGLWidget *render)
@@ -164,24 +253,107 @@ void RoadElementOBJ::move(float dx, float dy, float dz)
 {
     deltaX += dx;
     deltaY += dy;
+    elementX = deltaX;
+    elementY = deltaY;
 }
 
 void RoadElementOBJ::drawControlElement(int index, float lineWidth, float pointSize)
 {
+    glPushMatrix();
+    glTranslatef(deltaX, deltaY, 0.0f);
+    glRotatef(zRot, 0.0f, 0.0f, 1.0f); // поворот по Z
+    glScalef(scaleFactor, scaleFactor, scaleFactor);
+
+    switch (index)
+    {
+    case 0:
+//        glPointSize(pointSize + 5.0f);
+//        glBegin(GL_POINTS);
+//        glColor3f(0.0f, 0.0f, 0.0f);
+//        glVertex3f(0.0f, yMax, 0.0f);
+//        glEnd();
+        glLineWidth(lineWidth);
+        glDisableClientState(GL_NORMAL_ARRAY);
+        glDisable(GL_TEXTURE_2D);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+        glEnableClientState(GL_COLOR_ARRAY);
+
+        glColorPointer(3, GL_FLOAT,0,zRotColorArray.begin());
+        glVertexPointer(3, GL_FLOAT, 0, zRotVertexArray.begin());
+        glDrawElements(GL_LINE_STRIP,zRotIndexArray.size(),GL_UNSIGNED_INT,zRotIndexArray.begin());
+        break;
+    default:
+        break;
+    }
+
+    glPopMatrix();
 }
 
 QCursor RoadElementOBJ::getCursorForControlElement(int index)
-{
-    return Qt::CrossCursor;
+{    
+    switch(index)
+    {
+        case 0:
+            return Qt::CrossCursor;
+        default:
+            return Qt::ArrowCursor;
+    }
+
+
 }
 
 void RoadElementOBJ::resizeByControl(int index, float dx, float dy, float x, float y)
 {
+    if (fixed)
+    {
+        return;
+    }
+    switch (index)
+    {
+    case 0:
+    {
+        float X1 = 0.0f;
+        float Y1 = zRadius;
+        float X2 = 0.0f;
+        float Y2 = 0.0f;
+        float X3 = X1 + dx;
+        float Y3 = Y1 + dy;
+        float dx1 = X1 - X2;
+        float dy1 = Y1 - Y2;
+        float r1 = sqrt(dx1*dx1 + dy1*dy1);
+        float dx2 = X3 - X2;
+        float dy2 = Y3 - Y2;
+        float r2 = sqrt(dx2*dx2 + dy2*dy2);
+        float pi = 3.14159265f;
+        float t = dx1 / r1;
+        if (t > 1)
+            t = 1.0f;
+        if (t < -1)
+            t = -1.0f;
+        float angle1 = acos(t);
+        if (dy1 < 0)
+            angle1 = 2.0f * pi - angle1;
+        t = dx2 / r2;
+        if (t > 1)
+            t = 1.0f;
+        if (t < -1)
+            t = -1.0f;
+        float angle2 = acos(t);
+        if (dy2 < 0)
+            angle2 = 2.0f * pi - angle2;
+        float angle = angle2 - angle1;
+        setZRotation(zRot + angle * 180.0f / pi);
+    }
+        break;
+    default:
+        break;
+    }
 }
 
 int RoadElementOBJ::getNumberOfControls()
 {
-    return 0;
+    return 1;
 }
 
 int RoadElementOBJ::controlsForPoint()
@@ -195,12 +367,7 @@ void RoadElementOBJ::changeColorOfSelectedControl(int index)
 
 void RoadElementOBJ::getProperties(QFormLayout *layout, QGLWidget *render)
 {
-    while(QLayoutItem* child = layout->takeAt(0))
-    {
-        delete child->widget();
-        delete child;
-    }
-
+    clearProperties(layout);
     QDoubleSpinBox* rotationSpinBox = new QDoubleSpinBox();
     rotationSpinBox->setKeyboardTracking(false);
     rotationSpinBox->setMinimum(0.0f);
@@ -319,9 +486,85 @@ void RoadElementOBJ::clear()
 {
 }
 
+RoadElementOBJ::setZRotVertexArray()
+{
+    float pi = 3.14159265f;
+    int numberOfSides = 40;
+    for (int i = 0; i <= numberOfSides; ++i)
+    {
+        float angle = 2.0f * pi / (float(numberOfSides)) * float(i);
+        zRotVertexArray.push_back(zRadius * cosf(angle));
+        zRotVertexArray.push_back(zRadius * sinf(angle));
+        zRotVertexArray.push_back(0.0f);
+    }
+}
+
+RoadElementOBJ::setZRotColorArray(float r, float g, float b)
+{
+    zRotColorArray.resize(zRotVertexArray.size());
+    for (int i = 0; i < zRotVertexArray.size() / 3; ++i)
+    {
+        zRotColorArray[i * 3] = r;
+        zRotColorArray[i * 3 + 1] = g;
+        zRotColorArray[i * 3 + 2] = b;
+    }
+}
+
+RoadElementOBJ::setZRotIndexArray()
+{
+    zRotIndexArray.resize(zRotVertexArray.size() / 3);
+    for (int i = 0; i < zRotVertexArray.size() / 3; ++i)
+    {
+        zRotIndexArray[i] = i;
+    }
+}
+
 
 RoadElement *RoadElementOBJ::getCopy()
 {
-    RoadElement* r  = NULL;
-    return r;
+    RoadElementOBJ* copyElement = new RoadElementOBJ(*this);
+    return copyElement;
+}
+
+
+void RoadElementOBJ::clearProperties(QLayout *layout)
+{
+    while(layout->count() > 0)
+    {
+        QLayoutItem *item = layout->takeAt(0);
+        delete item->widget();
+        delete item;
+    }
+}
+
+
+QJsonObject RoadElementOBJ::getJSONInfo()
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "RoadBroken::getJSONInfo()\n";
+    QJsonObject element;
+
+    element["Name"] = name;
+    element["Layer"] = layer;
+
+    element["Fixed"] = fixed;
+    element["Id"] = Id;
+
+    element["Folder"] = folder;
+    element["Filemane"] = filename;
+
+    element["ScaleFactor"] = scaleFactor;
+    element["DeltaX"] = deltaX;
+    element["DeltaY"] = deltaY;
+    element["ZRadius"] = zRadius;
+    element["XRot"] = xRot;
+    element["YRot"] = yRot;
+    element["ZRot"] = zRot;
+    element["XScale"] = xScale;
+    element["YScale"] = yScale;
+    element["ZScale"] = zScale;
+
+
+    return element;
+
 }

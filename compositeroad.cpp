@@ -8,6 +8,8 @@ CompositeRoad::CompositeRoad()
     fixed = false;
     name = "CompositeRoad";
     layer = 0;
+    zRadius = 2.0f;
+    elementX = elementY = 0.0f;
 }
 
 CompositeRoad::CompositeRoad(const CompositeRoad &source)
@@ -62,10 +64,7 @@ void CompositeRoad::drawFigure(QGLWidget *render)
 {
     if (log)
     Logger::getLogger()->infoLog() << "CompositeRoad::drawFigure(QGLWidget *render)\n";
-    if (selected)
-    {
-        drawSelectionFrame();
-    }
+
     for (int i = 0; i < 5; ++i)
     {
         for (QList<RoadElement*>::iterator it = elements.begin();
@@ -75,6 +74,12 @@ void CompositeRoad::drawFigure(QGLWidget *render)
             if ((*it)->getLayer() == i)
                 (*it)->drawFigure(render);
         }
+    }
+    if (selected)
+    {
+        glDisable(GL_DEPTH_TEST);
+        drawSelectionFrame();
+        glEnable(GL_DEPTH_TEST);
     }
 
 }
@@ -89,6 +94,7 @@ void CompositeRoad::drawSelectionFrame()
     {
         (*it)->drawSelectionFrame();
     }
+    drawControlElement(0, 5.0f, 5.0f);
 }
 
 void CompositeRoad::drawMeasurements(QGLWidget *render)
@@ -118,6 +124,7 @@ void CompositeRoad::move(float dx, float dy, float dz)
     }
     elementX += dx;
     elementY += dy;
+    setZRotVertexArray();
 }
 
 void CompositeRoad::drawControlElement(int index, float lineWidth, float pointSize)
@@ -127,6 +134,24 @@ void CompositeRoad::drawControlElement(int index, float lineWidth, float pointSi
                                    << " index = " << index
                                    << " lineWidth = " << lineWidth
                                    << " pointSize = " << pointSize << "\n";
+    switch (index)
+    {
+    case 0:
+//
+//        glDisableClientState(GL_NORMAL_ARRAY);
+//        glDisable(GL_TEXTURE_2D);
+//        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+//        glEnableClientState(GL_COLOR_ARRAY);
+        glLineWidth(lineWidth);
+        glColorPointer(3, GL_FLOAT,0,zRotColorArray.begin());
+        glVertexPointer(3, GL_FLOAT, 0, zRotVertexArray.begin());
+        glDrawElements(GL_LINE_STRIP,zRotIndexArray.size(),GL_UNSIGNED_INT,zRotIndexArray.begin());
+        break;
+    default:
+        break;
+    }
+
 }
 
 QCursor CompositeRoad::getCursorForControlElement(int index)
@@ -134,6 +159,14 @@ QCursor CompositeRoad::getCursorForControlElement(int index)
     if (log)
     Logger::getLogger()->infoLog() << "CompositeRoad::getCursorForControlElement(int index)"
                                    << " index = " << index << "\n";
+    switch (index)
+    {
+    case 0:
+        return Qt::CrossCursor;
+    default:
+        return Qt::SizeAllCursor;
+    }
+
     return Qt::SizeAllCursor;
 }
 
@@ -150,13 +183,53 @@ void CompositeRoad::resizeByControl(int index, float dx, float dy, float x, floa
     {
         return;
     }
+    switch (index)
+    {
+    case 0:
+    {
+        float X1 = x;
+        float Y1 = y;
+        float X2 = elementX;
+        float Y2 = elementY;
+        float X3 = X1 + dx;
+        float Y3 = Y1 + dy;
+        float dx1 = X1 - X2;
+        float dy1 = Y1 - Y2;
+        float r1 = sqrt(dx1*dx1 + dy1*dy1);
+        float dx2 = X3 - X2;
+        float dy2 = Y3 - Y2;
+        float r2 = sqrt(dx2*dx2 + dy2*dy2);
+        float pi = 3.14159265f;
+        float t = dx1 / r1;
+        if (t > 1)
+            t = 1.0f;
+        if (t < -1)
+            t = -1.0f;
+        float angle1 = acos(t);
+        if (dy1 < 0)
+            angle1 = 2.0f * pi - angle1;
+        t = dx2 / r2;
+        if (t > 1)
+            t = 1.0f;
+        if (t < -1)
+            t = -1.0f;
+        float angle2 = acos(t);
+        if (dy2 < 0)
+            angle2 = 2.0f * pi - angle2;
+        float angle = angle2 - angle1;
+        //setZRotation(zRot + angle * 180.0f / pi);
+    }
+        break;
+    default:
+        break;
+    }
 }
 
 int CompositeRoad::getNumberOfControls()
 {
     if (log)
     Logger::getLogger()->infoLog() << "CompositeRoad::getNumberOfControls()\n";
-    return 0;
+    return 1;
 }
 
 int CompositeRoad::controlsForPoint()
@@ -207,6 +280,47 @@ void CompositeRoad::addElement(RoadElement *element)
     }
     elementX = sumX / float(elements.size());
     elementY = sumY / float(elements.size());
+
+    setZRotVertexArray();
+    setZRotColorArray(0.0f, 1.0f, 0.0f);
+    setZRotIndexArray();
+}
+
+CompositeRoad::setZRotVertexArray()
+{
+    int numberOfSides = 40;
+    if (zRotVertexArray.size() != (numberOfSides + 1) * 3)
+        zRotVertexArray.resize((numberOfSides + 1) * 3);
+    float pi = 3.14159265f;
+    for (int i = 0; i <= numberOfSides; ++i)
+    {
+        float angle = 2.0f * pi / (float(numberOfSides)) * float(i);
+        zRotVertexArray[i * 3] = elementX + zRadius * cosf(angle);
+        zRotVertexArray[i * 3 + 1] = elementY + zRadius * sinf(angle);
+        zRotVertexArray[i * 3 + 2] = 0.0f;
+    }
+}
+
+CompositeRoad::setZRotColorArray(float r, float g, float b)
+{
+    if (zRotColorArray.size() != zRotVertexArray.size())
+        zRotColorArray.resize(zRotVertexArray.size());
+    for (int i = 0; i < zRotVertexArray.size() / 3; ++i)
+    {
+        zRotColorArray[i * 3] = r;
+        zRotColorArray[i * 3 + 1] = g;
+        zRotColorArray[i * 3 + 2] = b;
+    }
+}
+
+CompositeRoad::setZRotIndexArray()
+{
+    if (zRotIndexArray.size() != zRotVertexArray.size() / 3)
+        zRotIndexArray.resize(zRotVertexArray.size() / 3);
+    for (int i = 0; i < zRotVertexArray.size() / 3; ++i)
+    {
+        zRotIndexArray[i] = i;
+    }
 }
 
 

@@ -79,6 +79,19 @@ struct Vertex
     float color[3];// = {0.5f, 0.5f, 0.5f};
     float texture[2];// = {0.0f, 0.0f};
     float normal[3];// = {0.0f, 0.0f, 0.0f};
+
+    Vertex& operator= (const Vertex& source)
+    {
+        for (int i = 0; i < 3; ++i)
+        {
+            position[i] = source.position[i];
+            color[i] = source.color[i];
+            normal[i] = source.normal[i];
+        }
+        texture[0] = source.texture[0];
+        texture[1] = source.texture[1];
+        return *this;
+    }
 };
 
 struct Mesh

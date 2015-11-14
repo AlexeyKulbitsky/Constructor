@@ -72,7 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
     stackedLayout->setStackingMode(QStackedLayout::StackAll);
     YandexMapsView* yandexMaps = new YandexMapsView(this);
     //GoogleMapsView* googleMaps = new GoogleMapsView(this);
-    scene2D = new Scene2D(tabScene2D);
+    scene2D = new Scene2D(&settings, tabScene2D);
     scene2D->setOverlayWidget(yandexMaps);
     stackedLayout->addWidget(scene2D);
     stackedLayout->addWidget(yandexMaps);
@@ -303,11 +303,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    scene2D->saveSettings();
+    writeSettings();
     delete undoStack;
     undoStack = NULL;
     RoadElement::undoStack = undoStack;
     settingsDialog->saveLogTreeSettings();
-    writeSettings();
+
     Logger::getLogger()->stopLogging();
     Logger::deleteLogger();
     delete ui;
@@ -468,22 +470,19 @@ void MainWindow::createToolBar()
 
 MainWindow::readSettings()
 {
-    settings.beginGroup("/Settings");
-    int windowWidth = settings.value("/window_width", width()).toInt();
-    int windowHeight = settings.value("/window_height", height()).toInt();
-    int windowPositionX = settings.value("/window_position_x", pos().x()).toInt();
-    int windowPositionY = settings.value("/window_position_y", pos().y()).toInt();
-    //this->setGeometry(windowPositionX, windowPositionY, windowWidth, windowHeight);
+    settings.beginGroup("/Settings/MainWindow");
+    QPoint pos = settings.value("pos", QPoint(200, 200)).toPoint();
+    QSize size = settings.value("size", QSize(400, 400)).toSize();
+    resize(size);
+    move(pos);
     settings.endGroup();
 }
 
 MainWindow::writeSettings()
 {
-    settings.beginGroup("/Settings");
-    settings.setValue("/window_width", width());
-    settings.setValue("/window_height", height());
-    settings.setValue("/window_positin_x", pos().x());
-    settings.setValue("/window_positin_y", pos().y());
+    settings.beginGroup("/Settings/MainWindow");
+    settings.setValue("pos", pos());
+    settings.setValue("size", size());
     settings.endGroup();
 }
 

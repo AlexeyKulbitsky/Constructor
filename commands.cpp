@@ -574,6 +574,7 @@ void PasteCommand::redo()
         {
             stateManager->selectedState->selectedElements << elements[i];
             elements[i]->setSelectedStatus(true);
+            elements[i]->move(-1.0f, 1.0f);
         }
         scene2D->setMouseTracking(true);
         stateManager->selectedState->clearProperties(layout);
@@ -596,7 +597,7 @@ void PasteCommand::redo()
             element->setStepDialog(stateManager->stepDialog);
             element->setStepDialogs(stateManager->stepDialogs, 10);
             element->getProperties(layout, scene2D);
-
+            element->move(-1.0f, 1.0f);
             stateManager->setState(stateManager->roadBuilderState);
 
         }
@@ -616,9 +617,11 @@ void PasteCommand::redo()
                 element->setStepDialog(stateManager->stepDialog);
                 element->setStepDialogs(stateManager->stepDialogs, 10);
                 element->getProperties(layout, scene2D);
+                element->move(-1.0f, 1.0f);
                 stateManager->setState(stateManager->lineBuilderState);
 
             }
+
             else
             {
                 stateManager->selectedState->setSelectedElement(selectedIndex, selectedGroup);
@@ -627,6 +630,7 @@ void PasteCommand::redo()
                 element->setStepDialog(stateManager->stepDialog);
                 element->setStepDialogs(stateManager->stepDialogs, 10);
                 element->getProperties(layout, scene2D);
+                element->move(-1.0f, 1.0f);
                 stateManager->setState(stateManager->selectedState);
 
             }

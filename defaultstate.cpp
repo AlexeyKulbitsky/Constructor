@@ -391,7 +391,13 @@ void DefaultState::dropEvent(QDropEvent *event)
         }
     if (s == "Перекресток")
     {
-        Intersection* intersection = new Intersection(x, y);
+        bool ok;
+        Intersection* intersection = NULL;
+        int numberOfRoads = QInputDialog::getInt(0,"Введите колчество рукавов","Количество рукавов",4,3,20,1,&ok);
+        if (ok)
+            intersection = new Intersection(x, y, numberOfRoads);
+        else
+            intersection = new Intersection(x, y);
         intersection->setModel(model);
         RoadElement::undoStack->push(new InsertCommand(intersection, stateManager, properties, model, 0, scene));
         return;
@@ -578,10 +584,11 @@ void DefaultState::dropEvent(QDropEvent *event)
         else
             if (lst.at(1)[lst.at(1).size() - 1] == 'j')
             {
-                RoadElementOBJ* element = new RoadElementOBJ(x, y);
+                RoadElementOBJ* element = new RoadElementOBJ(x, y, lst.at(0),lst.at(1));
                 stateManager->fileManagerOBJ->loadOBJ(lst.at(0),
                                      lst.at(1),
                                      element->meshes,2.374f, element->scaleFactor);
+
                 element->setModel(model);
 //                model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
 //                model->setModified(true);

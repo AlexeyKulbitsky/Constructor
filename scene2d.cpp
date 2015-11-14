@@ -40,12 +40,43 @@ Scene2D::Scene2D(QWidget* parent) : QGLWidget(parent), widget(0)
     setAcceptDrops(true);
     model = NULL;
     stateManager = NULL;
+    settings = NULL;
+}
+
+Scene2D::Scene2D(QSettings *settings, QWidget *parent) : QGLWidget(parent)
+{
+    fixedScale = false;
+    widget = NULL;
+    sceneActive = true;
+    showScene = true;
+    showMaps = false;
+    scaleStep = 1.05;
+    gridStep = 1.0;
+    showGrid = true;
+    this->setFocusPolicy(Qt::StrongFocus);
+    nSca = 0.2f;
+    xRot=0; yRot=0; zRot=0; zTra=0;
+    xDelta = 0.0f;
+    yDelta = 0.0f;
+    dX = 0.0f;
+    dY = 0.0f;
+    figureIsSelected = false;
+    controlIsSelected = false;
+    drawRectStatus = false;
+    rightButtonIsPressed = false;
+    leftButtonIsPressed = false;
+    setAcceptDrops(true);
+    model = NULL;
+    stateManager = NULL;
+    this->settings = settings;
+    loadSettings();
 }
 
 
 
 Scene2D::~Scene2D()
 {
+   // saveSettings();
     stateManager = NULL;
     model = NULL;
     properties = NULL;
@@ -511,6 +542,13 @@ void Scene2D::setDrawRectStatus(bool status)
     drawRectStatus = status;
 }
 
+void Scene2D::setSettings(QSettings *settings)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "Scene2D::setDrawRectStatus(bool status)\n";
+    this->settings = settings;
+}
+
 void Scene2D::setOverlayWidget(QWidget *widget)
 {
     if (log)
@@ -616,6 +654,20 @@ void Scene2D::drawModel()
         drawRect(rectPoint1, rectPoint2);
 
     glPopMatrix();
+}
+
+void Scene2D::loadSettings()
+{
+    settings->beginGroup("/Settings/View/Scene2D");
+    nSca = settings->value("/Scale", 0.2f).toFloat();
+    settings->endGroup();
+}
+
+void Scene2D::saveSettings()
+{
+    settings->beginGroup("/Settings/View/Scene2D");
+    settings->setValue("/Scale",nSca);
+    settings->endGroup();
 }
 
 bool Scene2D::getLogging()

@@ -8,7 +8,7 @@ class RoadElementOBJ: public RoadElement
     Q_OBJECT
 public:
     RoadElementOBJ();
-    RoadElementOBJ(float x, float y);
+    RoadElementOBJ(float x, float y, QString folder, QString filename);
     RoadElementOBJ(const RoadElementOBJ &source);
     virtual ~RoadElementOBJ();
     // RoadElement interface
@@ -58,6 +58,7 @@ public:
     GLuint figureList, selectedFigureList;
     int listNumber;
     float deltaX, deltaY;
+    float zRadius;
     GLdouble xRot;
     GLdouble yRot;
     GLdouble zRot;
@@ -65,25 +66,38 @@ public:
     GLdouble xScale;
     GLdouble yScale;
     GLdouble zScale;
+    QVector<float> zRotVertexArray;
+    QVector<float> zRotColorArray;
+    QVector<unsigned> zRotIndexArray;
+    //std::vector<vec3> vertexArray;
+    //std::vector<vec3> normalArray;
+    //std::vector<vec2> textureArray;
 
-    std::vector<vec3> vertexArray;
-    std::vector<vec3> normalArray;
-    std::vector<vec2> textureArray;
-
-     std::vector<Vertex> vertices;
+     //std::vector<Vertex> vertices;
      std::vector<Mesh*> meshes;
 
-     QMap<QString, Material> materials;
+     //QMap<QString, Material> materials;
 
-     Mesh mesh;
-
+     //Mesh mesh;
+     QString folder;
+     QString filename;
      // RoadElement interface
 public:
      virtual void clear();
-
+     setZRotVertexArray();
+     setZRotColorArray(float r, float g, float b);
+     setZRotIndexArray();
      // RoadElement interface
 public:
      virtual RoadElement *getCopy();
+
+     // RoadElement interface
+public:
+     virtual void clearProperties(QLayout *layout);
+
+     // RoadElement interface
+public:
+     virtual QJsonObject getJSONInfo();
 };
 
 #endif // ROADELEMENTOBJ_H

@@ -202,7 +202,7 @@ void Scene3D::initializeGL()
     Logger::getLogger()->infoLog() << "Scene3D::initializeGL()\n";
     qglClearColor(Qt::white);
     glEnable(GL_DEPTH_TEST);
-    glShadeModel(GL_FLAT);
+    glShadeModel(GL_SMOOTH);
     glEnable(GL_CULL_FACE);
     //glCullFace (GL_FRONT_AND_BACK);
     //glEnable(GL_FRONT_AND_BACK);

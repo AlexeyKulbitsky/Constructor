@@ -3,6 +3,7 @@
 
 #include "filemanager.h"
 #include "ruler.h"
+#include "objfilemanager.h"
 
 class JSONFileManager: public FileManager
 {
@@ -30,6 +31,7 @@ private:
     RailWay *readRailWay(QJsonObject& obj);
     Ruler* readRuler(QJsonObject& obj);
     Intersection* readIntersection(QJsonObject& obj);
+    RoadElementOBJ* readRoadElementOBJ(QJsonObject& obj);
 
 public slots:
     void autoSaveFile();
