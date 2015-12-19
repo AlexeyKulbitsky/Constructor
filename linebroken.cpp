@@ -125,8 +125,7 @@ LineBroken::LineBroken(float width, float *axisVertices, int size, QString sourc
     setIndexArrayForAxis();
 
     setVertexArray(width, axisVertices, size);
-    //getTextures(source);
-    textureID[0] = TextureManager::getInstance()->getID(source);
+    textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + source);
     setTextureArray();
     setColorArray(red, green, blue, alpha);
 

@@ -3,6 +3,9 @@
 #include <QDrag>
 #include <QMimeData>
 #include <QDir>
+#include <QDebug>
+#include <QApplication>
+
 ObjectsList::ObjectsList(QWidget *parent)
     : QListWidget(parent)
 {
@@ -12,55 +15,40 @@ ObjectsList::ObjectsList(QWidget *parent)
     //setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     //QListWidgetItem* item = new QListWidgetItem(QIcon("D://QT/Tools/QtCreator/bin/GL/1.bmp"),tr("Дорога"));
 
-    this->addItem("Дорога простая");
+    //this->addItem("Дорога простая");
     this->addItem("Дорога ломаная");
     this->addItem("Поворот дороги");
     this->addItem("Перекресток");
-    this->addItem("Закругление");
+    //this->addItem("Закругление");
     this->addItem("Разделительная зона (разметка)");
     this->addItem("Разделительная зона (газон)");
     this->addItem("Разделительная зона (тротуар)");
     this->addItem("Сплошная");
     this->addItem("Прерывистая");
-    this->addItem("Двойная сплошая");
+    this->addItem("Двойная сплошная");
     this->addItem("Двойная прерывистая");
     this->addItem("Пешеходный переход");
     this->addItem("Трамвайные пути");
     this->addItem("Железная дорога");
-    //this->addItem("Провод");
-    //this->addItem("Двойной провод");
-   // this->addItem("Куб");
-    //this->addItem("BMW M3");
-    //this->addItem("Audi Q7");
-    //this->addItem("ВАЗ-2104");
-   // this->addItem("ВАЗ-2106");
-    //this->addItem("Dodge_Ram_2007");
-    //this->addItem("Автобус ПАЗ");
-    //this->addItem("Микроавтобус Ford");
-    //this->addItem("Грузовик Ford");
-    //this->addItem("DAF XF");
-    //this->addItem("Остановка");
-    //this->addItem("Здание 1");
-    //this->addItem("Здание 2");
-    //this->addItem("Дерево 1");
-    //this->addItem("Дерево 2");
-    //this->addItem("Дерево 3");
-    //this->addItem("Здание");
-    //this->addItem("Знак");
-    //this->addItem("Человек");
-    //this->addItem("");
-
+    this->addItem("Провод/растяжка");
+    this->addItem("Двойной провод");
+    this->addItem("Столб");
+    //this->addItem("Кривая Безье");
+    //this->addItem("Куб");
+    this->addItem("Рекламный щит");
+    this->addItem("П-образная арка");
 }
 
-ObjectsList::ObjectsList(QDir directory, QString fileType, QWidget *parent)
+ObjectsList::ObjectsList(QString folder, QString fileType, QWidget *parent)
     : QListWidget(parent)
 {
-    this->directory = directory;
+    directory.setPath(QApplication::applicationDirPath() + folder);
     this->fileType = fileType;
     QStringList list(directory.entryList(QStringList() << fileType));
     for (int i = 0; i < list.size(); ++i)
         this->addItem(list.at(i));
-    filePath = directory.absolutePath();
+    filePath = folder;
+    //qDebug() << filePath;
 }
 
 void ObjectsList::dropEvent(QDropEvent *event)
@@ -101,11 +89,12 @@ void ObjectsList::mouseMoveEvent(QMouseEvent *event)
     {
         QByteArray csvData;
         QStringList lst;
-        lst << filePath + "/" << itemAt(dragStartPosition)->text();
+        lst << filePath << itemAt(dragStartPosition)->text();
         QString str;
-        str = lst.join(' ');
+        str = lst.join('|');
         csvData.append(str);
         mimeData->setData("text/plain",csvData);
+        qDebug() << lst;
     }
     drag->setMimeData(mimeData);
 

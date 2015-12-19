@@ -1,4 +1,7 @@
 #include "jsonfilemanager.h"
+#include <QProgressDialog>
+#include <QApplication>
+#include "yandexmapsview.h"
 
 JSONFileManager::JSONFileManager(Model *model)
 {
@@ -31,8 +34,12 @@ bool JSONFileManager::openFile(QString source)
         QJsonArray ar = loadDoc.array();
 
 
+        QProgressDialog progress("Открытие файла...", "Отменить", 0, ar.size());
+        progress.setWindowModality(Qt::WindowModal);
+
         for (int i = 0; i < ar.size(); ++i)
         {
+            progress.setValue(i);
             RoadElement* element = NULL;
             QJsonObject obj = ar[i].toObject();
             QString name = obj["Name"].toString();
@@ -70,8 +77,36 @@ bool JSONFileManager::openFile(QString source)
             else
             if (name == "RoadElementOBJ")
                 element = readRoadElementOBJ(obj);
+            else
+            if (name == "VoltageLine")
+                element = readVoltageLine(obj);
+            else
+            if (name == "DoubleVoltageLine")
+                element = readDoubleVoltageLine(obj);
+            else
+            if (name == "Pole")
+                element = readPole(obj);
+            else
+            if (name == "Cube")
+                element = readCube(obj);
+            else
+            if (name == "Billboard")
+                element = readBillboard(obj);
+            else
+            if (name == "Arch")
+                element = readArch(obj);
+            else
+            if (name == "MapPlane")
+                element = readMapPlane(obj);
+//            else
+//            if (name == "YandexMaps")
+//            {
+//                readYandexMaps(obj);
+//                continue;
+//            }
             model->getGroup(element->getLayer()).push_back(element);
         }
+        progress.setValue(ar.size());
         file.close();
     }
     return true;
@@ -86,6 +121,22 @@ bool JSONFileManager::saveFile(QString source)
         for(QList<RoadElement*>::iterator it = model->getGroup(i).begin();
             it != model->getGroup(i).end(); ++it)
             elements.append((*it)->getJSONInfo());
+    }
+    for (int i = 0; i < maps.size(); ++i)
+    {
+        QJsonObject map;
+        if (maps[i]->objectName() == "YandexMaps")
+        {
+            YandexMapsView* yandex = qobject_cast<YandexMapsView*>(maps[i]);
+            map["Name"] = "YandexMaps";
+            map["Zoom"] = yandex->getZoom();
+            map["CenterX"] = yandex->getCenterX();
+            map["CenterY"] = yandex->getCenterY();
+            map["ScaleStep"] = yandex->getScaleStep();
+            map["ScaleFactor"] = yandex->getScaleFactor();
+            map["ScaleCounter"] = yandex->getScaleCounter();
+        }
+        elements.append(map);
     }
 
     QFile file(source);
@@ -161,8 +212,12 @@ RoadElement *JSONFileManager::readElementFromFile(QString source)
 
         QList<RoadElement*> elements;
 
+        QProgressDialog progress("Открытие файла...", "Отменить", 0, ar.size());
+        progress.setWindowModality(Qt::WindowModal);
+
         for (int i = 0; i < ar.size(); ++i)
         {
+            progress.setValue(i);
             RoadElement* element = NULL;
             QJsonObject obj = ar[i].toObject();
             QString name = obj["Name"].toString();
@@ -200,8 +255,30 @@ RoadElement *JSONFileManager::readElementFromFile(QString source)
             else
             if (name == "RoadElementOBJ")
                 element = readRoadElementOBJ(obj);
+            else
+            if (name == "VoltageLine")
+                element = readVoltageLine(obj);
+            else
+            if (name == "DoubleVoltageLine")
+                element = readDoubleVoltageLine(obj);
+            else
+            if (name == "Pole")
+                element = readPole(obj);
+            else
+            if (name == "Cube")
+                element = readCube(obj);
+            else
+            if (name == "Billboard")
+                element = readBillboard(obj);
+            else
+            if (name == "Arch")
+                element = readArch(obj);
+            else
+            if (name == "MapPlane")
+                element = readMapPlane(obj);
             elements.push_back(element);
         }
+        progress.setValue(ar.size());
         file.close();
         RoadElement* result = NULL;
         if (elements.size() > 1)
@@ -230,7 +307,7 @@ RoadSimple *JSONFileManager::readRoadSimple(QJsonObject &obj)
     float y2 = coordAr[3].toDouble();
 
     float leftWidth = obj["LeftWidth"].toDouble();
-    float rightWidth = obj["LeftWidth"].toDouble();
+    float rightWidth = obj["RightWidth"].toDouble();
     float leftBoardWidth = obj["LeftBoardWidth"].toDouble();
     float rightBoardWidth = obj["RightBoardWidth"].toDouble();
 
@@ -369,7 +446,7 @@ RoadBroken* JSONFileManager::readRoadBroken(QJsonObject &obj)
         if (name == "SplitZone")
             lineLinked.line = readSplitZone(lineElement);
         lineLinked.lineType = line["LineType"].toInt();
-        lineLinked.lineWidth = line["LineWidth"].toDouble();
+        //lineLinked.lineWidth = line["LineWidth"].toDouble();
         lineLinked.rightSide = line["RightSide"].toBool();
         lineLinked.step = line["Step"].toDouble();
         lineLinked.beginSide = line["BeginSide"].toBool();
@@ -489,7 +566,6 @@ Curve* JSONFileManager::readCurve(QJsonObject &obj)
     float numberOfSides = obj["NumberOfSides"].toInt();
 
     float boardWidth = obj["BoardWidth"].toDouble();
-    float angleRounding = obj["AngleRounding"].toDouble();
 
     QJsonArray tempControlPoints = obj["ControlPoints"].toArray();
     float controls[9];
@@ -499,7 +575,7 @@ Curve* JSONFileManager::readCurve(QJsonObject &obj)
     Curve* curve = new Curve(controls, tempControlPoints.size(),
                              texture1, texture_1Usize, texture_1Vsize,
                              texture2, texture_2Usize, texture_2Vsize,
-                             numberOfSides, angleRounding, boardWidth,
+                             numberOfSides, boardWidth,
                              fixed, showBoard, layer, name);
     int Id = obj["Id"].toInt();
     curve->setId(Id);
@@ -782,6 +858,7 @@ Intersection *JSONFileManager::readIntersection(QJsonObject &obj)
         curves[i] = readCurve(temp);
     }
 
+
     Intersection* intersection = new Intersection(roads, curves);
     int Id = obj["Id"].toInt();
     intersection->setId(Id);
@@ -799,6 +876,7 @@ RoadElementOBJ *JSONFileManager::readRoadElementOBJ(QJsonObject &obj)
 
     float x = obj["DeltaX"].toDouble();
     float y = obj["DeltaY"].toDouble();
+    float z = obj["DeltaZ"].toDouble();
     float zRot = obj["ZRot"].toDouble();
     float xScale = obj["XScale"].toDouble();
     float yScale = obj["XScale"].toDouble();
@@ -807,7 +885,7 @@ RoadElementOBJ *JSONFileManager::readRoadElementOBJ(QJsonObject &obj)
     RoadElementOBJ* element = new RoadElementOBJ(x,y,folder,filename);
 
     OBJFileManager* manager = new OBJFileManager(model);
-    manager->loadOBJ(folder,filename, element->meshes, 2.374f, element->scaleFactor);
+    manager->loadOBJ(QApplication::applicationDirPath() + folder,filename, element->meshes, 2.374f, element->scaleFactor);
 
     float scaleFactor = obj["ScaleFactor"].toDouble();
     element->setId(Id);
@@ -817,7 +895,170 @@ RoadElementOBJ *JSONFileManager::readRoadElementOBJ(QJsonObject &obj)
     element->setZScale(zScale);
     element->setZRotation(zRot);
     element->setScale(scaleFactor);
+    element->setZTranslation(z);
     return element;
+}
+
+VoltageLine *JSONFileManager::readVoltageLine(QJsonObject &obj)
+{
+    float width = obj["Width"].toDouble();
+
+    QJsonArray temp = obj["AxisVertexArray"].toArray();
+    QVector<float> axisVertexArray;
+    axisVertexArray.resize(temp.size());
+    for (int i = 0; i < temp.size(); ++i)
+    {
+        axisVertexArray[i] = temp[i].toDouble();
+    }
+
+    int Id = obj["Id"].toInt();
+    bool fixed = obj["Fixed"].toBool();
+
+    VoltageLine* line = new VoltageLine(axisVertexArray, width);
+    line->setId(Id);
+    line->setFixed(fixed);
+    return line;
+}
+
+DoubleVoltageLine *JSONFileManager::readDoubleVoltageLine(QJsonObject &obj)
+{
+    float width = obj["Width"].toDouble();
+
+    QJsonArray temp = obj["AxisVertexArray"].toArray();
+    QVector<float> axisVertexArray;
+    axisVertexArray.resize(temp.size());
+    for (int i = 0; i < temp.size(); ++i)
+    {
+        axisVertexArray[i] = temp[i].toDouble();
+    }
+
+    int Id = obj["Id"].toInt();
+    bool fixed = obj["Fixed"].toBool();
+
+    DoubleVoltageLine* line = new DoubleVoltageLine(axisVertexArray, width);
+    line->setId(Id);
+    line->setFixed(fixed);
+    return line;
+}
+
+Pole *JSONFileManager::readPole(QJsonObject &obj)
+{
+    //float x = obj["X"].toDouble();
+    //float y = obj["Y"].toDouble();
+    float x1 = obj["X1"].toDouble();
+    float y1 = obj["Y1"].toDouble();
+    float z1 = obj["Z1"].toDouble();
+    float x2 = obj["X2"].toDouble();
+    float y2 = obj["Y2"].toDouble();
+    float z2 = obj["Z2"].toDouble();
+    float diameter = obj["Diameter"].toDouble();
+    //float height = obj["Height"].toDouble();
+    int Id = obj["Id"].toInt();
+    bool fixed = obj["Fixed"].toBool();
+
+    //Pole* pole = new Pole(x, y, diameter, height);
+    Pole* pole = new Pole(x1, y1, z1, x2, y2, z2, diameter);
+    pole->setId(Id);
+    pole->setFixed(fixed);
+    return pole;
+}
+
+Cube *JSONFileManager::readCube(QJsonObject &obj)
+{
+    float x = obj["X"].toDouble();
+    float y = obj["Y"].toDouble();
+    float height = obj["Height"].toDouble();
+    float width = obj["Width"].toDouble();
+    float length = obj["Length"].toDouble();
+    bool withTexture = obj["WithTexture"].toBool();
+    float z = obj["Z"].toDouble() + height / 2.0f;
+
+    Cube* cube = NULL;
+    if (withTexture)
+    {
+        QString texture = obj["Texture"].toString();
+        cube = new Cube(x, y, z, height, width, length, texture, "Cube", 2);
+    }
+    else
+    {
+        cube = new Cube(x, y, z, height, width, length, "Cube", 2);
+    }
+    int Id = obj["Id"].toInt();
+    bool fixed = obj["Fixed"].toBool();
+
+    cube->setId(Id);
+    cube->setFixed(fixed);
+    return cube;
+}
+
+Billboard *JSONFileManager::readBillboard(QJsonObject &obj)
+{
+    int Id = obj["Id"].toInt();
+    bool fixed = obj["Fixed"].toBool();
+    float x = obj["X"].toDouble();
+    float y = obj["Y"].toDouble();
+    float width = obj["Width"].toDouble();
+    float height = obj["Height"].toDouble();
+    float z = obj["Z"].toDouble();
+    QString texture = obj["Texture"].toString();
+    float zRot = obj["ZRot"].toDouble();
+
+    Billboard* billboard = new Billboard(x, y, width, height, z, zRot, texture);
+    billboard->setId(Id);
+    billboard->setFixed(fixed);
+    return billboard;
+}
+
+Arch *JSONFileManager::readArch(QJsonObject &obj)
+{
+    int Id = obj["Id"].toInt();
+    bool fixed = obj["Fixed"].toBool();
+    float height = obj["Height"].toDouble();
+    float width = obj["Width"].toDouble();
+    float z = obj["Z"].toDouble();
+    float rotation = obj["Rotation"].toDouble();
+    float x = obj["X"].toDouble();
+    float y = obj["Y"].toDouble();
+
+    Arch* arch = new Arch(x, y, width, z, height, rotation);
+    arch->setId(Id);
+    arch->setFixed(fixed);
+    return arch;
+}
+
+MapPlane *JSONFileManager::readMapPlane(QJsonObject &obj)
+{
+    int Id = obj["Id"].toInt();
+    float height = obj["Height"].toDouble();
+    float width = obj["Width"].toDouble();
+    QString texture = obj["Texture"].toString();
+
+    MapPlane* mapPlane = new MapPlane(width, height, texture);
+    mapPlane->setId(Id);
+
+    return mapPlane;
+}
+
+void JSONFileManager::readYandexMaps(QJsonObject &obj)
+{
+    for (int i = 0; i < maps.size(); ++i)
+    {
+        if (maps[i]->objectName() == "YandexMaps")
+        {
+            YandexMapsView* yandex = qobject_cast<YandexMapsView*>(maps[i]);
+            QString zoom = obj["Zoom"].toString();
+            QString centerX = obj["CenterX"].toString();
+            QString centerY = obj["CenterY"].toString();
+            float scaleStep = obj["ScaleStep"].toDouble();
+            float scaleFactor = obj["ScaleFactor"].toDouble();
+            int scaleCounter = obj["ScaleCounter"].toInt();
+
+            yandex->setCenter(centerX, centerY, zoom);
+            yandex->setScaleStep(scaleStep);
+            yandex->setScaleFactor(scaleFactor);
+            yandex->setScaleCounter(scaleCounter);
+        }
+    }
 }
 
 

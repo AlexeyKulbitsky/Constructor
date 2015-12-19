@@ -15,7 +15,7 @@ RailWay::RailWay(float *axisArray, int size,
     name = "RailWay";
     selected = fixed = false;
     layer = 1;
-    textureID[0] = TextureManager::getInstance()->getID(textureSource);
+    textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + textureSource);
     texture = textureSource;
     this->textureUsize = textureUsize;
     this->textureVsize = textureVsize;
@@ -35,7 +35,7 @@ RailWay::RailWay(QVector<float> &axisArray,
     selected = fixed = false;
     layer = 1;
     texture = textureSource;
-    textureID[0] = TextureManager::getInstance()->getID(textureSource);
+    textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + textureSource);
     this->textureUsize = textureUsize;
     this->textureVsize = textureVsize;
     axisVertexArray.resize(axisArray.size());

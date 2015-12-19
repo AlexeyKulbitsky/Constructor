@@ -204,7 +204,10 @@ DeleteCommand::DeleteCommand(RoadElement *element, Model *model, StateManager* s
 DeleteCommand::DeleteCommand(QList<RoadElement *> &elements, Model *model, StateManager* stateManager, QFormLayout *layout, Scene2D *scene2D, QUndoCommand *parent)
     : QUndoCommand(parent)
 {
-    this->elements = elements;
+    for (int i = 0; i < elements.size(); ++i)
+    {
+        this->elements.push_back(elements[i]);
+    }
     this->oneElement = false;
     this->isInModel = true;
     this->model = model;

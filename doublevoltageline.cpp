@@ -19,6 +19,33 @@ DoubleVoltageLine::DoubleVoltageLine(float *axisArray, int size, float width,
     setVertexArray();
 }
 
+DoubleVoltageLine::DoubleVoltageLine(QVector<float> &axisArray, float width, QString name, int layer)
+{
+    axisVertexArray.resize(axisArray.size());
+    for (int i = 0; i < axisArray.size(); ++i)
+        axisVertexArray[i] = axisArray[i];
+    this->height = axisVertexArray[2];
+    this->width = width;
+    this->layer = layer;
+    this->name = name;
+    setVertexArray();
+    selected = fixed = false;
+}
+
+DoubleVoltageLine::DoubleVoltageLine(const DoubleVoltageLine &source)
+{
+    axisVertexArray.resize(source.axisVertexArray.size());
+    for (int i = 0; i < source.axisVertexArray.size(); ++i)
+        axisVertexArray[i] = source.axisVertexArray[i];
+    this->height = axisVertexArray[2];
+    this->width = source.width;
+    this->layer = source.layer;
+    this->name = source.name;
+    setVertexArray();
+    selected = source.selected;
+    fixed = source.fixed;
+}
+
 DoubleVoltageLine::~DoubleVoltageLine()
 {
     for (int i = 0; i < lines.size(); ++i)
@@ -43,11 +70,13 @@ void DoubleVoltageLine::setSelectedStatus(bool status)
 }
 
 void DoubleVoltageLine::drawFigure(QGLWidget *render)
-{
-    if (selected)
-        drawSelectionFrame();
+{ 
     for (int i = 0; i < lines.size(); ++i)
         lines[i]->drawFigure(render);
+    if (selected)
+    {
+        drawSelectionFrame();
+    }
 }
 
 void DoubleVoltageLine::drawSelectionFrame()
@@ -77,13 +106,15 @@ void DoubleVoltageLine::move(float dx, float dy, float dz)
 
 void DoubleVoltageLine::drawControlElement(int index, float lineWidth, float pointSize)
 {
+    glDisable(GL_LIGHTING);
     glPointSize(pointSize);
     glBegin(GL_POINTS);
     glColor3d(0.0f, 0.0f, 0.0f);
     glVertex3f(axisVertexArray[index * 3],
                 axisVertexArray[index * 3 + 1],
-                axisVertexArray[index * 3 + 1]);
+                axisVertexArray[index * 3 + 2]);
     glEnd();
+    glEnable(GL_LIGHTING);
 }
 
 QCursor DoubleVoltageLine::getCursorForControlElement(int index)
@@ -120,11 +151,7 @@ void DoubleVoltageLine::changeColorOfSelectedControl(int index)
 
 void DoubleVoltageLine::getProperties(QFormLayout *layout, QGLWidget *render)
 {
-    while(QLayoutItem* child = layout->takeAt(0))
-    {
-        delete child->widget();
-        delete child;
-    }
+    clearProperties(layout);
     QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
     widthSpinBox->setKeyboardTracking(false);
     widthSpinBox->setMinimum(0.001);
@@ -244,12 +271,12 @@ void DoubleVoltageLine::setVertexArray()
                 dx *= -1.0f;
                 dy *= -1.0f;
             }
-            if (x1 < x2 && y1 > y2)
+            if (x1 <= x2 && y1 >= y2)
             {
                 dx *= -1.0f;
 
             }
-            if (x1 > x2 && y1 < y2)
+            if (x1 >= x2 && y1 <= y2)
             {
                 dy *= -1.0f;
 
@@ -281,12 +308,12 @@ void DoubleVoltageLine::setVertexArray()
                     dx *= -1.0f;
                     dy *= -1.0f;
                 }
-                if (x1 < x2 && y1 > y2)
+                if (x1 <= x2 && y1 >= y2)
                 {
                     dx *= -1.0f;
 
                 }
-                if (x1 > x2 && y1 < y2)
+                if (x1 >= x2 && y1 <= y2)
                 {
                     dy *= -1.0f;
 
@@ -312,17 +339,30 @@ void DoubleVoltageLine::setVertexArray()
                 float y3 = axisVertexArray[(i + 1) * 3 + 1];
                 float num = (x1-x2)*(x3-x2)+(y1-y2)*(y3-y2);
                 float den = sqrt(((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))*((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
-                float alpha = (acos(num / den))/2.0f;
+                float t = num / den;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float alpha = (acos(t))/2.0f;
                 float sa = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1);
                 float pi = 3.1415926f;
                 if(sa < 0) // Точка находится справа
                 {
                     alpha = pi - alpha;
                 }
-
-
-                float beta = acos((x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2))));
-                if (asin((y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)))) < 0)
+                t = (x3-x2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float beta = acos(t);
+                t = (y3-y2)/(sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2)));
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                if (asin(t) < 0)
                 {
                     beta *= -1.0f;
                 }
@@ -373,3 +413,81 @@ void DoubleVoltageLine::setHeight(double height)
     emit heightChanged(height);
 }
 
+
+
+RoadElement *DoubleVoltageLine::getCopy()
+{
+    DoubleVoltageLine* copyElement = new DoubleVoltageLine(*this);
+    return copyElement;
+}
+
+void DoubleVoltageLine::setCoordForControl(int index, std::vector<vec3> &controls)
+{
+    axisVertexArray[index * 3] = controls[0].x;
+    axisVertexArray[index * 3 + 1] = controls[0].y;
+    axisVertexArray[index * 3 + 2] = controls[0].z;
+    setVertexArray();
+}
+
+QJsonObject DoubleVoltageLine::getJSONInfo()
+{
+    QJsonObject element;
+    element["Name"] = name;
+    element["Layer"] = layer;
+    element["Width"] = width;
+    QJsonArray temp;
+
+    for (int i = 0; i < axisVertexArray.size(); ++i)
+    {
+        temp.append(QJsonValue(axisVertexArray[i]));
+    }
+    element["AxisVertexArray"] = temp;
+     element["Id"] = Id;
+    element["Fixed"] = fixed;
+    return element;
+}
+
+void DoubleVoltageLine::clearProperties(QLayout *layout)
+{
+    while(layout->count() > 0)
+    {
+        QLayoutItem *item = layout->takeAt(0);
+        delete item->widget();
+        delete item;
+    }
+}
+
+void DoubleVoltageLine::deleteBreak(bool front)
+{
+    if (front)
+    {
+        for (int i = 0; i < lines.size(); ++i)
+        {
+            lines[i]->deleteBreak(front);
+        }
+        axisVertexArray.pop_front();
+        axisVertexArray.pop_front();
+        axisVertexArray.pop_front();
+
+    }
+    else
+    {
+        for (int i = 0; i < lines.size(); ++i)
+        {
+            lines[i]->deleteBreak(front);
+        }
+        axisVertexArray.pop_back();
+        axisVertexArray.pop_back();
+        axisVertexArray.pop_back();
+    }
+}
+
+std::vector<vec3> DoubleVoltageLine::getCoordOfControl(int index)
+{
+    std::vector<vec3> res;
+    vec3 p(axisVertexArray[index * 3],
+               axisVertexArray[index * 3 + 1],
+               axisVertexArray[index * 3 + 2]);
+    res.push_back(p);
+    return res;
+}

@@ -1,23 +1,17 @@
-#ifndef VOLTAGELINE_H
-#define VOLTAGELINE_H
+#ifndef ARCH_H
+#define ARCH_H
+#include "roadelement.h"
+#include "pole.h"
 
-#include <QGLWidget>
-#include <QVector>
-#include "linebroken.h"
-
-class VoltageLine: public LineBroken
+class Arch : public RoadElement
 {
     Q_OBJECT
 public:
-    VoltageLine();
-    VoltageLine(float* axisArray, int size, float width = 0.01f,
-                QString name = "VoltageLine",
-                int layer = 1);
-    VoltageLine(QVector<float> &axisArray, float width = 0.01f,
-                QString name = "VoltageLine",
-                int layer = 1);
-    VoltageLine(const VoltageLine& source);
-    virtual ~VoltageLine();
+    Arch();
+    Arch(float x, float y, float width, float z, float height);
+    Arch(float x, float y, float width, float z, float height, float rotation);
+    Arch(const Arch& source);
+    virtual ~Arch();
     // RoadElement interface
 public:
     virtual bool isSelected();
@@ -36,48 +30,41 @@ public:
     virtual bool isFixed();
     virtual int getLayer();
     virtual void clear();
-
-    virtual void addBreak(bool front);
-    void addBreak(bool front, float x, float y, float z);
-    void setVertexArray();
-    void setIndexArray();
-    void setColorArray(float red, float green, float blue, float alpha);
+    virtual RoadElement *getCopy();
 
 signals:
     void widthChanged(double value);
+    void rotationChanged(double value);
     void heightChanged(double value);
+    void zChanged(double value);
 
 public slots:
     virtual bool setFixed(bool fixed);
-    void setWidth(double width);
-    void setHeight(double height);
-
-public:
-    QVector<GLfloat> axisVertexArray;
+    void setWidth(double value);
+    void setRotation(double value);
+    void setHeight(double value);
+    void setZ(double value);
 
 private:
-    bool selected, fixed;
+    bool fixed;
+    bool selected;
     int layer;
+    QVector<Pole*> polesVertical;
+    QVector<Pole*> polesHorizontal;
+    QVector<Pole*> poles;
+
     float width;
+    float z;
     float height;
-    QVector<GLfloat> vertexArray;
-    QVector<GLubyte> indexArray;
-    QVector<GLfloat> colorArray;
+    float rotation;
 
     // RoadElement interface
 public:
-    virtual RoadElement *getCopy();
-
-    // RoadElement interface
-public:
+    virtual void rotate(float angle, float x, float y, float z);
+    virtual void clearProperties(QLayout *layout);
     virtual std::vector<vec3> getCoordOfControl(int index);
     virtual void setCoordForControl(int index, std::vector<vec3> &controls);
     virtual QJsonObject getJSONInfo();
-    virtual void clearProperties(QLayout *layout);
-
-    // LineBroken interface
-public:
-    virtual void deleteBreak(bool front);
 };
 
-#endif // VOLTAGELINE_H
+#endif // ARCH_H

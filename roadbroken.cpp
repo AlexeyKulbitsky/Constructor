@@ -13,6 +13,8 @@ RoadBroken::RoadBroken()
 
 RoadBroken::RoadBroken(float x1, float y1, float x2, float y2, float width, float red, float green, float blue, float alpha, QString name, int layer)
 {
+    layout = NULL;
+    render = NULL;
     this->layer = layer;
     this->name = name;
     this->size = size;
@@ -41,6 +43,8 @@ RoadBroken::RoadBroken(float x1, float y1, float x2, float y2, float width, floa
 
 RoadBroken::RoadBroken(QVector<GLfloat> &vetrexArray, float red, float green, float blue, float alpha, QString name, int layer)
 {    
+    layout = NULL;
+    render = NULL;
     this->layer = layer;
     this->name = name;
     setVertexArray(vetrexArray);
@@ -67,6 +71,8 @@ RoadBroken::RoadBroken(float x1, float y1, float x2, float y2, float width,
                        QString name, int layer)
 {
 
+    layout = NULL;
+    render = NULL;
     this->layer = layer;
     this->name = name;
     this->size = size;
@@ -85,8 +91,8 @@ RoadBroken::RoadBroken(float x1, float y1, float x2, float y2, float width,
     setLeftIndexArray();
     texture1 = texture_1;
     texture2 = texture_2;
-    textureID[0] = TextureManager::getInstance()->getID(texture_1);
-    textureID[1] = TextureManager::getInstance()->getID(texture_2);
+    textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_1);
+    textureID[1] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_2);
     this->texture_1Usize = texture_1Usize;
     this->texture_1Vsize = texture_1Vsize;
     this->texture_2Usize = texture_2Usize;
@@ -117,6 +123,8 @@ RoadBroken::RoadBroken(QVector<float> &vertexArray,
                        bool showRightBoard, bool showLeftBoard, bool fixed,
                        QString name, int layer)
 {
+    layout = NULL;
+    render = NULL;
     this->layer = layer;
     this->name = name;
     this->showRightBoard = showRightBoard;
@@ -148,8 +156,8 @@ RoadBroken::RoadBroken(QVector<float> &vertexArray,
     setLeftIndexArray();
     texture1 = texture_1;
     texture2 = texture_2;
-    textureID[0] = TextureManager::getInstance()->getID(texture_1);
-    textureID[1] = TextureManager::getInstance()->getID(texture_2);
+    textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_1);
+    textureID[1] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_2);
     this->texture_1Usize = texture_1Usize;
     this->texture_1Vsize = texture_1Vsize;
     this->texture_2Usize = texture_2Usize;
@@ -388,6 +396,9 @@ void RoadBroken::resetVertexArray(float dx, float dy, bool right)
                                        << " right = " << right << "\n";
     int i = right ? 0 : 1;
     int delta = right ? 1 : -1;
+    float dxFinal = 0.0f;
+    float dyFinal = 0.0f;
+    bool recalculate = false;
     for (; i < vertexArray.size() / 3; i += 2)
     {
         float x1 = vertexArray[(i + delta) * 3];
@@ -398,12 +409,65 @@ void RoadBroken::resetVertexArray(float dx, float dy, bool right)
         float dy1 = y2 - y1;
         float r1 = sqrt(dx1*dx1 + dy1*dy1);
         float r = (dx*dx1 + dy*dy1) / r1;
-        float dX = dx1 / r1 * r;
+        float dX = dx1 / r1 * r;       
         float dY = dy1 / r1 * r;
         vertexArray[i * 3] += dX;
         vertexArray[i * 3 + 1] += dY;
-    }
 
+        x2 = vertexArray[i * 3];
+        y2 = vertexArray[i * 3 + 1];
+        float res = dx1 * (x2 - x1) + dy1 * (y2 - y1);
+        if (res < 0.0f)
+        {
+            float r2 = r1;
+            r = sqrt(dx * dx + dy * dy);
+            dx1 = x2 - x1;
+            dy1 = y2 - y1;
+            r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float rTemp = r1 / (r1 + r2);
+            if (fabs(x2 - x1) < 1e-7
+                    && fabs(y2 - y1) < 1e-7)
+            {
+                rTemp = 0.001f;
+            }
+            float dxTemp = dx * (-1.0f) * rTemp;
+            float dyTemp = dy * (-1.0f) * rTemp;
+            if (fabs(dxTemp) > fabs(dxFinal) ||
+                    fabs(dyTemp) > fabs(dyFinal))
+            {
+                dxFinal = dxTemp;
+                dyFinal = dyTemp;
+                recalculate = true;
+            }
+        }
+    }
+    i = right ? 0 : 1;
+    if (recalculate)
+    {
+        for (; i < vertexArray.size() / 3; i += 2)
+        {
+            float x1 = vertexArray[(i + delta) * 3];
+            float y1 = vertexArray[(i + delta) * 3 + 1];
+            float x2 = vertexArray[i * 3];
+            float y2 = vertexArray[i * 3 + 1];
+            float dx1 = x2 - x1;
+            float dy1 = y2 - y1;
+            float r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float r = (dxFinal*dx1 + dyFinal*dy1) / r1;
+            float dX = dx1 / r1 * r;
+            float dY = dy1 / r1 * r;
+            vertexArray[i * 3] += dX;
+            vertexArray[i * 3 + 1] += dY;
+            float x2Temp = vertexArray[i * 3];
+            float y2Temp = vertexArray[i * 3 + 1];
+            if (fabs(x2Temp - x1) < 1e-7
+                    && fabs(y2Temp - y1) < 1e-7)
+            {
+                vertexArray[i * 3] = x1 - dx1 / r1 * 0.001f;
+                vertexArray[i * 3 + 1] = y1 - dy1 / r1 * 0.001f;
+            }
+        }
+    }
     float sumX = 0.0f, sumY = 0.0f;
     for (int i = 0; i < this->vertexArray.size() / 3; ++i)
     {
@@ -3397,8 +3461,10 @@ void RoadBroken::getProperties(QFormLayout *layout, QGLWidget* render)
     QCheckBox* showLeftBoardCheckBox = new QCheckBox();
     QCheckBox* fixedCheckBox = new QCheckBox();
     QDoubleSpinBox* rightBoardSpinBox = new QDoubleSpinBox();
+    rightBoardSpinBox->setMouseTracking(true);
     rightBoardSpinBox->setKeyboardTracking(false);
     QDoubleSpinBox* leftBoardSpinBox = new QDoubleSpinBox();
+    leftBoardSpinBox->setMouseTracking(true);
     leftBoardSpinBox->setKeyboardTracking(false);
     showRightBoardCheckBox->setChecked(showRightBoard);
     QObject::connect(showRightBoardCheckBox, SIGNAL(toggled(bool)), this, SLOT(setRightBoardShowStatus(bool)));
@@ -3575,9 +3641,9 @@ void RoadBroken::addLine(float step, QString textureSource, float textureSize, f
                                           splitZoneWidth, beginRounding, endRounding,
                                           splitZoneType,
                                           splitZoneHeight,
-                                          QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                          "/models/city_roads/board.jpg",
                                           0.25f, 6.0f,
-                                          QApplication::applicationDirPath() + "/models/city_roads/grass.jpg",
+                                          "/models/city_roads/grass.jpg",
                                           3.0f, 3.0f,
                                           QString("Линия №") + QString::number(lines.size() + 1));
             }
@@ -3588,9 +3654,9 @@ void RoadBroken::addLine(float step, QString textureSource, float textureSize, f
                                           splitZoneWidth, beginRounding, endRounding,
                                           splitZoneType,
                                           splitZoneHeight,
-                                          QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                          "/models/city_roads/board.jpg",
                                           0.25f, 6.0f,
-                                          QApplication::applicationDirPath() + "/models/city_roads/nr_07S.jpg",
+                                          "/models/city_roads/nr_07S.jpg",
                                           6.0f, 6.0f,
                                           QString("Линия №") + QString::number(lines.size() + 1));
             }
@@ -3651,31 +3717,31 @@ void RoadBroken::addLine()
     switch(lineType)
     {
     case 0:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/solid.png";
+        textSource = "/models/city_roads/solid.png";
         lWidth = 0.1f;
         break;
     case 1:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/inter.png";
+        textSource = "/models/city_roads/inter.png";
         lWidth = 0.1f;
         break;
     case 2:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/d_solid.png";
+        textSource = "/models/city_roads/d_solid.png";
         lWidth = 0.25f;
         break;
     case 3:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/d_inter_l.png";
+        textSource = "/models/city_roads/d_inter_l.png";
         lWidth = 0.25f;
         break;
     case 4:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/d_inter_r.png";
+        textSource = "/models/city_roads/d_inter_r.png";
         lWidth = 0.25f;
         break;
     case 5:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/d_inter.png";
+        textSource = "/models/city_roads/d_inter.png";
         lWidth = 0.25f;
         break;
     case 8:
-        textSource = QString(":/textures/tramways.png");
+        textSource = QString("/models/city_roads/tramways.png");
         lWidth = 1.5f;
         addLine(step, textSource, 1.5f, lWidth, lineType, rightSide);
         return;

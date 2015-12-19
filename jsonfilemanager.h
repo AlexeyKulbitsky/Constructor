@@ -5,6 +5,7 @@
 #include "ruler.h"
 #include "objfilemanager.h"
 
+
 class JSONFileManager: public FileManager
 {
     Q_OBJECT
@@ -32,6 +33,14 @@ private:
     Ruler* readRuler(QJsonObject& obj);
     Intersection* readIntersection(QJsonObject& obj);
     RoadElementOBJ* readRoadElementOBJ(QJsonObject& obj);
+    VoltageLine* readVoltageLine(QJsonObject& obj);
+    DoubleVoltageLine* readDoubleVoltageLine(QJsonObject& obj);
+    Pole* readPole(QJsonObject& obj);
+    Cube* readCube(QJsonObject& obj);
+    Billboard* readBillboard(QJsonObject& obj);
+    Arch* readArch(QJsonObject& obj);
+    MapPlane* readMapPlane(QJsonObject& obj);
+    void readYandexMaps(QJsonObject& obj);
 
 public slots:
     void autoSaveFile();

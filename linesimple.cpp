@@ -39,7 +39,7 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, QString name, int
     // Рвмка для выбора фигуры
     setIndexArrayForSelectionFrame();
     setColorArrayForSelectionFrame(0.0f, 0.0f, 0.0f);
-
+    indexOfSelectedControl = -1;
     selected = false;
     fixed = false;
     this->description = '\0';
@@ -71,6 +71,7 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, floa
 
     selected = false;
     fixed = false;
+    indexOfSelectedControl = -1;
     this->description = '\0';
 }
 
@@ -85,7 +86,7 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QStr
     this->width = width;
 
     setVertexArray(x1, y1, x2, y2, width);    
-    textureID[0] = TextureManager::getInstance()->getID(source);
+    textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + source);
     setTextureArray();
     setIndexArray();
     //qDebug() << "Texture binded";
@@ -99,6 +100,7 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QStr
 
     selected = false;
     fixed = false;
+    indexOfSelectedControl = -1;
     this->description = '\0';
 }
 
@@ -114,7 +116,7 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QStr
     this->width = width;
 
     setVertexArray(x1, y1, x2, y2, width);
-    textureID[0] = TextureManager::getInstance()->getID(source);
+    textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + source);
     setTextureArray();
     setIndexArray();
     this->x1 = x1;
@@ -124,7 +126,7 @@ LineSimple::LineSimple(float x1, float y1, float x2, float y2, float width, QStr
 
     setIndexArrayForSelectionFrame();
     setColorArrayForSelectionFrame(0.0f, 0.0f, 0.0f);
-
+    indexOfSelectedControl = -1;
     selected = false;
     fixed = false;
 
@@ -735,6 +737,23 @@ bool LineSimple::isFixed()
     if (log)
         Logger::getLogger()->infoLog() << "LineSimple::isFixed()\n";
     return fixed;
+}
+
+void LineSimple::setLength(float length, bool front)
+{
+    if (front)
+    {
+        x1 = x2 + (x1 - x2) / this->length * length;
+        y1 = y2 + (y1 - y2) / this->length * length;
+    }
+    else
+    {
+        x2 = x1 + (x2 - x1) / this->length * length;
+        y2 = y1 + (y2 - y1) / this->length * length;
+    }
+    this->length = length;
+    setVertexArray(x1, y1, x2, y2, width);
+    setTextureArray();
 }
 
 

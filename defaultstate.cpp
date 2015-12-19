@@ -349,8 +349,8 @@ void DefaultState::dropEvent(QDropEvent *event)
     if (s == "Дорога простая")
     {
         RoadSimple* road =  new RoadSimple(x - 2.0f, y, x + 2.0f, y, 6.0f,
-                                           QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
-                                           QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
+                                           "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
+                                           "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
                                            "RoadSimple", 0);
         road->setModel(model);
         RoadElement::undoStack->push(new InsertCommand(road, stateManager, properties, model, 0, scene));
@@ -360,8 +360,8 @@ void DefaultState::dropEvent(QDropEvent *event)
     {
 
         RoadBroken* road = new RoadBroken(x, y, x + 2.75f, y, 6.0f,
-                                          QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
-                                          QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
+                                          "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
+                                          "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
                                           "RoadBroken", 0);
         road->setModel(model);
         RoadElement::undoStack->push(new InsertCommand(road, stateManager, properties, model, 0, scene));
@@ -372,18 +372,19 @@ void DefaultState::dropEvent(QDropEvent *event)
         RoundingRoad* road = new RoundingRoad(x, y, 10, 0, 90,
                                               x, y, 16, 0, 90,
                                               20, "RoundingRoad", 0,
-                                              QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
-                                              QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f);
+                                              "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
+                                              "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f);
         road->setModel(model);
         RoadElement::undoStack->push(new InsertCommand(road, stateManager, properties, model, 0, scene));
+        return;
     } else
         if (s == "Закругление")
         {
             Curve* curve = new Curve(x, y, 0.0f,
                                      x - 5.0f, y, 0.0f,
                                      x, y + 5.0f, 0.0f,
-                                     QApplication::applicationDirPath() + "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
-                                     QApplication::applicationDirPath() + "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
+                                     "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
+                                     "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
                                      10);
             curve->setModel(model);
             RoadElement::undoStack->push(new InsertCommand(curve, stateManager, properties, model, 0, scene));
@@ -393,13 +394,13 @@ void DefaultState::dropEvent(QDropEvent *event)
     {
         bool ok;
         Intersection* intersection = NULL;
-        int numberOfRoads = QInputDialog::getInt(0,"Введите колчество рукавов","Количество рукавов",4,3,20,1,&ok);
+        int numberOfRoads = QInputDialog::getInt(0,tr("Введите количество рукавов"),"Количество рукавов",4,3,10,1,&ok);
         if (ok)
+        {
             intersection = new Intersection(x, y, numberOfRoads);
-        else
-            intersection = new Intersection(x, y);
-        intersection->setModel(model);
-        RoadElement::undoStack->push(new InsertCommand(intersection, stateManager, properties, model, 0, scene));
+            intersection->setModel(model);
+            RoadElement::undoStack->push(new InsertCommand(intersection, stateManager, properties, model, 0, scene));
+        }
         return;
     }
     if (s == "Разделительная зона (разметка)")
@@ -423,9 +424,9 @@ void DefaultState::dropEvent(QDropEvent *event)
                                              true,
                                              1,
                                              0.1,
-                                             QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                             "/models/city_roads/board.jpg",
                                              0.25f, 6.0f,
-                                             QApplication::applicationDirPath() + "/models/city_roads/grass.jpg",
+                                             "/models/city_roads/grass.jpg",
                                              3.0f, 3.0f);
 
         splitZone->setModel(model);
@@ -441,9 +442,9 @@ void DefaultState::dropEvent(QDropEvent *event)
                                              true,
                                              2,
                                              0.1,
-                                             QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                             "/models/city_roads/board.jpg",
                                              0.25f, 6.0f,
-                                             QApplication::applicationDirPath() + "/models/city_roads/nr_07S.jpg",
+                                             "/models/city_roads/nr_07S.jpg",
                                              6.0f, 6.0f);
         splitZone->setModel(model);
         RoadElement::undoStack->push(new InsertCommand(splitZone, stateManager, properties, model, 1, scene));
@@ -458,7 +459,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[3] = x + 2.5f;
         axis[4] = y;
         axis[5] = 0.02f;
-        LineBroken* line = new LineBroken(0.1f, axis, 6, QApplication::applicationDirPath() + "/models/city_roads/solid.png", 6.0f, QString("LineBroken"), 1);
+        LineBroken* line = new LineBroken(0.1f, axis, 6, "/models/city_roads/solid.png", 6.0f, QString("LineBroken"), 1);
         line->setModel(model);
         RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, 1, scene));
         return;
@@ -472,7 +473,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[3] = x + 2.5f;
         axis[4] = y;
         axis[5] = 0.02f;
-        LineBroken* line = new LineBroken(0.1f, axis, 6, QApplication::applicationDirPath() + "/models/city_roads/inter.png", 6.0f, QString("LineBroken"), 1);
+        LineBroken* line = new LineBroken(0.1f, axis, 6, "/models/city_roads/inter.png", 6.0f, QString("LineBroken"), 1);
         line->setModel(model);
         RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, 1, scene));
         return;
@@ -486,7 +487,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[3] = x + 2.5f;
         axis[4] = y;
         axis[5] = 0.02f;
-        LineBroken* line = new LineBroken(0.25f, axis, 6, QApplication::applicationDirPath() + "/models/city_roads/d_solid.png", 6.0f, QString("LineBroken"), 1);
+        LineBroken* line = new LineBroken(0.25f, axis, 6, "/models/city_roads/d_solid.png", 6.0f, QString("LineBroken"), 1);
         line->setModel(model);
         RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, 1, scene));
         return;
@@ -500,7 +501,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[3] = x + 2.5f;
         axis[4] = y;
         axis[5] = 0.02f;
-        LineBroken* line = new LineBroken(0.25f, axis, 6, QApplication::applicationDirPath() + "/models/city_roads/d_inter.png", 6.0f, QString("LineBroken"), 1);
+        LineBroken* line = new LineBroken(0.25f, axis, 6, "/models/city_roads/d_inter.png", 6.0f, QString("LineBroken"), 1);
         line->setModel(model);
         RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, 1, scene));
         return;
@@ -514,7 +515,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[3] = x + 2.5f;
         axis[4] = y;
         axis[5] = 0.02f;
-        LineBroken* line = new LineBroken(0.25f, axis, 6, QApplication::applicationDirPath() + "/models/city_roads/d_inter.png", 6.0f, QString("LineBroken"), 1);
+        LineBroken* line = new LineBroken(0.25f, axis, 6, "/models/city_roads/d_inter.png", 6.0f, QString("LineBroken"), 1);
         line->setModel(model);
         RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, 1, scene));
         return;
@@ -538,7 +539,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[3] = x + 2.5f;
         axis[4] = y;
         axis[5] = 0.02f;
-        LineBroken* tramways = new LineBroken(1.5f, axis, 6, QString(":/textures/tramways.png"), 1.5f, "Tramways", 1);
+        LineBroken* tramways = new LineBroken(1.5f, axis, 6, QString("/models/city_roads/tramways.png"), 1.5f, "Tramways", 1);
         tramways->setModel(model);
         RoadElement::undoStack->push(new InsertCommand(tramways, stateManager, properties, model, 1, scene));
         return;
@@ -553,18 +554,98 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[4] = y;
         axis[5] = 0.02f;
         RailWay* railway = new RailWay(axis, 6,
-                                       QApplication::applicationDirPath() + "/models/city_roads/railway.jpg",
+                                       "/models/city_roads/railway.jpg",
                                        2.65f, 6.0f);
         railway->setModel(model);
         RoadElement::undoStack->push(new InsertCommand(railway, stateManager, properties, model, 1, scene));
         return;
     }
-
-
+    if (s == "Провод/растяжка")
+    {
+        float axis[6];
+        axis[0] = x - 2.5f;
+        axis[1] = y;
+        axis[2] = 1.0f;
+        axis[3] = x + 2.5f;
+        axis[4] = y;
+        axis[5] = 1.0f;
+        VoltageLine* line = new VoltageLine(axis, 6);
+        line->setModel(model);
+        RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, 1, scene));
+        return;
+    }
+    if (s == "Двойной провод")
+    {
+        float axis[6];
+        axis[0] = x - 5.0f;
+        axis[1] = y;
+        axis[2] = 1.0f;
+        axis[3] = x + 5.0f;
+        axis[4] = y;
+        axis[5] = 1.0f;
+        DoubleVoltageLine* line = new DoubleVoltageLine(axis, 6);
+        line->setModel(model);
+        RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, 1, scene));
+        return;
+    }
+    if (s == "Столб")
+    {
+        //Pole* pole = new Pole(x, y, 0.2f, 1.5f);
+        //Pole* pole = new Pole(x, y, 0.0f, x + 5.0f, y + 5.0f, 5.0f, 1.0f);
+        Pole* pole = new Pole(x, y, 0.0f, x, y, 5.0f, 1.0f);
+        pole->setModel(model);
+        RoadElement::undoStack->push(new InsertCommand(pole, stateManager, properties, model, pole->getLayer(), scene));
+        return;
+    }
+    if (s == "Кривая Безье")
+    {
+        QVector<float> points;
+        points.push_back(x);
+        points.push_back(y);
+        points.push_back(0.0f);
+        points.push_back(x + 5.0f);
+        points.push_back(y);
+        points.push_back(0.0f);
+        points.push_back(x + 10.0f);
+        points.push_back(y);
+        points.push_back(0.0f);
+        points.push_back(x + 15.0f);
+        points.push_back(y);
+        points.push_back(0.0f);
+        points.push_back(x + 20.0f);
+        points.push_back(y);
+        points.push_back(0.0f);
+        int numberOfSides = 50;
+        Beziers* line = new Beziers(points, numberOfSides);
+        line->setModel(model);
+        RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, line->getLayer(), scene));
+        return;
+    }
+    if (s == "Куб")
+    {
+        Cube* cube = new Cube(x, y, 0.0f, 2.0f, "/models/city_roads/reklam_1.png", "Cube", 2);
+        cube->setModel(model);
+        RoadElement::undoStack->push(new InsertCommand(cube, stateManager, properties, model, 2, scene));
+        return;
+    }
+    if (s == "Рекламный щит")
+    {
+        Billboard* billboard = new Billboard(x, y, 6.0f, 3.0f, 2.5f, "/models/city_roads/reklam_1.png");
+        billboard->setModel(model);
+        RoadElement::undoStack->push(new InsertCommand(billboard, stateManager, properties, model, 2, scene));
+        return;
+    }
+    if (s == "П-образная арка")
+    {
+        Arch* arch = new Arch(x, y, 7.0f, 4.0f, 1.0f);
+        arch->setModel(model);
+        RoadElement::undoStack->push(new InsertCommand(arch, stateManager, properties, model, 2, scene));
+        return;
+    }
     else
     {
 
-        QStringList lst =  QString(event->mimeData()->data("text/plain")).split(' ');
+        QStringList lst =  QString(event->mimeData()->data("text/plain")).split('|');
         if (lst.at(1)[lst.at(1).size() - 1] == 's')
         {
 
@@ -575,32 +656,27 @@ void DefaultState::dropEvent(QDropEvent *event)
                                  element->materials);
 
             element->setModel(model);
-//            model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-//            model->setModified(true);
-//            element->setSelectedStatus(false);
-            RoadElement::undoStack->push(new InsertCommand(element, stateManager, properties, model, model->getNumberOfGroups() - 1, scene));
+            RoadElement::undoStack->push(new InsertCommand(element, stateManager, properties, model, element->getLayer(), scene));
 
         }
         else
             if (lst.at(1)[lst.at(1).size() - 1] == 'j')
             {
+
                 RoadElementOBJ* element = new RoadElementOBJ(x, y, lst.at(0),lst.at(1));
-                stateManager->fileManagerOBJ->loadOBJ(lst.at(0),
+                stateManager->fileManagerOBJ->loadOBJ(QApplication::applicationDirPath() + lst.at(0),
                                      lst.at(1),
                                      element->meshes,2.374f, element->scaleFactor);
 
                 element->setModel(model);
-//                model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-//                model->setModified(true);
-//                element->setSelectedStatus(false);
-                RoadElement::undoStack->push(new InsertCommand(element, stateManager, properties, model, model->getNumberOfGroups() - 1, scene));
+                RoadElement::undoStack->push(new InsertCommand(element, stateManager, properties, model, element->getLayer(), scene));
             }
         else
             if (lst.at(1)[lst.at(1).size() - 1] == 'n')
             {
                 RoadElement* element = NULL;
                 QString source = lst.at(0) + lst.at(1);
-                element = stateManager->fileManagerJSON->readElementFromFile(source);
+                element = stateManager->fileManagerJSON->readElementFromFile(QApplication::applicationDirPath() + source);
                 if (element)
                 {
                     float dx = x - element->getElementX();
@@ -627,34 +703,8 @@ void DefaultState::dropEvent(QDropEvent *event)
     /*
 
          else
-        if (s == "Провод")
-        {
-            float axis[6];
-            axis[0] = x - 2.5f;
-            axis[1] = y - 0.5f;
-            axis[2] = 1.0f;
-            axis[3] = x + 2.5f;
-            axis[4] = y + 0.5f;
-            axis[5] = 1.0f;
-            VoltageLine* line = new VoltageLine(axis, 6);
-            line->setModel(model);
-            model->getGroup(1).push_back(line);
-            model->setModified(true);
-        } else
-            if (s == "Двойной провод")
-            {
-                float axis[6];
-                axis[0] = x - 5.0f;
-                axis[1] = y - 0.5f;
-                axis[2] = 1.0f;
-                axis[3] = x + 5.0f;
-                axis[4] = y + 0.5f;
-                axis[5] = 1.0f;
-                DoubleVoltageLine* line = new DoubleVoltageLine(axis, 6);
-                line->setModel(model);
-                model->getGroup(1).push_back(line);
-                model->setModified(true);
-            } else
+         else
+
 
     if (s == "Куб")
     {
@@ -1003,7 +1053,7 @@ bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
     glLoadIdentity();
 
     int i = 1;
-    for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
+    for (int j = model->getNumberOfGroups() - 2; j >= 0; --j)
     {
         for (QList<RoadElement*>::iterator it = model->getGroup(j).begin();
              it != model->getGroup(j).end(); ++it)
@@ -1029,7 +1079,7 @@ bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
     {
         selectedElementsCount = hitsForFigure;
         i = selectBuffer[3] - 1; // имя фигуры верхняя фигура
-        for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
+        for (int j = model->getNumberOfGroups() - 2; j >= 0; --j)
         {
             if (i < model->getGroup(j).size())
             {
@@ -1096,7 +1146,7 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
     glLoadIdentity();
 
     int i = 1;
-    for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
+    for (int j = model->getNumberOfGroups() - 2; j >= 0; --j)
     {
         for (QList<RoadElement*>::iterator it = model->getGroup(j).begin();
              it != model->getGroup(j).end(); ++it)
@@ -1125,7 +1175,7 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
         if (hitsForFigure == 1)
         {
             i = selectBuffer[3] - 1; // имя фигуры верхняя фигура
-            for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
+            for (int j = model->getNumberOfGroups() - 2; j >= 0; --j)
             {
                 if (i < model->getGroup(j).size())
                 {
@@ -1148,7 +1198,7 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
             for (int hitNumber = 1; hitNumber <= hitsForFigure; ++hitNumber)
             {
                 i = selectBuffer[hitNumber * 4 - 1] - 1; // имя фигуры верхняя фигура
-                for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
+                for (int j = model->getNumberOfGroups() - 2; j >= 0; --j)
                 {
                     if (i < model->getGroup(j).size())
                     {

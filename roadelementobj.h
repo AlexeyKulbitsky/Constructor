@@ -37,6 +37,7 @@ signals:
     void yScaleChanged(double value);
     void zScaleChanged(double value);
     void scaleChanged(double value);
+    void zTranslationChanged(double value);
 
 public slots:
     virtual bool setFixed(bool fixed);
@@ -45,6 +46,7 @@ public slots:
     void setYScale(double value);
     void setZScale(double value);
     void setScale(double scale);
+    void setZTranslation(double translation);
 
 public:
 
@@ -57,7 +59,7 @@ public:
     GLuint textureID[1];
     GLuint figureList, selectedFigureList;
     int listNumber;
-    float deltaX, deltaY;
+    float deltaX, deltaY, deltaZ;
     float zRadius;
     GLdouble xRot;
     GLdouble yRot;
@@ -98,6 +100,11 @@ public:
      // RoadElement interface
 public:
      virtual QJsonObject getJSONInfo();
+
+     // RoadElement interface
+public:
+     virtual std::vector<vec3> getCoordOfControl(int index);
+     virtual void setCoordForControl(int index, std::vector<vec3> &controls);
 };
 
 #endif // ROADELEMENTOBJ_H

@@ -17,6 +17,9 @@
 #include <QGraphicsScene>
 #include "scene2d.h"
 #include "settingsdialog.h"
+#include "yandexmapsview.h"
+#include "googlemapsview.h"
+#include "osmview.h"
 
 namespace Ui {
 class MainWindow;
@@ -37,6 +40,11 @@ public:
     Scene3D* scene3D;
     QGraphicsScene *scene;
     SettingsDialog* settingsDialog;
+
+    QStackedLayout* stackedLayout;
+    YandexMapsView* yandexMaps;
+    GoogleMapsView* googleMaps;
+    OSMview* osMaps;
 
     QScrollArea *scenePropertiesScrollArea;
     QWidget* scenePropertiesWidget;
@@ -91,6 +99,7 @@ public:
 
     readSettings();
     writeSettings();
+    QString currentFileName;
 
 private:
     JSONFileManager* jsonFileManager;
@@ -99,9 +108,10 @@ private:
 private slots:
     void newFile();
     void openFile();
+    void saveAsFile();
     void saveFile();
-
     void on_tabWidget_currentChanged(int index);
+    void setMap(int index);
 
 public slots:
     void setFileManager(FileManager* manager);

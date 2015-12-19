@@ -3,7 +3,7 @@
 
 Model::Model(QObject *parent) : QObject(parent)
 {
-    numberOfGroups = 4;
+    numberOfGroups = 5;
     for (int i = 0; i < numberOfGroups; ++i)
     {
         group[i].visible = true;
@@ -17,7 +17,7 @@ Model::Model(QObject *parent) : QObject(parent)
 Model::~Model()
 {
 
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < numberOfGroups; ++i)
     {
         for (int j = 0; j < group[i].elements.size(); ++j)
         {

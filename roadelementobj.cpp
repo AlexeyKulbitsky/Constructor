@@ -12,6 +12,7 @@ RoadElementOBJ::RoadElementOBJ()
     xScale = yScale = zScale = 1.0f;
     indexOfSelectedControl = -1;
     figureList = selectedFigureList = 0;
+    deltaZ = 0.0f;
 }
 
 RoadElementOBJ::RoadElementOBJ(float x, float y, QString folder, QString filename)
@@ -32,6 +33,7 @@ RoadElementOBJ::RoadElementOBJ(float x, float y, QString folder, QString filenam
     zRadius = 2.0f;
     this->folder = folder;
     this->filename = filename;
+    deltaZ = 0.0f;
     setZRotVertexArray();
     setZRotColorArray(0.0f, 1.0f, 0.0f);
     setZRotIndexArray();
@@ -60,6 +62,7 @@ RoadElementOBJ::RoadElementOBJ(const RoadElementOBJ &source)
     this->folder = source.folder;
     this->filename = source.filename;
     scaleFactor = source.scaleFactor;
+    deltaZ = source.deltaZ;
     setZRotVertexArray();
     setZRotColorArray(0.0f, 1.0f, 0.0f);
     setZRotIndexArray();
@@ -135,7 +138,7 @@ void RoadElementOBJ::drawFigure(QGLWidget *render)
     glPolygonMode(GL_FRONT_AND_BACK , GL_FILL);
     glPushMatrix();
 
-    glTranslatef(deltaX, deltaY, 0.0f);
+    glTranslatef(deltaX, deltaY, deltaZ);
 
     //glRotatef(xRot, 1.0f, 0.0f, 0.0f); // поворот по X
     //glRotatef(90, 0.0f, 1.0f, 0.0f); // поворот по Y
@@ -242,7 +245,10 @@ void RoadElementOBJ::drawFigure(QGLWidget *render)
 
 void RoadElementOBJ::drawSelectionFrame()
 {
-    drawControlElement(0, 5.0f, 5.0f);
+    for (int i = 0; i < getNumberOfControls(); ++i)
+    {
+        drawControlElement(i, 5.0f, 10.0f);
+    }
 }
 
 void RoadElementOBJ::drawMeasurements(QGLWidget *render)
@@ -283,6 +289,14 @@ void RoadElementOBJ::drawControlElement(int index, float lineWidth, float pointS
         glVertexPointer(3, GL_FLOAT, 0, zRotVertexArray.begin());
         glDrawElements(GL_LINE_STRIP,zRotIndexArray.size(),GL_UNSIGNED_INT,zRotIndexArray.begin());
         break;
+    case 1:
+    {
+        glPointSize(pointSize);
+        glBegin(GL_POINTS);
+        glColor3f(0.0f, 1.0f, 0.0f);
+        glVertex3f(0.0f, 0.0f, 0.0f);
+        glEnd();
+    }
     default:
         break;
     }
@@ -295,6 +309,8 @@ QCursor RoadElementOBJ::getCursorForControlElement(int index)
     switch(index)
     {
         case 0:
+            return Qt::CrossCursor;
+        case 1:
             return Qt::CrossCursor;
         default:
             return Qt::ArrowCursor;
@@ -353,7 +369,7 @@ void RoadElementOBJ::resizeByControl(int index, float dx, float dy, float x, flo
 
 int RoadElementOBJ::getNumberOfControls()
 {
-    return 1;
+    return 2;
 }
 
 int RoadElementOBJ::controlsForPoint()
@@ -405,6 +421,11 @@ void RoadElementOBJ::getProperties(QFormLayout *layout, QGLWidget *render)
     connect(zScaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setZScale(double)));
     connect(this, SIGNAL(zScaleChanged(double)), zScaleSpinBox, SLOT(setValue(double)));
 
+    QDoubleSpinBox* zTranslationSpinBox = new QDoubleSpinBox();
+    zTranslationSpinBox->setKeyboardTracking(false);
+    zTranslationSpinBox->setValue(deltaZ);
+    connect(zTranslationSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setZTranslation(double)));
+    connect(this, SIGNAL(zTranslationChanged(double)), zTranslationSpinBox, SLOT(setValue(double)));
     if (render)
     {
         connect(rotationSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
@@ -412,6 +433,7 @@ void RoadElementOBJ::getProperties(QFormLayout *layout, QGLWidget *render)
         connect(xScaleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
         connect(yScaleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
         connect(zScaleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+        connect(zTranslationSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
     }
 
     layout->addRow("Поворот:", rotationSpinBox);
@@ -419,6 +441,7 @@ void RoadElementOBJ::getProperties(QFormLayout *layout, QGLWidget *render)
     layout->addRow("Масштаб по X", xScaleSpinBox);
     layout->addRow("Масштаб по Y", yScaleSpinBox);
     layout->addRow("Масштаб по Z", zScaleSpinBox);
+    layout->addRow("Высота", zTranslationSpinBox);
 }
 
 bool RoadElementOBJ::isFixed()
@@ -479,6 +502,14 @@ void RoadElementOBJ::setScale(double scale)
         scaleFactor = scale;
         emit scaleChanged(scaleFactor);
     }
+}
+
+void RoadElementOBJ::setZTranslation(double translation)
+{
+    if (deltaZ == translation)
+        return;
+    deltaZ = translation;
+    emit zTranslationChanged(translation);
 }
 
 
@@ -556,6 +587,7 @@ QJsonObject RoadElementOBJ::getJSONInfo()
     element["ScaleFactor"] = scaleFactor;
     element["DeltaX"] = deltaX;
     element["DeltaY"] = deltaY;
+    element["DeltaZ"] = deltaZ;
     element["ZRadius"] = zRadius;
     element["XRot"] = xRot;
     element["YRot"] = yRot;
@@ -564,7 +596,30 @@ QJsonObject RoadElementOBJ::getJSONInfo()
     element["YScale"] = yScale;
     element["ZScale"] = zScale;
 
-
     return element;
 
+}
+
+
+std::vector<vec3> RoadElementOBJ::getCoordOfControl(int index)
+{
+    std::vector<vec3> res;
+    switch (index)
+    {
+    case 0:
+        break;
+    case 1:
+    {
+        vec3 p(deltaX, deltaY, deltaZ);
+        res.push_back(p);
+    }
+        break;
+    default:
+        break;
+    }
+    return res;
+}
+
+void RoadElementOBJ::setCoordForControl(int index, std::vector<vec3> &controls)
+{
 }

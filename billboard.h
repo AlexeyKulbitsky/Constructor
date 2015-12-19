@@ -1,24 +1,18 @@
-#ifndef DOUBLEVOLTAGELINE_H
-#define DOUBLEVOLTAGELINE_H
+#ifndef BILLBOARD_H
+#define BILLBOARD_H
+#include "roadelement.h"
+#include "cube.h"
+#include "pole.h"
 
-#include <QGLWidget>
-#include <QVector>
-#include "linebroken.h"
-#include "voltageline.h"
-
-class DoubleVoltageLine: public LineBroken
+class Billboard : public RoadElement
 {
     Q_OBJECT
 public:
-    DoubleVoltageLine();
-    DoubleVoltageLine(float* axisArray, int size, float width = 0.5f,
-                QString name = "DoubleVoltageLine",
-                int layer = 1);
-    DoubleVoltageLine(QVector<float> &axisArray, float width = 0.5f,
-                QString name = "DoubleVoltageLine",
-                int layer = 1);
-    DoubleVoltageLine(const DoubleVoltageLine& source);
-    virtual ~DoubleVoltageLine();
+    Billboard();
+    Billboard(float x, float y, float width, float height, float z, QString texture);
+    Billboard(float x, float y, float width, float height, float z, float rotation, QString texture);
+    Billboard(const Billboard& source);
+    virtual ~Billboard();
     // RoadElement interface
 public:
     virtual bool isSelected();
@@ -37,40 +31,48 @@ public:
     virtual bool isFixed();
     virtual int getLayer();
     virtual void clear();
-
-    virtual void addBreak(bool front);
-    void setVertexArray();
-
+    virtual RoadElement *getCopy();
+    setZRotVertexArray();
+    setZRotColorArray(float r, float g, float b);
+    setZRotIndexArray();
 
 signals:
     void widthChanged(double value);
     void heightChanged(double value);
+    void zChanged(double value);
+    void zRotationChanged(double value);
 
 public slots:
     virtual bool setFixed(bool fixed);
-    void setWidth(double width);
-    void setHeight(double height);
+    void setWidth(double value);
+    void setHeight(double value);
+    void setZ(double value);
+    void setZRotation(double value);
 
 private:
-    bool selected, fixed;
+    bool selected;
+    bool fixed;
     int layer;
     float width;
     float height;
-    QVector<GLfloat> axisVertexArray;
-    QVector<VoltageLine*> lines;
-
-
+    float z;
+    QVector<Cube*> plains;
+    Pole* pole;
+    Cube* support;
+    bool doubleSide;
+    QString texture;
+    QVector<float> zRotVertexArray;
+    QVector<float> zRotColorArray;
+    QVector<unsigned> zRotIndexArray;
+    float zRadius;
+    float zRot;
     // RoadElement interface
 public:
-    virtual RoadElement *getCopy();
-
-    // RoadElement interface
-public:
-    virtual void setCoordForControl(int index, std::vector<vec3> &controls);
-    virtual QJsonObject getJSONInfo();
     virtual void clearProperties(QLayout *layout);
-    virtual void deleteBreak(bool front);
-    virtual std::vector<vec3> getCoordOfControl(int index);
+
+    // RoadElement interface
+public:
+    virtual QJsonObject getJSONInfo();
 };
 
-#endif // DOUBLEVOLTAGELINE_H
+#endif // BILLBOARD_H

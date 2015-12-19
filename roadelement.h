@@ -205,6 +205,11 @@ public:
     virtual RoadElement* getCopy() = 0;
     virtual int getId() { return Id; }
     virtual void setId(int Id);
+    virtual bool calculateLinesIntersection(float a1, float b1, float c1,
+                                    float a2, float b2, float c2,
+                                    float& x, float& y);
+    virtual float calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4);
+    virtual float calculateAngle(vec3 v1, vec3 v2);
 
 public slots:
     virtual bool setFixed(bool fixed) = 0;

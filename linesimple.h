@@ -88,7 +88,8 @@ public slots:
     // RoadElement interface
 public:
     virtual bool isFixed();
-
+    void setLength(float length, bool front);
+    float getLength() { return length; }
     // RoadElement interface
 public:
     virtual void drawMeasurements(QGLWidget *render);

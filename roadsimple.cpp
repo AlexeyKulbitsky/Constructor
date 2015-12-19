@@ -132,11 +132,17 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, float width,
     {
         showRightBoard = showLeftBoard = false;
         z = 0.02f;
+        textureID[0] = TextureManager::getInstance()->getID(source_1);
+        textureID[1] = TextureManager::getInstance()->getID(source_2);
+
     }
     else
     {
         showRightBoard = showLeftBoard = true;
         z = 0.0f;
+        textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + source_1);
+        textureID[1] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + source_2);
+
     }
     useColor = false;
     this->size = size;
@@ -151,8 +157,6 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, float width,
     textureArrayLeft.resize(20);
 
     setVertexArray(x1, y1, x2, y2, width);
-    textureID[0] = TextureManager::getInstance()->getID(source_1);
-    textureID[1] = TextureManager::getInstance()->getID(source_2);
 
     setTextureArray();
     setIndexArray();
@@ -197,10 +201,14 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2,
     if (name == "Crosswalk")
     {
         z = 0.02f;
+        textureID[0] = TextureManager::getInstance()->getID(source_1);
+        textureID[1] = TextureManager::getInstance()->getID(source_2);
     }
     else
     {
         z = 0.0f;
+        textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + source_1);
+        textureID[1] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + source_2);
     }
     useColor = false;
     this->size = size;
@@ -218,8 +226,7 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2,
     textureArrayLeft.resize(20);
 
     setVertexArray(x1, y1, x2, y2, width);
-    textureID[0] = TextureManager::getInstance()->getID(source_1);
-    textureID[1] = TextureManager::getInstance()->getID(source_2);
+
 
     setTextureArray();
     setIndexArray();
@@ -1603,7 +1610,10 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
             setVertexArray(x1, y1, x2, y2, width);
             setTextureArray();
             for (int i = 0; i < lines.size(); ++i)
-                lines[i].line->resizeByControl(0,dx1 / length * dr,dy1 / length * dr,x,y);
+            {
+                if (lines[i].lineType != 7)
+                    lines[i].line->resizeByControl(0,dx1 / length * dr,dy1 / length * dr,x,y);
+            }
             emit lengthChanged(length);
         }
             break;
@@ -1619,7 +1629,10 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
             setVertexArray(x1, y1, x2, y2, width);
             setTextureArray();
             for (int i = 0; i < lines.size(); ++i)
-                lines[i].line->resizeByControl(1,dx1 / length * dr,dy1 / length * dr,x,y);
+            {
+                if (lines[i].lineType != 7)
+                    lines[i].line->resizeByControl(1,dx1 / length * dr,dy1 / length * dr,x,y);
+            }
             emit lengthChanged(length);
         }
             break;
@@ -1628,11 +1641,14 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
         {
             float dr = ((xP1 - xP2)*dx + (yP1 - yP2)*dy)/
                     sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
-            float widthResult = width + dr * 2.0f > 0 ?
-                        width + dr * 2.0f :
-                        0.1f;
-            this->rightWidth += dr;
-            this->width += dr;
+            rightWidth += dr;
+            if (rightWidth < 0.0f)
+            {
+                rightWidth = 0.001f;
+                width = leftWidth + 0.001f;
+            }
+            else
+                width += dr;
             setVertexArray(x1, y1, x2, y2, width);
             setTextureArray();
             //resetLines();
@@ -1644,11 +1660,15 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
         {
             float dr = ((xP2 - xP1)*dx + (yP2 - yP1)*dy)/
                     sqrt((xP2 - xP1)*(xP2 - xP1) + (yP2 - yP1)*(yP2 - yP1));
-            float widthResult = width + dr * 2.0f > 0 ?
-                        width + dr * 2.0f :
-                        0.1f;
-            this->leftWidth += dr;
-            this->width += dr;
+
+            leftWidth += dr;
+            if (leftWidth < 0.0f)
+            {
+                leftWidth = 0.001f;
+                width = rightWidth + 0.001f;
+            }
+            else
+                width += dr;
             setVertexArray(x1, y1, x2, y2, width);
             setTextureArray();
             //resetLines();
@@ -2048,11 +2068,11 @@ void RoadSimple::resetLines()
         {
         case 6:
         {
-            SplitZone *splitZone = dynamic_cast<SplitZone*>(lines[i].line);
-            float width = splitZone->getWidth();
-            vec3 p1(line_x1, line_y1, 0.02f);
-            vec3 p2(line_x2, line_y2, 0.02f);
-            splitZone->calculateLine(p1,p2,width);
+//            SplitZone *splitZone = dynamic_cast<SplitZone*>(lines[i].line);
+//            float width = splitZone->getWidth();
+//            vec3 p1(line_x1, line_y1, 0.02f);
+//            vec3 p2(line_x2, line_y2, 0.02f);
+//            splitZone->calculateLine(p1,p2,width);
         }
             break;
         case 7:
@@ -2086,8 +2106,19 @@ void RoadSimple::resetLines()
                 d = r - lines[i].step;
             else
                 d = lines[i].step;
-            line_x1 = X1 + (X2 - X1) / r * d;
-            line_y1 = Y1 + (Y2 - Y1) / r * d;
+            if (d == 0)
+            {
+                line_x1 = X1 + (X2 - X1) / r * d;
+                line_y1 = Y1 + (Y2 - Y1) / r * d;
+            }
+            else
+            {
+                LineSimple *l = dynamic_cast<LineSimple*>(lines[i].line);
+                line_x1 = l->getAxisPoint_1().x;
+                line_y1 = l->getAxisPoint_1().y;
+            }
+//            line_x1 = X1 + (X2 - X1) / r * d;
+//            line_y1 = Y1 + (Y2 - Y1) / r * d;
 
             float dr = ((X3 - X1)*(line_x1 - X1) + (Y3 - Y1)*(line_y1 - Y1)) / d;
             dr = d - dr;
@@ -2138,9 +2169,10 @@ void RoadSimple::resetLines()
                         r1 = width - lines[index].step;
                     else
                         r1 = lines[index].step;
-                line_x1 = line_x1 + (line_x2 - line_x1) / width * r1;
-                line_y1 = line_y1 + (line_y2 - line_y1) / width * r1;
-
+//                line_x1 = line_x1 + (line_x2 - line_x1) / width * r1;
+//                line_y1 = line_y1 + (line_y2 - line_y1) / width * r1;
+                line_x2 = line_x2 + (line_x1 - line_x2) / width * r1;
+                line_y2 = line_y2 + (line_y1 - line_y2) / width * r1;
                 for (int i = 0; i < lines.size(); ++i)
                 {
                     if (i == index)
@@ -2168,9 +2200,9 @@ void RoadSimple::resetLines()
             break;
         default:
         {
-            LineSimple *lineSimple = dynamic_cast<LineSimple*>(lines[i].line);
-            lineSimple->setVertexArray(line_x1, line_y1, line_x2, line_y2, lines[i].lineWidth);
-            lineSimple->setTextureArray();
+//            LineSimple *lineSimple = dynamic_cast<LineSimple*>(lines[i].line);
+//            lineSimple->setVertexArray(line_x1, line_y1, line_x2, line_y2, lines[i].lineWidth);
+//            lineSimple->setTextureArray();
         }
             break;
         }
@@ -2384,9 +2416,9 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
                                       endRounding,
                                       splitZoneType,
                                       splitZoneHeight,
-                                      QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                      "/models/city_roads/board.jpg",
                                       0.25f, 6.0f,
-                                      QApplication::applicationDirPath() + "/models/city_roads/grass.jpg",
+                                      "/models/city_roads/grass.jpg",
                                       3.0f, 3.0f,
                                       QString("Линия №") + QString::number(lines.size() + 1));
             line.splitZoneWidth = splitZoneWidth;
@@ -2401,9 +2433,9 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
                                       endRounding,
                                       splitZoneType,
                                       splitZoneHeight,
-                                      QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                      "/models/city_roads/board.jpg",
                                       0.25f, 6.0f,
-                                      QApplication::applicationDirPath() + "/models/city_roads/nr_07S.jpg",
+                                      "/models/city_roads/nr_07S.jpg",
                                       6.0f, 6.0f,
                                       QString("Линия №") + QString::number(lines.size() + 1));
             line.splitZoneWidth = splitZoneWidth;
@@ -2499,26 +2531,55 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
                     r1 = width - lines[index].step;
                 else
                     r1 = lines[index].step;
-            line_x1 = line_x1 + (line_x2 - line_x1) / width * r1;
-            line_y1 = line_y1 + (line_y2 - line_y1) / width * r1;
+//            line_x1 = line_x1 + (line_x2 - line_x1) / width * r1;
+//            line_y1 = line_y1 + (line_y2 - line_y1) / width * r1;
+            line_x2 = line_x2 + (line_x1 - line_x2) / width * r1;
+            line_y2 = line_y2 + (line_y1 - line_y2) / width * r1;
 
             for (int i = 0; i < lines.size(); ++i)
             {
                 if (i == index)
                     continue;
-                float r;
-                if (!lines[i].rightSide)
-                    r = width - lines[i].step;
-                else
-                    r = lines[i].step;
-                if (r >= r1)
+//                float r;
+//                if (!lines[i].rightSide)
+//                    r = lines[i].step;
+//                else
+//                    r = width - lines[i].step;
+
+//                if (r >= r1)
+//                {
+//                    float x = line_x1 + (line_x2 - line_x1) / (width - r1) * (r - r1);
+//                    float y = line_y1 + (line_y2 - line_y1) / (width - r1) * (r - r1);
+//                    LineSimple *l = dynamic_cast<LineSimple*>(lines[i].line);
+//                    vec2 p = l->getAxisPoint_2();
+//                    l->setVertexArray(x, y, p.x, p.y, lines[i].lineWidth);
+//                    l->setTextureArray();
+//                }
+                vec2 p1(line_x1, line_y1);
+                vec2 p2(line_x2, line_y2);
+                LineSimple *l = dynamic_cast<LineSimple*>(lines[i].line);
+                vec2 t1 = l->getAxisPoint_1();
+                vec2 t2 = l->getAxisPoint_2();
+
+                float xTemp, yTemp;
+                float a1, a2, b1, b2, c1, c2;
+
+                a1 = p1.y - p2.y;
+                b1 = p2.x - p1.x;
+                c1 = p1.x * p2.y - p2.x * p1.y;
+
+                a2 = t1.y - t2.y;
+                b2 = t2.x - t1.x;
+                c2 = t1.x * t2.y - t2.x * t1.y;
+                if (!calculateLinesIntersection(a1, b1, c1,
+                                                a2, b2, c2,
+                                                xTemp, yTemp))
+                    continue;
+                if (((p1.x >= xTemp && p2.x <= xTemp) || (p1.x <= xTemp && p2.x >= xTemp)) &&
+                   ((p1.y >= yTemp && p2.y <= yTemp) || (p1.y <= yTemp && p2.y >= yTemp)))
                 {
-                    float x = line_x1 + (line_x2 - line_x1) / (width - r1) * (r - r1);
-                    float y = line_y1 + (line_y2 - line_y1) / (width - r1) * (r - r1);
-                    LineSimple *line = dynamic_cast<LineSimple*>(lines[i].line);
-                    vec2 p = line->getAxisPoint_2();
-                    line->setVertexArray(x, y, p.x, p.y, lines[i].lineWidth);
-                    line->setTextureArray();
+                    l->setVertexArray(xTemp, yTemp, t2.x, t2.y, lines[i].lineWidth);
+                    l->setTextureArray();
                 }
             }
         }
@@ -2535,8 +2596,10 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
         break;
         */
     default:
+    {
         line.line = new LineSimple(line_x1, line_y1, line_x2, line_y2, lineWidth, textureSource, textureSize, "LineSimple", 1,
                                    QString("Линия №") + QString::number(lines.size() + 1));
+    }
         break;
     }
     line.lineWidth = lineWidth;
@@ -2565,36 +2628,36 @@ void RoadSimple::addLine()
     switch(lineType)
     {
     case 0:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/solid.png";
+        textSource = "/models/city_roads/solid.png";
         lWidth = 0.1f;
         break;
     case 1:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/inter.png";
+        textSource = "/models/city_roads/inter.png";
         lWidth = 0.1f;
         break;
     case 2:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/d_solid.png";
+        textSource = "/models/city_roads/d_solid.png";
         lWidth = 0.25f;
         break;
     case 3:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/d_inter_l.png";
+        textSource = "/models/city_roads/d_inter_l.png";
         lWidth = 0.25f;
         break;
     case 4:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/d_inter_r.png";
+        textSource = "/models/city_roads/d_inter_r.png";
         lWidth = 0.25f;
         break;
     case 5:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/d_inter.png";
+        textSource = "/models/city_roads/d_inter.png";
         lWidth = 0.25f;
         break;
     case 7:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/solid.png";
+        textSource = "/models/city_roads/solid.png";
         lWidth = 0.4f;
         break;
     case 8:
     {
-        textSource = QString(":/textures/tramways.png");
+        textSource = QString("/models/city_roads/tramways.png");
         lWidth = 1.5f;
         if (!singleWay)
         {
@@ -2814,17 +2877,17 @@ void RoadSimple::drawMeasurements(QGLWidget *render)
     float x1, x2, y1, y2;
 
     // Ширина полосы
-    x1 = VertexArray[2][0];
-    y1 = VertexArray[2][1];
-    x2 = VertexArray[3][0];
-    y2 = VertexArray[3][1];
-    x = (x1 + x2) / 2.0f;
-    y = (y1 + y2) / 2.0f;
-    z = 0.0f;
-    glColor3f(0.0f, 0.0f, 0.0f);
-    float dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
-    getWindowCoord(x, y, z, wx, wy, wz);
-    render->renderText(wx + 5, wy + 5, "W=" + QString("%1").arg(dr, 0, 'f', 2), shrift);
+//    x1 = VertexArray[2][0];
+//    y1 = VertexArray[2][1];
+//    x2 = VertexArray[3][0];
+//    y2 = VertexArray[3][1];
+//    x = (x1 + x2) / 2.0f;
+//    y = (y1 + y2) / 2.0f;
+//    z = 0.0f;
+//    glColor3f(0.0f, 0.0f, 0.0f);
+//    float dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+//    getWindowCoord(x, y, z, wx, wy, wz);
+//    render->renderText(wx + 5, wy + 5, "W=" + QString("%1").arg(dr, 0, 'f', 2), shrift);
 
     // Длина полосы
     x1 = VertexArray[0][0];
@@ -2835,7 +2898,7 @@ void RoadSimple::drawMeasurements(QGLWidget *render)
     y = (y1 + y2) / 2.0f;
     z = 0.0f;
     glColor3f(0.0f, 0.0f, 0.0f);
-    dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+    float dr = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
     getWindowCoord(x, y, z, wx, wy, wz);
     render->renderText(wx + 5, wy + 5, "L=" + QString("%1").arg(dr, 0, 'f', 2), shrift);
 
@@ -3295,4 +3358,32 @@ void RoadSimple::setCoordForControl(int index, std::vector<vec3> &controls)
 QString RoadSimple::getName()
 {
     return "RoadSimple";
+}
+
+
+void RoadSimple::rotate(float angle, float x, float y, float z)
+{
+    float tx = 0.0f, ty = 0.0f;
+    x1 -= x;
+    y1 -= y;
+    tx = x1;
+    ty = y1;
+    x1 = tx * cos(angle) - ty * sin(angle);
+    y1 = tx * sin(angle) + ty * cos(angle);
+    x1 += x;
+    y1 += y;
+
+    x2 -= x;
+    y2 -= y;
+    tx = x2;
+    ty = y2;
+    x2 = tx * cos(angle) - ty * sin(angle);
+    y2 = tx * sin(angle) + ty * cos(angle);
+    x2 += x;
+    y2 += y;
+
+    setVertexArray(x1, y1, x2, y2, width);
+    setTextureArray();
+    for (int i = 0; i < lines.size(); ++i)
+        lines[i].line->rotate(angle, x, y, 0.0f);
 }

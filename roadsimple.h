@@ -67,6 +67,8 @@ public:
     vec3 getCoordOfPoint(int index);
     void setDescription(const QString& description);
     void drawDescription(QGLWidget* render = 0, float red = 1.0f, float green = 1.0f, float blue = 1.0f);
+    bool getShowRightBoardStatus() { return showRightBoard; }
+    bool getShowLeftBoardStatus() { return showLeftBoard; }
 
 public:
     QVector<GLfloat> vertexArrayRight;
@@ -154,6 +156,9 @@ public:
     float getLeftBoardWidth();
     static bool getLogging() { return log; }
     float getLength();
+    float getRightWidth() { return rightWidth; }
+    float getLeftWidth() { return leftWidth; }
+
 signals:
     void widthChanged(double width);
     void lengthChanged(double length);
@@ -223,6 +228,10 @@ public:
     // RoadElement interface
 public:
     virtual QString getName();
+
+    // RoadElement interface
+public:
+    virtual void rotate(float angle, float x, float y, float z);
 };
 
 #endif // ROADSIMPLE_H

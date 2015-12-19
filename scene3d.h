@@ -26,6 +26,10 @@ public:
     void rotateRight();
     void getProperties(QFormLayout* layout);
     static bool getLogging() { return log; }
+    void loadSettings();
+    void saveSettings();
+    void drawSubstrate();
+    void setSettings(QSettings* settings);
     // QWidget interface
 protected:
     virtual void mousePressEvent(QMouseEvent *);
@@ -46,6 +50,10 @@ signals:
 public slots:
     static void setLogging(bool status);
     void setBackGroundColor();
+    void setDrawSubstrateStatus(bool status);
+    void setSubstrateLength(double length);
+    void setSubstrateWidth(double length);
+    void setSubstrateColor();
 
 public:
     bool rightButtonIsPressed;
@@ -70,10 +78,14 @@ public:
 
 private:
     StateManager* stateManager;
+    QSettings* settings;
     Model* model;
     QFormLayout* layout;
     QColor backgroundColor;
     static bool log;
+    QColor substrateColor;
+    float substrateWidth, substrateLength;
+    bool drawSubstrateStatus;
 };
 
 #endif // SCENE3D_H

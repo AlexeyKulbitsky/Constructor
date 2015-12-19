@@ -444,29 +444,7 @@ void SelectedState::dropEvent(QDropEvent *event)
 {
     if (log)
         Logger::getLogger()->infoLog() << "SelectedState::dropEvent(QDropEvent *event)\n";
-    GLint viewport[4];
-    GLdouble modelview[16];
-    GLdouble projection[16];
-    GLfloat winX, winY, winZ;
-    GLdouble posX = 0.0, posY = 0.0, posZ = 0.0;
-
-    glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
-    glGetDoublev( GL_PROJECTION_MATRIX, projection );
-    glGetIntegerv( GL_VIEWPORT, viewport );
-
-    winX = (float)event->pos().x();
-    winY = (float)viewport[3] - (float)event->pos().y();
-    glReadPixels( int(winX), int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
-
-    gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
-
-
-    QString s(event->mimeData()->text());
-    float x = posX / scene->nSca + scene->xDelta;
-    float y = posY / scene->nSca + scene->yDelta;
-
-
-    scene->updateGL();
+    stateManager->defaultState->dropEvent(event);
 }
 
 void SelectedState::setSelectedElement(int elementIndex, int groupIndex)
@@ -1283,12 +1261,13 @@ void SelectedState::saveToPresets()
         QString fileName = QApplication::applicationDirPath() + "/models/user/" + text + ".json";
         if (selectedElements.size() > 0)
         {
-            CompositeRoad* road = new CompositeRoad();
-            for (int i = 0; i < selectedElements.size(); ++i)
-            {
-                road->addElement(selectedElements[i]);
-            }
-            JSONFileManager::saveFile(fileName, road);
+//            CompositeRoad* road = new CompositeRoad();
+//            for (int i = 0; i < selectedElements.size(); ++i)
+//            {
+//                road->addElement(selectedElements[i]);
+//            }
+//            JSONFileManager::saveFile(fileName, road);
+            JSONFileManager::saveFile(fileName, selectedElements);
         }
         else
             JSONFileManager::saveFile(fileName, selectedElement);

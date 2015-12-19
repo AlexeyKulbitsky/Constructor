@@ -15,8 +15,6 @@
 #include "logger.h"
 #include <QStackedLayout>
 #include "overlayedmapswidget.h"
-#include "yandexmapsview.h"
-#include "googlemapsview.h"
 #include <QWebFrame>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -24,8 +22,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     settings("LpGR","Constructor")
 {    
+
     Logger::getLogger()->startLogging();
     ui->setupUi(this);
+    setWindowTitle("Constructor ver.1.0.3");
     model = new Model(this);
     jsonFileManager = new JSONFileManager(model);
     setFileManager(jsonFileManager);
@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     propertiesDockWidget->setFeatures(QDockWidget::DockWidgetMovable |
                                   QDockWidget::DockWidgetFloatable);
     propertiesScrollArea = new QScrollArea(propertiesDockWidget);
+    propertiesScrollArea->setFocusPolicy(Qt::StrongFocus);
     propertiesDockWidget->setWidget(propertiesScrollArea);
     propertiesScrollArea->setMaximumWidth(300);
 
@@ -64,19 +65,22 @@ MainWindow::MainWindow(QWidget *parent) :
     scenePropertiesScrollArea->setWidgetResizable(true);
     addDockWidget(Qt::LeftDockWidgetArea, scenePropertiesDockWidget);
 
-
+    connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(on_tabWidget_currentChanged(int)));
     QWidget* tabScene2D = new QWidget();
 
-    QStackedLayout* stackedLayout = new QStackedLayout(tabScene2D);
+    stackedLayout = new QStackedLayout(tabScene2D);
     tabScene2D->setLayout(stackedLayout);
-    stackedLayout->setStackingMode(QStackedLayout::StackAll);
-    YandexMapsView* yandexMaps = new YandexMapsView(this);
-    //GoogleMapsView* googleMaps = new GoogleMapsView(this);
+    yandexMaps = new YandexMapsView(this);
+
+    googleMaps = new GoogleMapsView(this);
+    osMaps = new OSMview(this);
     scene2D = new Scene2D(&settings, tabScene2D);
+    connect(scene2D, SIGNAL(currentIndexChanged(int)), this, SLOT(setMap(int)));
     scene2D->setOverlayWidget(yandexMaps);
     stackedLayout->addWidget(scene2D);
     stackedLayout->addWidget(yandexMaps);
-    //stackedLayout->addWidget(googleMaps);
+    stackedLayout->addWidget(googleMaps);
+    stackedLayout->addWidget(osMaps);
 
     scene2D->setProperties(propertiesLayout);
     scene2D->setModel(model);
@@ -90,12 +94,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QGridLayout* layout = new QGridLayout(tabScene3D);
     layout->setMargin(0);
     scene3D = new Scene3D(tabScene3D, scene2D);
+    //scene3D->setSettings(&settings);
     scene3D->setModel(model);
     layout->addWidget(scene3D);
     ui->tabWidget->insertTab(1, tabScene3D, "3D-вид");
 
-
-    connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(on_tabWidget_currentChanged(int)));
+    //connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(on_tabWidget_currentChanged(int)));
 
 
 
@@ -164,8 +168,7 @@ MainWindow::MainWindow(QWidget *parent) :
     elementsScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     QListWidget* objectList = new ObjectsList(elementsDockWidget);
     elementsToolBox->addItem(objectList, "Основные элементы");
-    QDir dir(QApplication::applicationDirPath());
-    dir.cd("models/user/");
+    QString dir = "/models/user/";
     ObjectsList* templtatesList = new ObjectsList(dir, QString("*.json"));
     connect(scene2D->stateManager, SIGNAL(templtateAdded()), templtatesList, SLOT(resetObjects()));
     elementsToolBox->addItem(templtatesList, "Пользовательские шаблоны");
@@ -174,9 +177,10 @@ MainWindow::MainWindow(QWidget *parent) :
     elementsComboBox = new QComboBox(elementsDockWidget);
     elementsComboBox->addItem("Транспорт");
     elementsComboBox->addItem("Люди");
-    elementsComboBox->addItem("Деревья, растения");
-    elementsComboBox->addItem("Знаки");
+    elementsComboBox->addItem("Деревья, растения");    
+    elementsComboBox->addItem("Конструкции");
     elementsComboBox->addItem("Строения");
+    elementsComboBox->addItem("Знаки");
     backgroundLayout->addWidget(elementsComboBox);
 
     elementsLayout = new QStackedLayout();
@@ -190,26 +194,21 @@ MainWindow::MainWindow(QWidget *parent) :
     transportScrollArea->setWidgetResizable(true);
     transportScrollArea->setWidget(transportToolBox);
     transportScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    dir.cdUp();
-    dir.cd("transport/buses/");
+    dir = "/models/transport/buses/";
     transportToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Пассажирский транспорт");
-    dir.cdUp();
-    dir.cd("lorries/");
+    dir = "/models/transport/lorries/";
     transportToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Для небольших грузов");
-    dir.cdUp();
-    dir.cd("machinery/");
-    transportToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Machinery");
-    dir.cdUp();
-    dir.cd("scooter/");
-    transportToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Scooter");
-    dir.cdUp();
-    dir.cd("TGV/");
+//    dir.cdUp();
+//    dir.cd("machinery/");
+//    transportToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Machinery");
+//    dir.cdUp();
+//    dir.cd("scooter/");
+//    transportToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Scooter");
+    dir = "/models/transport/TGV/";
     transportToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Ж/д траспорт");
-    dir.cdUp();
-    dir.cd("trucks/");
+    dir = "/models/transport/trucks/";
     transportToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Грузовики");
-    dir.cdUp();
-    dir.cd("cars/");
+    dir = "/models/transport/cars/";
     transportToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Легковые автомобили");
     elementsLayout->addWidget(transportScrollArea);
 
@@ -219,18 +218,11 @@ MainWindow::MainWindow(QWidget *parent) :
     humnasScrollArea->setWidgetResizable(true);
     humnasScrollArea->setWidget(humansToolBox);
     humnasScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    dir.cdUp();
-    dir.cdUp();
-    dir.cd("humans/men/");
+    dir = "/models/humans/men/";
     humansToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Мужчины");
-    dir.cdUp();
-    dir.cd("women/");
+    dir = "/models/humans/women/";
     humansToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Женщины");
     elementsLayout->addWidget(humnasScrollArea);
-
-    addDockWidget(Qt::LeftDockWidgetArea, elementsDockWidget);
-    this->tabifyDockWidget ( elementsDockWidget, scenePropertiesDockWidget);
-    elementsDockWidget->raise();
 
     QToolBox* plantsToolBox = new QToolBox(elementsDockWidget);
     plantsToolBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -238,11 +230,59 @@ MainWindow::MainWindow(QWidget *parent) :
     plantsScrollArea->setWidgetResizable(true);
     plantsScrollArea->setWidget(plantsToolBox);
     plantsScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    dir.cdUp();
-    dir.cdUp();
-    dir.cd("plants/");
+    dir = "/models/plants/";
     plantsToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Деревья");
     elementsLayout->addWidget(plantsScrollArea);
+
+    QToolBox* constructionsToolBox = new QToolBox(elementsDockWidget);
+    constructionsToolBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    QScrollArea* constructionsScrollArea = new QScrollArea(elementsDockWidget);
+    constructionsScrollArea->setWidgetResizable(true);
+    constructionsScrollArea->setWidget(constructionsToolBox);
+    constructionsScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    dir = "/models/constructions/poles/";
+    constructionsToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Столбы");
+    dir = "/models/constructions/traffic_lights/";
+    constructionsToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Светофоры");
+    dir = "/models/constructions/bus_stops/";
+    constructionsToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Остановки");
+    //dir.cdUp();
+    //constructionsToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Остальное");
+    elementsLayout->addWidget(constructionsScrollArea);
+
+    QToolBox* buildingsToolBox = new QToolBox(elementsDockWidget);
+    buildingsToolBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    QScrollArea* buildingsScrollArea = new QScrollArea(elementsDockWidget);
+    buildingsScrollArea->setWidgetResizable(true);
+    buildingsScrollArea->setWidget(buildingsToolBox);
+    buildingsScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    dir = "/models/buildings/";
+    buildingsToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "Здания");
+    elementsLayout->addWidget(buildingsScrollArea);
+
+    QToolBox* signsToolBox = new QToolBox(elementsDockWidget);
+    signsToolBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    QScrollArea* signsScrollArea = new QScrollArea(elementsDockWidget);
+    signsScrollArea->setWidgetResizable(true);
+    signsScrollArea->setWidget(signsToolBox);
+    signsScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    dir = "/models/road_signs/1.Предупреждающие/";
+    signsToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "1.Предупреждающие");
+    dir = "/models/road_signs/2.Приоритета/";
+    signsToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "2.Приоритета");
+    dir = "/models/road_signs/3.Запрещающие/";
+    signsToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "3.Запрещающие");
+    dir = "/models/road_signs/4.Предписывающие/";
+    signsToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "4.Предписывающие");
+    dir = "/models/road_signs/5.Особых_предписаний/";
+    signsToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "5.Особых_предписаний");
+    dir = "/models/road_signs/6.Информационные/";
+    signsToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "6.Информационные");
+    dir = "/models/road_signs/7.Сервиса/";
+    signsToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "7.Сервиса");
+    dir = "/models/road_signs/8.Таблички/";
+    signsToolBox->addItem(new ObjectsList(dir, QString("*.obj")), "8.Таблички");
+    elementsLayout->addWidget(signsScrollArea);
 
     addDockWidget(Qt::LeftDockWidgetArea, elementsDockWidget);
     this->tabifyDockWidget ( elementsDockWidget, scenePropertiesDockWidget);
@@ -303,6 +343,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    //scene3D->saveSettings();
     scene2D->saveSettings();
     writeSettings();
     delete undoStack;
@@ -343,7 +384,7 @@ void MainWindow::createMenu()
     toolsMenu = menuBar()->addMenu(tr("&Инструменты"));
     toolsMenu->addAction(showGridAction);
     toolsMenu->addAction(showRoadAction);
-    toolsMenu->addAction(showLinesAction);
+    //toolsMenu->addAction(showLinesAction);
     toolsMenu->addAction(showProperties);
     toolsMenu->addAction(saveToPresetAction);
 
@@ -384,7 +425,7 @@ void MainWindow::createActions()
     saveAsAction = new QAction(tr("&Сохранить как..."), this);
     saveAsAction->setShortcut(QKeySequence::SaveAs);
     saveAsAction->setStatusTip(tr("Сохранить проект как..."));
-    connect(saveAsAction, SIGNAL(triggered()), this, SLOT(saveFile()));
+    connect(saveAsAction, SIGNAL(triggered()), this, SLOT(saveAsFile()));
 
     exitAction = new QAction(tr("Выход"), this);
     exitAction->setShortcut(tr("Ctrl+Q"));
@@ -420,7 +461,7 @@ void MainWindow::createActions()
     //showGridAction->setChecked(spreadsheet->showGrid());
     showGridAction->setStatusTip(tr("Отображать/прятать координатную сетку"));
     showGridAction->setChecked(true);
-    //connect(showGridAction, SIGNAL(toggled(bool)),ui->scene2D, SLOT(setShowGrid(bool)));
+    connect(showGridAction, SIGNAL(toggled(bool)),scene2D, SLOT(setShowGrid(bool)));
 
     showRoadAction = new QAction(tr("Отображать дорожное полотно"), this);
     showRoadAction->setCheckable(true);
@@ -428,15 +469,15 @@ void MainWindow::createActions()
     showRoadAction->setStatusTip(tr("Отображать/прятать дорожное полотно"));
     showRoadAction->setChecked(true);
     showRoadAction->setShortcut(tr("Ctrl+1"));
-    //connect(showRoadAction, SIGNAL(toggled(bool)), this->model, SLOT(setRoadVisible(bool)));
+    connect(showRoadAction, SIGNAL(toggled(bool)), this->model, SLOT(setRoadVisible(bool)));
 
-    showLinesAction = new QAction(tr("Отображать дорожную разметку"), this);
-    showLinesAction->setCheckable(true);
-    //showGridAction->setChecked(spreadsheet->showGrid());
-    showLinesAction->setStatusTip(tr("Отображать/прятать дорожную разметку"));
-    showLinesAction->setChecked(true);
-    showLinesAction->setShortcut(tr("Ctrl+2"));
-    //connect(showLinesAction, SIGNAL(toggled(bool)), this->model, SLOT(setLinesVilible(bool)));
+//    showLinesAction = new QAction(tr("Отображать дорожную разметку"), this);
+//    showLinesAction->setCheckable(true);
+//    //showGridAction->setChecked(spreadsheet->showGrid());
+//    showLinesAction->setStatusTip(tr("Отображать/прятать дорожную разметку"));
+//    showLinesAction->setChecked(true);
+//    showLinesAction->setShortcut(tr("Ctrl+2"));
+//    //connect(showLinesAction, SIGNAL(toggled(bool)), this->model, SLOT(setLinesVilible(bool)));
 
     //////////////////////////////////////
 
@@ -527,7 +568,7 @@ void MainWindow::openFile()
 
 }
 
-void MainWindow::saveFile()
+void MainWindow::saveAsFile()
 {
 
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save Document"), QApplication::applicationDirPath(), tr("JSON files (*.json)") );
@@ -535,12 +576,32 @@ void MainWindow::saveFile()
     if (fileManager->saveFile(fileName))
     {
         ui->statusBar->showMessage("Файл сохранен");
+        currentFileName = fileName;
     }
     else
     {
         ui->statusBar->showMessage("Не удалось сохранить файл");
     }
 
+}
+
+void MainWindow::saveFile()
+{
+    if (currentFileName.size() == 0)
+    {
+        saveAsFile();
+    }
+    else
+    {
+        if (fileManager->saveFile(currentFileName))
+        {
+            ui->statusBar->showMessage("Файл сохранен");
+        }
+        else
+        {
+            ui->statusBar->showMessage("Не удалось сохранить файл");
+        }
+    }
 }
 
 
@@ -573,6 +634,30 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         break;
     }
 
+}
+
+void MainWindow::setMap(int index)
+{
+    switch (index)
+    {
+    case 0:
+        stackedLayout->setCurrentIndex(index);
+        break;
+    case 1:
+        scene2D->setOverlayWidget(yandexMaps);
+        stackedLayout->setCurrentIndex(index);
+        break;
+    case 2:
+        scene2D->setOverlayWidget(googleMaps);
+        stackedLayout->setCurrentIndex(index);
+        break;
+    case 3:
+        scene2D->setOverlayWidget(osMaps);
+        stackedLayout->setCurrentIndex(index);
+        break;
+    default:
+        break;
+    }
 }
 
 

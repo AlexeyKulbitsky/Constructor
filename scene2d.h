@@ -10,7 +10,7 @@
 #include <iostream>
 #include <QMenu>
 #include <QAction>
-
+#include <QWebView>
 class StateManager;
 #include "statemanager.h"
 #include "model.h"
@@ -91,12 +91,19 @@ public:
     void drawBackground(QPainter *painter);
     void setDrawRectStatus(bool status);
     void setSettings(QSettings* settings);
-    void setOverlayWidget(QWidget *widget);
+    void setOverlayWidget(QWebView *widget);
     void drawModel();
     void loadSettings();
     void saveSettings();
     static bool getLogging();
+    void drawSubstrate();
+    float getScaleStep() { return scaleStep; }
 
+    void getXDelta(float value) { xDelta = value; }
+    float getXDelta() { return xDelta; }
+
+    void getYDelta(float value) { yDelta = value; }
+    float getYDelta() { return yDelta; }
 
 signals:
     //void selectedFigureChanged(RoadElement* roadElement);
@@ -105,12 +112,14 @@ signals:
     void scaleStepChanged(double value);
     void gridStepChanged(double value);
     void showMapsStatusChanged(bool status);
+    void currentIndexChanged(int index);
+    void widgetWidthChanged(int w);
+    void widgetHeightChanged(int h);
 
 public slots:
     void activateRuler();
     void deActivateRuler();
     void setRulerActive(bool status);
-    void listItemClicked(QListWidgetItem* item);
     void setShowGrid(bool);
     void setScale(double scale);
     void setScaleStep(double step);
@@ -126,14 +135,33 @@ public slots:
     void cut();
     void del();
     void saveToPresets();
+    void setDrawSubstrateStatus(bool status);
+    void setSubstrateLength(double length);
+    void setSubstrateWidth(double length);
+    void setSubstrateColor();
+    void setMapType(int index);
+    void setWidgetWidth(int w);
+    void setWidgetHeight(int h);
+    void setWidgetWidthScaleFactor(double factor);
+    void setWidgetHeightScaleFactor(double factor);
+
+    void saveImage();
 
 private:
-
+    QImage widgetImage;
+    bool scaleImage;
     Model* model;
     QFormLayout* properties;
     bool showGrid;
-    QWidget* widget;
+    QWebView* widget;
+    int widgetWidth;
+    int widgetHeight;
+    float widgetWidthScaleFactor;
+    float widgetHeightScaleFactor;
 
+    QColor substrateColor;
+    float substrateWidth, substrateLength;
+    bool drawSubstrateStatus;
     static bool log;
     // QWidget interface
 protected:

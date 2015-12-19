@@ -6,12 +6,35 @@
 #include "curve.h"
 #include <QVector>
 
+class Angle : public QObject
+{
+    Q_OBJECT
+public:
+    Angle():angle(0.0f) {}
+    Angle(float a):angle(a) {}
+    float getAngle() { return angle; }
+
+signals:
+    void angleChanged(double angle);
+
+public slots:
+    void setAngle(double angle)
+    {
+        if (float(angle) == this->angle)
+            return;
+        this->angle = float(angle);
+        emit angleChanged(angle);
+    }
+
+private:
+    float angle;
+};
+
 class Intersection: public RoadElement
 {
     Q_OBJECT
 public:
     Intersection();
-    Intersection(float x, float y);
     Intersection(float x, float y, int numberOfRoads);
     Intersection(const Intersection& source);
     Intersection(QVector<RoadSimple*>& roads, QVector<Curve*>& curves);
@@ -33,14 +56,6 @@ public:
 
     virtual bool isFixed();
     virtual int getLayer();
-    void setRoadsTextures();
-    bool calculateLinesIntersection(float a1, float b1, float c1,
-                                    float a2, float b2, float c2,
-                                    float& x, float& y);
-    float calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4);
-    void calculateRoadForAngle(int i, int index);
-    void calculateRoadForRounding(int i, int index);
-    void calculateRoadForMoving(int i, float dx, float dy);
 
 signals:
     void intersectionsChanged();
@@ -54,20 +69,16 @@ public slots:
     virtual void getProperties(QFormLayout *layout, QGLWidget *render);
 
     bool calculateRoadIntersections();
-    void calculateRoadIntersections(int roadIndex, int controlIndex);
     void calculateRoundings();
 
     void setVertexArray();
     void setIndexArray();
     void setTextureArray(float textureUSize, float textureVSize);
-
-    void addRoad();
-    void deleteRoad();
+    void setRoadsTextures();
     void recalculateRoads();
 
     void resetWidth();
     void setAngle(double angle);
-    void setAngle(double angle, int index);
     void deleteLine();
     void addLine();
 
@@ -76,7 +87,6 @@ private:
     bool fixed;
     int layer;
     int indexOfSelectedControl;
-
     QVector<RoadSimple*> roads;
     QVector<Curve*> curves;
 
@@ -90,7 +100,7 @@ private:
 
     QVector<bool> showBoardStatus;
 
-    QVector<float> angles;
+    QVector<Angle*> angles;
     QFormLayout* layout;
     QGLWidget* render;
     static bool log;
@@ -99,28 +109,11 @@ public:
     virtual void clear();
     static bool getLogging(){ return log; }
     static void setLogging(bool status);
-    // RoadElement interface
-public:
     virtual void clearProperties(QLayout *layout);
-
-    // RoadElement interface
-public:
     virtual void setModel(Model *model);
-
-    // RoadElement interface
-public:
     virtual std::vector<vec3> getCoordOfControl(int index);
-
-    // RoadElement interface
-public:
     virtual RoadElement *getCopy();
-
-    // RoadElement interface
-public:
     virtual void setCoordForControl(int index, std::vector<vec3> &controls);
-
-    // RoadElement interface
-public:
     virtual QJsonObject getJSONInfo();
 };
 

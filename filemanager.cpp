@@ -5,6 +5,12 @@ int FileManager::autoSaveTime = 5;
 bool FileManager::autoSaveOn = true;
 QTimer FileManager::timer;
 
+void FileManager::addMap(QWebView *map)
+{
+    if (map)
+        maps.push_back(map);
+}
+
 void FileManager::setAutoSaveFileName(QString fileName)
 {
     autoSaveFileName = fileName;

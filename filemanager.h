@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include "model.h"
-
+#include <QWebView>
 class FileManager : public QObject
 {
     Q_OBJECT
@@ -13,13 +13,14 @@ public:
 
     virtual bool openFile(QString source) = 0;
     virtual bool saveFile(QString source) = 0;
+    virtual void addMap(QWebView* map);
     static void setAutoSaveFileName(QString fileName);
     static void setAutoSaveTime(int time);
     static void setAutoSaveOn(bool status);
 
 protected:
     Model* model;
-
+    QVector<QWebView*> maps;
     static QString autoSaveFileName;
     static int autoSaveTime;
     static bool autoSaveOn;

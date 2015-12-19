@@ -16,7 +16,7 @@ public:
     Curve(float *controls, int size,
           QString texture_1, float texture_1Usize, float texture_1Vsize,
           QString texture_2, float texture_2Usize, float texture_2Vsize,
-          int numberOfSides, float angleRounding, float boardWidth,
+          int numberOfSides, float boardWidth,
           bool fixed, bool showBoard, int layer, QString name);
     Curve(const Curve& source);
     ~Curve();
@@ -47,22 +47,19 @@ public:
     void setTextureArrayBoard(float textureUSize, float textureVSize);
     void setIndexArrayBoard();
 
-    GLuint getTextures(QString source);
     float getLeftLength() { return leftLength; }
     float getRightLength() { return rightLength; }
     void setCoordForPoint(int index, float x, float y, float z);
+    void setCoordsForControls(float x1, float y1, float z1,
+                              float x2, float y2, float z2,
+                              float x3, float y3, float z3);
     vec3 getCoordOfPoint(int index);
     void getWindowCoord(double x, double y, double z, double  &wx, double  &wy, double  &wz);
     float getBoardWidth();
     bool getBoardShowStatus();
-    void setAngleVertexArray();
-    void setAngleColorArray(float red, float green, float blue);
-    void setAngleIndexArray();
-    void calculateAngle();
     bool calculateLinesIntersection(float a1, float b1, float c1,
                                     float a2, float b2, float c2,
                                     float& x, float& y);
-    void calculateControlsForAngle(int index);
     static void setLogging(bool status);
     static bool getLogging() { return log; }
 signals:
@@ -76,9 +73,11 @@ public slots:
     virtual bool setFixed(bool fixed);
     void setLeftLength(double length);
     void setRightLength(double length);
+    void setLeft(double value);
+    void setRight(double value);
+    void setLeftRightLength(float left, float right);
     void setBoardWidth(double width);
     void setBoardShowStatus(bool status);
-    void setAngle(double angle);
 
 private:
     QVector<GLfloat> vertexArray;
@@ -97,12 +96,6 @@ private:
     QVector<GLfloat> textureArrayBoard;
     QVector<GLubyte> indexArrayBoard;
 
-    QVector <GLfloat> angleVertexArray;
-    QVector <GLfloat> angleColorArray;
-    QVector <GLubyte> angleIndexArray;
-
-
-
     float controlPoints[9];
     float leftLength, rightLength;
     float angle1, angle2;
@@ -119,6 +112,7 @@ private:
     QFormLayout* layout;
     QGLWidget* render;
 
+    bool right;
     // RoadElement interface
 public:
     virtual std::vector<vec3> getCoordOfControl(int index);

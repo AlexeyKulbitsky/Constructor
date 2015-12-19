@@ -34,7 +34,7 @@ SOURCES += main.cpp\
     scene3d.cpp \
     compositeroad.cpp \
 #    multiselectedstate.cpp \
-#    cube.cpp \
+    cube.cpp \
 #    objectstoolbox.cpp \
     objfilemanager.cpp \
     roadelement3d.cpp \
@@ -45,8 +45,8 @@ SOURCES += main.cpp\
     texturemanager.cpp \
     curve.cpp \
     splitzone.cpp \
-#    voltageline.cpp \
-#    doublevoltageline.cpp \
+    voltageline.cpp \
+    doublevoltageline.cpp \
     railway.cpp \
     linelinked.cpp \
     logger.cpp \
@@ -57,7 +57,13 @@ SOURCES += main.cpp\
     yandexmapsview.cpp \
     googlemapsview.cpp \
     settingsdialog.cpp \
-    filemanager.cpp
+    filemanager.cpp \
+    pole.cpp \
+    beziers.cpp \
+    billboard.cpp \
+    arch.cpp \
+    mapplane.cpp \
+    osmview.cpp
 
 
 
@@ -86,7 +92,7 @@ HEADERS  += mainwindow.h\
     scene3d.h \
     compositeroad.h \
 #    multiselectedstate.h \
-#    cube.h \
+    cube.h \
 #    objectstoolbox.h \
     objfilemanager.h \
     roadelement3d.h \
@@ -97,8 +103,8 @@ HEADERS  += mainwindow.h\
     texturemanager.h \
     curve.h \
     splitzone.h \
-#    voltageline.h \
-#    doublevoltageline.h \
+    voltageline.h \
+    doublevoltageline.h \
     railway.h \
     linelinked.h \
     logger.h \
@@ -107,7 +113,13 @@ HEADERS  += mainwindow.h\
     overlayedmapswidget.h \
     yandexmapsview.h \
     googlemapsview.h \
-    settingsdialog.h
+    settingsdialog.h \
+    pole.h \
+    beziers.h \
+    billboard.h \
+    arch.h \
+    mapplane.h \
+    osmview.h
 
 ##LIBS += -LC:/OpenSSL-Win64 -llibeay32 -llibssl32
 

@@ -107,12 +107,98 @@ void Scene3D::getProperties(QFormLayout *layout)
         delete item;
     }
 
-    QPushButton* backgroundColorButton = new QPushButton();
-    QString style = "background: rgba(%1, %2, %3, %4);";
-    backgroundColorButton->setStyleSheet(style.arg(backgroundColor.red()).arg(backgroundColor.green()).arg(backgroundColor.blue()).arg(backgroundColor.alpha()));
-    connect(backgroundColorButton, SIGNAL(clicked(bool)), this, SLOT(setBackGroundColor()));
+//    QPushButton* backgroundColorButton = new QPushButton();
+//    QString style = "background: rgba(%1, %2, %3, %4);";
+//    backgroundColorButton->setStyleSheet(style.arg(backgroundColor.red()).arg(backgroundColor.green()).arg(backgroundColor.blue()).arg(backgroundColor.alpha()));
+//    connect(backgroundColorButton, SIGNAL(clicked(bool)), this, SLOT(setBackGroundColor()));
 
-    layout->addRow("Цвет фона", backgroundColorButton);
+    //    layout->addRow("Цвет фона", backgroundColorButton);
+
+//    QDoubleSpinBox* substrateWidthSpinBox = new QDoubleSpinBox();
+//    substrateWidthSpinBox->setMinimum(0.0);
+//    substrateWidthSpinBox->setMaximum(1000000.0);
+//    substrateWidthSpinBox->setValue(substrateWidth);
+//    connect(substrateWidthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setSubstrateWidth(double)));
+
+//    QDoubleSpinBox* substrateLengthSpinBox = new QDoubleSpinBox();
+//    substrateLengthSpinBox->setMinimum(0.0);
+//    substrateLengthSpinBox->setMaximum(1000000.0);
+//    substrateLengthSpinBox->setValue(substrateLength);
+//    connect(substrateLengthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setSubstrateLength(double)));
+
+//    QPushButton* substrateColorButton = new QPushButton("Изменить");
+//    connect(substrateColorButton, SIGNAL(clicked()), this, SLOT(setSubstrateColor()));
+
+//    QCheckBox* substrateCheckBox = new QCheckBox();
+//    connect(substrateCheckBox, SIGNAL(toggled(bool)), substrateWidthSpinBox, SLOT(setEnabled(bool)));
+//    connect(substrateCheckBox, SIGNAL(toggled(bool)), substrateLengthSpinBox, SLOT(setEnabled(bool)));
+//    connect(substrateCheckBox, SIGNAL(toggled(bool)), substrateColorButton, SLOT(setEnabled(bool)));
+//    connect(substrateCheckBox, SIGNAL(toggled(bool)), this, SLOT(setDrawSubstrateStatus(bool)));
+//    connect(substrateCheckBox, SIGNAL(toggled(bool)), this, SLOT(updateGL()));
+//    substrateCheckBox->setChecked(drawSubstrateStatus);
+
+//    layout->addRow("Отображать подложку", substrateCheckBox);
+//    layout->addRow("Длина подложки", substrateLengthSpinBox);
+//    layout->addRow("Ширина подложки", substrateWidthSpinBox);
+//    layout->addRow("Цвет подложки", substrateColorButton);
+}
+
+void Scene3D::loadSettings()
+{
+    settings->beginGroup("/Settings/View/Scene3D");
+
+    int red = settings->value("/Substrate/Color/Red",200).toInt();
+    int green = settings->value("/Substrate/Color/Green",200).toInt();
+    int blue = settings->value("/Substrate/Color/Blue",200).toInt();
+    substrateColor.setRgb(red, green, blue);
+    substrateLength = settings->value("/Substrate/Length",1000.0f).toFloat();
+    substrateWidth = settings->value("/Substrate/Width",1000.0f).toFloat();
+    drawSubstrateStatus = settings->value("/Substrate/Status",true).toBool();
+
+    settings->endGroup();
+}
+
+void Scene3D::saveSettings()
+{
+    settings->beginGroup("/Settings/View/Scene3D");
+
+    settings->setValue("/Substrate/Color/Red",substrateColor.red());
+    settings->setValue("/Substrate/Color/Green",substrateColor.green());
+    settings->setValue("/Substrate/Color/Blue",substrateColor.blue());
+    settings->setValue("/Substrate/Length",substrateLength);
+    settings->setValue("/Substrate/Width",substrateWidth);
+    settings->setValue("/Substrate/Status",drawSubstrateStatus);
+
+    settings->endGroup();
+}
+
+void Scene3D::drawSubstrate()
+{
+    if (log)
+    Logger::getLogger()->infoLog() << "Scene3D::drawSubstrate()\n";
+    glBegin(GL_TRIANGLES);
+    qglColor(substrateColor);
+    glVertex3f(substrateLength / -2.0f, substrateWidth / -2.0f, 0.0f);
+    qglColor(substrateColor);
+    glVertex3f(substrateLength / 2.0f, substrateWidth / 2.0f, 0.0f);
+    qglColor(substrateColor);
+    glVertex3f(substrateLength / -2.0f, substrateWidth / 2.0f, 0.0f);
+
+    qglColor(substrateColor);
+    glVertex3f(substrateLength / -2.0f, substrateWidth / -2.0f, 0.0f);
+    qglColor(substrateColor);
+    glVertex3f(substrateLength / 2.0f, substrateWidth / -2.0f, 0.0f);
+    qglColor(substrateColor);
+    glVertex3f(substrateLength / 2.0f, substrateWidth / 2.0f, 0.0f);
+    glEnd();
+}
+
+void Scene3D::setSettings(QSettings *settings)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "Scene3D::setDrawRectStatus(bool status)\n";
+    this->settings = settings;
+    //loadSettings();
 }
 
 
@@ -289,8 +375,8 @@ void Scene3D::paintGL()
 {
     if (log)
     Logger::getLogger()->infoLog() << "Scene3D::paintGL()\n";
-    //glClearColor(0.9, 0.9, 0.9, 1);
-    qglClearColor(backgroundColor);
+    glClearColor(0.9, 0.9, 0.9, 1);
+    //qglClearColor(backgroundColor);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       // Позиция света
@@ -300,6 +386,22 @@ void Scene3D::paintGL()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glPushMatrix();
+
+//    if (drawSubstrateStatus)
+//    {
+//        glDisable(GL_COLOR_MATERIAL);
+//        glDisable(GL_TEXTURE_2D);
+//        glDisable(GL_LIGHTING);
+//        glDisableClientState(GL_NORMAL_ARRAY);
+//        glEnableClientState(GL_COLOR_ARRAY);
+//        drawSubstrate();
+//        glDisableClientState(GL_COLOR_ARRAY);
+//        glEnableClientState(GL_NORMAL_ARRAY);
+//        glEnable(GL_LIGHTING);
+//        glEnable(GL_TEXTURE_2D);
+//        glEnable(GL_COLOR_MATERIAL);
+
+//    }
 
     GLfloat LightAmbient[]= { 1.0f, 1.0f, 1.0f, 1.0f }; // Значения фонового света ( НОВОЕ )
     GLfloat LightSpecular[]= { 1.0f, 1.0f, 1.0f, 1.0f }; // Значения фонового света ( НОВОЕ )
@@ -318,7 +420,10 @@ void Scene3D::paintGL()
     glRotatef(xRot, 1.0f, 0.0f, 0.0f); // поворот по X
     glRotatef(yRot, 0.0f, 1.0f, 0.0f); // поворот по Y
     glRotatef(zRot, 0.0f, 0.0f, 1.0f); // поворот по Z
+
     glScalef(nSca, nSca, nSca);
+
+
 
     if (model)
     {
@@ -328,7 +433,12 @@ void Scene3D::paintGL()
             {
                 for(QList<RoadElement*>::iterator it = model->getGroup(i).begin();
                     it != model->getGroup(i).end(); ++it)
+                {
+                    bool selected = (*it)->isSelected();
+                    (*it)->setSelectedStatus(false);
                     (*it)->drawFigure(this);
+                    (*it)->setSelectedStatus(selected);
+                }
             }
 
         }
@@ -354,6 +464,38 @@ void Scene3D::setBackGroundColor()
 {
     backgroundColor = QColorDialog::getColor(backgroundColor);
     getProperties(layout);
+    updateGL();
+}
+
+void Scene3D::setDrawSubstrateStatus(bool status)
+{
+    if (log)
+            Logger::getLogger()->infoLog() << "Scene3D::setDrawSubstrateStatus(bool status)"
+                                           << " status = " << status << "\n";
+    drawSubstrateStatus = status;
+}
+
+void Scene3D::setSubstrateLength(double length)
+{
+    if (log)
+            Logger::getLogger()->infoLog() << "Scene3D::setSubstrateLength(double length)"
+                                           << " length = " << length << "\n";
+    substrateLength = length;
+}
+
+void Scene3D::setSubstrateWidth(double length)
+{
+    if (log)
+            Logger::getLogger()->infoLog() << "Scene3D::setSubstrateWidth(double length)"
+                                           << " length = " << length << "\n";
+    substrateWidth = length;
+}
+
+void Scene3D::setSubstrateColor()
+{
+    if (log)
+            Logger::getLogger()->infoLog() << "Scene3D::setSubstrateColor()\n";
+    substrateColor = QColorDialog::getColor(substrateColor, 0, "Цвет подложки");
     updateGL();
 }
 

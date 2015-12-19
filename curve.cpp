@@ -32,12 +32,12 @@ Curve::Curve(float xCenter, float yCenter, float zCenter,
     //rightLength = sqrt((xRight - xCenter)*(xRight - xCenter) + (yRight - yCenter)*(yRight - yCenter));
     texture1 = texture_1;
     texture2 = texture_2;
-    textureID[0] = TextureManager::getInstance()->getID(texture_1);
+    textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_1);
     //textureID[0] = getTextures(texture_1);
     this->texture1USize = texture_1Usize;
     this->texture1VSize = texture_1Vsize;
 
-    textureID[1] = TextureManager::getInstance()->getID(texture_2);
+    textureID[1] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_2);
     //textureID[1] = getTextures(texture_2);
     this->texture2USize = texture_2Usize;
     this->texture2VSize = texture_2Vsize;
@@ -51,10 +51,10 @@ Curve::Curve(float xCenter, float yCenter, float zCenter,
     setTextureArrayBoard(texture2USize, texture2VSize);
     setIndexArrayBoard();
 
-    calculateAngle();
-    setAngleVertexArray();
-    setAngleColorArray(1.0f, 0.0f, 0.0f);
-    setAngleIndexArray();
+//    calculateAngle();
+//    setAngleVertexArray();
+//    setAngleColorArray(1.0f, 0.0f, 0.0f);
+//    setAngleIndexArray();
     //calculateAngle();
     fixed = selected = false;
     showBoard = true;
@@ -62,7 +62,7 @@ Curve::Curve(float xCenter, float yCenter, float zCenter,
     name = "Curve";
 }
 
-Curve::Curve(float *controls, int size, QString texture_1, float texture_1Usize, float texture_1Vsize, QString texture_2, float texture_2Usize, float texture_2Vsize, int numberOfSides, float angleRounding, float boardWidth, bool fixed, bool showBoard, int layer, QString name)
+Curve::Curve(float *controls, int size, QString texture_1, float texture_1Usize, float texture_1Vsize, QString texture_2, float texture_2Usize, float texture_2Vsize, int numberOfSides, float boardWidth, bool fixed, bool showBoard, int layer, QString name)
 {
     this->numberOfSides = numberOfSides;
     this->name = name;
@@ -76,14 +76,13 @@ Curve::Curve(float *controls, int size, QString texture_1, float texture_1Usize,
     elementY = controlPoints[1];
     texture1 = texture_1;
     texture2 = texture_2;
-    textureID[0] = TextureManager::getInstance()->getID(texture_1);
+    textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_1);
     this->texture1USize = texture_1Usize;
     this->texture1VSize = texture_1Vsize;
 
-    textureID[1] = TextureManager::getInstance()->getID(texture_2);
+    textureID[1] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_2);
     this->texture2USize = texture_2Usize;
     this->texture2VSize = texture_2Vsize;
-    this->angleRounding = angleRounding;
     this->boardWidth = boardWidth;
     setVertexArray();
     setTextureArray();
@@ -93,10 +92,10 @@ Curve::Curve(float *controls, int size, QString texture_1, float texture_1Usize,
     setTextureArrayBoard(texture2USize, texture2VSize);
     setIndexArrayBoard();
 
-    calculateAngle();
-    setAngleVertexArray();
-    setAngleColorArray(1.0f, 0.0f, 0.0f);
-    setAngleIndexArray();
+//    calculateAngle();
+//    setAngleVertexArray();
+//    setAngleColorArray(1.0f, 0.0f, 0.0f);
+//    setAngleIndexArray();
     this->fixed = fixed;
     selected = false;
     this->showBoard = showBoard;
@@ -139,10 +138,10 @@ Curve::Curve(const Curve &source)
     setTextureArrayBoard(texture2USize, texture2VSize);
     setIndexArrayBoard();
 
-    calculateAngle();
-    setAngleVertexArray();
-    setAngleColorArray(1.0f, 0.0f, 0.0f);
-    setAngleIndexArray();
+//    calculateAngle();
+//    setAngleVertexArray();
+//    setAngleColorArray(1.0f, 0.0f, 0.0f);
+//    setAngleIndexArray();
     name = source.name;
     fixed = source.fixed;
     selected = source.selected;
@@ -182,27 +181,20 @@ void Curve::drawFigure(QGLWidget *render)
     {
         if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
         {
-            ////qDebug() << "Index " << indexOfSelectedControl;
             drawControlElement(indexOfSelectedControl, 5.0f, 10.0);
         }
-        for (int i = 0; i < 4; ++i)
+        for (int i = 0; i < getNumberOfControls(); ++i)
             drawControlElement(i, 5.0f, 10.f);       
     }
-    ////qDebug() << "Vertices: " << vertexArray.size() / 3;
-    ////qDebug() << "Textures: " << textureArray.size() / 2;
-    ////qDebug() << "Indices: " << indexArray.size() / 3;
     glDisableClientState(GL_COLOR_ARRAY);
     glEnable(GL_TEXTURE_2D);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-    if (angleRounding < 180)
-    {
-        glBindTexture(GL_TEXTURE_2D, textureID[0]);
-        glVertexPointer(3, GL_FLOAT, 0, vertexArray.begin());
-        glTexCoordPointer(2, GL_FLOAT, 0, textureArray.begin());
-        glDrawElements(GL_TRIANGLES, indexArray.size(), GL_UNSIGNED_BYTE, indexArray.begin());
-    }
 
+    glBindTexture(GL_TEXTURE_2D, textureID[0]);
+    glVertexPointer(3, GL_FLOAT, 0, vertexArray.begin());
+    glTexCoordPointer(2, GL_FLOAT, 0, textureArray.begin());
+    glDrawElements(GL_TRIANGLES, indexArray.size(), GL_UNSIGNED_BYTE, indexArray.begin());
 
     if (showBoard)
     {
@@ -250,76 +242,76 @@ void Curve::drawMeasurements(QGLWidget *render)
     if (log)
         Logger::getLogger()->infoLog() << "Curve::drawMeasurements(QGLWidget *render)\n";
 
-    glEnable(GL_LINE_STIPPLE);
-    glLineStipple(1, 0x0FFF);
-    glLineWidth(1.5f);
-    glVertexPointer(3, GL_FLOAT, 0, angleVertexArray.begin());
-    glColorPointer(3, GL_FLOAT, 0, angleColorArray.begin());
-    glDrawElements(GL_LINE_STRIP,angleIndexArray.size(),GL_UNSIGNED_BYTE, angleIndexArray.begin());
-    glDisable(GL_LINE_STIPPLE);
+//    glEnable(GL_LINE_STIPPLE);
+//    glLineStipple(1, 0x0FFF);
+//    glLineWidth(1.5f);
+//    glVertexPointer(3, GL_FLOAT, 0, angleVertexArray.begin());
+//    glColorPointer(3, GL_FLOAT, 0, angleColorArray.begin());
+//    glDrawElements(GL_LINE_STRIP,angleIndexArray.size(),GL_UNSIGNED_BYTE, angleIndexArray.begin());
+//    glDisable(GL_LINE_STIPPLE);
 
-    GLdouble x, y, z;
-    GLdouble wx, wy, wz;
-    QFont shrift = QFont("Times", 8, QFont::Black);
-    if (render)
-    {
+//    GLdouble x, y, z;
+//    GLdouble wx, wy, wz;
+//    QFont shrift = QFont("Times", 8, QFont::Black);
+//    if (render)
+//    {
 
-        glPointSize(5.0f);
-        glBegin(GL_POINTS);
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glVertex3f(xRadius, yRadius, 0.3f);
-        glEnd();
+//        glPointSize(5.0f);
+//        glBegin(GL_POINTS);
+//        glColor3f(1.0f, 0.0f, 0.0f);
+//        glVertex3f(xRadius, yRadius, 0.3f);
+//        glEnd();
 
-        glEnable(GL_LINE_STIPPLE);
-        glLineStipple(1, 0x0FFF);
-        glLineWidth(1.5f);
-        //x = (xRadius + controlPoints[3]) / 2.0f;
-        //y = (yRadius + controlPoints[4]) / 2.0f;
-        x = xRadius;
-        y = yRadius;
-        z = 0.3f;
-        getWindowCoord(x, y, z, wx, wy, wz);
+//        glEnable(GL_LINE_STIPPLE);
+//        glLineStipple(1, 0x0FFF);
+//        glLineWidth(1.5f);
+//        //x = (xRadius + controlPoints[3]) / 2.0f;
+//        //y = (yRadius + controlPoints[4]) / 2.0f;
+//        x = xRadius;
+//        y = yRadius;
+//        z = 0.3f;
+//        getWindowCoord(x, y, z, wx, wy, wz);
 
-        glBegin(GL_LINES);
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glVertex3f(xRadius, yRadius, 0.3f);
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glVertex3f(controlPoints[3],
-                controlPoints[4],
-                0.3f);
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glVertex3f(xRadius, yRadius, 0.3f);
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glVertex3f(controlPoints[6],
-                controlPoints[7],
-                0.3f);
-        glEnd();
-        render->renderText(wx, wy, "R=" + QString("%1").arg(radius, 0, 'f', 2), shrift);
+//        glBegin(GL_LINES);
+//        glColor3f(1.0f, 0.0f, 0.0f);
+//        glVertex3f(xRadius, yRadius, 0.3f);
+//        glColor3f(1.0f, 0.0f, 0.0f);
+//        glVertex3f(controlPoints[3],
+//                controlPoints[4],
+//                0.3f);
+//        glColor3f(1.0f, 0.0f, 0.0f);
+//        glVertex3f(xRadius, yRadius, 0.3f);
+//        glColor3f(1.0f, 0.0f, 0.0f);
+//        glVertex3f(controlPoints[6],
+//                controlPoints[7],
+//                0.3f);
+//        glEnd();
+//        render->renderText(wx, wy, "R=" + QString("%1").arg(radius, 0, 'f', 2), shrift);
 
-        x = (controlPoints[3] + controlPoints[0]) / 2.0f;
-        y = (controlPoints[4] + controlPoints[1]) / 2.0f;
-        z = (controlPoints[5] + controlPoints[2]) / 2.0f;
-        getWindowCoord(x, y, z, wx, wy, wz);
-        render->renderText(wx, wy, "L=" + QString("%1").arg(leftLength, 0, 'f', 2), shrift);
+//        x = (controlPoints[3] + controlPoints[0]) / 2.0f;
+//        y = (controlPoints[4] + controlPoints[1]) / 2.0f;
+//        z = (controlPoints[5] + controlPoints[2]) / 2.0f;
+//        getWindowCoord(x, y, z, wx, wy, wz);
+//        render->renderText(wx, wy, "L=" + QString("%1").arg(leftLength, 0, 'f', 2), shrift);
 
-        x = (controlPoints[6] + controlPoints[0]) / 2.0f;
-        y = (controlPoints[7] + controlPoints[1]) / 2.0f;
-        z = (controlPoints[8] + controlPoints[2]) / 2.0f;
-        getWindowCoord(x, y, z, wx, wy, wz);
-        render->renderText(wx, wy, "L=" + QString("%1").arg(rightLength, 0, 'f', 2), shrift);
-        glDisable(GL_LINE_STIPPLE);
+//        x = (controlPoints[6] + controlPoints[0]) / 2.0f;
+//        y = (controlPoints[7] + controlPoints[1]) / 2.0f;
+//        z = (controlPoints[8] + controlPoints[2]) / 2.0f;
+//        getWindowCoord(x, y, z, wx, wy, wz);
+//        render->renderText(wx, wy, "L=" + QString("%1").arg(rightLength, 0, 'f', 2), shrift);
+//        glDisable(GL_LINE_STIPPLE);
 
-        float i = angleVertexArray.size() / 6;
-        x = angleVertexArray[i * 3];
-        y = angleVertexArray[i * 3 + 1];
-        z = angleVertexArray[i * 3 + 2];
-        getWindowCoord(x, y, z, wx, wy, wz);
-        render->renderText(wx, wy, "a=" + QString("%1").arg(angleRounding, 0, 'f', 2), shrift);
-    }
-    else
-    {
-        return;
-    }
+//        float i = angleVertexArray.size() / 6;
+//        x = angleVertexArray[i * 3];
+//        y = angleVertexArray[i * 3 + 1];
+//        z = angleVertexArray[i * 3 + 2];
+//        getWindowCoord(x, y, z, wx, wy, wz);
+//        render->renderText(wx, wy, "a=" + QString("%1").arg(angleRounding, 0, 'f', 2), shrift);
+//    }
+//    else
+//    {
+//        return;
+//    }
 
 }
 
@@ -347,12 +339,7 @@ void Curve::move(float dx, float dy, float dz)
     {
         vertexArrayBoard[i * 3] += dx;
         vertexArrayBoard[i * 3 + 1] += dy;
-    }
-    for (int i = 0; i < angleVertexArray.size() / 3; ++i)
-    {
-        angleVertexArray[i * 3] += dx;
-        angleVertexArray[i * 3 + 1] += dy;
-    }
+    }    
     xRadius += dx;
     yRadius += dy;
     elementX = controlPoints[0];
@@ -366,9 +353,7 @@ void Curve::drawControlElement(int index, float lineWidth, float pointSize)
                                        << " index = " << index
                                        << " lineWidth = " << lineWidth
                                        << " pointSize = " << pointSize << "\n";
-    switch (index)
-    {
-    case 0:
+    if (index == 0)
     {
         glPointSize(pointSize);
         glBegin(GL_POINTS);
@@ -376,8 +361,8 @@ void Curve::drawControlElement(int index, float lineWidth, float pointSize)
         glVertex3f(controlPoints[0], controlPoints[1], controlPoints[2] + 0.001f);
         glEnd();
     }
-        break;
-    case 1:
+    else
+    if (index == 1)
     {
         glPointSize(pointSize);
         glBegin(GL_POINTS);
@@ -385,8 +370,8 @@ void Curve::drawControlElement(int index, float lineWidth, float pointSize)
         glVertex3f(controlPoints[3], controlPoints[4], controlPoints[5] + 0.001f);
         glEnd();
     }
-        break;
-    case 2:
+    else
+    if (index == 2)
     {
         glPointSize(pointSize);
         glBegin(GL_POINTS);
@@ -394,55 +379,70 @@ void Curve::drawControlElement(int index, float lineWidth, float pointSize)
         glVertex3f(controlPoints[6], controlPoints[7], controlPoints[8] + 0.001f);
         glEnd();
     }
-        break;
-    case 3:
-    {
-        if (showBoard)
-        {
-            glLineWidth(lineWidth);
-            glBegin(GL_LINES);
-            for (int i = 0; i < vertexArrayBoard.size() / 3 - 5; i += 10)
-            {
 
-                glColor3f(0.0f, 1.0f, 0.0f);
-                glVertex3f(vertexArrayBoard[(i + 4) * 3],
-                        vertexArrayBoard[(i + 4) * 3 + 1],
-                        vertexArrayBoard[(i + 4) * 3 + 2]);
-                glColor3f(0.0f, 1.0f, 0.0f);
-                glVertex3f(vertexArrayBoard[(i + 9) * 3],
-                        vertexArrayBoard[(i + 9) * 3 + 1],
-                        vertexArrayBoard[(i + 9) * 3 + 2]);
+//    case 3:
+//    {
+//        if (showBoard)
+//        {
+//            glLineWidth(lineWidth);
+//            glBegin(GL_LINES);
+//            for (int i = 0; i < vertexArrayBoard.size() / 3 - 5; i += 10)
+//            {
 
-            }
-            glEnd();
-        }
-    }
-        break;
-    case 4:
+//                glColor3f(0.0f, 1.0f, 0.0f);
+//                glVertex3f(vertexArrayBoard[(i + 4) * 3],
+//                        vertexArrayBoard[(i + 4) * 3 + 1],
+//                        vertexArrayBoard[(i + 4) * 3 + 2]);
+//                glColor3f(0.0f, 1.0f, 0.0f);
+//                glVertex3f(vertexArrayBoard[(i + 9) * 3],
+//                        vertexArrayBoard[(i + 9) * 3 + 1],
+//                        vertexArrayBoard[(i + 9) * 3 + 2]);
+
+//            }
+//            glEnd();
+//        }
+//    }
+//        break;
+//    case 4:
+//    {
+//        glLineWidth(lineWidth);
+//        glBegin(GL_LINES);
+//        glColor3f(0.0f, 0.0f, 0.0f);
+//        glVertex3f(controlPoints[0], controlPoints[1], controlPoints[2] + 0.001f);
+//        glColor3f(0.0f, 0.0f, 0.0f);
+//        glVertex3f(controlPoints[3], controlPoints[4], controlPoints[5] + 0.001f);
+//        glEnd();
+//    }
+//        break;
+//    case 5:
+//    {
+//        glLineWidth(lineWidth);
+//        glBegin(GL_LINES);
+//        glColor3f(0.0f, 0.0f, 0.0f);
+//        glVertex3f(controlPoints[0], controlPoints[1], controlPoints[2] + 0.001f);
+//        glColor3f(0.0f, 0.0f, 0.0f);
+//        glVertex3f(controlPoints[6], controlPoints[7], controlPoints[8] + 0.001f);
+//        glEnd();
+//    }
+//        break;
+    else
+    if (index > 2 && index < getNumberOfControls())
     {
+        index -= 3;
         glLineWidth(lineWidth);
         glBegin(GL_LINES);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(controlPoints[0], controlPoints[1], controlPoints[2] + 0.001f);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(controlPoints[3], controlPoints[4], controlPoints[5] + 0.001f);
+        glColor3f(0.0f, 1.0f, 0.0f);
+        glVertex3f(vertexArrayBoard[(index * 10 + 4) * 3],
+                vertexArrayBoard[(index * 10 + 4) * 3 + 1],
+                vertexArrayBoard[(index * 10 + 4) * 3 + 2]);
+        glColor3f(0.0f, 1.0f, 0.0f);
+        glVertex3f(vertexArrayBoard[(index * 10 + 9) * 3],
+                vertexArrayBoard[(index * 10 + 9) * 3 + 1],
+                vertexArrayBoard[(index * 10 + 9) * 3 + 2]);
         glEnd();
     }
-        break;
-    case 5:
-    {
-        glLineWidth(lineWidth);
-        glBegin(GL_LINES);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(controlPoints[0], controlPoints[1], controlPoints[2] + 0.001f);
-        glColor3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(controlPoints[6], controlPoints[7], controlPoints[8] + 0.001f);
-        glEnd();
-    }
-        break;
-    default:
-        break;
-    }
+       // break;
+    //}
 }
 
 QCursor Curve::getCursorForControlElement(int index)
@@ -465,67 +465,51 @@ void Curve::resizeByControl(int index, float dx, float dy, float x, float y)
     if (fixed)
         return;
 
-    switch (index)
-    {
-    case 0:
+
+    if (index == 0)
     {
         controlPoints[0] += dx;
         controlPoints[1] += dy;
         elementX = controlPoints[0];
         elementY = controlPoints[1];
-        calculateControlsForAngle(index);
+
         setVertexArray();
         setTextureArray();
         setVertexArrayBoard();
-        setTextureArrayBoard(texture2USize, texture2VSize);
-        setAngleVertexArray();
-        calculateAngle();
+        setTextureArrayBoard(texture2USize, texture2VSize);       
         emit leftLengthChanged(leftLength);
         emit rightLengthChanged(rightLength);
-        //emit angleChanged(angleRounding);
     }
-        break;
-    case 1:
+    else
+    if (index == 1)
     {
         controlPoints[3] += dx;
         controlPoints[4] += dy;
-        calculateControlsForAngle(index);
         setVertexArray();
         setTextureArray();
         setVertexArrayBoard();
-        setTextureArrayBoard(texture2USize, texture2VSize);
-        setAngleVertexArray();
-        calculateAngle();
+        setTextureArrayBoard(texture2USize, texture2VSize);      
         emit leftLengthChanged(leftLength);
-        //emit angleChanged(angleRounding);
     }
-        break;
-    case 2:
+    else
+    if (index == 2)
     {
         controlPoints[6] += dx;
         controlPoints[7] += dy;
-        calculateControlsForAngle(index);
         setVertexArray();
         setTextureArray();
         setVertexArrayBoard();
         setTextureArrayBoard(texture2USize, texture2VSize);
-        setAngleVertexArray();
-        calculateAngle();
         emit rightLengthChanged(rightLength);
-        //emit angleChanged(angleRounding);
     }
-        break;
-    case 3:
+    else
+    if (index > 2 && index < getNumberOfControls())
     {
         float dr = ((x - xRadius)*dx + (y - yRadius)*dy)/
                 sqrt((x - xRadius)*(x - xRadius) + (y - yRadius)*(y - yRadius));
         boardWidth -= dr;
         setVertexArrayBoard();
         setTextureArrayBoard(texture2USize, texture2VSize);
-    }
-        break;
-    default:
-        break;
     }
 
 }
@@ -534,7 +518,7 @@ int Curve::getNumberOfControls()
 {
     if (log)
         Logger::getLogger()->infoLog() << "Curve::getNumberOfControls()\n";
-    return 4;
+    return 3 + numberOfSides;
 }
 
 int Curve::controlsForPoint()
@@ -652,7 +636,6 @@ void Curve::setVertexArray()
         Logger::getLogger()->infoLog() << "Curve::setVertexArray()\n";
     vertexArray.clear();
     float pi = 3.14159265f;
-
     float xCenter = controlPoints[0];
     float yCenter = controlPoints[1];
     float zCenter = controlPoints[2];
@@ -663,30 +646,9 @@ void Curve::setVertexArray()
     float yRight = controlPoints[7];
     float zRight = controlPoints[8];
 
-    if (angleRounding >= 180.0f)
-    {
 
-        //vertexArray.push_back(xCenter);
-        //vertexArray.push_back(yCenter);
-        //vertexArray.push_back(zCenter);
-        vertexArray.push_back(xLeft);
-        vertexArray.push_back(yLeft);
-        vertexArray.push_back(zLeft);
-        vertexArray.push_back(xRight);
-        vertexArray.push_back(yRight);
-        vertexArray.push_back(zRight);
-        leftLength = sqrt((xLeft - xCenter)*(xLeft - xCenter) + (yLeft - yCenter)*(yLeft - yCenter));
-        rightLength = sqrt((xRight - xCenter)*(xRight - xCenter) + (yRight - yCenter)*(yRight - yCenter));
-        //this->angle1 = angle1;
-        //this->angle2 = angle2;
-        //this->radius = 0.0f;
-        //this->xRadius = 0.0f;
-        //this->yRadius = 0.0f;
-        return;
-    }
     float aLeft = xLeft - xCenter;
     float bLeft = yLeft - yCenter;
-    //float cLeft = (-1.0f)*(xLeft * aLeft + yLeft * bLeft);
     float cLeft = (-1.0f)*(xLeft * (xLeft - xCenter) + yLeft * (yLeft - yCenter));
 
     float aRight = xRight - xCenter;
@@ -747,6 +709,18 @@ void Curve::setVertexArray()
     if (dy < 0)
         angle1 = 2.0f * pi - angle1;
 
+    float res = (xRight - xCenter)*(yLeft - yCenter) - (xLeft - xCenter)*(yRight - yCenter);
+    if (res < 0)
+    {
+        float temp = angle1;
+        angle1 = angle2;
+        angle2 = temp;
+        right = false;
+    }
+    else
+    {
+        right = true;
+    }
     if (angle1 > angle2)
     {
         angle2 += 2.0f * pi;
@@ -757,15 +731,10 @@ void Curve::setVertexArray()
     this->xRadius = x;
     this->yRadius = y;
     leftLength = sqrt((xLeft - xCenter)*(xLeft - xCenter) + (yLeft - yCenter)*(yLeft - yCenter));
-    //leftLength = floor(leftLength / 0.01 + 0.5) * 0.01;
     rightLength = sqrt((xRight - xCenter)*(xRight - xCenter) + (yRight - yCenter)*(yRight - yCenter));
-    //rightLength = floor(rightLength / 0.01 + 0.5) * 0.01;
     vertexArray.push_back(xCenter);
     vertexArray.push_back(yCenter);
     vertexArray.push_back(zCenter);
-    ////qDebug() << "---------------";
-    ////qDebug() << "A1 = " << angle1 * 180.0f / 3.14159265f;
-    ////qDebug() << "A2 = " << angle2 * 180.0f / 3.14159265f;
 
     for (int i = 0; i <= numberOfSides; ++i)
     {
@@ -844,7 +813,8 @@ void Curve::setVertexArrayBoard()
         Logger::getLogger()->infoLog() << "Curve::setVertexArrayBoard()\n";
     vertexArrayBoard.clear();
 
-    if (angleRounding == 180)
+    float eps = 1e-5;
+    if (fabs(angle1 - angle2) < eps)
     {
         float r = boardWidth;
 
@@ -913,10 +883,19 @@ void Curve::setVertexArrayBoard()
         return;
 
     }
+    float factor = right ? 1.0f : -1.0f;
     for (int i = 0; i <= numberOfSides; ++i)
     {
+        float angle = 0.0f;
+        if (right)
+        {
+            angle = (angle1 + (angle2 - angle1) * float(i) / float(numberOfSides));
+        }
+        else
+        {
+            angle = (angle2 - (angle2 - angle1) * float(i) / float(numberOfSides));
+        }
 
-        float angle = (angle1 + (angle2 - angle1) * float(i) / float(numberOfSides));
         float dx = radius * cosf(angle);
         float dy = radius * sinf(angle);
 
@@ -928,16 +907,16 @@ void Curve::setVertexArrayBoard()
         vertexArrayBoard.push_back(yRadius + dy);
         vertexArrayBoard.push_back(0.08f);
 
-        vertexArrayBoard.push_back(xRadius + dx - 0.03f * cosf(angle));
-        vertexArrayBoard.push_back(yRadius + dy - 0.03f * sinf(angle));
+        vertexArrayBoard.push_back(xRadius + dx - 0.03f * cosf(angle) * factor);
+        vertexArrayBoard.push_back(yRadius + dy - 0.03f * sinf(angle) * factor);
         vertexArrayBoard.push_back(0.1f);
 
-        vertexArrayBoard.push_back(xRadius + dx - 0.25f * cosf(angle));
-        vertexArrayBoard.push_back(yRadius + dy - 0.25f * sinf(angle));
+        vertexArrayBoard.push_back(xRadius + dx - 0.25f * cosf(angle) * factor);
+        vertexArrayBoard.push_back(yRadius + dy - 0.25f * sinf(angle) * factor);
         vertexArrayBoard.push_back(0.1f);
 
-        vertexArrayBoard.push_back(xRadius + dx - boardWidth * cosf(angle));
-        vertexArrayBoard.push_back(yRadius + dy - boardWidth * sinf(angle));
+        vertexArrayBoard.push_back(xRadius + dx - boardWidth * cosf(angle) * factor);
+        vertexArrayBoard.push_back(yRadius + dy - boardWidth * sinf(angle) * factor);
         vertexArrayBoard.push_back(0.1f);
 
         if (i != 0 && i != numberOfSides)
@@ -950,16 +929,16 @@ void Curve::setVertexArrayBoard()
             vertexArrayBoard.push_back(yRadius + dy);
             vertexArrayBoard.push_back(0.08f);
 
-            vertexArrayBoard.push_back(xRadius + dx - 0.03f * cosf(angle));
-            vertexArrayBoard.push_back(yRadius + dy - 0.03f * sinf(angle));
+            vertexArrayBoard.push_back(xRadius + dx - 0.03f * cosf(angle) * factor);
+            vertexArrayBoard.push_back(yRadius + dy - 0.03f * sinf(angle) * factor);
             vertexArrayBoard.push_back(0.1f);
 
-            vertexArrayBoard.push_back(xRadius + dx - 0.25f * cosf(angle));
-            vertexArrayBoard.push_back(yRadius + dy - 0.25f * sinf(angle));
+            vertexArrayBoard.push_back(xRadius + dx - 0.25f * cosf(angle) * factor);
+            vertexArrayBoard.push_back(yRadius + dy - 0.25f * sinf(angle) * factor);
             vertexArrayBoard.push_back(0.1f);
 
-            vertexArrayBoard.push_back(xRadius + dx - boardWidth * cosf(angle));
-            vertexArrayBoard.push_back(yRadius + dy - boardWidth * sinf(angle));
+            vertexArrayBoard.push_back(xRadius + dx - boardWidth * cosf(angle) * factor);
+            vertexArrayBoard.push_back(yRadius + dy - boardWidth * sinf(angle) * factor);
             vertexArrayBoard.push_back(0.1f);
         }
     }
@@ -1084,7 +1063,6 @@ void Curve::setIndexArrayBoard()
         indexArrayBoard.push_back(i);
         indexArrayBoard.push_back(i + 5);
 
-
         indexArrayBoard.push_back(i + 1);
         indexArrayBoard.push_back(i + 5);
         indexArrayBoard.push_back(i + 6);
@@ -1137,13 +1115,33 @@ void Curve::setCoordForPoint(int index, float x, float y, float z)
     controlPoints[index * 3 + 2] = z;
     elementX = controlPoints[0];
     elementY = controlPoints[1];
-    calculateControlsForAngle(index);
     setVertexArray();
     setTextureArray();
     setVertexArrayBoard();
     setTextureArrayBoard(texture2USize, texture2VSize);
-    setAngleVertexArray();
-    //calculateAngle();
+}
+
+void Curve::setCoordsForControls(float x1, float y1, float z1,
+                                 float x2, float y2, float z2,
+                                 float x3, float y3, float z3)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setCoordsForControls(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3)\n";
+    controlPoints[0] = x1;
+    controlPoints[1] = y1;
+    controlPoints[2] = z1;
+    controlPoints[3] = x2;
+    controlPoints[4] = y2;
+    controlPoints[5] = z2;
+    controlPoints[6] = x3;
+    controlPoints[7] = y3;
+    controlPoints[8] = z3;
+    elementX = controlPoints[0];
+    elementY = controlPoints[1];
+    setVertexArray();
+    setTextureArray();
+    setVertexArrayBoard();
+    setTextureArrayBoard(texture2USize, texture2VSize);
 }
 
 vec3 Curve::getCoordOfPoint(int index)
@@ -1198,165 +1196,12 @@ bool Curve::getBoardShowStatus()
     return showBoard;
 }
 
-void Curve::setAngleVertexArray()
-{
-    if (log)
-        Logger::getLogger()->infoLog() << "Curve::setAngleVertexArray()\n";
-    angleVertexArray.clear();
-    float pi = 3.1415926f;
 
-    float xCenter = controlPoints[0];
-    float yCenter = controlPoints[1];
-    float zCenter = controlPoints[2];
 
-    float xLeft = controlPoints[3];
-    float yLeft = controlPoints[4];
-    float zLeft = controlPoints[5];
 
-    float xRight = controlPoints[6];
-    float yRight = controlPoints[7];
-    float zRight = controlPoints[8];
 
-    float dxLeft = xLeft - xCenter;
-    float dyLeft = yLeft - yCenter;
-    float dxRight = xRight - xCenter;
-    float dyRight = yRight - yCenter;
-    float r1 = sqrt(dxLeft * dxLeft + dyLeft * dyLeft);
-    float r2 = sqrt(dxRight * dxRight + dyRight * dyRight);
 
-    float dx = xRight - xCenter;
-    float dy = yRight - yCenter;
-    float r = sqrt(dx * dx + dy * dy);
-    float t = dx / r;
-    if (t > 1)
-        t = 1.0f;
-    if (t < -1)
-        t = -1.0f;
-    float angle1 = acos(t);
-    if (dy <= 0)
-        angle1 = 2.0f * pi - angle1;
 
-    dx = xLeft - xCenter;
-    dy = yLeft - yCenter;
-    r = sqrt(dx * dx + dy * dy);
-    t = dx / r;
-    if (t > 1)
-        t = 1.0f;
-    if (t < -1)
-        t = -1.0f;
-    float angle2 = acos(t);
-    if (dy <= 0)
-        angle2 = 2.0f * pi - angle2;
-
-    if (angle1 > angle2)
-    {
-        angle2 += 2.0f * pi;
-    }
-
-    r = r1 > r2 ? r2 : r1;
-
-    for (int i = 0; i <= numberOfSides; ++i)
-    {
-
-        float angle = (angle1 + (angle2 - angle1) * float(i) / float(numberOfSides));
-        float dx = r * cosf(angle);
-        float dy = r * sinf(angle);
-        angleVertexArray.push_back(xCenter + dx);
-        angleVertexArray.push_back(yCenter + dy);
-        angleVertexArray.push_back(0.11f);
-    }
-    //angleRounding = (angle2 - angle1) * 180.0 / pi;
-    // emit angleChanged(angleRounding);
-}
-
-void Curve::setAngleColorArray(float red, float green, float blue)
-{
-    if (log)
-        Logger::getLogger()->infoLog() << "Curve::setAngleColorArray(float red, float green, float blue)"
-                                       << " red = " << red
-                                       << " green = " << green
-                                       << " blue = " << blue << "\n";
-    angleColorArray.clear();
-    for (int i = 0; i < angleVertexArray.size() / 3; ++i)
-    {
-        angleColorArray.push_back(red);
-        angleColorArray.push_back(green);
-        angleColorArray.push_back(blue);
-    }
-}
-
-void Curve::setAngleIndexArray()
-{
-    if (log)
-        Logger::getLogger()->infoLog() << "Curve::setAngleIndexArray()\n";
-    angleIndexArray.clear();
-    for (int i = 0; i < angleVertexArray.size() / 3; ++i)
-    {
-        angleIndexArray.push_back(i);
-    }
-}
-
-void Curve::calculateAngle()
-{
-    if (log)
-        Logger::getLogger()->infoLog() << "Curve::calculateAngle()\n";
-    float pi = 3.1415926f;
-
-    float xCenter = controlPoints[0];
-    float yCenter = controlPoints[1];
-    float zCenter = controlPoints[2];
-
-    float xLeft = controlPoints[3];
-    float yLeft = controlPoints[4];
-    float zLeft = controlPoints[5];
-
-    float xRight = controlPoints[6];
-    float yRight = controlPoints[7];
-    float zRight = controlPoints[8];
-
-    float dxLeft = xLeft - xCenter;
-    float dyLeft = yLeft - yCenter;
-    float dxRight = xRight - xCenter;
-    float dyRight = yRight - yCenter;
-    float r1 = sqrt(dxLeft * dxLeft + dyLeft * dyLeft);
-    float r2 = sqrt(dxRight * dxRight + dyRight * dyRight);
-
-    float dx = xRight - xCenter;
-    float dy = yRight - yCenter;
-    float r = sqrt(dx * dx + dy * dy);
-    float t = dx / r;
-    if (t > 1)
-        t = 1.0f;
-    if (t < -1)
-        t = -1.0f;
-    float angle1 = acos(t);
-    if (dy <= 0)
-        angle1 = 2.0f * pi - angle1;
-
-    dx = xLeft - xCenter;
-    dy = yLeft - yCenter;
-    r = sqrt(dx * dx + dy * dy);
-    t = dx / r;
-    if (t > 1)
-        t = 1.0f;
-    if (t < -1)
-        t = -1.0f;
-    float angle2 = acos(t);
-    if (dy <= 0)
-        angle2 = 2.0f * pi - angle2;
-
-    if (angle1 > angle2)
-    {
-        angle2 += 2.0f * pi;
-    }
-    float temp = angleRounding;
-    angleRounding = (angle2 - angle1) * 180.0 / pi;
-    if (temp != angleRounding)
-        emit angleChanged(angleRounding);
-    else
-        angleRounding = temp;
-
-}
 
 bool Curve::calculateLinesIntersection(float a1, float b1, float c1,
                                        float a2, float b2, float c2,
@@ -1490,72 +1335,7 @@ bool Curve::calculateLinesIntersection(float a1, float b1, float c1,
     return false;
 }
 
-void Curve::calculateControlsForAngle(int index)
-{
-    if (log)
-        Logger::getLogger()->infoLog() << "Curve::calculateControlsForAngle(int index)\n";
-    float pi = 3.14159265f;
-    float xCenter = controlPoints[0];
-    float yCenter = controlPoints[1];
 
-    float xLeft = controlPoints[3];
-    float yLeft = controlPoints[4];
-
-    float xRight = controlPoints[6];
-    float yRight = controlPoints[7];
-
-    float dxLeft = xLeft - xCenter;
-    float dyLeft = yLeft - yCenter;
-    float rLeft = sqrt(dxLeft*dxLeft + dyLeft*dyLeft);
-    float dxRight = xRight - xCenter;
-    float dyRight = yRight - yCenter;
-    float rRight = sqrt(dxRight*dxRight + dyRight*dyRight);
-    float t = dxRight / rRight;
-    if (t > 1)
-        t = 1.0f;
-    if (t < -1)
-        t = -1.0f;
-    float alpha1 = acos(t);
-    if (dyRight < 0)
-        alpha1 = 2.0f * pi - alpha1;
-    t = dxLeft / rLeft;
-    if (t > 1)
-        t = 1.0f;
-    if (t < -1)
-        t = -1.0f;
-    float alpha2 = acos(t);
-    if (dyLeft < 0)
-        alpha2 = 2.0f * pi - alpha2;
-    float res = alpha2 - alpha1;
-    if (res >= pi)
-    {
-        switch (index)
-        {
-        case 0:
-            break;
-        case 1:
-        {
-
-            controlPoints[3] = xCenter + rLeft * cos(alpha1 + pi);
-            controlPoints[4] = yCenter + rLeft * sin(alpha1 + pi);
-            angleRounding  = 180.0f;
-
-        }
-            break;
-        case 2:
-        {
-
-            controlPoints[6] = xCenter + rRight * cos(alpha2 - pi);
-            controlPoints[7] = yCenter + rRight * sin(alpha2 - pi);
-            angleRounding  = 180.0f;
-
-        }
-            break;
-        default:
-            break;
-        }
-    }
-}
 
 void Curve::setLogging(bool status)
 {
@@ -1592,6 +1372,8 @@ void Curve::setLeftLength(double length)
     controlPoints[4] = y1 + dy;
     setVertexArray();
     setTextureArray();
+    setVertexArrayBoard();
+    setTextureArrayBoard(texture2USize, texture2VSize);
     this->leftLength = length;
     emit leftLengthChanged(length);
 }
@@ -1615,8 +1397,61 @@ void Curve::setRightLength(double length)
     controlPoints[7] = y1 + dy;
     setVertexArray();
     setTextureArray();
+    setVertexArrayBoard();
+    setTextureArrayBoard(texture2USize, texture2VSize);
     this->rightLength = length;
     emit rightLengthChanged(length);
+}
+
+void Curve::setLeft(double value)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setLeft(double value)"
+                                       << " value = " << value << "\n";
+    if (leftLength == value)
+        return;
+    leftLength = value;
+    emit leftLengthChanged(value);
+}
+
+void Curve::setRight(double value)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setRight(double value)"
+                                       << " value = " << value << "\n";
+    if (rightLength == value)
+        return;
+    rightLength = value;
+    emit rightLengthChanged(value);
+}
+
+void Curve::setLeftRightLength(float left, float right)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setLeftRightLength(float left, float right)\n";
+
+    float x1 = controlPoints[0];
+    float y1 = controlPoints[1];
+    float x2 = controlPoints[3];
+    float y2 = controlPoints[4];
+    float x3 = controlPoints[6];
+    float y3 = controlPoints[7];
+    float r = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    float dx = (x2 - x1) / r * left;
+    float dy = (y2 - y1) / r * left;
+    controlPoints[3] = x1 + dx;
+    controlPoints[4] = y1 + dy;
+    r = sqrt((x3 - x1) * (x3 - x1) + (y3 - y1) * (y3 - y1));
+    dx = (x3 - x1) / r * right;
+    dy = (y3 - y1) / r * right;
+    controlPoints[6] = x1 + dx;
+    controlPoints[7] = y1 + dy;
+    setVertexArray();
+    setTextureArray();
+    setVertexArrayBoard();
+    setTextureArrayBoard(texture2USize, texture2VSize);
+    this->leftLength = left;
+    this->rightLength = right;
 }
 
 void Curve::setBoardWidth(double width)
@@ -1626,7 +1461,15 @@ void Curve::setBoardWidth(double width)
                                        << " width = " << width << "\n";
     if (boardWidth == width)
         return;
+    if (width < 0.0f)
+        width = 0.0f;
+    if (right)
+    {
+        if (width > radius)
+            width = radius;
+    }
     boardWidth = width;
+
     setVertexArrayBoard();
     setTextureArrayBoard(texture2USize, texture2VSize);
     emit boardWidthChanged(width);
@@ -1643,82 +1486,7 @@ void Curve::setBoardShowStatus(bool status)
     emit showBoardStatusChanged(status);
 }
 
-void Curve::setAngle(double angle)
-{
-    if (log)
-        Logger::getLogger()->infoLog() << "Curve::setAngle(double angle)"
-                                       << " angle = " << angle << "\n";
-    float pi = 3.14159265f;
 
-    if (fabs(angleRounding - angle) < 0.01f)
-        return;
-    angleRounding = angle;
-
-    float xCenter = controlPoints[0];
-    float yCenter = controlPoints[1];
-    float zCenter = controlPoints[2];
-
-    float xLeft = controlPoints[3];
-    float yLeft = controlPoints[4];
-    float zLeft = controlPoints[5];
-
-    float xRight = controlPoints[6];
-    float yRight = controlPoints[7];
-    float zRight = controlPoints[8];
-
-    float dxLeft = xLeft - xCenter;
-    float dyLeft = yLeft - yCenter;
-    float dxRight = xRight - xCenter;
-    float dyRight = yRight - yCenter;
-    float r1 = sqrt(dxLeft * dxLeft + dyLeft * dyLeft);
-    float r2 = sqrt(dxRight * dxRight + dyRight * dyRight);
-
-    float dx = xRight - xCenter;
-    float dy = yRight - yCenter;
-    float rRight = sqrt(dx * dx + dy * dy);
-    float t = dx / rRight;
-    if (t > 1)
-        t = 1.0f;
-    if (t < -1)
-        t = -1.0f;
-    float angle1 = acos(t);
-    if (dy <= 0)
-        angle1 = 2.0f * pi - angle1;
-
-    dx = xLeft - xCenter;
-    dy = yLeft - yCenter;
-    float rLeft = sqrt(dx * dx + dy * dy);
-    t = dx / rLeft;
-    if (t > 1)
-        t = 1.0f;
-    if (t < -1)
-        t = -1.0f;
-    float angle2 = acos(t);
-    if (dy <= 0)
-        angle2 = 2.0f * pi - angle2;
-
-    if (angle1 > angle2)
-    {
-        angle2 += 2.0f * pi;
-    }
-
-    dx = rLeft * cos(angle1 + angleRounding * pi / 180.0f);
-    dy = rLeft * sin(angle1 + angleRounding * pi / 180.0f);
-
-    controlPoints[3] = xCenter + dx;
-    controlPoints[4] = yCenter + dy;
-
-    setVertexArray();
-    setTextureArray();
-    setIndexArray();
-
-    setVertexArrayBoard();
-    setTextureArrayBoard(texture2USize, texture2VSize);
-    setIndexArrayBoard();
-    setAngleVertexArray();
-    emit angleChanged(angleRounding);
-
-}
 
 
 std::vector<vec3> Curve::getCoordOfControl(int index)
@@ -1748,38 +1516,19 @@ std::vector<vec3> Curve::getCoordOfControl(int index)
         res.push_back(p);
     }
         break;
-    case 3:
-    {
-        for (int i = 0; i < vertexArrayBoard.size() / 3 - 5; i += 10)
-        {
-            vec3 p(vertexArrayBoard[(i + 4) * 3],
-                    vertexArrayBoard[(i + 4) * 3 + 1],
-                    vertexArrayBoard[(i + 4) * 3 + 2]);
-            vec3 s(vertexArrayBoard[(i + 9) * 3],
-                    vertexArrayBoard[(i + 9) * 3 + 1],
-                    vertexArrayBoard[(i + 9) * 3 + 2]);
-            res.push_back(p);
-            res.push_back(s);
-        }
-    }
-        break;
-    case 4:
-    {
-        vec3 p(controlPoints[0], controlPoints[1], controlPoints[2] + 0.001f);
-        vec3 s(controlPoints[3], controlPoints[4], controlPoints[5] + 0.001f);
-        res.push_back(p);
-        res.push_back(s);
-    }
-        break;
-    case 5:
-    {
-        vec3 p(controlPoints[0], controlPoints[1], controlPoints[2] + 0.001f);
-        vec3 s(controlPoints[6], controlPoints[7], controlPoints[8] + 0.001f);
-        res.push_back(p);
-        res.push_back(s);
-    }
-        break;
     default:
+    {
+        index -= 3;
+
+        vec3 p(vertexArrayBoard[(index * 10 + 4) * 3],
+                vertexArrayBoard[(index * 10 + 4) * 3 + 1],
+                vertexArrayBoard[(index * 10 + 4) * 3 + 2]);
+        vec3 s(vertexArrayBoard[(index * 10 + 9) * 3],
+                vertexArrayBoard[(index * 10 + 9) * 3 + 1],
+                vertexArrayBoard[(index * 10 + 9) * 3 + 2]);
+        res.push_back(p);
+        res.push_back(s);
+    }
         break;
     }
     return res;
@@ -1887,7 +1636,6 @@ QJsonObject Curve::getJSONInfo()
     element["Texture2VSize"] = texture2VSize;
 
     element["BoardWidth"] = boardWidth;
-    element["AngleRounding"] = angleRounding;
     element["NumberOfSides"] = numberOfSides;
 
     element["Id"] = Id;

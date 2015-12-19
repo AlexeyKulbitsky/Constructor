@@ -100,8 +100,8 @@ RoundingRoad::RoundingRoad(float x1, float y1, float nearRadius, float angel1Nea
     setFarTextureArray(texture_2Usize, texture_2Vsize);
     //textureID[0] = getTextures(texture_1);
     //textureID[1] = getTextures(texture_2);
-    textureID[0] = TextureManager::getInstance()->getID(texture_1);
-    textureID[1] = TextureManager::getInstance()->getID(texture_2);
+    textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_1);
+    textureID[1] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_2);
     setIndexArrayForSelectionFrame();
     setColorArrayForSelectionFrame(0.0f, 0.0f, 0.0f);
 
@@ -119,6 +119,8 @@ RoundingRoad::RoundingRoad(float x1, float y1, float nearRadius, float angel1Nea
 
     this->numberOfSides = numberOfSides;
     this->indexOfSelectedControl = -1;
+    layout = NULL;
+    render = NULL;
     selected = false;
     fixed = false;
     connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
@@ -152,8 +154,8 @@ RoundingRoad::RoundingRoad(float x1, float y1, float nearRadius, float angel1Nea
     setTextureArray(texture_1Usize, texture_1Vsize);
     setNearTextureArray(texture_2Usize, texture_2Vsize);
     setFarTextureArray(texture_2Usize, texture_2Vsize);
-    textureID[0] = TextureManager::getInstance()->getID(texture_1);
-    textureID[1] = TextureManager::getInstance()->getID(texture_2);
+    textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_1);
+    textureID[1] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_2);
     setIndexArrayForSelectionFrame();
     setColorArrayForSelectionFrame(0.0f, 0.0f, 0.0f);
 
@@ -172,6 +174,8 @@ RoundingRoad::RoundingRoad(float x1, float y1, float nearRadius, float angel1Nea
     this->indexOfSelectedControl = -1;
     selected = false;
     this->fixed = fixed;
+    layout = NULL;
+    render = NULL;
     connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
 }
 
@@ -210,7 +214,8 @@ RoundingRoad::RoundingRoad(const RoundingRoad &source)
     this->texture2 = source.texture2;
     this->textureID[0] = source.textureID[0];
     this->textureID[1] = source.textureID[1];
-
+    layout = source.layout;
+    render = source.render;
     indexArrayForSelection = new GLubyte[numberOfVertices * 2];
     colorArrayForSelection = new GLfloat[numberOfVertices * 3];
 
@@ -816,10 +821,6 @@ void RoundingRoad::drawFigure(QGLWidget* render)
         if (render == NULL)
             Logger::getLogger()->warningLog() << "RoundingRoad::drawFigure(QGLWidget* render) render = NULL\n";
     }
-
-    ////qDebug() << "Texture coord: " << textureArray.size() / 2;
-    ////qDebug() << "Vertex coord: " << vertexArray.size() / 3;
-    ////qDebug() << "Index coord: " << indexArray.size() / 3;
     glDisableClientState(GL_COLOR_ARRAY);
     glEnable(GL_TEXTURE_2D);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -869,7 +870,6 @@ void RoundingRoad::drawFigure(QGLWidget* render)
         drawControlElement(indexOfSelectedControl, 5.0f, 10.0f);
         glEnable(GL_DEPTH_TEST);
     }
-
 }
 
 void RoundingRoad::drawSelectionFrame()
@@ -1432,6 +1432,8 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             dr = ((x - xCenterNearRadius)*dx + (y - yCenterNearRadius)*dy)/
                     sqrt((x - xCenterNearRadius)*(x - xCenterNearRadius) + (y - yCenterNearRadius)*(y - yCenterNearRadius));
             nearBoardWidth -= dr;
+            if (nearBoardWidth < 0.0f)
+                nearBoardWidth = 0.0f;
             setVertexArray(xCenterNearRadius, yCenterNearRadius, nearRadius, angel1NearRadius, angel2NearRadius,
                            xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
                            numberOfSides);
@@ -1442,6 +1444,8 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             dr = ((x - xCenterFarRadius)*dx + (y - yCenterFarRadius)*dy)/
                     sqrt((x - xCenterFarRadius)*(x - xCenterFarRadius) + (y - yCenterFarRadius)*(y - yCenterFarRadius));
             farBoardWidth += dr;
+            if (farBoardWidth < 0.0f)
+                farBoardWidth = 0.0f;
             setVertexArray(xCenterNearRadius, yCenterNearRadius, nearRadius, angel1NearRadius, angel2NearRadius,
                            xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
                            numberOfSides);
@@ -2057,9 +2061,9 @@ void RoundingRoad::addLine(float step, QString textureSource, float textureSize,
             line.line = new SplitZone(lineVertexArray, size, splitZoneWidth, beginRounding, endRounding,
                                       splitZoneType,
                                       splitZoneHeight,
-                                      QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                      "/models/city_roads/board.jpg",
                                       0.25f, 6.0f,
-                                      QApplication::applicationDirPath() + "/models/city_roads/grass.jpg",
+                                      "/models/city_roads/grass.jpg",
                                       3.0f, 3.0f,
                                       QString("Линия №") + QString::number(lines.size() + 1));
             line.splitZoneWidth = splitZoneWidth;
@@ -2070,9 +2074,9 @@ void RoundingRoad::addLine(float step, QString textureSource, float textureSize,
             line.line = new SplitZone(lineVertexArray, size, splitZoneWidth, beginRounding, endRounding,
                                       splitZoneType,
                                       splitZoneHeight,
-                                      QApplication::applicationDirPath() + "/models/city_roads/board.jpg",
+                                      "/models/city_roads/board.jpg",
                                       0.25f, 6.0f,
-                                      QApplication::applicationDirPath() + "/models/city_roads/nr_07S.jpg",
+                                      "/models/city_roads/nr_07S.jpg",
                                       6.0f, 6.0f,
                                       QString("Линия №") + QString::number(lines.size() + 1));
             line.splitZoneWidth = splitZoneWidth;
@@ -2117,32 +2121,32 @@ void RoundingRoad::addLine()
     switch(lineType)
     {
     case 0:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/solid.png";
+        textSource = "/models/city_roads/solid.png";
         lWidth = 0.1f;
         break;
     case 1:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/inter.png";
+        textSource = "/models/city_roads/inter.png";
         lWidth = 0.1f;
         break;
     case 2:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/d_solid.png";
+        textSource = "/models/city_roads/d_solid.png";
         lWidth = 0.25f;
         break;
     case 3:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/d_inter_l.png";
+        textSource = "/models/city_roads/d_inter_l.png";
         lWidth = 0.25f;
         break;
     case 4:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/d_inter_r.png";
+        textSource = "/models/city_roads/d_inter_r.png";
         lWidth = 0.25f;
         break;
     case 5:
-        textSource = QApplication::applicationDirPath() + "/models/city_roads/d_inter.png";
+        textSource = "/models/city_roads/d_inter.png";
         lWidth = 0.25f;
         break;
     case 8:
     {
-        textSource = QString(":/textures/tramways.png");
+        textSource = QString("/models/city_roads/tramways.png");
         lWidth = 1.5f;
         if (singleWay)
         {

@@ -32,8 +32,9 @@ SplitZone::SplitZone(float *pointsArray, int size,
     this->type = 0;
     this->height = 0.0f;
     indexOfSelectedControl = -1;
+    texture1 = "/models/city_roads/solid.png";
     line = new LineBroken(lineWidth,lineAxisArray,this->size,
-                          QApplication::applicationDirPath() + "/models/city_roads/solid.png", 6.0f,
+                          "/models/city_roads/solid.png", 6.0f,
                           "LineBroken", 1);
     selected = fixed = false;
 }
@@ -77,8 +78,8 @@ SplitZone::SplitZone(float *pointsArray, int size,
         calculateLine(pointsArray,size,width);
         this->layer = 1;
         this->height = height;
-        textureID[0] = TextureManager::getInstance()->getID(texture_1);
-        textureID[1] = TextureManager::getInstance()->getID(texture_2);
+        textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_1);
+        textureID[1] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_2);
         texture1 = texture_1;
         texture2 = texture_2;
         this->texture1USize = texture1USize;
@@ -105,8 +106,8 @@ SplitZone::SplitZone(float *pointsArray, int size,
         calculateLine(pointsArray,size,width);
         this->layer = 1;
         this->height = height;
-        textureID[0] = TextureManager::getInstance()->getID(texture_1);
-        textureID[1] = TextureManager::getInstance()->getID(texture_2);
+        textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_1);
+        textureID[1] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_2);
         texture1 = texture_1;
         texture2 = texture_2;
         this->texture1USize = texture1USize;
@@ -152,8 +153,9 @@ SplitZone::SplitZone(float x1, float y1, float z1,
     calculateLine(pBegin,pEnd,width);
     lineWidth = 0.15f;
     indexOfSelectedControl = -1;
+    texture1 = "/models/city_roads/solid.png";
     line = new LineBroken(lineWidth,lineAxisArray,this->size,
-                          QApplication::applicationDirPath() + "/models/city_roads/solid.png", 6.0f,
+                          "/models/city_roads/solid.png", 6.0f,
                           "LineBroken", 1);
     selected = fixed = false;
 }
@@ -206,8 +208,8 @@ SplitZone::SplitZone(float x1, float y1, float z1,
         calculateLine(pBegin,pEnd,width);
         this->layer = 1;
         this->height = height;
-        textureID[0] = TextureManager::getInstance()->getID(texture_1);
-        textureID[1] = TextureManager::getInstance()->getID(texture_2);
+        textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_1);
+        textureID[1] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_2);
         texture1 = texture_1;
         texture2 = texture_2;
         this->texture1USize = texture1USize;
@@ -243,8 +245,8 @@ SplitZone::SplitZone(float x1, float y1, float z1,
         calculateLine(pBegin,pEnd,width);
         this->layer = 1;
         this->height = height;
-        textureID[0] = TextureManager::getInstance()->getID(texture_1);
-        textureID[1] = TextureManager::getInstance()->getID(texture_2);
+        textureID[0] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_1);
+        textureID[1] = TextureManager::getInstance()->getID(QApplication::applicationDirPath() + texture_2);
         texture1 = texture_1;
         texture2 = texture_2;
         this->texture1USize = texture1USize;

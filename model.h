@@ -5,22 +5,24 @@
 #include <QList>
 class RoadElement;
 #include "roadelement.h"
-
-
-//#include "road.h"
 #include "roundingroad.h"
 #include "linesimple.h"
 #include "roadsimple.h"
 #include "linebroken.h"
 #include "roadbroken.h"
 #include "compositeroad.h"
-//#include "cube.h"
+#include "cube.h"
 #include "curve.h"
 #include "intersection.h"
 #include "splitzone.h"
-//#include "voltageline.h"
-//#include "doublevoltageline.h"
+#include "voltageline.h"
+#include "doublevoltageline.h"
 #include "railway.h"
+#include "pole.h"
+#include "beziers.h"
+#include "billboard.h"
+#include "arch.h"
+#include "mapplane.h"
 
 struct Group
 {
@@ -38,11 +40,12 @@ public:
 private:
     int numberOfGroups;
     //std::list<RoadElement*> group[4];
-    Group group[4];
-    // 1 - группа для дорожного полотна
-    // 2 - группа для дорожной разметки
-    // 3 - группа для тротуаров, разделительных полос
-    // 4 - группа для рабочих инструментов
+    Group group[5];
+    // 0 - группа для дорожного полотна
+    // 1 - группа для дорожной разметки
+    // 2 - группа для тротуаров, разделительных полос
+    // 3 - группа для рабочих инструментов
+    // 4 - группа для спутниковой подложки
 public:
     void addElement(RoadElement* element, int groupIndex);
     void deleteElement(int elementId, int groupIndex);

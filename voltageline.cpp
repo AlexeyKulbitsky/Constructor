@@ -23,6 +23,37 @@ VoltageLine::VoltageLine(float *axisArray, int size, float width,
     selected = fixed = false;
 }
 
+VoltageLine::VoltageLine(QVector<float> &axisArray, float width, QString name, int layer)
+{
+    axisVertexArray.resize(axisArray.size());
+    for (int i = 0; i < axisArray.size(); ++i)
+        axisVertexArray[i] = axisArray[i];
+    this->height = axisVertexArray[2];
+    this->width = width;
+    this->layer = layer;
+    this->name = name;
+    setVertexArray();
+    setIndexArray();
+    setColorArray(0.0f, 0.0f, 0.0f, 1.0f);
+    selected = fixed = false;
+}
+
+VoltageLine::VoltageLine(const VoltageLine &source)
+{
+    axisVertexArray.resize(source.axisVertexArray.size());
+    for (int i = 0; i < source.axisVertexArray.size(); ++i)
+        axisVertexArray[i] = source.axisVertexArray[i];
+    this->height = axisVertexArray[2];
+    this->width = source.width;
+    this->layer = source.layer;
+    this->name = source.name;
+    setVertexArray();
+    setIndexArray();
+    setColorArray(0.0f, 0.0f, 0.0f, 1.0f);
+    selected = source.selected;
+    fixed = source.fixed;
+}
+
 VoltageLine::~VoltageLine()
 {
 
@@ -87,6 +118,7 @@ void VoltageLine::move(float dx, float dy, float dz)
 
 void VoltageLine::drawControlElement(int index, float lineWidth, float pointSize)
 {
+    glDisable(GL_LIGHTING);
     glPointSize(pointSize);
     glBegin(GL_POINTS);
     glColor3f(0.0f, 0.0f, 0.0f);
@@ -94,6 +126,7 @@ void VoltageLine::drawControlElement(int index, float lineWidth, float pointSize
                axisVertexArray[index * 3 + 1],
                axisVertexArray[index * 3 + 2]);
     glEnd();
+    glEnable(GL_LIGHTING);
 }
 
 QCursor VoltageLine::getCursorForControlElement(int index)
@@ -129,11 +162,7 @@ void VoltageLine::changeColorOfSelectedControl(int index)
 
 void VoltageLine::getProperties(QFormLayout *layout, QGLWidget *render)
 {
-    while(QLayoutItem* child = layout->takeAt(0))
-    {
-        delete child->widget();
-        delete child;
-    }
+    clearProperties(layout);
     QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
     widthSpinBox->setKeyboardTracking(false);
     widthSpinBox->setMinimum(0.001);
@@ -465,4 +494,80 @@ void VoltageLine::setHeight(double height)
         axisVertexArray[i * 3 + 2] = height;
     setVertexArray();
     emit heightChanged(height);
+}
+
+
+RoadElement *VoltageLine::getCopy()
+{
+    VoltageLine* copyElement = new VoltageLine(*this);
+    return copyElement;
+}
+
+
+std::vector<vec3> VoltageLine::getCoordOfControl(int index)
+{
+    std::vector<vec3> res;
+    vec3 p(axisVertexArray[index * 3],
+               axisVertexArray[index * 3 + 1],
+               axisVertexArray[index * 3 + 2]);
+    res.push_back(p);
+    return res;
+}
+
+void VoltageLine::setCoordForControl(int index, std::vector<vec3> &controls)
+{
+    axisVertexArray[index * 3] = controls[0].x;
+    axisVertexArray[index * 3 + 1] = controls[0].y;
+    axisVertexArray[index * 3 + 2] = controls[0].z;
+    setVertexArray();
+}
+
+QJsonObject VoltageLine::getJSONInfo()
+{
+    QJsonObject element;
+    element["Name"] = name;
+    element["Layer"] = layer;
+    element["Width"] = width;
+    QJsonArray temp;
+
+    for (int i = 0; i < axisVertexArray.size(); ++i)
+    {
+        temp.append(QJsonValue(axisVertexArray[i]));
+    }
+    element["AxisVertexArray"] = temp;
+     element["Id"] = Id;
+    element["Fixed"] = fixed;
+    return element;
+}
+
+void VoltageLine::clearProperties(QLayout *layout)
+{
+    while(layout->count() > 0)
+    {
+        QLayoutItem *item = layout->takeAt(0);
+        delete item->widget();
+        delete item;
+    }
+}
+
+void VoltageLine::deleteBreak(bool front)
+{
+    if (fixed)
+        return;
+
+    if (front)
+    {
+        axisVertexArray.pop_front();
+        axisVertexArray.pop_front();
+        axisVertexArray.pop_front();
+    }
+    else
+    {
+        axisVertexArray.pop_back();
+        axisVertexArray.pop_back();
+        axisVertexArray.pop_back();
+    }
+    setVertexArray();
+    setIndexArray();
+    setColorArray(0.0f, 0.0f, 0.0f, 1.0f);
 }
