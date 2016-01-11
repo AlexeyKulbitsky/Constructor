@@ -1,4 +1,5 @@
 #include "roadelementobj.h"
+#include "roadelementmanager.h"
 
 RoadElementOBJ::RoadElementOBJ()
 {
@@ -10,9 +11,10 @@ RoadElementOBJ::RoadElementOBJ()
     deltaX = deltaY = 0.0f;
     xRot = yRot = zRot = 0.0f;
     xScale = yScale = zScale = 1.0f;
+    scaleFactor = 1.0f;
     indexOfSelectedControl = -1;
-    figureList = selectedFigureList = 0;
     deltaZ = 0.0f;
+    figureList = -1;
 }
 
 RoadElementOBJ::RoadElementOBJ(float x, float y, QString folder, QString filename)
@@ -28,8 +30,9 @@ RoadElementOBJ::RoadElementOBJ(float x, float y, QString folder, QString filenam
     listNumber = -1;
     xRot = yRot = zRot = 0.0f;
     xScale = yScale = zScale = 1.0f;
+    scaleFactor = 1.0f;
     indexOfSelectedControl = -1;
-    figureList = selectedFigureList = 0;
+    figureList = -1;
     zRadius = 2.0f;
     this->folder = folder;
     this->filename = filename;
@@ -57,7 +60,7 @@ RoadElementOBJ::RoadElementOBJ(const RoadElementOBJ &source)
     yScale = source.yScale;
     zScale = source.zScale;
     indexOfSelectedControl = -1;
-    figureList = selectedFigureList = 0;
+    figureList = source.figureList;
     zRadius = 2.0f;
     this->folder = source.folder;
     this->filename = source.filename;
@@ -67,57 +70,57 @@ RoadElementOBJ::RoadElementOBJ(const RoadElementOBJ &source)
     setZRotColorArray(0.0f, 1.0f, 0.0f);
     setZRotIndexArray();
 
-    for (int i = 0; i < source.meshes.size(); ++i)
-    {
-        Mesh* mesh = new Mesh();
-        strncpy(mesh->name, source.meshes[i]->name,20);
-        mesh->Ka[0] = source.meshes[i]->Ka[0];
-        mesh->Ka[1] = source.meshes[i]->Ka[1];
-        mesh->Ka[2] = source.meshes[i]->Ka[2];
+    //    for (int i = 0; i < source.meshes.size(); ++i)
+    //    {
+    //        Mesh* mesh = new Mesh();
+    //        strncpy(mesh->name, source.meshes[i]->name,20);
+    //        mesh->Ka[0] = source.meshes[i]->Ka[0];
+    //        mesh->Ka[1] = source.meshes[i]->Ka[1];
+    //        mesh->Ka[2] = source.meshes[i]->Ka[2];
 
-        mesh->Kd[0] = source.meshes[i]->Kd[0];
-        mesh->Kd[1] = source.meshes[i]->Kd[1];
-        mesh->Kd[2] = source.meshes[i]->Kd[2];
+    //        mesh->Kd[0] = source.meshes[i]->Kd[0];
+    //        mesh->Kd[1] = source.meshes[i]->Kd[1];
+    //        mesh->Kd[2] = source.meshes[i]->Kd[2];
 
-        mesh->Ks[0] = source.meshes[i]->Ks[0];
-        mesh->Ks[1] = source.meshes[i]->Ks[1];
-        mesh->Ks[2] = source.meshes[i]->Ks[2];
+    //        mesh->Ks[0] = source.meshes[i]->Ks[0];
+    //        mesh->Ks[1] = source.meshes[i]->Ks[1];
+    //        mesh->Ks[2] = source.meshes[i]->Ks[2];
 
-        mesh->d = source.meshes[i]->d;
-        mesh->Ns = source.meshes[i]->Ns;
-        mesh->illum = source.meshes[i]->illum;
+    //        mesh->d = source.meshes[i]->d;
+    //        mesh->Ns = source.meshes[i]->Ns;
+    //        mesh->illum = source.meshes[i]->illum;
 
-        strncpy(mesh->map_Ka, source.meshes[i]->map_Ka, 255);
-        strncpy(mesh->map_Kd, source.meshes[i]->map_Kd, 255);
-        strncpy(mesh->map_Ks, source.meshes[i]->map_Ks, 255);
+    //        strncpy(mesh->map_Ka, source.meshes[i]->map_Ka, 255);
+    //        strncpy(mesh->map_Kd, source.meshes[i]->map_Kd, 255);
+    //        strncpy(mesh->map_Ks, source.meshes[i]->map_Ks, 255);
 
-        mesh->map_Ka_ID = source.meshes[i]->map_Ka_ID;
-        mesh->map_Kd_ID = source.meshes[i]->map_Kd_ID;
-        mesh->map_Ks_ID = source.meshes[i]->map_Ks_ID;
+    //        mesh->map_Ka_ID = source.meshes[i]->map_Ka_ID;
+    //        mesh->map_Kd_ID = source.meshes[i]->map_Kd_ID;
+    //        mesh->map_Ks_ID = source.meshes[i]->map_Ks_ID;
 
 
-        for (int j = 0; j < source.meshes[i]->vertices.size(); ++j)
-        {
-            Vertex vertex;
-            for (int k = 0; k < 3; ++k)
-            {
-                vertex.position[k] = source.meshes[i]->vertices[j].position[k];
-                vertex.color[k] = source.meshes[i]->vertices[j].color[k];
-                vertex.normal[k] = source.meshes[i]->vertices[j].normal[k];
-            }
-            vertex.texture[0] = source.meshes[i]->vertices[j].texture[0];
-            vertex.texture[1] = source.meshes[i]->vertices[j].texture[1];
-            mesh->vertices.push_back(vertex);
-        }
-        meshes.push_back(mesh);
-    }
+    //        for (int j = 0; j < source.meshes[i]->vertices.size(); ++j)
+    //        {
+    //            Vertex vertex;
+    //            for (int k = 0; k < 3; ++k)
+    //            {
+    //                vertex.position[k] = source.meshes[i]->vertices[j].position[k];
+    //                vertex.color[k] = source.meshes[i]->vertices[j].color[k];
+    //                vertex.normal[k] = source.meshes[i]->vertices[j].normal[k];
+    //            }
+    //            vertex.texture[0] = source.meshes[i]->vertices[j].texture[0];
+    //            vertex.texture[1] = source.meshes[i]->vertices[j].texture[1];
+    //            mesh->vertices.push_back(vertex);
+    //        }
+    //        meshes.push_back(mesh);
+    //    }
 
 
 }
 
 RoadElementOBJ::~RoadElementOBJ()
 {
-
+    RoadElementManager::getInstance()->deleteReference(filename);
 }
 
 
@@ -132,109 +135,21 @@ void RoadElementOBJ::setSelectedStatus(bool status)
     selected = status;
 }
 
-void RoadElementOBJ::drawFigure(QGLWidget *render)
+void RoadElementOBJ::drawFigure(QGLWidget *)
 {
     //glFrontFace(GL_CW);
     glPolygonMode(GL_FRONT_AND_BACK , GL_FILL);
     glPushMatrix();
 
     glTranslatef(deltaX, deltaY, deltaZ);
-
-    //glRotatef(xRot, 1.0f, 0.0f, 0.0f); // поворот по X
-    //glRotatef(90, 0.0f, 1.0f, 0.0f); // поворот по Y
     glRotatef(zRot, 0.0f, 0.0f, 1.0f); // поворот по Z
-    //glRotatef(3000, 0.0f, 0.0f, 1.0f);
-    //glRotatef(90.0f, 1.0f, 0.0f, 0.0f); // поворот по X
-
     glScalef(scaleFactor, scaleFactor, scaleFactor);
-    //glScalef(xScale, yScale, zScale);
-    //glDisableClientState(GL_COLOR_ARRAY);
-    //glDisableClientState(GL_NORMAL_ARRAY);
 
-
-    //qDebug() << "Number of meshes: " << meshes.size();
-    for (int i = 0; i < meshes.size(); ++i)
-   {
-
-   if (!selected)
-   {
-       GLfloat materialAmbient[]= { meshes[i]->Ka[0], meshes[i]->Ka[1], meshes[i]->Ka[2], 1.0f }; // Значения фонового света ( НОВОЕ )
-       GLfloat materialDiffuse[]= { meshes[i]->Kd[0], meshes[i]->Kd[1], meshes[i]->Kd[2], 1.0f }; // Значения диффузного света ( НОВОЕ )
-       GLfloat materialSpecular[]= { meshes[i]->Ks[0], meshes[i]->Ks[1], meshes[i]->Ks[2], 1.0f };
-
-
-       if (meshes[i]->map_Ka_ID > 0)
-       {
-           glEnable(GL_TEXTURE_2D);
-           glBindTexture(GL_TEXTURE_2D, meshes[i]->map_Ka_ID);
-
-       }
-       else if (meshes[i]->map_Ks_ID > 0)
-       {
-           glEnable(GL_TEXTURE_2D);
-           glBindTexture(GL_TEXTURE_2D, meshes[i]->map_Ks_ID);
-           ////qDebug() << meshes[i]->map_Ks_ID;
-       }
-       else
-           if (meshes[i]->map_Kd_ID > 0)
-       {
-               glEnable(GL_TEXTURE_2D);
-           glBindTexture(GL_TEXTURE_2D, meshes[i]->map_Kd_ID);
-           ////qDebug() << "Texture ID ID" <<  meshes[i]->map_Kd_ID;
-       }
-
-           glDisableClientState(GL_COLOR_ARRAY);
-
-           glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-           glEnableClientState(GL_NORMAL_ARRAY);
-           glEnable(GL_LIGHTING);
-
-       glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbient);
-       glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDiffuse);
-       glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
-       glMaterialf(GL_FRONT, GL_SHININESS, meshes[i]->Ns);
-
-       glTexCoordPointer(2, GL_FLOAT,sizeof(Vertex),&meshes[i]->vertices.data()->texture);
-       glNormalPointer(GL_FLOAT, sizeof(Vertex), &meshes[i]->vertices.data()->normal);
-
-   }
-   else
-   {
-
-       glDisableClientState(GL_NORMAL_ARRAY);
-       glDisable(GL_TEXTURE_2D);
-       glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-       glEnableClientState(GL_COLOR_ARRAY);
-       //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-       //glLineWidth(1.0f);
-       glColorPointer(3, GL_FLOAT, sizeof(Vertex), &meshes[i]->vertices.data()->color);
-
-   }
-   glVertexPointer(3, GL_FLOAT, sizeof(Vertex), &meshes[i]->vertices.data()->position);
-   glDrawArrays(GL_TRIANGLES, 0, meshes[i]->vertices.size());
-
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-   glDisable(GL_TEXTURE_2D);
-   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-   glDisableClientState(GL_NORMAL_ARRAY);
-
-   glDisable(GL_LIGHTING);
-   glEnableClientState(GL_COLOR_ARRAY);
-}
-
-    GLfloat materialAmbient[]= { 0.2f, 0.2f, 0.2f, 1.0f }; // Значения фонового света ( НОВОЕ )
-    GLfloat materialDiffuse[]= { 0.8f, 0.8f, 0.8f, 1.0f }; // Значения диффузного света ( НОВОЕ )
-    GLfloat materialSpecular[]= { 0.0f, 0.0f, 0.0f, 1.0f };
-
-
-    glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDiffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
-    glMaterialf(GL_FRONT, GL_SHININESS, 0.0f);
-
+    if (figureList > 0)
+        glCallList(figureList);
 
     glPopMatrix();
+
     if (selected)
     {
         glDisable(GL_DEPTH_TEST);
@@ -251,11 +166,11 @@ void RoadElementOBJ::drawSelectionFrame()
     }
 }
 
-void RoadElementOBJ::drawMeasurements(QGLWidget *render)
+void RoadElementOBJ::drawMeasurements(QGLWidget *)
 {
 }
 
-void RoadElementOBJ::move(float dx, float dy, float dz)
+void RoadElementOBJ::move(float dx, float dy, float)
 {
     deltaX += dx;
     deltaY += dy;
@@ -273,11 +188,11 @@ void RoadElementOBJ::drawControlElement(int index, float lineWidth, float pointS
     switch (index)
     {
     case 0:
-//        glPointSize(pointSize + 5.0f);
-//        glBegin(GL_POINTS);
-//        glColor3f(0.0f, 0.0f, 0.0f);
-//        glVertex3f(0.0f, yMax, 0.0f);
-//        glEnd();
+        //        glPointSize(pointSize + 5.0f);
+        //        glBegin(GL_POINTS);
+        //        glColor3f(0.0f, 0.0f, 0.0f);
+        //        glVertex3f(0.0f, yMax, 0.0f);
+        //        glEnd();
         glLineWidth(lineWidth);
         glDisableClientState(GL_NORMAL_ARRAY);
         glDisable(GL_TEXTURE_2D);
@@ -308,18 +223,18 @@ QCursor RoadElementOBJ::getCursorForControlElement(int index)
 {    
     switch(index)
     {
-        case 0:
-            return Qt::CrossCursor;
-        case 1:
-            return Qt::CrossCursor;
-        default:
-            return Qt::ArrowCursor;
+    case 0:
+        return Qt::CrossCursor;
+    case 1:
+        return Qt::CrossCursor;
+    default:
+        return Qt::ArrowCursor;
     }
 
 
 }
 
-void RoadElementOBJ::resizeByControl(int index, float dx, float dy, float x, float y)
+void RoadElementOBJ::resizeByControl(int index, float dx, float dy, float, float)
 {
     if (fixed)
     {
@@ -362,6 +277,12 @@ void RoadElementOBJ::resizeByControl(int index, float dx, float dy, float x, flo
         setZRotation(zRot + angle * 180.0f / pi);
     }
         break;
+    case 1:
+        deltaX += dx;
+        deltaY += dy;
+        elementX = deltaX;
+        elementY = deltaY;
+        break;
     default:
         break;
     }
@@ -377,7 +298,7 @@ int RoadElementOBJ::controlsForPoint()
     return 1;
 }
 
-void RoadElementOBJ::changeColorOfSelectedControl(int index)
+void RoadElementOBJ::changeColorOfSelectedControl(int)
 {
 }
 
@@ -457,6 +378,7 @@ int RoadElementOBJ::getLayer()
 bool RoadElementOBJ::setFixed(bool fixed)
 {
     this->fixed = fixed;
+    return true;
 }
 
 void RoadElementOBJ::setZRotation(double value)
@@ -515,9 +437,15 @@ void RoadElementOBJ::setZTranslation(double translation)
 
 void RoadElementOBJ::clear()
 {
+    for (unsigned i = 0; i < meshes.size(); ++i)
+    {
+        delete meshes[i];
+        meshes[i] = NULL;
+    }
+    meshes.clear();
 }
 
-RoadElementOBJ::setZRotVertexArray()
+void RoadElementOBJ::setZRotVertexArray()
 {
     float pi = 3.14159265f;
     int numberOfSides = 40;
@@ -530,7 +458,7 @@ RoadElementOBJ::setZRotVertexArray()
     }
 }
 
-RoadElementOBJ::setZRotColorArray(float r, float g, float b)
+void RoadElementOBJ::setZRotColorArray(float r, float g, float b)
 {
     zRotColorArray.resize(zRotVertexArray.size());
     for (int i = 0; i < zRotVertexArray.size() / 3; ++i)
@@ -541,13 +469,95 @@ RoadElementOBJ::setZRotColorArray(float r, float g, float b)
     }
 }
 
-RoadElementOBJ::setZRotIndexArray()
+void RoadElementOBJ::setZRotIndexArray()
 {
     zRotIndexArray.resize(zRotVertexArray.size() / 3);
     for (int i = 0; i < zRotVertexArray.size() / 3; ++i)
     {
         zRotIndexArray[i] = i;
     }
+}
+
+GLuint RoadElementOBJ::generateList()
+{
+    GLuint id = glGenLists(1);
+    glNewList(id, GL_COMPILE);
+
+    for (unsigned i = 0; i < meshes.size(); ++i)
+    {
+
+        glDisableClientState(GL_COLOR_ARRAY);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glEnableClientState(GL_NORMAL_ARRAY);
+        glEnable(GL_LIGHTING);
+
+        GLfloat materialAmbient[]= { meshes[i]->Ka[0], meshes[i]->Ka[1], meshes[i]->Ka[2], 1.0f }; // Значения фонового света ( НОВОЕ )
+        GLfloat materialDiffuse[]= { meshes[i]->Kd[0], meshes[i]->Kd[1], meshes[i]->Kd[2], 1.0f }; // Значения диффузного света ( НОВОЕ )
+        GLfloat materialSpecular[]= { meshes[i]->Ks[0], meshes[i]->Ks[1], meshes[i]->Ks[2], 1.0f };
+
+
+        if (meshes[i]->map_Ka_ID > 0)
+        {
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, meshes[i]->map_Ka_ID);
+
+        }
+        else if (meshes[i]->map_Ks_ID > 0)
+        {
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, meshes[i]->map_Ks_ID);
+            ////qDebug() << meshes[i]->map_Ks_ID;
+        }
+        else
+            if (meshes[i]->map_Kd_ID > 0)
+            {
+                glEnable(GL_TEXTURE_2D);
+                glBindTexture(GL_TEXTURE_2D, meshes[i]->map_Kd_ID);
+                ////qDebug() << "Texture ID ID" <<  meshes[i]->map_Kd_ID;
+            }
+
+
+
+        glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbient);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDiffuse);
+        glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
+        glMaterialf(GL_FRONT, GL_SHININESS, meshes[i]->Ns);
+
+        glTexCoordPointer(2, GL_FLOAT,sizeof(Vertex),&meshes[i]->vertices.data()->texture);
+        glNormalPointer(GL_FLOAT, sizeof(Vertex), &meshes[i]->vertices.data()->normal);
+
+
+        glVertexPointer(3, GL_FLOAT, sizeof(Vertex), &meshes[i]->vertices.data()->position);
+        glDrawArrays(GL_TRIANGLES, 0, meshes[i]->vertices.size());
+
+        //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_LIGHTING);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisableClientState(GL_NORMAL_ARRAY);
+        glEnableClientState(GL_COLOR_ARRAY);
+
+    }
+
+    GLfloat materialAmbient[]= { 0.2f, 0.2f, 0.2f, 1.0f }; // Значения фонового света ( НОВОЕ )
+    GLfloat materialDiffuse[]= { 0.8f, 0.8f, 0.8f, 1.0f }; // Значения диффузного света ( НОВОЕ )
+    GLfloat materialSpecular[]= { 0.0f, 0.0f, 0.0f, 1.0f };
+
+
+    glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDiffuse);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
+    glMaterialf(GL_FRONT, GL_SHININESS, 0.0f);
+
+    glEndList();
+    figureList = id;
+    qDebug() << "figureList:" << figureList;
+    return id;
+}
+
+void RoadElementOBJ::setList(GLuint id)
+{
+    figureList = id;
 }
 
 
@@ -620,6 +630,6 @@ std::vector<vec3> RoadElementOBJ::getCoordOfControl(int index)
     return res;
 }
 
-void RoadElementOBJ::setCoordForControl(int index, std::vector<vec3> &controls)
+void RoadElementOBJ::setCoordForControl(int, std::vector<vec3>&)
 {
 }

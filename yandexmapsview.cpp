@@ -10,11 +10,12 @@ YandexMapsView::YandexMapsView(QWidget *parent)
     :QWebView(parent)
 {
     setObjectName("YandexMaps");
-    load(QUrl::fromLocalFile(QApplication::applicationDirPath() + "/index.html"));
+    load(QUrl::fromLocalFile(QApplication::applicationDirPath() + "/yandex.html"));
     this->page()->settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
     scaleStep = 1.0f;
     scaleFactor = 1.0f;
     scaleCounter = 0;
+    active = true;
 }
 
 void YandexMapsView::setLogging(bool status)

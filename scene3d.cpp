@@ -19,7 +19,7 @@ Scene3D::Scene3D(QWidget *parent, QGLWidget* shared) : QGLWidget(parent, shared)
     leftButtonIsPressed = false;
     rightButtonIsPressed = false;
     middleButtonIsPressed = false;
-
+    firstTime = true;
 }
 
 Scene3D::~Scene3D()
@@ -99,6 +99,7 @@ void Scene3D::getProperties(QFormLayout *layout)
             Logger::getLogger()->errorLog() << "Scene3D::getProperties(QFormLayout *layout) layout = NULL\n";
         QApplication::exit(0);
     }
+    firstTime = true;
     this->layout = layout;
     while(layout->count() > 0)
     {
@@ -222,7 +223,7 @@ void Scene3D::mousePressEvent(QMouseEvent *pe)
     }
 }
 
-void Scene3D::mouseReleaseEvent(QMouseEvent *pe)
+void Scene3D::mouseReleaseEvent(QMouseEvent *)
 {
     if (log)
     Logger::getLogger()->infoLog() << "Scene3D::mouseReleaseEvent(QMouseEvent *pe)\n";
@@ -290,12 +291,12 @@ void Scene3D::initializeGL()
     glEnable(GL_DEPTH_TEST);
     glShadeModel(GL_SMOOTH);
     glEnable(GL_CULL_FACE);
-    //glCullFace (GL_FRONT_AND_BACK);
-    //glEnable(GL_FRONT_AND_BACK);
-    //glFrontFace (GL_CW);
+    glEnable(GL_ALPHA_TEST);
     glEnable(GL_BLEND);
     glEnable(GL_MULTISAMPLE);
+
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glEnable(GL_NORMALIZE);
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_COLOR_ARRAY);
@@ -375,6 +376,11 @@ void Scene3D::paintGL()
 {
     if (log)
     Logger::getLogger()->infoLog() << "Scene3D::paintGL()\n";
+    if (firstTime)
+    {
+        resizeGL(width(), height());
+        firstTime = false;
+    }
     glClearColor(0.9, 0.9, 0.9, 1);
     //qglClearColor(backgroundColor);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

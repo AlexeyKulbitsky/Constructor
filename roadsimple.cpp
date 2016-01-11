@@ -2624,7 +2624,7 @@ void RoadSimple::addLine()
         Logger::getLogger()->infoLog() << "RoadSimple::addLine()\n";
     //qDebug() << "Add line";
     QString textSource;
-    float lWidth;
+    float lWidth = 0.0f;
     switch(lineType)
     {
     case 0:
@@ -2760,7 +2760,10 @@ void RoadSimple::deleteLine()
     if (!b) return;
     ////qDebug() << "delete line " << b->text();
     int i = b->text().toInt() - 1;
-    lines.remove(i);
+
+    RoadElement::undoStack->push(new DeleteLineCommand(this, lines[i], render));
+
+    //lines.remove(i);
 
     for (int i = 0; i < lines.size(); ++i)
     {
@@ -2970,6 +2973,7 @@ bool RoadSimple::setFixed(bool fixed)
         Logger::getLogger()->infoLog() << "RoadSimple::setFixed(bool fixed)"
                                        << " fixed = " << fixed << "\n";
     this->fixed = fixed;
+    return true;
 }
 
 
@@ -3158,7 +3162,7 @@ std::vector<vec3> RoadSimple::getCoordOfControl(int index)
                 break;
             }
         }
-        for (int j = 0; j < lines[i].line->getCoordOfControl(index).size(); ++j)
+        for (unsigned j = 0; j < lines[i].line->getCoordOfControl(index).size(); ++j)
         {
             res.push_back(lines[i].line->getCoordOfControl(index)[j]);
         }
@@ -3361,7 +3365,7 @@ QString RoadSimple::getName()
 }
 
 
-void RoadSimple::rotate(float angle, float x, float y, float z)
+void RoadSimple::rotate(float angle, float x, float y, float )
 {
     float tx = 0.0f, ty = 0.0f;
     x1 -= x;

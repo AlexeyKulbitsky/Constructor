@@ -166,7 +166,7 @@ void Arch::drawSelectionFrame()
         drawControlElement(i, 5.0f, 10.0f);
 }
 
-void Arch::drawMeasurements(QGLWidget *render)
+void Arch::drawMeasurements(QGLWidget *)
 {
 }
 
@@ -190,7 +190,7 @@ void Arch::move(float dx, float dy, float dz)
     elementY += dy;
 }
 
-void Arch::drawControlElement(int index, float lineWidth, float pointSize)
+void Arch::drawControlElement(int index, float, float pointSize)
 {
     switch(index)
     {
@@ -217,12 +217,12 @@ void Arch::drawControlElement(int index, float lineWidth, float pointSize)
     }
 }
 
-QCursor Arch::getCursorForControlElement(int index)
+QCursor Arch::getCursorForControlElement(int)
 {
     return Qt::CrossCursor;
 }
 
-void Arch::resizeByControl(int index, float dx, float dy, float x, float y)
+void Arch::resizeByControl(int index, float dx, float dy, float, float)
 {
     if (fixed)
         return;
@@ -317,7 +317,7 @@ int Arch::controlsForPoint()
     return 1;
 }
 
-void Arch::changeColorOfSelectedControl(int index)
+void Arch::changeColorOfSelectedControl(int)
 {
 }
 
@@ -477,7 +477,8 @@ void Arch::setWidth(double value)
         }
         count++;
     }
-    rotate(rotation, elementX, elementY, 0.0f);
+    float pi = 3.14159265f;
+    rotate(rotation * pi / 180.0f, elementX, elementY, 0.0f);
     emit widthChanged(width);
 }
 
@@ -571,7 +572,8 @@ void Arch::setHeight(double value)
         }
         count++;
     }
-    rotate(rotation, elementX, elementY, 0.0f);
+    float pi = 3.14159265f;
+    rotate(rotation * pi / 180.0f, elementX, elementY, 0.0f);
     emit heightChanged(value);
 }
 
@@ -654,7 +656,8 @@ void Arch::setZ(double value)
         }
         count++;
     }
-    rotate(rotation, elementX, elementY, 0.0f);
+    float pi = 3.14159265f;
+    rotate(rotation * pi / 180.0f, elementX, elementY, 0.0f);
     emit zChanged(value);
 }
 
@@ -681,13 +684,13 @@ void Arch::clearProperties(QLayout *layout)
 }
 
 
-std::vector<vec3> Arch::getCoordOfControl(int index)
+std::vector<vec3> Arch::getCoordOfControl(int)
 {
     std::vector<vec3> res;
     return res;
 }
 
-void Arch::setCoordForControl(int index, std::vector<vec3> &controls)
+void Arch::setCoordForControl(int, std::vector<vec3>&)
 {
 }
 

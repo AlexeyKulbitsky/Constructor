@@ -183,6 +183,7 @@ public:
     virtual int controlsForPoint() = 0;
     virtual void changeColorOfSelectedControl(int index) = 0;
     virtual QString getName();
+    virtual void setName(const QString& name) { this->name = name; }
     virtual QJsonObject getJSONInfo();
     virtual void getProperties(QFormLayout* layout, QGLWidget* render = 0) = 0;
     virtual void clearProperties(QLayout* layout);
@@ -210,10 +211,11 @@ public:
                                     float& x, float& y);
     virtual float calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4);
     virtual float calculateAngle(vec3 v1, vec3 v2);
+    virtual unsigned int getSize() { return sizeof(*this); }
 
 public slots:
     virtual bool setFixed(bool fixed) = 0;
-    virtual setShowMeasurements(bool status);
+    virtual void setShowMeasurements(bool status);
 
 protected:
     QString name;

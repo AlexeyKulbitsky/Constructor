@@ -11,19 +11,19 @@ MapPlane::MapPlane(GLfloat width, GLfloat height, QString &texture)
     this->height = height;
     vertexArray[0][0] = -width / 2.0f;
     vertexArray[0][1] = -height / 2.0f;
-    vertexArray[0][2] = 0.0f;
+    vertexArray[0][2] = -0.02f;
 
     vertexArray[1][0] = -width / 2.0f;
     vertexArray[1][1] = height / 2.0f;
-    vertexArray[1][2] = 0.0f;
+    vertexArray[1][2] = -0.02f;
 
     vertexArray[2][0] = width / 2.0f;
     vertexArray[2][1] = height / 2.0f;
-    vertexArray[2][2] = 0.0f;
+    vertexArray[2][2] = -0.02f;
 
     vertexArray[3][0] = width / 2.0f;
     vertexArray[3][1] = -height / 2.0f;
-    vertexArray[3][2] = 0.0f;
+    vertexArray[3][2] = -0.02f;
 
     textureID = TextureManager::getInstance()->getID(texture);
 
@@ -133,9 +133,13 @@ void MapPlane::setSelectedStatus(bool status)
     selected = status;
 }
 
-void MapPlane::drawFigure(QGLWidget *render)
+void MapPlane::drawFigure(QGLWidget *)
 {
+    glDisable(GL_LIGHTING);
+    glDisableClientState(GL_COLOR_ARRAY);
     glEnable(GL_TEXTURE_2D);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
     glBindTexture(GL_TEXTURE_2D, textureID);
     glBegin(GL_QUADS);
     for (int i = 3; i >= 0; --i)
@@ -144,31 +148,33 @@ void MapPlane::drawFigure(QGLWidget *render)
         glVertex3f(vertexArray[i][0], vertexArray[i][1], vertexArray[i][2]);
     }
     glEnd();
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisable(GL_TEXTURE_2D);
+    glEnableClientState(GL_COLOR_ARRAY);
 }
 
 void MapPlane::drawSelectionFrame()
 {
 }
 
-void MapPlane::drawMeasurements(QGLWidget *render)
+void MapPlane::drawMeasurements(QGLWidget *)
 {
 }
 
-void MapPlane::move(float dx, float dy, float dz)
+void MapPlane::move(float, float, float)
 {
 }
 
-void MapPlane::drawControlElement(int index, float lineWidth, float pointSize)
+void MapPlane::drawControlElement(int, float, float)
 {
 }
 
-QCursor MapPlane::getCursorForControlElement(int index)
+QCursor MapPlane::getCursorForControlElement(int)
 {
     return Qt::CrossCursor;
 }
 
-void MapPlane::resizeByControl(int index, float dx, float dy, float x, float y)
+void MapPlane::resizeByControl(int, float, float, float, float)
 {
 }
 
@@ -182,11 +188,11 @@ int MapPlane::controlsForPoint()
     return 1;
 }
 
-void MapPlane::changeColorOfSelectedControl(int index)
+void MapPlane::changeColorOfSelectedControl(int)
 {
 }
 
-void MapPlane::getProperties(QFormLayout *layout, QGLWidget *render)
+void MapPlane::getProperties(QFormLayout *, QGLWidget *)
 {
 }
 

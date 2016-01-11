@@ -543,7 +543,7 @@ void StepDialog::setEndStep(double step)
     emit endStepChanged(step);
 }
 
-void StepDialog::changeGroupBox(int index)
+void StepDialog::changeGroupBox(int)
 {
 
 }

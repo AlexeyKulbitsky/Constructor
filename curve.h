@@ -39,6 +39,8 @@ public:
     virtual int getLayer();
     virtual void clear();
 
+    void setDescirption(const QString& desc);
+
     void setVertexArray();
     void setTextureArray();
     void setIndexArray();
@@ -113,24 +115,13 @@ private:
     QGLWidget* render;
 
     bool right;
+    QString description;
     // RoadElement interface
 public:
     virtual std::vector<vec3> getCoordOfControl(int index);
-
-    // RoadElement interface
-public:
     virtual RoadElement *getCopy();
-
-    // RoadElement interface
-public:
     virtual void setCoordForControl(int index, std::vector<vec3> &controls);
-
-    // RoadElement interface
-public:
     virtual void clearProperties(QLayout *layout);
-
-    // RoadElement interface
-public:
     virtual QJsonObject getJSONInfo();
 };
 

@@ -12,10 +12,10 @@ public:
     VoltageLine();
     VoltageLine(float* axisArray, int size, float width = 0.01f,
                 QString name = "VoltageLine",
-                int layer = 1);
+                int layer = 2);
     VoltageLine(QVector<float> &axisArray, float width = 0.01f,
                 QString name = "VoltageLine",
-                int layer = 1);
+                int layer = 2);
     VoltageLine(const VoltageLine& source);
     virtual ~VoltageLine();
     // RoadElement interface

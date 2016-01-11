@@ -43,8 +43,8 @@ public:
     // FileManager interface
 public:
     virtual ~OBJFileManager();
-    virtual bool openFile(QString source);
-    virtual bool saveFile(QString source);
+    virtual bool openFile(QString);
+    virtual bool saveFile(QString);
     void readVertexInfo();
     void readIndexInfo();
     float *calculateNormals(int a, int b, int c);

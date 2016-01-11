@@ -37,6 +37,7 @@ ObjectsList::ObjectsList(QWidget *parent)
     //this->addItem("Куб");
     this->addItem("Рекламный щит");
     this->addItem("П-образная арка");
+    this->addItem("Камера");
 }
 
 ObjectsList::ObjectsList(QString folder, QString fileType, QWidget *parent)
@@ -48,7 +49,6 @@ ObjectsList::ObjectsList(QString folder, QString fileType, QWidget *parent)
     for (int i = 0; i < list.size(); ++i)
         this->addItem(list.at(i));
     filePath = folder;
-    //qDebug() << filePath;
 }
 
 void ObjectsList::dropEvent(QDropEvent *event)
@@ -108,12 +108,12 @@ void ObjectsList::resetObjects()
     QStringList list(directory.entryList(QStringList() << fileType));
     for (int i = 0; i < list.size(); ++i)
         this->addItem(list.at(i));
-    filePath = directory.absolutePath();
+    //filePath = directory.absolutePath();
 }
 
 
 
-void ObjectsList::mouseReleaseEvent(QMouseEvent *event)
+void ObjectsList::mouseReleaseEvent(QMouseEvent *)
 {
     /*
     if (event->button() == Qt::LeftButton)

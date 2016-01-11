@@ -199,17 +199,8 @@ public slots:
     // RoadElement interface
 public:
     virtual void clearProperties(QLayout *layout);
-
-    // RoadElement interface
-public:
     virtual void deleteLine(RoadElement *line);
-
-    // RoadElement interface
-public:
     virtual RoadElement *getCopy();
-
-    // RoadElement interface
-public:
     virtual void setCoordForControl(int index, std::vector<vec3> &controls);
 };
 

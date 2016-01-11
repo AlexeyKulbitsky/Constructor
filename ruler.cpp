@@ -269,7 +269,7 @@ void Ruler::setSelectedStatus(bool status)
     selected = status;
 }
 
-void Ruler::drawFigure(QGLWidget *render)
+void Ruler::drawFigure(QGLWidget *)
 {
     if (log)
         Logger::getLogger()->infoLog() << "Ruler::drawFigure(QGLWidget *render)\n";
@@ -378,7 +378,7 @@ void Ruler::drawMeasurements(QGLWidget *render)
     render->renderText (wx + 5, wy - 5, QString("%1").arg(r, 0, 'f', 2));
 }
 
-void Ruler::move(float dx, float dy, float dz)
+void Ruler::move(float , float , float )
 {
     //    if (log)
     //        Logger::getLogger()->infoLog() << "Ruler::move(float dx, float dy, float dz)"
@@ -479,7 +479,7 @@ void Ruler::changeColorOfSelectedControl(int index)
     indexOfSelectedControl = index;
 }
 
-void Ruler::getProperties(QFormLayout *layout, QGLWidget *render)
+void Ruler::getProperties(QFormLayout *, QGLWidget *)
 {
 }
 
@@ -524,6 +524,7 @@ bool Ruler::setFixed(bool fixed)
         Logger::getLogger()->infoLog() << "Ruler::setFixed(bool fixed)"
                                        << " fixed = " << fixed << "\n";
     this->fixed = fixed;
+    return true;
 }
 
 

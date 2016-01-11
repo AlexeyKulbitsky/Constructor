@@ -429,7 +429,7 @@ void Cube::setSelectedStatus(bool status)
     selected = status;
 }
 
-void Cube::drawFigure(QGLWidget *render)
+void Cube::drawFigure(QGLWidget *)
 {
 
     glEnableClientState(GL_NORMAL_ARRAY);
@@ -480,11 +480,11 @@ void Cube::drawSelectionFrame()
         drawControlElement(i, 5.0f, 10.f);
 }
 
-void Cube::drawMeasurements(QGLWidget *render)
+void Cube::drawMeasurements(QGLWidget *)
 {
 }
 
-void Cube::move(float dx, float dy, float dz)
+void Cube::move(float dx, float dy, float)
 {
     for (int i = 0; i < vertexArray.size() / 3; ++i)
     {
@@ -616,12 +616,12 @@ void Cube::drawControlElement(int index, float lineWidth, float pointSize)
     }
 }
 
-QCursor Cube::getCursorForControlElement(int index)
+QCursor Cube::getCursorForControlElement(int)
 {
     return Qt::CrossCursor;
 }
 
-void Cube::resizeByControl(int index, float dx, float dy, float x, float y)
+void Cube::resizeByControl(int index, float dx, float dy, float, float)
 {
     switch(index)
     {
@@ -896,7 +896,7 @@ int Cube::controlsForPoint()
     return 4;
 }
 
-void Cube::changeColorOfSelectedControl(int index)
+void Cube::changeColorOfSelectedControl(int)
 {
 }
 
@@ -1102,7 +1102,7 @@ void Cube::clearProperties(QLayout *layout)
 }
 
 
-void Cube::rotate(float angle, float x, float y, float z)
+void Cube::rotate(float angle, float x, float y, float)
 {
     for (int i = 0; i < vertexArray.size() / 3; ++i)
     {
@@ -1125,12 +1125,12 @@ void Cube::setColor(float red, float green, float blue)
 }
 
 
-std::vector<vec3> Cube::getCoordOfControl(int index)
+std::vector<vec3> Cube::getCoordOfControl(int)
 {
     std::vector<vec3> res;
     return res;
 }
 
-void Cube::setCoordForControl(int index, std::vector<vec3> &controls)
+void Cube::setCoordForControl(int, std::vector<vec3>&)
 {
 }

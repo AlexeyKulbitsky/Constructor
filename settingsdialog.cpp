@@ -655,7 +655,7 @@ void SettingsDialog::saveLogTreeSettings()
 void SettingsDialog::loadLogTreeSettings()
 {
     settings->beginGroup("/Settings/Logging/Tree");
-    bool checked;
+    bool checked = false;
     Qt::CheckState state;
     QTreeWidgetItemIterator it(ui->logTreeWidget);
     while (*it)

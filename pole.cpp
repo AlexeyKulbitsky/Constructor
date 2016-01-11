@@ -77,7 +77,7 @@ Pole::Pole(float x1, float y1, float z1, float x2, float y2, float z2, float dia
     vec3 v1(dx1, dy1, dz1);
     vec3 v2(dx2, dy2, dz2);
     float angle = calculateAngle(v1, v2);
-    float pi = 3.14159265f;
+    //float pi = 3.14159265f;
     float cos_a = cosf(angle / 2.0f);
     float sin_a = sinf(angle / 2.0f);
     float X = x * sin_a;
@@ -175,7 +175,7 @@ void Pole::setSelectedStatus(bool status)
     selected = status;
 }
 
-void Pole::drawFigure(QGLWidget *render)
+void Pole::drawFigure(QGLWidget *)
 {
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnable(GL_LIGHTING);
@@ -201,7 +201,7 @@ void Pole::drawSelectionFrame()
     drawControlElement(0, 5.0f, 10.0f);
 }
 
-void Pole::drawMeasurements(QGLWidget *render)
+void Pole::drawMeasurements(QGLWidget *)
 {
 }
 
@@ -225,7 +225,7 @@ void Pole::move(float dx, float dy, float dz)
     z2 += dz;
 }
 
-void Pole::drawControlElement(int index, float lineWidth, float pointSize)
+void Pole::drawControlElement(int index, float, float pointSize)
 {
     switch (index)
     {
@@ -243,12 +243,12 @@ void Pole::drawControlElement(int index, float lineWidth, float pointSize)
     }
 }
 
-QCursor Pole::getCursorForControlElement(int index)
+QCursor Pole::getCursorForControlElement(int)
 {
     return Qt::CrossCursor;
 }
 
-void Pole::resizeByControl(int index, float dx, float dy, float x, float y)
+void Pole::resizeByControl(int, float, float, float, float)
 {
 }
 
@@ -481,7 +481,7 @@ QJsonObject Pole::getJSONInfo()
 }
 
 
-void Pole::rotate(float angle, float x, float y, float z)
+void Pole::rotate(float angle, float x, float y, float)
 {
     for (int i = 0; i < vertexArray.size() / 3; ++i)
     {

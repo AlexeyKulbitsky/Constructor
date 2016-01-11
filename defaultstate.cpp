@@ -1,6 +1,7 @@
 #include "defaultstate.h"
 #include "objfilemanager.h"
 #include "_3dsfilemanager.h"
+#include "roadelementmanager.h"
 #include <QApplication>
 #include <GL/glu.h>
 
@@ -165,6 +166,11 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
                         }
                         else
                         {
+                            if ((*it)->getName() == "Camera")
+                            {
+                                Camera* camera = qobject_cast<Camera*>(*it);
+                                camera->setCamera(stateManager->camera);
+                            }
                             stateManager->selectedState->setSelectedElement(selectedIndex, selectedGroup);
                             stateManager->selectedState->setSelectedElement(*it);
                             stateManager->setState(stateManager->selectedState);
@@ -215,6 +221,11 @@ void DefaultState::mouseReleaseEvent(QMouseEvent *pe)
                             }
                             else
                             {
+                                if ((*it)->getName() == "Camera")
+                                {
+                                    Camera* camera = qobject_cast<Camera*>(*it);
+                                    camera->setCamera(stateManager->camera);
+                                }
                                 stateManager->selectedState->setSelectedElement(selectedIndex, selectedGroup);
                                 stateManager->selectedState->setSelectedElement(*it);
                                 stateManager->setState(stateManager->selectedState);
@@ -399,6 +410,8 @@ void DefaultState::dropEvent(QDropEvent *event)
         {
             intersection = new Intersection(x, y, numberOfRoads);
             intersection->setModel(model);
+            qDebug() << "Size of Intersection in self:" << intersection->getSize();
+            qDebug() << "Size of Intersection:" << sizeof(*intersection);
             RoadElement::undoStack->push(new InsertCommand(intersection, stateManager, properties, model, 0, scene));
         }
         return;
@@ -571,7 +584,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[5] = 1.0f;
         VoltageLine* line = new VoltageLine(axis, 6);
         line->setModel(model);
-        RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, 1, scene));
+        RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, 2, scene));
         return;
     }
     if (s == "Двойной провод")
@@ -585,7 +598,7 @@ void DefaultState::dropEvent(QDropEvent *event)
         axis[5] = 1.0f;
         DoubleVoltageLine* line = new DoubleVoltageLine(axis, 6);
         line->setModel(model);
-        RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, 1, scene));
+        RoadElement::undoStack->push(new InsertCommand(line, stateManager, properties, model, 2, scene));
         return;
     }
     if (s == "Столб")
@@ -642,6 +655,13 @@ void DefaultState::dropEvent(QDropEvent *event)
         RoadElement::undoStack->push(new InsertCommand(arch, stateManager, properties, model, 2, scene));
         return;
     }
+    if (s == "Камера")
+    {
+        Camera* camera = new Camera(x, y, stateManager->camera);
+        camera->setModel(model);
+        RoadElement::undoStack->push(new InsertCommand(camera, stateManager, properties, model, 3, scene));
+        scene->updateGL();
+    }
     else
     {
 
@@ -662,21 +682,34 @@ void DefaultState::dropEvent(QDropEvent *event)
         else
             if (lst.at(1)[lst.at(1).size() - 1] == 'j')
             {
-
                 RoadElementOBJ* element = new RoadElementOBJ(x, y, lst.at(0),lst.at(1));
-                stateManager->fileManagerOBJ->loadOBJ(QApplication::applicationDirPath() + lst.at(0),
-                                     lst.at(1),
-                                     element->meshes,2.374f, element->scaleFactor);
-
+                qDebug() << "OBJ element created";
+                int listId = RoadElementManager::getInstance()->getElementID(lst.at(1));
+                if (listId < 0)
+                {
+                    stateManager->fileManagerOBJ->loadOBJ(QApplication::applicationDirPath() + lst.at(0),
+                                         lst.at(1),
+                                         element->meshes,2.374f, element->scaleFactor);
+                    GLuint id = element->generateList();
+                    RoadElementManager::getInstance()->setID(lst.at(1), id);
+                }
+                else
+                {
+                    element->setList(listId);
+                    qDebug() << "Existing id is gotten from Manager:" << listId;
+                }
+                RoadElementManager::getInstance()->addReference(lst.at(1));
                 element->setModel(model);
                 RoadElement::undoStack->push(new InsertCommand(element, stateManager, properties, model, element->getLayer(), scene));
             }
         else
             if (lst.at(1)[lst.at(1).size() - 1] == 'n')
             {
+                qDebug() << "Read JSON";
                 RoadElement* element = NULL;
-                QString source = lst.at(0) + lst.at(1);
-                element = stateManager->fileManagerJSON->readElementFromFile(QApplication::applicationDirPath() + source);
+                QString source = QApplication::applicationDirPath() + lst.at(0) + lst.at(1);
+                qDebug() << "FileName" << source;
+                element = stateManager->fileManagerJSON->readElementFromFile(source);
                 if (element)
                 {
                     float dx = x - element->getElementX();
@@ -687,304 +720,6 @@ void DefaultState::dropEvent(QDropEvent *event)
             }
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /*
-
-         else
-         else
-
-
-    if (s == "Куб")
-    {
-        model->getGroup(2).push_back(new Cube(x, y, 1.0f, 2.0f, "Cube", 2));
-        model->setModified(true);
-    } else
-    if (s == "Audi Q7")
-    {
-        RoadElementOBJ* element = new RoadElementOBJ(x, y);
-
-       stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/audi_q7/").toStdString().c_str(),"audi_q7.obj",
-                             element->meshes,2.177f, element->scaleFactor, 2);
-       element->setModel(model);
-        model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-        model->setModified(true);
-
-    } else
-    if (s == "BMW M3")
-    {
-        RoadElementOBJ* element = new RoadElementOBJ(x, y);
-        stateManager->fileManagerOBJ->loadOBJ(QApplication::applicationDirPath() + "/models/cars/bmw_m3/","bmw_m3.obj",
-                             element->meshes,1.976f, element->scaleFactor, 2);
-        //fileManager->loadOBJ("models/cars/","bmw_m3.obj",
-        //                     element->meshes,2.177f, element->scaleFactor);
-        element->setModel(model);
-        model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-        element->setSelectedStatus(false);
-        model->setModified(true);
-    } else
-            if (s == "ВАЗ-2104")
-            {
-                RoadElementOBJ* element = new RoadElementOBJ(x, y);
-                stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/vaz_2104/").toStdString().c_str(),"vaz_2104.obj",
-                                     element->meshes,1.74f, element->scaleFactor);
-                //fileManager->loadOBJ("models/cars/","vaz_2104.obj",
-                //                     element->meshes,1.74f, element->scaleFactor);
-               element->setModel(model);
-                model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-                model->setModified(true);
-            } else
-    if (s == "ВАЗ-2106")
-    {
-        RoadElementOBJ* element = new RoadElementOBJ(x, y);
-        stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/VAZ_2106/").toStdString().c_str(),"VAZ_2106.obj",
-                             element->meshes,1.74f, element->scaleFactor, 1);
-        //fileManager->loadOBJ("models/cars/","VAZ_2106.obj",
-        //                     element->meshes,1.74f, element->scaleFactor);
-        element->setModel(model);
-        model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-        model->setModified(true);
-    } else
-        if (s == "Dodge_Ram_2007")
-        {
-            RoadElementOBJ* element = new RoadElementOBJ(x, y);
-            stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/Dodge_Ram_2007/").toStdString().c_str(),"Dodge_Ram_2007.obj",
-                                 element->meshes,2.022f, element->scaleFactor);
-            //fileManager->loadOBJ("models/cars/","Dodge_Ram_2007.obj",
-            //                     element->meshes,1.74f, element->scaleFactor);
-           element->setModel(model);
-            model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-            model->setModified(true);
-        } else
-                if (s == "Автобус ПАЗ")
-                {
-                    RoadElementOBJ* element = new RoadElementOBJ(x, y);
-                    stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/PAZ_1/").toStdString().c_str(),"PAZ_1.obj",
-                                         element->meshes,2.5f, element->scaleFactor, 1);
-                    //fileManager->loadOBJ("models/cars/","PAZ_1.obj",
-                    //                     element->meshes,1.74f, element->scaleFactor);
-                    element->setModel(model);
-                    model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-                    model->setModified(true);
-                } else
-    if (s == "Микроавтобус Ford")
-    {
-        RoadElementOBJ* element = new RoadElementOBJ(x, y);
-        stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/ford_transit_bus/").toStdString().c_str(),"ford_transit_bus.obj",
-                             element->meshes,2.374f, element->scaleFactor);
-        //fileManager->loadOBJ("models/cars/","ford_transit_bus.obj",
-        //                     element->meshes,1.74f, element->scaleFactor);
-        element->setModel(model);
-        model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-        model->setModified(true);
-    } else
-    if (s == "Грузовик Ford")
-    {
-        RoadElementOBJ* element = new RoadElementOBJ(x, y);
-        stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/ford_transit_1/").toStdString().c_str(),"ford_transit_1.obj",
-                             element->meshes,2.374f, element->scaleFactor);
-        //fileManager->loadOBJ("models/cars/","ford_transit_1.obj",
-        //                     element->meshes,1.74f, element->scaleFactor);
-        element->setModel(model);
-        model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-        model->setModified(true);
-    } else
-        if (s == "DAF XF")
-        {
-            RoadElementOBJ* element = new RoadElementOBJ(x, y);
-            stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/DAF_xf/").toStdString().c_str(),"DAF_XF.obj",
-                                 element->meshes,3.374f, element->scaleFactor);
-            //fileManager->loadOBJ("models/cars/","ford_transit_1.obj",
-            //                     element->meshes,1.74f, element->scaleFactor);
-            element->setModel(model);
-            model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-            model->setModified(true);
-        } else
-    if (s == "Остановка")
-    {
-        RoadElementOBJ* element = new RoadElementOBJ(x, y);
-        stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/cars/bus_stop_1/").toStdString().c_str(),"bus_stop_1.obj",
-                             element->meshes,2.374f, element->scaleFactor);
-        element->setModel(model);
-        model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-        model->setModified(true);
-    } else
-        if (s == "Человек")
-        {
-            RoadElementOBJ* element = new RoadElementOBJ(x, y);
-            stateManager->fileManagerOBJ->loadOBJ("D:/QT/Projects/Constructor/build-Constructor-Desktop_Qt_5_4_1_MinGW_32bit-Debug/debug/","man.obj",
-                                 element->meshes,2.374f, element->scaleFactor);
-            element->setModel(model);
-            model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-            model->setModified(true);
-        } else
-    /*
-    if (s == "Знак")
-    {
-        OBJFileManager* fileManager = new OBJFileManager(model);
-        RoadElement3D* element = new RoadElement3D();
-        fileManager->loadOBJ("D:/QT/Projects/Constructor/build-Constructor-Desktop_Qt_5_4_1_MinGW_32bit-Debug/debug/","city_bump2.obj",
-                             element->meshes,2.374f, element->scaleFactor);
-        model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-        model->setModified(true);
-    }
-    */
-
-
-
-    /*
-            if (s == "Здание 1")
-            {
-                RoadElementOBJ* element = new RoadElementOBJ(x, y);
-                stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/buildings/build10/").toStdString().c_str(),"Build10_obj.obj",
-                                     element->meshes,50.374f, element->scaleFactor);
-               element->setModel(model);
-                model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-                model->setModified(true);
-            }
-    else
-                if (s == "Здание 2")
-                {
-                    RoadElementOBJ* element = new RoadElementOBJ(x, y);
-                    stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/buildings/build11/").toStdString().c_str(),"Build11_obj.obj",
-                                         element->meshes,2.374f, element->scaleFactor);
-                    element->setModel(model);
-                    model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-                    model->setModified(true);
-                }
-        else
-                    if (s == "Дерево 1")
-                    {
-                        RoadElementOBJ* element = new RoadElementOBJ(x, y);
-                        stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/humans/man/").toStdString().c_str(),"Man.obj",
-                                             element->meshes,2.374f, element->scaleFactor);
-                        element->setModel(model);
-                        model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-                        model->setModified(true);
-                    }
-            else
-                        if (s == "Дерево 2")
-                        {
-                            RoadElementOBJ* element = new RoadElementOBJ(x, y);
-                            stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/plants/tree2/").toStdString().c_str(),"Tree2.obj",
-                                                 element->meshes,2.374f, element->scaleFactor);
-                            element->setModel(model);
-                            model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-                            model->setModified(true);
-                        }
-                else
-                            if (s == "Дерево 3")
-                            {
-                                RoadElement3D* element = new RoadElement3D(x, y);
-                                stateManager->fileManager3DS->load3DS((QApplication::applicationDirPath() + "/models/plants/BlackLocust/").toStdString().c_str(),
-                                                     "black_locust1.3ds",
-                                                     element->meshes,element->materials);
-                                element->setModel(model);
-                                element->setSelectedStatus(true);
-                                model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-                                model->setModified(true);
-                            }
-                    else
-    if (s == "Знак")
-    {
-        RoadElement3D* element = new RoadElement3D(x, y);
-        stateManager->fileManager3DS->load3DS("D:/QT/Projects/Constructor/build-Constructor-Desktop_Qt_5_4_1_MinGW_32bit-Debug/debug/","road60m_15left_barrier.3ds",
-                             element->meshes,element->materials);
-        element->setSelectedStatus(true);
-        element->setModel(model);
-        model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-        model->setModified(true);
-    }else
-        if (s == "Здание")
-        {
-            RoadElementOBJ* element = new RoadElementOBJ(x, y);
-            stateManager->fileManagerOBJ->loadOBJ((QApplication::applicationDirPath() + "/models/buildings/").toStdString().c_str(),"Bld_02.obj",
-                                 element->meshes,0.0f, element->scaleFactor);
-            element->setModel(model);
-            element->scaleFactor = 1.0f;
-            model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-            model->setModified(true);
-        }
-    /*
-    else
-    {
-        _3DsFileManager* fileManager = new _3DsFileManager();
-        RoadElement3D* element = new RoadElement3D();
-        fileManager->load3DS("D:/3ds/elements/",s.toStdString().c_str(), element->meshes,element->materials);
-        element->setSelectedStatus(true);
-        model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-        model->setModified(true);
-    }
-    */
-    //QString(event->mimeData()->data());
-
-    /*
-    else
-    {
-
-        QStringList lst =  QString(event->mimeData()->data("text/plain")).split(' ');
-        for (int i = 0; i < lst.size(); ++i)
-        {
-            //qDebug() << lst.at(i);
-        }
-        if (lst.at(1)[lst.at(1).size() - 1] == 's')
-        {
-
-            RoadElement3D* element = new RoadElement3D(x, y);
-            stateManager->fileManager3DS->load3DS(lst.at(0).toStdString().c_str(),
-                                 lst.at(1).toStdString().c_str(),
-                                 element->meshes,
-                                 element->materials);
-
-            element->setModel(model);
-            model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-            model->setModified(true);
-            element->setSelectedStatus(false);
-
-        }
-        else
-            if (lst.at(1)[lst.at(1).size() - 1] == 'j')
-            {
-                /*
-                RoadElementOBJ* element = new RoadElementOBJ(x, y);
-                stateManager->fileManagerOBJ->loadOBJ(lst.at(0).toStdString().c_str(),
-                                     lst.at(1).toStdString().c_str(),
-                                     element->meshes,2.374f, element->scaleFactor);
-                element->setModel(model);
-                element->scaleFactor = 1.0f;
-                model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-                model->setModified(true);
-                element->setSelectedStatus(false);
-                */
-    /*
-                RoadElementOBJ* element = new RoadElementOBJ(x, y);
-                stateManager->fileManagerOBJ->loadOBJ(lst.at(0),
-                                     lst.at(1),
-                                     element->meshes,2.374f, element->scaleFactor);
-                element->setModel(model);
-                model->getGroup(model->getNumberOfGroups() - 1).push_back(element);
-                model->setModified(true);
-                element->setSelectedStatus(false);
-            }
-        ////qDebug() << lst.at(1)[lst.at(1).size() - 1];
-        ////qDebug() << s.toStdString().c_str();
-
-
-    }
-
-*/
-    //scene->updateGL();
 }
 
 DefaultState::~DefaultState()
@@ -1017,6 +752,7 @@ void DefaultState::clearProperties(QFormLayout *layout)
 
 bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
 {
+    (void)withResult;
     if (log)
         Logger::getLogger()->infoLog() << "DefaultState::tryToSelectFigures(QPoint mp, bool withResult)\n";
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
@@ -1055,19 +791,23 @@ bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
     int i = 1;
     for (int j = model->getNumberOfGroups() - 2; j >= 0; --j)
     {
-        for (QList<RoadElement*>::iterator it = model->getGroup(j).begin();
-             it != model->getGroup(j).end(); ++it)
+        if (model->isGroupVisible(j))
         {
-            glPushMatrix();
-            glScalef(nSca, nSca, nSca);
-            gluLookAt(xDelta,yDelta,0.5,
-                      xDelta,yDelta,-10,
-                      0,1,0);
-            glLoadName(i++); // загрузить имя на вершину стека имён
-            (*it)->drawFigure();
-            glPopMatrix();
+            for (QList<RoadElement*>::iterator it = model->getGroup(j).begin();
+                 it != model->getGroup(j).end(); ++it)
+            {
+                glPushMatrix();
+                glScalef(nSca, nSca, nSca);
+                gluLookAt(xDelta,yDelta,0.5,
+                          xDelta,yDelta,-10,
+                          0,1,0);
+                glLoadName(i++); // загрузить имя на вершину стека имён
+                (*it)->drawFigure();
+                glPopMatrix();
 
+            }
         }
+
     }
 
     hitsForFigure=glRenderMode(GL_RENDER); // число совпадений и переход в режим рисования
@@ -1081,19 +821,22 @@ bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
         i = selectBuffer[3] - 1; // имя фигуры верхняя фигура
         for (int j = model->getNumberOfGroups() - 2; j >= 0; --j)
         {
-            if (i < model->getGroup(j).size())
+            if (model->isGroupVisible(j))
             {
+                if (i < model->getGroup(j).size())
+                {
 
-                selectedGroup = j;
-                selectedIndex = i;
-                glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
-                glPopMatrix(); // извлечь матрицу из стека матриц
-                scene->updateGL(); // обновить изображение
-                return true;
-            }
-            else
-            {
-                i -= model->getGroup(j).size();
+                    selectedGroup = j;
+                    selectedIndex = i;
+                    glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
+                    glPopMatrix(); // извлечь матрицу из стека матриц
+                    scene->updateGL(); // обновить изображение
+                    return true;
+                }
+                else
+                {
+                    i -= model->getGroup(j).size();
+                }
             }
         }
     }
@@ -1107,6 +850,7 @@ bool DefaultState::tryToSelectFigures(QPoint mp, bool withResult)
 
 bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
 {
+    (void)withResult;
     if (log)
         Logger::getLogger()->infoLog() << "DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)\n";
     GLfloat ratio = scene->ratio; // отношение высоты окна виджета к его ширине
@@ -1148,18 +892,21 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
     int i = 1;
     for (int j = model->getNumberOfGroups() - 2; j >= 0; --j)
     {
-        for (QList<RoadElement*>::iterator it = model->getGroup(j).begin();
-             it != model->getGroup(j).end(); ++it)
+        if (model->isGroupVisible(j))
         {
-            glPushMatrix();
-            glScalef(nSca, nSca, nSca);
-            gluLookAt(xDelta,yDelta,0.5,
-                      xDelta,yDelta,-10,
-                      0,1,0);
-            glLoadName(i++); // загрузить имя на вершину стека имён
-            (*it)->drawFigure();
-            glPopMatrix();
+            for (QList<RoadElement*>::iterator it = model->getGroup(j).begin();
+                 it != model->getGroup(j).end(); ++it)
+            {
+                glPushMatrix();
+                glScalef(nSca, nSca, nSca);
+                gluLookAt(xDelta,yDelta,0.5,
+                          xDelta,yDelta,-10,
+                          0,1,0);
+                glLoadName(i++); // загрузить имя на вершину стека имён
+                (*it)->drawFigure();
+                glPopMatrix();
 
+            }
         }
     }
 
@@ -1177,19 +924,22 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
             i = selectBuffer[3] - 1; // имя фигуры верхняя фигура
             for (int j = model->getNumberOfGroups() - 2; j >= 0; --j)
             {
-                if (i < model->getGroup(j).size())
+                if (model->isGroupVisible(j))
                 {
+                    if (i < model->getGroup(j).size())
+                    {
 
-                    selectedGroup = j;
-                    selectedIndex = i;
-                    glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
-                    glPopMatrix(); // извлечь матрицу из стека матриц
-                    scene->updateGL(); // обновить изображение
-                    return true;
-                }
-                else
-                {
-                    i -= model->getGroup(j).size();
+                        selectedGroup = j;
+                        selectedIndex = i;
+                        glMatrixMode(GL_PROJECTION); // матрица проекции стала активной
+                        glPopMatrix(); // извлечь матрицу из стека матриц
+                        scene->updateGL(); // обновить изображение
+                        return true;
+                    }
+                    else
+                    {
+                        i -= model->getGroup(j).size();
+                    }
                 }
             }
         }
@@ -1200,20 +950,23 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
                 i = selectBuffer[hitNumber * 4 - 1] - 1; // имя фигуры верхняя фигура
                 for (int j = model->getNumberOfGroups() - 2; j >= 0; --j)
                 {
-                    if (i < model->getGroup(j).size())
+                    if (model->isGroupVisible(j))
                     {
-                        selectedGroup = j;
-                        selectedIndex = i;
-                        QList<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
-                        for(int k = 0; k < selectedIndex; ++k)
-                            ++it;
-                        (*it)->setSelectedStatus(true);
-                        stateManager->selectedState->selectedElements.push_back(*it);
-                        break;
-                    }
-                    else
-                    {
-                        i -= model->getGroup(j).size();
+                        if (i < model->getGroup(j).size())
+                        {
+                            selectedGroup = j;
+                            selectedIndex = i;
+                            QList<RoadElement*>::iterator it = model->getGroup(selectedGroup).begin();
+                            for(int k = 0; k < selectedIndex; ++k)
+                                ++it;
+                            (*it)->setSelectedStatus(true);
+                            stateManager->selectedState->selectedElements.push_back(*it);
+                            break;
+                        }
+                        else
+                        {
+                            i -= model->getGroup(j).size();
+                        }
                     }
                 }
             }
@@ -1240,7 +993,7 @@ bool DefaultState::tryToSelectFigures(QPoint mp1, QPoint mp2, bool withResult)
 }
 
 
-void DefaultState::keyReleaseEvent(QKeyEvent *pe)
+void DefaultState::keyReleaseEvent(QKeyEvent*)
 {
     if (log)
         Logger::getLogger()->infoLog() << "DefaultState::keyReleaseEvent(QKeyEvent *pe)\n";
@@ -1304,12 +1057,12 @@ void DefaultState::getWorldCoord(double x, double y, double z, double &wx, doubl
     glGetIntegerv(GL_VIEWPORT,viewport);
     glGetDoublev(GL_MODELVIEW_MATRIX,mvmatrix);
     glGetDoublev(GL_PROJECTION_MATRIX,projmatrix);
-    y - viewport[3]-y;
+    y = viewport[3] - y;
     gluUnProject(x, y, z, mvmatrix, projmatrix, viewport, &wx, &wy, &wz);
 }
 
 
-void DefaultState::contextMenuEvent(QContextMenuEvent *pe)
+void DefaultState::contextMenuEvent(QContextMenuEvent *)
 {
     if (log)
         Logger::getLogger()->infoLog() << "DefaultState::contextMenuEvent(QContextMenuEvent *pe)\n";

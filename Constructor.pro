@@ -63,7 +63,10 @@ SOURCES += main.cpp\
     billboard.cpp \
     arch.cpp \
     mapplane.cpp \
-    osmview.cpp
+    osmview.cpp \
+    camera.cpp \
+    roadelementmanager.cpp \
+    cameraview.cpp
 
 
 
@@ -119,7 +122,10 @@ HEADERS  += mainwindow.h\
     billboard.h \
     arch.h \
     mapplane.h \
-    osmview.h
+    osmview.h \
+    camera.h \
+    roadelementmanager.h \
+    cameraview.h
 
 ##LIBS += -LC:/OpenSSL-Win64 -llibeay32 -llibssl32
 

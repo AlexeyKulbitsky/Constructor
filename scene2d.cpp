@@ -5,8 +5,10 @@
 #include <QImage>
 #include "yandexmapsview.h"
 #include "googlemapsview.h"
+#include "osmview.h"
 #include <QColorDialog>
 #include <QFileDialog>
+#include <QProgressDialog>
 
 bool Scene2D::log = true;
 
@@ -14,6 +16,8 @@ GLint viewport[4]; // декларируем матрицу поля просм�
 
 Scene2D::Scene2D(QWidget* parent) : QGLWidget(parent), widget(0)
 {
+    firstTime = true;
+    delay = 0;
     widgetWidth = widgetHeight = 1.0f;
     scaleImage = false;
     fixedScale = false;
@@ -44,6 +48,8 @@ Scene2D::Scene2D(QWidget* parent) : QGLWidget(parent), widget(0)
 
 Scene2D::Scene2D(QSettings *settings, QWidget *parent) : QGLWidget(parent)
 {
+    firstTime = true;
+    delay = 0;
     widgetWidth = widgetHeight = 1.0f;
     scaleImage = false;
     fixedScale = false;
@@ -131,38 +137,12 @@ void Scene2D::paintGL()
     if (log)
         Logger::getLogger()->infoLog() << "Scene2D::paintGL()\n";
 
+    if (firstTime)
+    {
+        resizeGL(width(), height());
+        firstTime = false;
+    }
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    //    if (showMaps && sceneActive)
-    //    {
-    ////        if (!scaleImage)
-    ////        {
-    ////            widgetImage = QImage(widget->size(),QImage::Format_RGBA8888);
-    ////            widget->render(&widgetImage);
-    ////            widgetImage = QGLWidget::convertToGLFormat(widgetImage);
-    ////        }
-
-
-    //        int w = widget->width();
-    //        int h = widget->height();
-    //        widget->resize(w * 2, h * 2);
-    //        //QTimer timer;
-    //        //timer.setInterval(1000 * 10);
-    //        //timer.start();
-    //        //Sleep(10000);
-
-    //        widgetImage = QImage(widget->size(),QImage::Format_RGBA8888);
-    //        widget->render(&widgetImage);
-    //        widget->resize(w, h);
-    //        QString fileName = QFileDialog::getSaveFileName(this, tr("Save Document"), QApplication::applicationDirPath(), tr("JSON files (*.jpg)") );
-    //        widgetImage.save(fileName);
-
-    //        //widgetImage = QGLWidget::convertToGLFormat(widgetImage);
-    //        //glDisable(GL_DEPTH_TEST);
-    //        //glDrawPixels(widgetImage.width(), widgetImage.height(), GL_RGBA, GL_UNSIGNED_BYTE, widgetImage.bits());
-    //        //glEnable(GL_DEPTH_TEST);
-    //    }
-
     drawModel();
 }
 
@@ -379,7 +359,7 @@ void Scene2D::defaultScene()
 
 
 
-void Scene2D::getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz)
+void Scene2D::getWindowCoord(double, double, double, double&, double&, double&)
 {
     /*
     Logger::getLogger()->writeLog("Scene2D::getWindowCoord");
@@ -437,6 +417,7 @@ void Scene2D::drawAxis()
     glVertex3f( 0.0f,  0.0f, -1.0f);
     glEnd();
     glEnable(GL_DEPTH_TEST);
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void Scene2D::drawRect(QPoint p1, QPoint p2)
@@ -478,7 +459,6 @@ void Scene2D::drawRect(QPoint p1, QPoint p2)
     glEnd();
     glEnable(GL_LIGHTING);
     glEnable(GL_DEPTH_TEST);
-    ////qDebug() << "drawRect";
 }
 
 void Scene2D::dragEnterEvent(QDragEnterEvent* event)
@@ -536,7 +516,7 @@ void Scene2D::drawGrid()
             glEnd();
         }
     }
-    ////qDebug() << "Draw grid";
+    glEnable(GL_LIGHTING);
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -578,6 +558,12 @@ void Scene2D::setModel(Model *model)
 
 }
 
+void Scene2D::setCamera(CameraView *camera)
+{
+    stateManager->camera = camera;
+    stateManager->fileManagerJSON->setCameraView(camera);
+}
+
 
 void Scene2D::setProperties(QFormLayout *properties)
 {
@@ -595,12 +581,11 @@ void Scene2D::setProperties(QFormLayout *properties)
 
 }
 
-void Scene2D::drawBackground(QPainter *painter)
+void Scene2D::drawBackground(QPainter*)
 {
     //painter->setPen(Qt::NoPen);
     //painter->setBrush(gradient);
     //painter->drawRect(rect());
-
 }
 
 void Scene2D::setDrawRectStatus(bool status)
@@ -651,35 +636,35 @@ void Scene2D::drawModel()
 
     glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);    // Установка Фонового Света
     glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);
+    glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT1);
     glScalef(nSca, nSca, nSca);
-
-
 
     gluLookAt(xDelta,yDelta,0.5,
               xDelta,yDelta,-10,
               0,1,0);
-    //    if (drawSubstrateStatus)
-    //        drawSubstrate();
-    glDisable(GL_LIGHTING);
-    glDisable(GL_DEPTH_TEST);
-    for (int i = 0; i < model->getGroup(model->getNumberOfGroups() - 1).size(); ++i)
-    {
-        model->getGroup(model->getNumberOfGroups() - 1)[i]->drawFigure(this);
-    }
-    glEnable(GL_DEPTH_TEST);
+
     glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT1);
+
+    // Отрисовка спутниковой подложки
+    if (model->isGroupVisible(model->getNumberOfGroups() - 1))
+    {
+        for (int i = 0; i < model->getGroup(model->getNumberOfGroups() - 1).size(); ++i)
+        {
+            model->getGroup(model->getNumberOfGroups() - 1)[i]->drawFigure(this);
+        }
+    }
+
+    // Отрисовка координатной сетки
     drawGrid();
+    // Отрисовка осей
     drawAxis();
-    // Установка Диффузного Света
 
-    //glEnable(GL_LIGHTING);
-    //glEnable(GL_LIGHT1);
-
-
+    // Отрисовка моделей, кроме спутника
     if (model)
     {
-        for (int i =  0; i < model->getNumberOfGroups(); ++i)
+        for (int i =  0; i < model->getNumberOfGroups() - 1; ++i)
         {
             if (model->isGroupVisible(i) == true)
             {
@@ -692,9 +677,9 @@ void Scene2D::drawModel()
 
         }
     }
-    ////////////////////////////
 
-    for (int i =  0; i < model->getNumberOfGroups(); ++i)
+    // Отрисвока размеров (все, кроме линейки и спутниковой подложки)
+    for (int i =  0; i < model->getNumberOfGroups() - 2; ++i)
     {
         if (model->isGroupVisible(i) == true)
         {
@@ -711,12 +696,12 @@ void Scene2D::drawModel()
         }
 
     }
-    /////////////////////////////
-    int count = model->getNumberOfGroups();
-    if (model->isGroupVisible(count - 1) == true)
+    // Отрисовка линейки
+    int count = model->getNumberOfGroups() - 2;
+    if (model->isGroupVisible(count) == true)
     {
-        for(QList<RoadElement*>::iterator it = model->getGroup(count - 1).begin();
-            it != model->getGroup(count - 1).end(); ++it)
+        for(QList<RoadElement*>::iterator it = model->getGroup(count).begin();
+            it != model->getGroup(count).end(); ++it)
         {
             if ((*it)->getName() == "Ruler")
                 (*it)->drawMeasurements(this);
@@ -724,11 +709,8 @@ void Scene2D::drawModel()
     }
 
 
-    //shrift = QFont("Times", 15, QFont::Black);
-    // renderText (ptrMousePosition.x(), ptrMousePosition.y(), "HELLO", shrift);
-
-    //glDisable(GL_LIGHT1);
-    //glDisable(GL_LIGHTING);
+    glDisable(GL_LIGHT1);
+    glDisable(GL_LIGHTING);
 
     if (drawRectStatus == true)
         drawRect(rectPoint1, rectPoint2);
@@ -963,65 +945,89 @@ void Scene2D::setWidgetHeightScaleFactor(double factor)
     setWidgetHeight(int(h));
 }
 
+void Scene2D::setDelay(int seconds)
+{
+    if (delay == seconds)
+        return;
+    delay = seconds;
+    emit delayChanged(seconds);
+}
+
 void Scene2D::saveImage()
 {
+    QProgressDialog progress("Захват карты...", "Отменить", 0, 4);
+    progress.setCancelButton(0);
+    progress.setWindowModality(Qt::WindowModal);
+    progress.show();
     int w = widget->width();
     int h = widget->height();
+
+    progress.setValue(0);
     widget->resize(widgetWidth, widgetHeight);
-    //qDebug() << "widgetWidth" << widgetWidth;
-    //qDebug() << "widgetHeight" << widgetHeight;
-    //QTimer timer;
-    //timer.setInterval(1000 * 10);
-    //timer.start();
-    //Sleep(10000);
-    //QString fileName = QFileDialog::getSaveFileName(this, tr("Save Document"), QApplication::applicationDirPath(), tr("JSON files (*.jpg)") );
+    progress.setValue(1);
+    qSleep(delay * 1000);
     widgetImage = QImage(widget->size(),QImage::Format_RGB32);
+    progress.setValue(2);
     if (widget->objectName() == "YandexMaps")
     {
         YandexMapsView* yandex = qobject_cast<YandexMapsView*>(widget);
         yandex->setActive(false);
         widget->render(&widgetImage);
         float dx = float(widgetImage.width());
-        qDebug() << "Width (px) : " << dx;
         float dy = float(widgetImage.height());
-        qDebug() << "Height (px) : " << dy;
         float r = yandex->getDiagonal();
         float s = sqrt(dx * dx + dy * dy);
-        qDebug() << "Diagonal (px) : " << s;
-        qDebug() << "Diagonal (m) : " << r;
         float factor = r / s;
         float w = dx * factor;
         float h = dy * factor;
         MapPlane *mapPlane = new MapPlane(w, h, widgetImage);
         model->getGroup(mapPlane->getLayer()).push_back(mapPlane);
         yandex->setActive(true);
+        progress.setValue(3);
     }
     else
-    if (widget->objectName() == "GoogleMaps")
-    {
-        GoogleMapsView* google = qobject_cast<GoogleMapsView*>(widget);
-        google->setActive(false);
-        widget->render(&widgetImage);
-        float dx = float(widgetImage.width());
-        qDebug() << "Width (px) : " << dx;
-        float dy = float(widgetImage.height());
-        qDebug() << "Height (px) : " << dy;
-        float r = google->getDiagonal();
-        float s = sqrt(dx * dx + dy * dy);
-        qDebug() << "Diagonal (px) : " << s;
-        qDebug() << "Diagonal (m) : " << r;
-        float factor = r / s;
-        float w = dx * factor;
-        float h = dy * factor;
-        MapPlane *mapPlane = new MapPlane(w, h, widgetImage);
-        model->getGroup(mapPlane->getLayer()).push_back(mapPlane);
-        //QString fileName = QFileDialog::getSaveFileName(this, tr("Save Document"), QApplication::applicationDirPath(), tr("JSON files (*.jpg)") );
-        //widgetImage.save(fileName);
-        google->setActive(true);
-    }
+        if (widget->objectName() == "GoogleMaps")
+        {
+            GoogleMapsView* google = qobject_cast<GoogleMapsView*>(widget);
+            google->setActive(false);
+            widget->render(&widgetImage);
+            float dx = float(widgetImage.width());
+            float dy = float(widgetImage.height());
+            float r = google->getDiagonal();
+            float s = sqrt(dx * dx + dy * dy);
+            float factor = r / s;
+            float w = dx * factor;
+            float h = dy * factor;
+            MapPlane *mapPlane = new MapPlane(w, h, widgetImage);
+            model->getGroup(mapPlane->getLayer()).push_back(mapPlane);
+            google->setActive(true);
+            progress.setValue(3);
+        }
+        else
+            if (widget->objectName() == "OSM")
+            {
+                OSMview *osm = qobject_cast<OSMview*>(widget);
+                widget->render(&widgetImage);
+                float dx = float(widgetImage.width());
+                float dy = float(widgetImage.height());
+                float r = osm->getDiagonal();
+                float s = sqrt(dx * dx + dy * dy);
+                float factor = r / s;
+                float w = dx * factor;
+                float h = dy * factor;
+                MapPlane *mapPlane = new MapPlane(w, h, widgetImage);
+                model->getGroup(mapPlane->getLayer()).push_back(mapPlane);
+                progress.setValue(3);
+            }
     widget->resize(w, h);
+    progress.setValue(4);
+}
 
-    //widgetImage.save(fileName);
+void Scene2D::qSleep(int msec)
+{
+    QEventLoop loop;
+    QTimer::singleShot(msec, &loop, SLOT(quit()));
+    loop.exec();
 }
 
 
@@ -1107,6 +1113,7 @@ void Scene2D::getProperties(QFormLayout *layout)
             Logger::getLogger()->errorLog() << "Scene2D::getProperties(QFormLayout *layout) layout = NULL\n";
         QApplication::exit(0);
     }
+    firstTime = true;
     //disconnect(stepDialog, 0, this, 0);
     while(layout->count() > 0)
     {
@@ -1121,6 +1128,11 @@ void Scene2D::getProperties(QFormLayout *layout)
     scaleSpinBox->setValue(nSca);
     connect(scaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setScale(double)));
     connect(this, SIGNAL(scaleChanged(double)), scaleSpinBox, SLOT(setValue(double)));
+    scaleSpinBox->setToolTip("Изменение текущего мастаба");
+//    QLabel *scaleLabel = new QLabel("Масштаб");
+//    QHBoxLayout *scaleLayout = new QHBoxLayout();
+//    scaleLayout->addWidget(scaleLabel);
+//    scaleLayout->addWidget(scaleSpinBox);
 
     QDoubleSpinBox* scaleStepSpinBox = new QDoubleSpinBox();
     scaleStepSpinBox->setMinimum(0.0);
@@ -1128,6 +1140,11 @@ void Scene2D::getProperties(QFormLayout *layout)
     scaleStepSpinBox->setValue(scaleStep);
     connect(scaleStepSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setScaleStep(double)));
     connect(this, SIGNAL(scaleStepChanged(double)), scaleStepSpinBox, SLOT(setValue(double)));
+    scaleStepSpinBox->setToolTip("Изменение шага масштабирования при прокручивании колесом мыши");
+//    QLabel *scaleStepLabel = new QLabel("Шаг масштабирования");
+//    QHBoxLayout *scaleStepLayout = new QHBoxLayout();
+//    scaleStepLayout->addWidget(scaleStepLabel);
+//    scaleStepLayout->addWidget(scaleStepSpinBox);
 
     QDoubleSpinBox* gridStepSpinBox = new QDoubleSpinBox();
     gridStepSpinBox->setMinimum(0.0);
@@ -1136,13 +1153,21 @@ void Scene2D::getProperties(QFormLayout *layout)
     gridStepSpinBox->setValue(gridStep);
     connect(gridStepSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setGridStep(double)));
     connect(this, SIGNAL(gridStepChanged(double)), gridStepSpinBox, SLOT(setValue(double)));
-
+    gridStepSpinBox->setToolTip("Изменение шага координатной сетки");
+//    QLabel *gridStepLabel = new QLabel("Шаг сетки (м)");
+//    QHBoxLayout *gridStepLayout = new QHBoxLayout();
+//    gridStepLayout->addWidget(gridStepLabel);
+//    gridStepLayout->addWidget(gridStepSpinBox);
 
     QComboBox* mapsTypeComboBox = new QComboBox();
     mapsTypeComboBox->addItem("Яндекс.Карты");
     mapsTypeComboBox->addItem("Google Maps");
     mapsTypeComboBox->addItem("OpenStreetMaps");
     connect(mapsTypeComboBox, SIGNAL(activated(int)), this, SLOT(setMapType(int)));
+//    QLabel *mapsTypeLabel = new QLabel("Ресурс карт");
+//    QHBoxLayout *mapsTypeLayout = new QHBoxLayout();
+//    mapsTypeLayout->addWidget(mapsTypeLabel);
+//    mapsTypeLayout->addWidget(mapsTypeComboBox);
 
 
     QSpinBox* widthSpinBox = new QSpinBox();
@@ -1151,6 +1176,11 @@ void Scene2D::getProperties(QFormLayout *layout)
     connect(widthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setWidgetWidth(int)));
     connect(this, SIGNAL(widgetWidthChanged(int)), widthSpinBox, SLOT(setValue(int)));
     widthSpinBox->setValue(width());
+    widthSpinBox->setToolTip("Ширина захватываемого участка карты");
+//    QLabel *widthLabel = new QLabel("Ширина слоя (пикс)");
+//    QHBoxLayout *widthLayout = new QHBoxLayout();
+//    widthLayout->addWidget(widthLabel);
+//    widthLayout->addWidget(widthSpinBox);
 
     QSpinBox* heightSpinBox = new QSpinBox();
     heightSpinBox->setMinimum(0);
@@ -1158,12 +1188,43 @@ void Scene2D::getProperties(QFormLayout *layout)
     connect(heightSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setWidgetHeight(int)));
     connect(this, SIGNAL(widgetHeightChanged(int)), heightSpinBox, SLOT(setValue(int)));
     heightSpinBox->setValue(height());
+    heightSpinBox->setToolTip("Высота захватываемого участка карты");
+//    QLabel *height = new QLabel("Высота слоя (пикс)");
+//    QHBoxLayout *heightLayout = new QHBoxLayout();
+//    heightLayout->addWidget(height);
+//    heightLayout->addWidget(heightSpinBox);
+
+    QSpinBox *delaySpinBox = new QSpinBox();
+    delaySpinBox->setMinimum(0);
+    delaySpinBox->setMaximum(1000);
+    connect(delaySpinBox, SIGNAL(valueChanged(int)), this, SLOT(setDelay(int)));
+    connect(this, SIGNAL(delayChanged(int)), delaySpinBox, SLOT(setValue(int)));
+    delaySpinBox->setValue(delay);
+    delaySpinBox->setToolTip("Пауза выставляется для случаев, когда Вы хотите захватить большой участок карты (который больше участка, отображаемого на экране).\nЭто нужно для того, чтобы изображение нужного размера подгрузилось перед его захватом.\nКонкретные значения паузы зависят от размера захватываемого участка карты и скорости соединения с сетью.");
+//    QLabel *delayLabel = new QLabel("Пауза (сек)");
+//    QHBoxLayout *delayLayout = new QHBoxLayout();
+//    delayLayout->addWidget(delayLabel);
+//    delayLayout->addWidget(delaySpinBox);
 
     QPushButton* saveImageButton = new QPushButton();
     connect(saveImageButton, SIGNAL(clicked(bool)), this, SLOT(saveImage()));
+//    QLabel *saveLabel = new QLabel("Захват карты");
+//    QHBoxLayout *saveLayout = new QHBoxLayout();
+//    saveLayout->addWidget(saveLabel);
+//    saveLayout->addWidget(saveImageButton);
 
     QRadioButton* mapsOnTopRadioButton = new QRadioButton();
+//    QLabel *mapsOnTopLabel = new QLabel("Активная карта");
+//    QHBoxLayout *mapsOnTopLayout = new QHBoxLayout();
+//    mapsOnTopLayout->addWidget(mapsOnTopLabel);
+//    mapsOnTopLayout->addWidget(mapsOnTopRadioButton);
+
     QRadioButton* sceneOnTopRadioButton = new QRadioButton();
+//    QLabel *sceneOnTopLabel = new QLabel("Активная сцена");
+//    QHBoxLayout *sceneOnTopLayout = new QHBoxLayout();
+//    sceneOnTopLayout->addWidget(sceneOnTopLabel);
+//    sceneOnTopLayout->addWidget(sceneOnTopRadioButton);
+
     connect(sceneOnTopRadioButton, SIGNAL(toggled(bool)), gridStepSpinBox, SLOT(setEnabled(bool)));
     connect(sceneOnTopRadioButton, SIGNAL(toggled(bool)), scaleSpinBox, SLOT(setEnabled(bool)));
     connect(sceneOnTopRadioButton, SIGNAL(toggled(bool)), scaleStepSpinBox, SLOT(setEnabled(bool)));
@@ -1171,22 +1232,39 @@ void Scene2D::getProperties(QFormLayout *layout)
     connect(sceneOnTopRadioButton, SIGNAL(toggled(bool)), heightSpinBox, SLOT(setDisabled(bool)));
     connect(sceneOnTopRadioButton, SIGNAL(toggled(bool)), saveImageButton, SLOT(setDisabled(bool)));
     connect(sceneOnTopRadioButton, SIGNAL(toggled(bool)), mapsTypeComboBox, SLOT(setDisabled(bool)));
-
+    connect(sceneOnTopRadioButton, SIGNAL(toggled(bool)), delaySpinBox, SLOT(setDisabled(bool)));
     connect(sceneOnTopRadioButton, SIGNAL(toggled(bool)), this, SLOT(setSceneActive(bool)));
-    sceneOnTopRadioButton->toggle();
+    if (sceneActive)
+        sceneOnTopRadioButton->toggle();
+    else
+        mapsOnTopRadioButton->toggle();
+
+    //layout->setSpacing(1);
+//    layout->addLayout(scaleLayout);
+//    layout->addLayout(scaleStepLayout);
+//    layout->addLayout(gridStepLayout);
+//    layout->addLayout(mapsTypeLayout);
+//    layout->addLayout(sceneOnTopLayout);
+//    layout->addLayout(mapsOnTopLayout);
+//    layout->addLayout(widthLayout);
+//    layout->addLayout(heightLayout);
+//    layout->addLayout(delayLayout);
+//    layout->addLayout(saveLayout);
+//    layout->addStretch();
 
 
     layout->addRow("Масштаб", scaleSpinBox);
     layout->addRow("Шаг масштабирования", scaleStepSpinBox);
-    layout->addRow("Шаг сетки", gridStepSpinBox);
+    layout->addRow("Шаг сетки (м)", gridStepSpinBox);
     layout->addRow("Ресурс карт", mapsTypeComboBox);
     layout->addRow("Активная сцена", sceneOnTopRadioButton);
     layout->addRow("Активная карта", mapsOnTopRadioButton);
-    layout->addRow("Ширина слоя", widthSpinBox);
-    layout->addRow("Высота слоя", heightSpinBox);
+    layout->addRow("Ширина слоя (пикс)", widthSpinBox);
+    layout->addRow("Высота слоя (пикс)", heightSpinBox);
     //layout->addRow("Увеличение ширины", widgetWidthScaleFactorSpinBox);
     //layout->addRow("Увеличение высоты", widgetHeightScaleFactorSpinBox);
-    layout->addRow("Сохранить слой", saveImageButton);
+    layout->addRow("Пауза (сек)", delaySpinBox);
+    layout->addRow("Захват карты", saveImageButton);
 }
 
 void Scene2D::setShowMapsStatus(bool status)
@@ -1212,6 +1290,8 @@ void Scene2D::setSceneActive(bool status)
     if (log)
         Logger::getLogger()->infoLog() << "Scene2D::setSceneActive(bool status)"
                                        << " status = " << status << "\n";
+    if (sceneActive == status)
+        return;
     sceneActive = status;
     int index = -1;
     if (sceneActive)

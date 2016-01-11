@@ -18,9 +18,9 @@ public:
 public:
     virtual bool isSelected();
     virtual void setSelectedStatus(bool status);
-    virtual void drawFigure(QGLWidget *render);
+    virtual void drawFigure(QGLWidget *);
     virtual void drawSelectionFrame();
-    virtual void drawMeasurements(QGLWidget *render);
+    virtual void drawMeasurements(QGLWidget *);
     virtual void move(float dx, float dy, float dz);
     virtual void drawControlElement(int index, float lineWidth, float pointSize);
     virtual QCursor getCursorForControlElement(int index);
@@ -28,7 +28,7 @@ public:
     virtual int getNumberOfControls();
     virtual int controlsForPoint();
     virtual void changeColorOfSelectedControl(int index);
-    virtual void getProperties(QFormLayout *layout, QGLWidget *render);
+    virtual void getProperties(QFormLayout *layout, QGLWidget *);
     virtual bool isFixed();
     virtual int getLayer();
     virtual void clear();

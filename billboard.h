@@ -32,9 +32,9 @@ public:
     virtual int getLayer();
     virtual void clear();
     virtual RoadElement *getCopy();
-    setZRotVertexArray();
-    setZRotColorArray(float r, float g, float b);
-    setZRotIndexArray();
+    void setZRotVertexArray();
+    void setZRotColorArray(float r, float g, float b);
+    void setZRotIndexArray();
 
 signals:
     void widthChanged(double value);

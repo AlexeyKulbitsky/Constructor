@@ -11,15 +11,16 @@ _3DsFileManager::~_3DsFileManager()
 }
 
 
-bool _3DsFileManager::openFile(QString source)
+bool _3DsFileManager::openFile(QString)
 {
-
+    return true;
 }
 
 
 
-bool _3DsFileManager::saveFile(QString source)
+bool _3DsFileManager::saveFile(QString)
 {
+    return true;
 }
 
 bool _3DsFileManager::load3DS(const char *folder, const char *filename, std::vector<Mesh_3DS *> &meshes, QMap<QString, Material> &materials)
@@ -27,8 +28,8 @@ bool _3DsFileManager::load3DS(const char *folder, const char *filename, std::vec
     //Mesh_3DS* mesh = new Mesh_3DS();
 
     unsigned char ch;
-    unsigned short qty;
-    unsigned short faceFlags;
+    //unsigned short qty;
+    //unsigned short faceFlags;
 
     fileFolder = folder;
     char fullPath[1024];
@@ -210,7 +211,7 @@ int _3DsFileManager::getTextures(QString textureSource)
         return -1;
     image1 = QGLWidget::convertToGLFormat(image1);
     glGenTextures(1, &textureID);
-    if (textureID < 0)
+    if (textureID <= 0)
         return -1;
     // создаём и связываем 1-ый текстурный объект с последующим состоянием текстуры
     glBindTexture(GL_TEXTURE_2D, textureID);
@@ -375,9 +376,9 @@ bool _3DsFileManager::readMaterial(FILE *file, Material &material, unsigned int 
 
 bool _3DsFileManager::readObject(FILE *file, Mesh_3DS *mesh, unsigned int bytesRead)
 {
-    unsigned char ch;
+    //unsigned char ch;
     unsigned short qty;
-    unsigned short faceFlags;
+    //unsigned short faceFlags;
 
     unsigned short int chunkID;          // ID chunk-а
     unsigned int chunkLength;

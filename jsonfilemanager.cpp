@@ -2,6 +2,7 @@
 #include <QProgressDialog>
 #include <QApplication>
 #include "yandexmapsview.h"
+#include "roadelementmanager.h"
 
 JSONFileManager::JSONFileManager(Model *model)
 {
@@ -9,11 +10,17 @@ JSONFileManager::JSONFileManager(Model *model)
     timer.setInterval(1000 * 60 * 5);
     connect(&timer, SIGNAL(timeout()), &timer, SLOT(start()));
     connect(&timer, SIGNAL(timeout()), this, SLOT(autoSaveFile()));
+    cameraView = NULL;
 }
 
 JSONFileManager::~JSONFileManager()
 {
+    
+}
 
+void JSONFileManager::setCameraView(CameraView *camera)
+{
+    cameraView = camera;   
 }
 
 
@@ -98,6 +105,12 @@ bool JSONFileManager::openFile(QString source)
             else
             if (name == "MapPlane")
                 element = readMapPlane(obj);
+            else
+            if (name == "CompositeRoad")
+                element = readCompositeRoad(obj);
+            else
+            if (name == "Camera")
+                element = readCamera(obj);
 //            else
 //            if (name == "YandexMaps")
 //            {
@@ -221,6 +234,7 @@ RoadElement *JSONFileManager::readElementFromFile(QString source)
             RoadElement* element = NULL;
             QJsonObject obj = ar[i].toObject();
             QString name = obj["Name"].toString();
+            qDebug() << "Name: " << name;
             if (name == "RoadSimple" ||
                 name == "Crosswalk")
                 element = readRoadSimple(obj);
@@ -276,12 +290,18 @@ RoadElement *JSONFileManager::readElementFromFile(QString source)
             else
             if (name == "MapPlane")
                 element = readMapPlane(obj);
+            else
+            if (name == "CompositeRoad")
+                element = readCompositeRoad(obj);
+            else
+            if (name == "Camera")
+                element = readCamera(obj);
             elements.push_back(element);
         }
         progress.setValue(ar.size());
         file.close();
         RoadElement* result = NULL;
-        if (elements.size() > 1)
+        if (elements.size() >= 1)
         {
             CompositeRoad* road = new CompositeRoad();
             for (int i = 0; i < elements.size(); ++i)
@@ -289,10 +309,6 @@ RoadElement *JSONFileManager::readElementFromFile(QString source)
                 road->addElement(elements[i]);
             }
             result = road;
-        }
-        else
-        {
-            result = elements[0];
         }
         return result;
     }
@@ -623,6 +639,37 @@ CompositeRoad* JSONFileManager::readCompositeRoad(QJsonObject &obj)
         else
         if (name == "RoadElementOBJ")
             element = readRoadElementOBJ(obj);
+        else
+        if (name == "Intersection")
+            element = readIntersection(obj);
+        else
+        if (name == "RoadElementOBJ")
+            element = readRoadElementOBJ(obj);
+        else
+        if (name == "VoltageLine")
+            element = readVoltageLine(obj);
+        else
+        if (name == "DoubleVoltageLine")
+            element = readDoubleVoltageLine(obj);
+        else
+        if (name == "Pole")
+            element = readPole(obj);
+        else
+        if (name == "Cube")
+            element = readCube(obj);
+        else
+        if (name == "Billboard")
+            element = readBillboard(obj);
+        else
+        if (name == "Arch")
+            element = readArch(obj);
+        else
+        if (name == "MapPlane")
+            element = readMapPlane(obj);
+        else
+        if (name == "Camera")
+            element = readCamera(obj);
+
         road->addElement(element);
     }
 
@@ -884,8 +931,18 @@ RoadElementOBJ *JSONFileManager::readRoadElementOBJ(QJsonObject &obj)
 
     RoadElementOBJ* element = new RoadElementOBJ(x,y,folder,filename);
 
-    OBJFileManager* manager = new OBJFileManager(model);
-    manager->loadOBJ(QApplication::applicationDirPath() + folder,filename, element->meshes, 2.374f, element->scaleFactor);
+    if (RoadElementManager::getInstance()->getElementID(filename) < 0)
+    {
+        OBJFileManager* manager = new OBJFileManager(model);
+        manager->loadOBJ(QApplication::applicationDirPath() + folder,filename, element->meshes, 2.374f, element->scaleFactor);
+        GLuint id = element->generateList();
+        RoadElementManager::getInstance()->setID(filename, id);
+    }
+    else
+    {
+        element->setList(RoadElementManager::getInstance()->getElementID(filename));
+    }
+    RoadElementManager::getInstance()->addReference(filename);
 
     float scaleFactor = obj["ScaleFactor"].toDouble();
     element->setId(Id);
@@ -1059,6 +1116,29 @@ void JSONFileManager::readYandexMaps(QJsonObject &obj)
             yandex->setScaleCounter(scaleCounter);
         }
     }
+}
+
+Camera *JSONFileManager::readCamera(QJsonObject &obj)
+{
+    int Id = obj["Id"].toInt();
+    float x = obj["X"].toDouble();
+    float y = obj["Y"].toDouble();
+    float height = obj["Height"].toDouble();
+    float horizontalAngle = obj["HorizontalAngle"].toDouble();
+    float verticalAngle = obj["VerticalAngle"].toDouble();
+    int sensor = obj["Sensor"].toInt();
+    int lens = obj["Lens"].toInt();
+    float focalLength = obj["FocalLength"].toDouble();
+    QString cameraName = obj["CameraName"].toString();
+    Camera* camera = new Camera(x, y, height,
+                                horizontalAngle, verticalAngle,
+                                sensor, lens, focalLength,
+                                cameraName,
+                                cameraView);
+    camera->setId(Id);
+
+    return camera;
+    
 }
 
 

@@ -116,7 +116,7 @@ ResizeByControlCommand::ResizeByControlCommand(RoadElement* element, int index, 
     this->firstTime = true;
     this->index = index;
     this->scene2D = scene2D;
-    for (int i = 0; i < element->getCoordOfControl(index).size(); ++i)
+    for (unsigned i = 0; i < element->getCoordOfControl(index).size(); ++i)
     {
         vec3 temp = element->getCoordOfControl(index)[i];
         oldPosition.push_back(temp);
@@ -159,7 +159,7 @@ void ResizeByControlCommand::setNewPosition()
 {
     if (log)
         Logger::getLogger()->infoLog() << "ResizeByControlCommand::setNewPosition()\n";
-    for (int i = 0; i < element->getCoordOfControl(index).size(); ++i)
+    for (unsigned i = 0; i < element->getCoordOfControl(index).size(); ++i)
     {
         vec3 temp = element->getCoordOfControl(index)[i];
         newPosition.push_back(temp);
@@ -372,7 +372,7 @@ InsertCommand::InsertCommand(RoadElement *element, StateManager *stateManager, Q
     this->groupIndex = groupIndex;
     this->scene2D = scene2D;
     this->stateManager = stateManager;
-    this->layout - layout;
+    this->layout = layout;
 }
 
 InsertCommand::~InsertCommand()
@@ -381,7 +381,7 @@ InsertCommand::~InsertCommand()
         delete element;
     this->element = NULL;
     this->model = NULL;
-    this->groupIndex = NULL;
+    this->groupIndex = -1;
     this->scene2D = NULL;
 }
 

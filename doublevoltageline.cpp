@@ -85,7 +85,7 @@ void DoubleVoltageLine::drawSelectionFrame()
         drawControlElement(i, 10.0f, 10.0f);
 }
 
-void DoubleVoltageLine::drawMeasurements(QGLWidget *render)
+void DoubleVoltageLine::drawMeasurements(QGLWidget *)
 {
 
 }
@@ -104,7 +104,7 @@ void DoubleVoltageLine::move(float dx, float dy, float dz)
         lines[i]->move(dx, dy, dz);
 }
 
-void DoubleVoltageLine::drawControlElement(int index, float lineWidth, float pointSize)
+void DoubleVoltageLine::drawControlElement(int index, float, float pointSize)
 {
     glDisable(GL_LIGHTING);
     glPointSize(pointSize);
@@ -125,7 +125,7 @@ QCursor DoubleVoltageLine::getCursorForControlElement(int index)
         return Qt::ArrowCursor;
 }
 
-void DoubleVoltageLine::resizeByControl(int index, float dx, float dy, float x, float y)
+void DoubleVoltageLine::resizeByControl(int index, float dx, float dy, float, float)
 {
     if (fixed)
         return;
@@ -144,7 +144,7 @@ int DoubleVoltageLine::controlsForPoint()
     return 1;
 }
 
-void DoubleVoltageLine::changeColorOfSelectedControl(int index)
+void DoubleVoltageLine::changeColorOfSelectedControl(int)
 {
 
 }
@@ -390,6 +390,7 @@ void DoubleVoltageLine::setVertexArray()
 bool DoubleVoltageLine::setFixed(bool fixed)
 {
     this->fixed = fixed;
+    return true;
 }
 
 void DoubleVoltageLine::setWidth(double width)

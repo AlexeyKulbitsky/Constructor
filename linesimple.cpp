@@ -199,19 +199,19 @@ void LineSimple::setVertexArray(float x1, float y1, float x2, float y2, float wi
     }
     VertexArray[0][0]=x1 + dx;
     VertexArray[0][1]=y1 - dy;
-    VertexArray[0][2]=0.001f;
+    VertexArray[0][2]=0.002f;
 
     VertexArray[1][0]=x1 - dx;
     VertexArray[1][1]=y1 + dy;
-    VertexArray[1][2]=0.001f;
+    VertexArray[1][2]=0.002f;
 
     VertexArray[2][0]=x2 - dx;
     VertexArray[2][1]=y2 + dy;
-    VertexArray[2][2]=0.001f;
+    VertexArray[2][2]=0.002f;
 
     VertexArray[3][0]=x2 + dx;
     VertexArray[3][1]=y2 - dy;
-    VertexArray[3][2]=0.001f;
+    VertexArray[3][2]=0.002f;
 
     elementX = (x1 + x2) / 2.0f;
     elementY = (y1 + y2) / 2.0f;
@@ -278,34 +278,11 @@ void LineSimple::setIndexArray()
 }
 
 
-void LineSimple::drawFigure(QGLWidget* render)
+void LineSimple::drawFigure(QGLWidget* )
 {
     if (log)
         Logger::getLogger()->infoLog() << "LineSimple::drawFigure(QGLWidget* render)\n";
-    /*
-    if (selected == true)
-    {
-        if (indexOfSelectedControl >= 0)
-        {
 
-            //glLineWidth(2.0);
-            //glPointSize(5.0);
-            // drawControlElement(indexOfSelectedControl, 2.0, 5.0);
-        }
-        // Если фигуры выбрана - изменяем цвет заливки
-        setColorArray(0.7f, 0.7f, 0.7f, alpha);
-        drawSelectionFrame();
-        // glColor3d(0.3, 0.7, 0.1);
-
-
-    }
-    else
-    {
-        // Если фигуры не выбрана - цвет заливки по умолчанию
-        setColorArray(red, green, blue, alpha);
-
-    }
-    */
     if (!useColor)
     {
         glDisableClientState(GL_COLOR_ARRAY);
@@ -332,7 +309,6 @@ void LineSimple::drawFigure(QGLWidget* render)
     if (selected == true)
     {
         glDisable(GL_DEPTH_TEST);
-        // Если фигуры выбрана - изменяем цвет заливки
         setColorArray(0.7f, 0.7f, 0.7f, alpha);
         drawSelectionFrame();
         glEnable(GL_DEPTH_TEST);
@@ -340,7 +316,9 @@ void LineSimple::drawFigure(QGLWidget* render)
     }
     if (indexOfSelectedControl >= 0 && indexOfSelectedControl < 2)
     {
+        glDisable(GL_DEPTH_TEST);
         drawControlElement(indexOfSelectedControl, 5.0f, 10.0);
+        glEnable(GL_DEPTH_TEST);
     }
 
 }
@@ -356,10 +334,10 @@ void LineSimple::setIndexArrayForSelectionFrame()
     IndexArrayForSelection[2] = 2;
     IndexArrayForSelection[3] = 3;
 
-    IndexArrayForSelection[4] = 4;
-    IndexArrayForSelection[5] = 5;
-    IndexArrayForSelection[6] = 6;
-    IndexArrayForSelection[7] = 7;
+    //IndexArrayForSelection[4] = 4;
+    //IndexArrayForSelection[5] = 5;
+    //IndexArrayForSelection[6] = 6;
+    //IndexArrayForSelection[7] = 7;
 
 }
 
@@ -757,7 +735,7 @@ void LineSimple::setLength(float length, bool front)
 }
 
 
-void LineSimple::drawMeasurements(QGLWidget *render)
+void LineSimple::drawMeasurements(QGLWidget *)
 {
     if (!showMeasurements)
         return;
@@ -772,6 +750,7 @@ bool LineSimple::setFixed(bool fixed)
         Logger::getLogger()->infoLog() << "LineSimple::setFixed(bool fixed)"
                                        << " fixed = " << fixed << "\n";
     this->fixed = fixed;
+    return true;
 }
 
 

@@ -42,7 +42,7 @@ void RoadElement3D::setSelectedStatus(bool status)
     selected = status;
 }
 
-void RoadElement3D::drawFigure(QGLWidget *render)
+void RoadElement3D::drawFigure(QGLWidget *)
 {
     //glFrontFace(GL_CCW);
     glEnable(GL_DEPTH_TEST);
@@ -134,7 +134,7 @@ void RoadElement3D::drawFigure(QGLWidget *render)
         glEnable(GL_LIGHTING);
 
         //qDebug() << "NUMBER OF MESHES: " << meshes.size();
-        for (int i = 0; i < meshes.size(); ++i)
+        for (unsigned i = 0; i < meshes.size(); ++i)
         {
 
 
@@ -192,7 +192,7 @@ void RoadElement3D::drawFigure(QGLWidget *render)
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glLineWidth(1.0f);
         glColor3f(0.0f,0.0f,0.0f);
-        for (int i = 0; i < meshes.size(); ++i)
+        for (unsigned i = 0; i < meshes.size(); ++i)
         {
 
             glColorPointer(3, GL_FLOAT, 0, meshes[i]->colors.begin());
@@ -215,17 +215,17 @@ void RoadElement3D::drawSelectionFrame()
 {
 }
 
-void RoadElement3D::drawMeasurements(QGLWidget *render)
+void RoadElement3D::drawMeasurements(QGLWidget *)
 {
 }
 
-void RoadElement3D::move(float dx, float dy, float dz)
+void RoadElement3D::move(float dx, float dy, float)
 {
     deltaX += dx;
     deltaY += dy;
 }
 
-void RoadElement3D::drawControlElement(int index, float lineWidth, float pointSize)
+void RoadElement3D::drawControlElement(int index, float, float pointSize)
 {
     /*
     if (index == 0)
@@ -245,7 +245,7 @@ void RoadElement3D::drawControlElement(int index, float lineWidth, float pointSi
 
   if (index < 0)
       return;
-    int i;
+    unsigned i;
     for (i = 0; i < meshes.size(); ++i)
     {
         if (index >= meshes[i]->vertices.size() / 3)
@@ -272,12 +272,12 @@ void RoadElement3D::drawControlElement(int index, float lineWidth, float pointSi
 
 }
 
-QCursor RoadElement3D::getCursorForControlElement(int index)
+QCursor RoadElement3D::getCursorForControlElement(int)
 {
     return Qt::CrossCursor;
 }
 
-void RoadElement3D::resizeByControl(int index, float dx, float dy, float x, float y)
+void RoadElement3D::resizeByControl(int index, float dx, float dy, float, float)
 {
     if (index == 0)
         zRot += (GLfloat)(atan(dy/dx));
@@ -288,7 +288,7 @@ void RoadElement3D::resizeByControl(int index, float dx, float dy, float x, floa
 int RoadElement3D::getNumberOfControls()
 {
     int count = 0;
-    for (int i = 0; i < meshes.size(); ++i)
+    for (unsigned i = 0; i < meshes.size(); ++i)
         count += meshes[i]->vertices.size() / 3;
     ////qDebug() << count;
     return count;
@@ -304,7 +304,7 @@ void RoadElement3D::changeColorOfSelectedControl(int index)
     indexOfSelectedControl = index;
 }
 
-void RoadElement3D::getProperties(QFormLayout *layout, QGLWidget *render)
+void RoadElement3D::getProperties(QFormLayout *layout, QGLWidget *)
 {
     while(QLayoutItem* child = layout->takeAt(0))
     {
@@ -356,31 +356,31 @@ int RoadElement3D::getLayer()
     return layer;
 }
 
-void RoadElement3D::setVertexArray(QVector<GLfloat> &vertexArray)
+void RoadElement3D::setVertexArray(QVector<GLfloat>&)
 {
     this->vertexArray.clear();
     //this->vertexArray = vertexArray;
 }
 
-void RoadElement3D::setTextureArray(QVector<GLfloat> &textureArray)
+void RoadElement3D::setTextureArray(QVector<GLfloat>&)
 {
     this->textureArray.clear();
     //this->textureArray = textureArray;
 }
 
-void RoadElement3D::setNormalArray(QVector<GLfloat> &normalArray)
+void RoadElement3D::setNormalArray(QVector<GLfloat>&)
 {
     this->normalArray.clear();
     //this->normalArray = normalArray;
 }
 
-void RoadElement3D::setIndexArray(QVector<GLubyte> &indexArray)
+void RoadElement3D::setIndexArray(QVector<GLubyte>&)
 {
     //this->indexArray.clear();
     //this->indexArray = indexArray;
 }
 
-void RoadElement3D::setColorArray(float red, float green, float blue)
+void RoadElement3D::setColorArray(float, float, float)
 {
     //colorArray.clear();
     //for (int i = 0; i < vertexArray.size() / 3; ++i)
@@ -419,6 +419,7 @@ void RoadElement3D::getTextures(const char *textureSource)
 bool RoadElement3D::setFixed(bool fixed)
 {
     this->fixed = fixed;
+    return true;
 }
 
 void RoadElement3D::setZRotation(double value)
@@ -451,7 +452,7 @@ void RoadElement3D::setYScale(double value)
 
 std::vector<vec3> RoadElement3D::getCoordOfControl(int index)
 {
-      int i;
+      unsigned i;
       for (i = 0; i < meshes.size(); ++i)
       {
           if (index >= meshes[i]->vertices.size() / 3)

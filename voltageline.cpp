@@ -71,7 +71,7 @@ void VoltageLine::setSelectedStatus(bool status)
     selected = status;
 }
 
-void VoltageLine::drawFigure(QGLWidget *render)
+void VoltageLine::drawFigure(QGLWidget *)
 {
     //if (!render)
     //    return;
@@ -94,7 +94,7 @@ void VoltageLine::drawSelectionFrame()
         drawControlElement(i, 10.0f, 10.0f);
 }
 
-void VoltageLine::drawMeasurements(QGLWidget *render)
+void VoltageLine::drawMeasurements(QGLWidget *)
 {
 }
 
@@ -116,7 +116,7 @@ void VoltageLine::move(float dx, float dy, float dz)
     }
 }
 
-void VoltageLine::drawControlElement(int index, float lineWidth, float pointSize)
+void VoltageLine::drawControlElement(int index, float, float pointSize)
 {
     glDisable(GL_LIGHTING);
     glPointSize(pointSize);
@@ -137,7 +137,7 @@ QCursor VoltageLine::getCursorForControlElement(int index)
         return Qt::ArrowCursor;
 }
 
-void VoltageLine::resizeByControl(int index, float dx, float dy, float x, float y)
+void VoltageLine::resizeByControl(int index, float dx, float dy, float, float)
 {
     if (fixed)
         return;
@@ -156,7 +156,7 @@ int VoltageLine::controlsForPoint()
     return 1;
 }
 
-void VoltageLine::changeColorOfSelectedControl(int index)
+void VoltageLine::changeColorOfSelectedControl(int)
 {
 }
 
@@ -459,7 +459,7 @@ void VoltageLine::setIndexArray()
     indexArray[i * 6 + 11] = size - 1;
 }
 
-void VoltageLine::setColorArray(float red, float green, float blue, float alpha)
+void VoltageLine::setColorArray(float red, float green, float blue, float)
 {
     if (colorArray.size() != vertexArray.size())
         colorArray.resize(vertexArray.size());
@@ -474,6 +474,7 @@ void VoltageLine::setColorArray(float red, float green, float blue, float alpha)
 bool VoltageLine::setFixed(bool fixed)
 {
     this->fixed = fixed;
+    return true;
 }
 
 void VoltageLine::setWidth(double width)

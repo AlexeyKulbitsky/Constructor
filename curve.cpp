@@ -173,7 +173,7 @@ void Curve::setSelectedStatus(bool status)
     selected = status;
 }
 
-void Curve::drawFigure(QGLWidget *render)
+void Curve::drawFigure(QGLWidget *)
 {
     if (log)
         Logger::getLogger()->infoLog() << "Curve::drawFigure(QGLWidget *render)\n";
@@ -183,8 +183,9 @@ void Curve::drawFigure(QGLWidget *render)
         {
             drawControlElement(indexOfSelectedControl, 5.0f, 10.0);
         }
-        for (int i = 0; i < getNumberOfControls(); ++i)
-            drawControlElement(i, 5.0f, 10.f);       
+        if (showBoard)
+            for (int i = 0; i < getNumberOfControls(); ++i)
+                drawControlElement(i, 5.0f, 10.f);
     }
     glDisableClientState(GL_COLOR_ARRAY);
     glEnable(GL_TEXTURE_2D);
@@ -312,6 +313,20 @@ void Curve::drawMeasurements(QGLWidget *render)
 //    {
 //        return;
 //    }
+
+    if (description.size() == 0)
+        return;
+    glColor3f(1.0f, 0.0f, 0.0f);
+    QFont shrift = QFont("Times", 8, QFont::Black);
+    GLdouble x, y, z;
+    GLdouble wx, wy, wz;
+    int index = vertexArray.size() / 6;
+    x = vertexArray[index * 3];
+    y = vertexArray[index * 3 + 1];
+    z = vertexArray[index * 3 + 2];
+    getWindowCoord(x, y, z, wx, wy, wz);
+    if (render)
+        render->renderText(int(wx), int(wy), description, shrift);
 
 }
 
@@ -630,6 +645,13 @@ void Curve::clear()
         Logger::getLogger()->infoLog() << "Curve::clear()\n";
 }
 
+void Curve::setDescirption(const QString &desc)
+{
+    if (log)
+        Logger::getLogger()->infoLog() << "Curve::setDescirption(const QString &desc)\n";
+    description = desc;
+}
+
 void Curve::setVertexArray()
 {
     if (log)
@@ -641,10 +663,10 @@ void Curve::setVertexArray()
     float zCenter = controlPoints[2];
     float xLeft = controlPoints[3];
     float yLeft = controlPoints[4];
-    float zLeft = controlPoints[5];
+    //float zLeft = controlPoints[5];
     float xRight = controlPoints[6];
     float yRight = controlPoints[7];
-    float zRight = controlPoints[8];
+    //float zRight = controlPoints[8];
 
 
     float aLeft = xLeft - xCenter;
@@ -757,8 +779,8 @@ void Curve::setTextureArray()
     float y = controlPoints[1];
     float x1 = vertexArray[3];
     float y1 = vertexArray[4];
-    float xTotal = 0.0f;
-    float yTotal = 0.0f;
+    //float xTotal = 0.0f;
+    //float yTotal = 0.0f;
 
     float dx = x1 - x;
     float dy = y1 - y;
@@ -991,22 +1013,22 @@ void Curve::setTextureArrayBoard(float textureUSize, float textureVSize)
     y1 = vertexArrayBoard[i * 3 + 1];
     x2 = vertexArrayBoard[(i + 1) * 3];
     y2 = vertexArrayBoard[(i + 1) * 3 + 1];
-    float s1 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
+    //float s1 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
     x2 = vertexArrayBoard[(i + 1) * 3];
     y2 = vertexArrayBoard[(i + 1) * 3 + 1];
     x2 = vertexArrayBoard[(i + 2) * 3];
     y2 = vertexArrayBoard[(i + 2) * 3 + 1];
-    float s2 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
+    //float s2 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
     x2 = vertexArrayBoard[(i + 2) * 3];
     y2 = vertexArrayBoard[(i + 2) * 3 + 1];
     x2 = vertexArrayBoard[(i + 3) * 3];
     y2 = vertexArrayBoard[(i + 3) * 3 + 1];
-    float s3 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
+    //float s3 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
     x2 = vertexArrayBoard[(i + 3) * 3];
     y2 = vertexArrayBoard[(i + 3) * 3 + 1];
     x2 = vertexArrayBoard[(i + 4) * 3];
     y2 = vertexArrayBoard[(i + 4) * 3 + 1];
-    float s4 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
+    //float s4 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
 
     for (int i = 0; i < numberOfSides; ++i)
     {
@@ -1352,6 +1374,7 @@ bool Curve::setFixed(bool fixed)
         Logger::getLogger()->infoLog() << "Curve::setFixed(bool fixed)"
                                        << " fixed = " << fixed << "\n";
     this->fixed = fixed;
+    return true;
 }
 
 void Curve::setLeftLength(double length)

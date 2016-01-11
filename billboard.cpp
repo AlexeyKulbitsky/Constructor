@@ -100,7 +100,7 @@ void Billboard::drawSelectionFrame()
     drawControlElement(0, 5.0f, 10.f);
 }
 
-void Billboard::drawMeasurements(QGLWidget *render)
+void Billboard::drawMeasurements(QGLWidget *)
 {
 }
 
@@ -121,7 +121,7 @@ void Billboard::move(float dx, float dy, float dz)
     }
 }
 
-void Billboard::drawControlElement(int index, float lineWidth, float pointSize)
+void Billboard::drawControlElement(int, float lineWidth, float)
 {
     glLineWidth(lineWidth);
     glDisableClientState(GL_NORMAL_ARRAY);
@@ -135,12 +135,12 @@ void Billboard::drawControlElement(int index, float lineWidth, float pointSize)
     glDrawElements(GL_LINE_STRIP,zRotIndexArray.size(),GL_UNSIGNED_INT,zRotIndexArray.begin());
 }
 
-QCursor Billboard::getCursorForControlElement(int index)
+QCursor Billboard::getCursorForControlElement(int)
 {
     return Qt::CrossCursor;
 }
 
-void Billboard::resizeByControl(int index, float dx, float dy, float x, float y)
+void Billboard::resizeByControl(int, float dx, float dy, float, float)
 {
     if (fixed)
         return;
@@ -191,7 +191,7 @@ int Billboard::controlsForPoint()
     return 1;
 }
 
-void Billboard::changeColorOfSelectedControl(int index)
+void Billboard::changeColorOfSelectedControl(int)
 {
 }
 
@@ -265,7 +265,7 @@ RoadElement *Billboard::getCopy()
     return copyElement;
 }
 
-Billboard::setZRotVertexArray()
+void Billboard::setZRotVertexArray()
 {
     float pi = 3.14159265f;
     int numberOfSides = 40;
@@ -278,7 +278,7 @@ Billboard::setZRotVertexArray()
     }
 }
 
-Billboard::setZRotColorArray(float r, float g, float b)
+void Billboard::setZRotColorArray(float r, float g, float b)
 {
     zRotColorArray.resize(zRotVertexArray.size());
     for (int i = 0; i < zRotVertexArray.size() / 3; ++i)
@@ -289,7 +289,7 @@ Billboard::setZRotColorArray(float r, float g, float b)
     }
 }
 
-Billboard::setZRotIndexArray()
+void Billboard::setZRotIndexArray()
 {
     zRotIndexArray.resize(zRotVertexArray.size() / 3);
     for (int i = 0; i < zRotVertexArray.size() / 3; ++i)

@@ -12,6 +12,7 @@ class JSONFileManager: public FileManager
 public:
     JSONFileManager(Model* model);
     virtual ~JSONFileManager();
+    void setCameraView(CameraView* camera);
     // FileManager interface
 public:
     virtual bool openFile(QString source);
@@ -41,9 +42,13 @@ private:
     Arch* readArch(QJsonObject& obj);
     MapPlane* readMapPlane(QJsonObject& obj);
     void readYandexMaps(QJsonObject& obj);
-
+    Camera* readCamera(QJsonObject& obj);
+    
 public slots:
     void autoSaveFile();
+    
+private:
+    CameraView* cameraView;
 };
 
 #endif // JSONFILEMANAGER_H

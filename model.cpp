@@ -128,7 +128,7 @@ void Model::clear()
 {
     Logger::getLogger()->writeLog("Model::clear()");
 
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < numberOfGroups; ++i)
     {
         for (int j = 0; j < group[i].elements.size(); ++j)
         {
@@ -163,5 +163,17 @@ void Model::setLinesVilible(bool status)
 {
     Logger::getLogger()->writeLog("Model::setLinesVilible(" + QString::number(status) + ")");
     group[1].visible = status;
+}
+
+void Model::setMapVisible(bool status)
+{
+    Logger::getLogger()->writeLog("Model::setMapVisible(" + QString::number(status) + ")");
+    group[numberOfGroups - 1].visible = status;
+}
+
+void Model::setRulerVisible(bool status)
+{
+    Logger::getLogger()->writeLog("Model::setRulerVisible(" + QString::number(status) + ")");
+    group[numberOfGroups - 2].visible = status;
 }
 

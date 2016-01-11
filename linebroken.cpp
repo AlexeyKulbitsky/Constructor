@@ -256,11 +256,11 @@ void LineBroken::setVertexArray(float width, float* axisVertices, int size)
 
             VertexArray.push_back(x1 + dx);
             VertexArray.push_back(y1 - dy);
-            VertexArray.push_back(0.02f);
+            VertexArray.push_back(0.002f);
 
             VertexArray.push_back(x1 - dx);
             VertexArray.push_back(y1 + dy);
-            VertexArray.push_back(0.02f);
+            VertexArray.push_back(0.002f);
 
 
         }
@@ -293,11 +293,11 @@ void LineBroken::setVertexArray(float width, float* axisVertices, int size)
 
                 VertexArray.push_back(x1 - dx);
                 VertexArray.push_back(y1 + dy);
-                VertexArray.push_back(0.02f);
+                VertexArray.push_back(0.002f);
 
                 VertexArray.push_back(x1 + dx);
                 VertexArray.push_back(y1 - dy);
-                VertexArray.push_back(0.02f);
+                VertexArray.push_back(0.002f);
             }
             else
             {
@@ -348,19 +348,19 @@ void LineBroken::setVertexArray(float width, float* axisVertices, int size)
 
                 VertexArray.push_back(x2 - dx);
                 VertexArray.push_back(y2 - dy);
-                VertexArray.push_back(0.02f);
+                VertexArray.push_back(0.002f);
 
                 VertexArray.push_back(x2 + dx);
                 VertexArray.push_back(y2 + dy);
-                VertexArray.push_back(0.02f);
+                VertexArray.push_back(0.002f);
 
                 VertexArray.push_back(x2 - dx);
                 VertexArray.push_back(y2 - dy);
-                VertexArray.push_back(0.02f);
+                VertexArray.push_back(0.002f);
 
                 VertexArray.push_back(x2 + dx);
                 VertexArray.push_back(y2 + dy);
-                VertexArray.push_back(0.02f);
+                VertexArray.push_back(0.002f);
             }
         }
     }
@@ -533,31 +533,10 @@ void LineBroken::setIndexArrayForAxis()
     }
 }
 
-void LineBroken::drawFigure(QGLWidget* render)
+void LineBroken::drawFigure(QGLWidget* )
 {
     if (log)
     Logger::getLogger()->infoLog() << "LineBroken::drawFigure(QGLWidget* render)\n";
-    /*
-    if (selected == true)
-    {
-        // Если фигуры выбрана - изменяем цвет заливки
-        setColorArray(0.7f, 0.7f, 0.7f, alpha);
-        drawSelectionFrame();
-
-
-        glVertexPointer(3, GL_FLOAT, 0, vertexArrayForAxis.begin());
-        glColorPointer(3, GL_FLOAT, 0, colorArrayForAxis.begin());
-        glDrawElements(GL_LINE_STRIP, indexArrayForAxis.size(), GL_UNSIGNED_BYTE, indexArrayForAxis.begin());
-
-
-    }
-    else
-    {
-        // Если фигуры не выбрана - цвет заливки по умолчанию
-        setColorArray(red, green, blue, alpha);
-
-    }
-    */
 
     ////////////////////////////////////////////////
     if (!useColor)
@@ -592,7 +571,8 @@ void LineBroken::drawFigure(QGLWidget* render)
 
         glVertexPointer(3, GL_FLOAT, 0, vertexArrayForAxis.begin());
         glColorPointer(3, GL_FLOAT, 0, colorArrayForAxis.begin());
-        glDrawElements(GL_LINE_STRIP, indexArrayForAxis.size(), GL_UNSIGNED_BYTE, indexArrayForAxis.begin());        
+        glDrawElements(GL_LINE_STRIP, indexArrayForAxis.size(), GL_UNSIGNED_BYTE, indexArrayForAxis.begin());
+        glEnable(GL_DEPTH_TEST);
 
     }
     if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
@@ -866,6 +846,26 @@ void LineBroken::getProperties(QFormLayout *layout, QGLWidget* render)
             Logger::getLogger()->errorLog() << "LineBroken::getProperties(QFormLayout *layout, QGLWidget* render) layout = NULL\n";
         QApplication::exit(0);
     }
+    clearProperties(layout);
+
+    QCheckBox* fixedCheckBox = new QCheckBox();
+    fixedCheckBox->setChecked(fixed);
+    connect(fixedCheckBox, SIGNAL(toggled(bool)), this, SLOT(setFixed(bool)));
+
+    QDoubleSpinBox *widthSpinBox = new QDoubleSpinBox();
+    widthSpinBox->setKeyboardTracking(false);
+    widthSpinBox->setMaximum(1000000.0);
+    widthSpinBox->setSingleStep(0.01);
+    connect(widthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setWidth(double)));
+    connect(this, SIGNAL(widthChanged(double)), widthSpinBox, SLOT(setValue(double)));
+    widthSpinBox->setValue(width);
+
+    if (render)
+    {
+        connect(widthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+    }
+    layout->addRow("Зафиксировать", fixedCheckBox);
+    layout->addRow("Ширина", widthSpinBox);
 }
 
 
@@ -917,7 +917,7 @@ void LineBroken::deleteBreak(bool front)
     if (log)
     Logger::getLogger()->infoLog() << "LineBroken::deleteBreak(bool front)"
                                    << " front = " << front << "\n";
-    float x, y, z;
+    //float x, y, z;
     if (front)
     {
         vertexArrayForAxis.pop_front();
@@ -941,7 +941,7 @@ void LineBroken::deleteBreak(bool front)
 }
 
 
-void LineBroken::drawMeasurements(QGLWidget *render)
+void LineBroken::drawMeasurements(QGLWidget *)
 {
     if (!showMeasurements)
         return;
@@ -956,6 +956,7 @@ bool LineBroken::setFixed(bool fixed)
     Logger::getLogger()->infoLog() << "LineBroken::setFixed(bool fixed)"
                                    << " fixed = " << fixed << "\n";
     this->fixed = fixed;
+    return true;
 }
 
 void LineBroken::setDescription(QString description)
@@ -964,6 +965,17 @@ void LineBroken::setDescription(QString description)
     Logger::getLogger()->infoLog() << "LineBroken::setDescription(QString description)"
                                    << " description = " << description << "\n";
     this->description = description;
+}
+
+void LineBroken::setWidth(double value)
+{
+    if (width == value)
+        return;
+    width = value;
+    setVertexArray(width, vertexArrayForAxis.begin(), vertexArrayForAxis.size());
+    setTextureArray();
+
+    emit widthChanged(value);
 }
 
 

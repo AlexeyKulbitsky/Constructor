@@ -38,15 +38,15 @@ public:
     virtual void mouseReleaseEvent(QMouseEvent *pe);
     virtual void wheelEvent(QWheelEvent *pe);
     virtual void keyPressEvent(QKeyEvent *pe);
-    virtual void keyReleaseEvent(QKeyEvent *pe);
+    virtual void keyReleaseEvent(QKeyEvent *);
     virtual void dragEnterEvent(QDragEnterEvent *event);
-    virtual void dropEvent(QDropEvent *event);
-    virtual void contextMenuEvent(QContextMenuEvent *pe);
+    virtual void dropEvent(QDropEvent *);
+    virtual void contextMenuEvent(QContextMenuEvent *);
 
     // State interface
 public:
     virtual QString getName();
-    void getGlobalCoord(double wx, double wy, double wz, double &x, double &y, double &z);
+    void getGlobalCoord(double, double, double, double &, double &, double &);
     void clear();
     static bool getLogging();
     static void setLogging(bool status);
@@ -59,7 +59,7 @@ public:
     virtual void paste();
     virtual void cut();
     virtual void del();
-    virtual void clearProperties(QFormLayout *layout);
+    virtual void clearProperties(QFormLayout *);
     bool tryToSelectFigures(QPoint mp, RoadElement*& element);
     bool tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement* element, int& index);
 

@@ -63,6 +63,12 @@ StateManager::StateManager(Model *model, Scene2D* scene, QFormLayout *properties
     currentState = defaultState;
 }
 
+StateManager::StateManager(Model *model, Scene2D *scene, QFormLayout *properties, CameraView *cam)
+    : StateManager(model, scene, properties)
+{
+    camera = cam;
+}
+
 StateManager::~StateManager()
 {
     model = NULL;

@@ -40,12 +40,12 @@ public:
     virtual void mouseReleaseEvent(QMouseEvent *pe);
     virtual void wheelEvent(QWheelEvent *pe);
     virtual void keyPressEvent(QKeyEvent *pe);
-    virtual void keyReleaseEvent(QKeyEvent *pe);
+    virtual void keyReleaseEvent(QKeyEvent *);
     virtual void dragEnterEvent(QDragEnterEvent *event);
     virtual void dropEvent(QDropEvent *event);
 
     virtual QString getName();
-    virtual void contextMenuEvent(QContextMenuEvent *pe);
+    virtual void contextMenuEvent(QContextMenuEvent *);
     static void setLogging(bool status);
     static bool getLogging() { return log; }
 private:

@@ -526,12 +526,12 @@ void SelectedState::clearProperties(QFormLayout *layout)
             Logger::getLogger()->errorLog() << "QFormLayout *layout = NULL, cannot claerProperties, program terminates\n";
         QApplication::exit(0);
     }
-    while(layout->count() > 0)
-    {
-        QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
-    }
+//    while(layout->count() > 0)
+//    {
+//        QLayoutItem *item = layout->takeAt(0);
+//        delete item->widget();
+//        delete item;
+//    }
 
 
 }
@@ -646,7 +646,7 @@ bool SelectedState::tryToSelectAllFigures(QPoint mp)
     glLoadIdentity();
 
     int i = 1;
-    for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
+    for (int j = model->getNumberOfGroups() - 2; j >= 0; --j)
     {
         int element = 0;
         for (QList<RoadElement*>::iterator it = model->getGroup(j).begin();
@@ -674,7 +674,7 @@ bool SelectedState::tryToSelectAllFigures(QPoint mp)
     if (hitsForFigure > 0) // есть совпадания и нет ошибок
     {
         i = selectBuffer[3] - 1; // имя фигуры верхняя фигура
-        for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
+        for (int j = model->getNumberOfGroups() - 2; j >= 0; --j)
         {
             if (i < model->getGroup(j).size())
             {
@@ -899,7 +899,7 @@ bool SelectedState::tryToSelectFigures(QPoint mp, RoadElement *&element)
     glLoadIdentity();
 
     int i = 1;
-    for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
+    for (int j = model->getNumberOfGroups() - 2; j >= 0; --j)
     {
         int element = 0;
         for (QList<RoadElement*>::iterator it = model->getGroup(j).begin();
@@ -925,7 +925,7 @@ bool SelectedState::tryToSelectFigures(QPoint mp, RoadElement *&element)
     if (hitsForFigure > 0) // есть совпадания и нет ошибок
     {
         i = selectBuffer[3] - 1; // имя фигуры верхняя фигура
-        for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
+        for (int j = model->getNumberOfGroups() - 2; j >= 0; --j)
         {
             if (i < model->getGroup(j).size())
             {
@@ -1041,10 +1041,14 @@ void SelectedState::breakElements()
     for (int i = 0; i < selectedElement->getNumberOfElements(); ++i)
     {
         RoadElement* element = selectedElement->getElement(i);
+        if (element == NULL)\
+            qDebug() << "element null";
         int layer = element->getLayer();
         model->getGroup(layer).push_back(element);
+        qDebug() << "number:" << i;
     }
     model->getGroup(0).removeOne(selectedElement);
+    qDebug() << "Good";
 }
 
 void SelectedState::clear()

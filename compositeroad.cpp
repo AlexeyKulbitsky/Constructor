@@ -97,7 +97,7 @@ void CompositeRoad::drawSelectionFrame()
     drawControlElement(0, 5.0f, 5.0f);
 }
 
-void CompositeRoad::drawMeasurements(QGLWidget *render)
+void CompositeRoad::drawMeasurements(QGLWidget *)
 {
     if (!showMeasurements)
         return;
@@ -216,7 +216,7 @@ void CompositeRoad::resizeByControl(int index, float dx, float dy, float x, floa
         float angle2 = acos(t);
         if (dy2 < 0)
             angle2 = 2.0f * pi - angle2;
-        float angle = angle2 - angle1;
+        //float angle = angle2 - angle1;
         //setZRotation(zRot + angle * 180.0f / pi);
     }
         break;
@@ -246,7 +246,7 @@ void CompositeRoad::changeColorOfSelectedControl(int index)
                                    << "index = " << index << "\n";
 }
 
-void CompositeRoad::getProperties(QFormLayout *layout, QGLWidget *render)
+void CompositeRoad::getProperties(QFormLayout *, QGLWidget *)
 {
     if (log)
     Logger::getLogger()->infoLog() << "CompositeRoad::getProperties(QFormLayout *layout, QGLWidget *render\n)";
@@ -286,7 +286,7 @@ void CompositeRoad::addElement(RoadElement *element)
     setZRotIndexArray();
 }
 
-CompositeRoad::setZRotVertexArray()
+void CompositeRoad::setZRotVertexArray()
 {
     int numberOfSides = 40;
     if (zRotVertexArray.size() != (numberOfSides + 1) * 3)
@@ -301,7 +301,7 @@ CompositeRoad::setZRotVertexArray()
     }
 }
 
-CompositeRoad::setZRotColorArray(float r, float g, float b)
+void CompositeRoad::setZRotColorArray(float r, float g, float b)
 {
     if (zRotColorArray.size() != zRotVertexArray.size())
         zRotColorArray.resize(zRotVertexArray.size());
@@ -313,7 +313,7 @@ CompositeRoad::setZRotColorArray(float r, float g, float b)
     }
 }
 
-CompositeRoad::setZRotIndexArray()
+void CompositeRoad::setZRotIndexArray()
 {
     if (zRotIndexArray.size() != zRotVertexArray.size() / 3)
         zRotIndexArray.resize(zRotVertexArray.size() / 3);
@@ -330,6 +330,7 @@ bool CompositeRoad::setFixed(bool fixed)
     Logger::getLogger()->infoLog() << "CompositeRoad::setFixed(bool fixed)"
                                    << " fixed = " << fixed << "\n";
     this->fixed = fixed;
+    return true;
 }
 
 void CompositeRoad::setLogging(bool status)

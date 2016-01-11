@@ -387,7 +387,7 @@ void RoadBuilderState::keyPressEvent(QKeyEvent *pe)
     scene->updateGL();
 }
 
-void RoadBuilderState::keyReleaseEvent(QKeyEvent *pe)
+void RoadBuilderState::keyReleaseEvent(QKeyEvent *)
 {
     if (log)
     Logger::getLogger()->infoLog() << "RoadBuilderState::keyReleaseEvent(QKeyEvent *pe)\n";
@@ -683,7 +683,7 @@ void RoadBuilderState::setRoad(RoadBroken *roadBroken)
 }
 
 
-void RoadBuilderState::contextMenuEvent(QContextMenuEvent *pe)
+void RoadBuilderState::contextMenuEvent(QContextMenuEvent *)
 {
     if (log)
     Logger::getLogger()->infoLog() << "RoadBuilderState::contextMenuEvent(QContextMenuEvent *pe)\n";

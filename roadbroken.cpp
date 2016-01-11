@@ -416,8 +416,11 @@ void RoadBroken::resetVertexArray(float dx, float dy, bool right)
 
         x2 = vertexArray[i * 3];
         y2 = vertexArray[i * 3 + 1];
+        float r2 = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
         float res = dx1 * (x2 - x1) + dy1 * (y2 - y1);
-        if (res < 0.0f)
+        if (fabs(r2) < 1e-5)
+            r2 = 0.0f;
+        if (res <= 0.0f)
         {
             float r2 = r1;
             r = sqrt(dx * dx + dy * dy);
@@ -425,8 +428,8 @@ void RoadBroken::resetVertexArray(float dx, float dy, bool right)
             dy1 = y2 - y1;
             r1 = sqrt(dx1*dx1 + dy1*dy1);
             float rTemp = r1 / (r1 + r2);
-            if (fabs(x2 - x1) < 1e-7
-                    && fabs(y2 - y1) < 1e-7)
+            if (fabs(x2 - x1) < 1e-5
+                    && fabs(y2 - y1) < 1e-5)
             {
                 rTemp = 0.001f;
             }
@@ -559,10 +562,10 @@ void RoadBroken::setLeftVertexArray()
             float z0 = vertexArray[(i + 1) * 3 + 2];
             float x1 = vertexArray[i * 3];
             float y1 = vertexArray[i * 3 + 1];
-            float z1 = vertexArray[i * 3 + 2];
+            //float z1 = vertexArray[i * 3 + 2];
             float x2 = vertexArray[(i + 3) * 3];
             float y2 = vertexArray[(i + 3) * 3 + 1];
-            float z2 = vertexArray[(i + 3) * 3 + 2];
+            //float z2 = vertexArray[(i + 3) * 3 + 2];
             if (x0 == x2 && y0 == y2)
             {
                 x2 = vertexArray[(i + 7) * 3];
@@ -609,10 +612,10 @@ void RoadBroken::setLeftVertexArray()
                 float z0 = vertexArray[(i + 1) * 3 + 2];
                 float x1 = vertexArray[i * 3];
                 float y1 = vertexArray[i * 3 + 1];
-                float z1 = vertexArray[i * 3 + 2];
+                //float z1 = vertexArray[i * 3 + 2];
                 float x2 = vertexArray[(i - 1) * 3];
                 float y2 = vertexArray[(i - 1) * 3 + 1];
-                float z2 = vertexArray[(i - 1) * 3 + 2];
+                //float z2 = vertexArray[(i - 1) * 3 + 2];
                 if (x0 == x2 && y0 == y2)
                 {
                     x2 = vertexArray[(i - 5) * 3];
@@ -730,10 +733,10 @@ void RoadBroken::setLeftVertexArray()
                         float z0 = vertexArray[(i + 1) * 3 + 2];
                         float x1 = vertexArray[i * 3];
                         float y1 = vertexArray[i * 3 + 1];
-                        float z1 = vertexArray[i * 3 + 2];
+                        //float z1 = vertexArray[i * 3 + 2];
                         float x2 = vertexArray[(i - 1) * 3];
                         float y2 = vertexArray[(i - 1) * 3 + 1];
-                        float z2 = vertexArray[(i - 1) * 3 + 2];
+                        //float z2 = vertexArray[(i - 1) * 3 + 2];
                         if (x0 == x2 && y0 == y2)
                         {
                             x2 = vertexArray[(i - 5) * 3];
@@ -930,6 +933,9 @@ void RoadBroken::resetLeftVertexArray(float dx, float dy)
         Logger::getLogger()->infoLog() << "RoadBroken::resetLeftVertexArray(float dx, float dy)"
                                        << " dx = " << dx
                                        << " dy = " << dy << "\n";
+    float dxFinal = 0.0f;
+    float dyFinal = 0.0f;
+    bool recalculate = false;
     for (int i = 1; i < vertexArray.size() / 3; i += 2)
     {
         float x1 = vertexArray[i * 3];
@@ -944,6 +950,63 @@ void RoadBroken::resetLeftVertexArray(float dx, float dy)
         float dY = dy1 / r1 * r;
         vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3] += dX;
         vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3 + 1] += dY;
+
+        x2 = vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3];
+        y2 = vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3 + 1];
+        float r2 = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+        float res = dx1 * (x2 - x1) + dy1 * (y2 - y1);
+        if (fabs(r2) < 1e-5)
+            r2 = 0.0f;
+        if (res <= 0.0f)
+        {
+            float r2 = r1;
+            r = sqrt(dx * dx + dy * dy);
+            dx1 = x2 - x1;
+            dy1 = y2 - y1;
+            r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float rTemp = r1 / (r1 + r2);
+            if (fabs(x2 - x1) < 1e-5
+                    && fabs(y2 - y1) < 1e-5)
+            {
+                rTemp = 0.001f;
+            }
+            float dxTemp = dx * (-1.0f) * rTemp;
+            float dyTemp = dy * (-1.0f) * rTemp;
+            if (fabs(dxTemp) > fabs(dxFinal) ||
+                    fabs(dyTemp) > fabs(dyFinal))
+            {
+                dxFinal = dxTemp;
+                dyFinal = dyTemp;
+                recalculate = true;
+            }
+        }
+    }
+
+    if (recalculate)
+    {
+        for (int i = 1; i < vertexArray.size() / 3; i += 2)
+        {
+            float x1 = vertexArray[i * 3];
+            float y1 = vertexArray[i * 3 + 1];
+            float x2 = vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3];
+            float y2 = vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3 + 1];
+            float dx1 = x2 - x1;
+            float dy1 = y2 - y1;
+            float r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float r = (dxFinal*dx1 + dyFinal*dy1) / r1;
+            float dX = dx1 / r1 * r;
+            float dY = dy1 / r1 * r;
+            vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3] += dX;
+            vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3 + 1] += dY;
+            float x2Temp = vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3];
+            float y2Temp = vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3 + 1];
+            if (fabs(x2Temp - x1) < 1e-7
+                    && fabs(y2Temp - y1) < 1e-7)
+            {
+                vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3] = x1 - dx1 / r1 * 0.001f;
+                vertexArrayLeft[((i - 1) / 2 * 5 + 4) * 3 + 1] = y1 - dy1 / r1 * 0.001f;
+            }
+        }
     }
 }
 
@@ -976,7 +1039,7 @@ void RoadBroken::setRightTextureArray(float textureUsize, float textureVsize)
         float y8 = vertexArrayRight[(i + 8) * 3 + 1];
         float x9 = vertexArrayRight[(i + 9) * 3];
         float y9 = vertexArrayRight[(i + 9) * 3 + 1];
-        float pi = 3.1415926f;
+        //float pi = 3.1415926f;
 
         textureArrayRight.push_back(0.0f);
         textureArrayRight.push_back(0.0f);
@@ -1117,10 +1180,10 @@ void RoadBroken::setRightVertexArray()
             float z0 = vertexArray[i * 3 + 2];
             float x1 = vertexArray[(i + 1) * 3];
             float y1 = vertexArray[(i + 1) * 3 + 1];
-            float z1 = vertexArray[(i + 1) * 3 + 2];
+            //float z1 = vertexArray[(i + 1) * 3 + 2];
             float x2 = vertexArray[(i + 2) * 3];
             float y2 = vertexArray[(i + 2) * 3 + 1];
-            float z2 = vertexArray[(i + 2) * 3 + 2];
+            //float z2 = vertexArray[(i + 2) * 3 + 2];
             if (x0 == x2 && y0 == y2)
             {
                 x2 = vertexArray[(i + 6) * 3];
@@ -1169,10 +1232,10 @@ void RoadBroken::setRightVertexArray()
                 float z0 = vertexArray[i * 3 + 2];
                 float x1 = vertexArray[(i + 1) * 3];
                 float y1 = vertexArray[(i + 1) * 3 + 1];
-                float z1 = vertexArray[(i + 1) * 3 + 2];
+                //float z1 = vertexArray[(i + 1) * 3 + 2];
                 float x2 = vertexArray[(i - 2) * 3];
                 float y2 = vertexArray[(i - 2) * 3 + 1];
-                float z2 = vertexArray[(i - 2) * 3 + 2];
+                //float z2 = vertexArray[(i - 2) * 3 + 2];
                 if (x0 == x2 && y0 == y2)
                 {
                     x2 = vertexArray[(i - 6) * 3];
@@ -1292,10 +1355,10 @@ void RoadBroken::setRightVertexArray()
                         float z0 = vertexArray[i * 3 + 2];
                         float x1 = vertexArray[(i + 1) * 3];
                         float y1 = vertexArray[(i + 1) * 3 + 1];
-                        float z1 = vertexArray[(i + 1) * 3 + 2];
+                        //float z1 = vertexArray[(i + 1) * 3 + 2];
                         float x2 = vertexArray[(i - 2) * 3];
                         float y2 = vertexArray[(i - 2) * 3 + 1];
-                        float z2 = vertexArray[(i - 2) * 3 + 2];
+                        //float z2 = vertexArray[(i - 2) * 3 + 2];
                         if (x0 == x2 && y0 == y2)
                         {
                             x2 = vertexArray[(i - 6) * 3];
@@ -1490,6 +1553,9 @@ void RoadBroken::resetRightVertexArray(float dx, float dy)
         Logger::getLogger()->infoLog() << "RoadBroken::resetRightVertexArray(float dx, float dy)"
                                        << " dx = " << dx
                                        << " dy = " << dy << "\n";
+    float dxFinal = 0.0f;
+    float dyFinal = 0.0f;
+    bool recalculate = false;
     for (int i = 0; i < vertexArray.size() / 3; i += 2)
     {
         float x1 = vertexArray[i * 3];
@@ -1504,6 +1570,64 @@ void RoadBroken::resetRightVertexArray(float dx, float dy)
         float dY = dy1 / r1 * r;
         vertexArrayRight[(i / 2 * 5 + 4) * 3] += dX;
         vertexArrayRight[(i / 2 * 5 + 4) * 3 + 1] += dY;
+
+
+        x2 = vertexArrayRight[(i / 2 * 5 + 4) * 3];
+        y2 = vertexArrayRight[(i / 2 * 5 + 4) * 3 + 1];
+        float r2 = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+        float res = dx1 * (x2 - x1) + dy1 * (y2 - y1);
+        if (fabs(r2) < 1e-5)
+            r2 = 0.0f;
+        if (res <= 0.0f)
+        {
+            float r2 = r1;
+            r = sqrt(dx * dx + dy * dy);
+            dx1 = x2 - x1;
+            dy1 = y2 - y1;
+            r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float rTemp = r1 / (r1 + r2);
+            if (fabs(x2 - x1) < 1e-5
+                    && fabs(y2 - y1) < 1e-5)
+            {
+                rTemp = 0.001f;
+            }
+            float dxTemp = dx * (-1.0f) * rTemp;
+            float dyTemp = dy * (-1.0f) * rTemp;
+            if (fabs(dxTemp) > fabs(dxFinal) ||
+                    fabs(dyTemp) > fabs(dyFinal))
+            {
+                dxFinal = dxTemp;
+                dyFinal = dyTemp;
+                recalculate = true;
+            }
+        }
+    }
+
+    if (recalculate)
+    {
+        for (int i = 0; i < vertexArray.size() / 3; i += 2)
+        {
+            float x1 = vertexArray[i * 3];
+            float y1 = vertexArray[i * 3 + 1];
+            float x2 = vertexArrayRight[(i / 2 * 5 + 4) * 3];
+            float y2 = vertexArrayRight[(i / 2 * 5 + 4) * 3 + 1];
+            float dx1 = x2 - x1;
+            float dy1 = y2 - y1;
+            float r1 = sqrt(dx1*dx1 + dy1*dy1);
+            float r = (dxFinal*dx1 + dyFinal*dy1) / r1;
+            float dX = dx1 / r1 * r;
+            float dY = dy1 / r1 * r;
+            vertexArrayRight[(i / 2 * 5 + 4) * 3] += dX;
+            vertexArrayRight[(i / 2 * 5 + 4) * 3 + 1] += dY;
+            float x2Temp = vertexArrayRight[(i / 2 * 5 + 4) * 3];
+            float y2Temp = vertexArrayRight[(i / 2 * 5 + 4) * 3 + 1];
+            if (fabs(x2Temp - x1) < 1e-7
+                    && fabs(y2Temp - y1) < 1e-7)
+            {
+                vertexArrayRight[(i / 2 * 5 + 4) * 3] = x1 - dx1 / r1 * 0.001f;
+                vertexArrayRight[(i / 2 * 5 + 4) * 3 + 1] = y1 - dy1 / r1 * 0.001f;
+            }
+        }
     }
 }
 
@@ -1642,8 +1766,8 @@ void RoadBroken::getVertexArrayForLineAxis(QVector<float> &axisArray, bool right
                                        << " step = " << step
                                        << " beginStep = " << beginStep
                                        << " endStep = " << endStep << "\n";
-    float begin_step = beginStep;
-    float end_step = endStep;
+    //float begin_step = beginStep;
+    //float end_step = endStep;
     if (rightSide)
     {
         for (int i = 0; i < vertexArray.size() / 3;)
@@ -1652,13 +1776,13 @@ void RoadBroken::getVertexArrayForLineAxis(QVector<float> &axisArray, bool right
             {
                 float x0 = vertexArray[i * 3];
                 float y0 = vertexArray[i * 3 + 1];
-                float z0 = vertexArray[i * 3 + 2];
+                //float z0 = vertexArray[i * 3 + 2];
                 float x1 = vertexArray[(i + 1) * 3];
                 float y1 = vertexArray[(i + 1) * 3 + 1];
-                float z1 = vertexArray[(i + 1) * 3 + 2];
+                //float z1 = vertexArray[(i + 1) * 3 + 2];
                 float x2 = vertexArray[(i + 2) * 3];
                 float y2 = vertexArray[(i + 2) * 3 + 1];
-                float z2 = vertexArray[(i + 2) * 3 + 2];
+                //float z2 = vertexArray[(i + 2) * 3 + 2];
                 if (x0 == x2 && y0 == y2)
                 {
                     x2 = vertexArray[(i + 6) * 3];
@@ -1666,7 +1790,7 @@ void RoadBroken::getVertexArrayForLineAxis(QVector<float> &axisArray, bool right
                 }
                 float dx = x1 - x0;
                 float dy = y1 - y0;
-                float r = sqrt(dx*dx + dy*dy);
+                //float r = sqrt(dx*dx + dy*dy);
                 float r01 = sqrt(dx*dx + dy*dy);
                 float pi = 3.1415926f;
                 float t = (dx * (x2 - x0) + dy * (y2 - y0))/
@@ -1694,13 +1818,13 @@ void RoadBroken::getVertexArrayForLineAxis(QVector<float> &axisArray, bool right
                 {
                     float x0 = vertexArray[i * 3];
                     float y0 = vertexArray[i * 3 + 1];
-                    float z0 = vertexArray[i * 3 + 2];
+                    //float z0 = vertexArray[i * 3 + 2];
                     float x1 = vertexArray[(i + 1) * 3];
                     float y1 = vertexArray[(i + 1) * 3 + 1];
-                    float z1 = vertexArray[(i + 1) * 3 + 2];
+                    //float z1 = vertexArray[(i + 1) * 3 + 2];
                     float x2 = vertexArray[(i - 2) * 3];
                     float y2 = vertexArray[(i - 2) * 3 + 1];
-                    float z2 = vertexArray[(i - 2) * 3 + 2];
+                    //float z2 = vertexArray[(i - 2) * 3 + 2];
                     if (x0 == x2 && y0 == y2)
                     {
                         x2 = vertexArray[(i - 6) * 3];
@@ -1787,13 +1911,13 @@ void RoadBroken::getVertexArrayForLineAxis(QVector<float> &axisArray, bool right
             {
                 float x0 = vertexArray[(i + 1) * 3];
                 float y0 = vertexArray[(i + 1) * 3 + 1];
-                float z0 = vertexArray[(i + 1) * 3 + 2];
+                //float z0 = vertexArray[(i + 1) * 3 + 2];
                 float x1 = vertexArray[i * 3];
                 float y1 = vertexArray[i * 3 + 1];
-                float z1 = vertexArray[i * 3 + 2];
+                //float z1 = vertexArray[i * 3 + 2];
                 float x2 = vertexArray[(i + 3) * 3];
                 float y2 = vertexArray[(i + 3) * 3 + 1];
-                float z2 = vertexArray[(i + 3) * 3 + 2];
+                //float z2 = vertexArray[(i + 3) * 3 + 2];
                 if (x0 == x2 && y0 == y2)
                 {
                     x2 = vertexArray[(i + 7) * 3];
@@ -1824,13 +1948,13 @@ void RoadBroken::getVertexArrayForLineAxis(QVector<float> &axisArray, bool right
                 {
                     float x0 = vertexArray[(i + 1) * 3];
                     float y0 = vertexArray[(i + 1) * 3 + 1];
-                    float z0 = vertexArray[(i + 1) * 3 + 2];
+                    //float z0 = vertexArray[(i + 1) * 3 + 2];
                     float x1 = vertexArray[i * 3];
                     float y1 = vertexArray[i * 3 + 1];
-                    float z1 = vertexArray[i * 3 + 2];
+                    //float z1 = vertexArray[i * 3 + 2];
                     float x2 = vertexArray[(i - 1) * 3];
                     float y2 = vertexArray[(i - 1) * 3 + 1];
-                    float z2 = vertexArray[(i - 1) * 3 + 2];
+                    //float z2 = vertexArray[(i - 1) * 3 + 2];
                     if (x0 == x2 && y0 == y2)
                     {
                         x2 = vertexArray[(i - 5) * 3];
@@ -3121,7 +3245,7 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
     {
         if (index == vertexArray.size() / 3 + vertexArray.size() / 6 + vertexArray.size() / 6 + vertexArray.size() / 3 + 1 + 2)
         {
-            int j = vertexArray.size() / 3 - 2;
+            //int j = vertexArray.size() / 3 - 2;
             switch (keyBoardKey)
             {
             case Qt::Key_Shift:
@@ -3713,7 +3837,7 @@ void RoadBroken::addLine()
         Logger::getLogger()->infoLog() << "RoadBroken::addLine()\n";
     //qDebug() << "Add line";
     QString textSource;
-    float lWidth;
+    float lWidth = 0.0f;
     switch(lineType)
     {
     case 0:
@@ -3747,6 +3871,7 @@ void RoadBroken::addLine()
         return;
         break;
     default:
+        lWidth = 0.0f;
         break;
 
     }
@@ -3837,8 +3962,8 @@ void RoadBroken::resetLines()
         getVertexArrayForLineAxis(axisArray,lines[i].rightSide,lines[i].step,lines[i].beginStep, lines[i].endStep);
         int size = axisArray.size();
         float *lineVertexArray = new float[size];
-        for (int i = 0; i < size; ++i)
-            lineVertexArray[i] = axisArray[i];
+        for (int j = 0; j < size; ++j)
+            lineVertexArray[j] = axisArray[j];
 
         if (lines[i].lineType == 6)
         {
@@ -4146,6 +4271,7 @@ bool RoadBroken::setFixed(bool fixed)
         Logger::getLogger()->infoLog() << "RoadBroken::setFixed(bool fixed)"
                                        << " fixed = " << fixed << "\n";
     this->fixed = fixed;
+    return true;
 }
 
 void RoadBroken::setRightBoardShowStatus(bool status)
@@ -4367,7 +4493,7 @@ std::vector<vec3> RoadBroken::getCoordOfControl(int index)
                 }
                 if (j >=0)
                 {
-                    for (int m = 0; m < lines[j].line->getCoordOfControl(count).size(); ++m)
+                    for (unsigned m = 0; m < lines[j].line->getCoordOfControl(count).size(); ++m)
                     {
                         res.push_back(lines[j].line->getCoordOfControl(count)[m]);
                     }
@@ -4382,6 +4508,7 @@ std::vector<vec3> RoadBroken::getCoordOfControl(int index)
                 res.push_back(p);
                 return res;
             }
+    return res;
 
 }
 

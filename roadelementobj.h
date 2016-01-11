@@ -57,7 +57,8 @@ public:
     int indexOfSelectedControl;
 
     GLuint textureID[1];
-    GLuint figureList, selectedFigureList;
+    GLuint figureList;
+
     int listNumber;
     float deltaX, deltaY, deltaZ;
     float zRadius;
@@ -86,9 +87,12 @@ public:
      // RoadElement interface
 public:
      virtual void clear();
-     setZRotVertexArray();
-     setZRotColorArray(float r, float g, float b);
-     setZRotIndexArray();
+     void setZRotVertexArray();
+     void setZRotColorArray(float r, float g, float b);
+     void setZRotIndexArray();
+
+     GLuint generateList();
+     void setList(GLuint id);
      // RoadElement interface
 public:
      virtual RoadElement *getCopy();

@@ -158,8 +158,8 @@ public:
     ~_3DsFileManager();
     // FileManager interface
 public:
-    virtual bool openFile(QString source);
-    virtual bool saveFile(QString source);
+    virtual bool openFile(QString);
+    virtual bool saveFile(QString);
     bool load3DS(const char *folder, const char *filename, std::vector<Mesh_3DS *> &meshes, QMap<QString, Material> &materials);
 private:
     int getTextures(QString textureSource);

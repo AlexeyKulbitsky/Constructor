@@ -86,6 +86,7 @@ private:
     QColor substrateColor;
     float substrateWidth, substrateLength;
     bool drawSubstrateStatus;
+    bool firstTime;
 };
 
 #endif // SCENE3D_H

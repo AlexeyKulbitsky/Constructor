@@ -100,10 +100,14 @@ public:
 protected:
     void addControl(float x, float y);
 
+signals:
+    void widthChanged(double value);
+
     // RoadElement interface
 public slots:
     virtual bool setFixed(bool fixed);
     void setDescription(QString description);
+    void setWidth(double value);
 
     // RoadElement interface
 public:

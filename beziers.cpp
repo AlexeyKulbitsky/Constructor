@@ -63,7 +63,7 @@ void Beziers::setSelectedStatus(bool status)
     selected = status;
 }
 
-void Beziers::drawFigure(QGLWidget *render)
+void Beziers::drawFigure(QGLWidget *)
 {
     glDisable(GL_LIGHTING);
     glDisableClientState(GL_NORMAL_ARRAY);
@@ -101,11 +101,11 @@ void Beziers::drawSelectionFrame()
         drawControlElement(i, 5.0f, 10.0f);
 }
 
-void Beziers::drawMeasurements(QGLWidget *render)
+void Beziers::drawMeasurements(QGLWidget *)
 {
 }
 
-void Beziers::move(float dx, float dy, float dz)
+void Beziers::move(float dx, float dy, float)
 {
     for (int i = 0; i < vertexArray.size() / 3; ++i)
     {
@@ -119,7 +119,7 @@ void Beziers::move(float dx, float dy, float dz)
     }
 }
 
-void Beziers::drawControlElement(int index, float lineWidth, float pointSize)
+void Beziers::drawControlElement(int index, float, float pointSize)
 {
     glPointSize(pointSize);
     glBegin(GL_POINTS);
@@ -128,12 +128,12 @@ void Beziers::drawControlElement(int index, float lineWidth, float pointSize)
     glEnd();
 }
 
-QCursor Beziers::getCursorForControlElement(int index)
+QCursor Beziers::getCursorForControlElement(int)
 {
     return Qt::CrossCursor;
 }
 
-void Beziers::resizeByControl(int index, float dx, float dy, float x, float y)
+void Beziers::resizeByControl(int index, float dx, float dy, float, float)
 {
     controlPoints[index * 3] += dx;
     controlPoints[index * 3 + 1] += dy;
@@ -150,11 +150,11 @@ int Beziers::controlsForPoint()
     return 1;
 }
 
-void Beziers::changeColorOfSelectedControl(int index)
+void Beziers::changeColorOfSelectedControl(int)
 {
 }
 
-void Beziers::getProperties(QFormLayout *layout, QGLWidget *render)
+void Beziers::getProperties(QFormLayout *, QGLWidget *)
 {
 }
 

@@ -23,6 +23,7 @@ class RoadElement;
 #include "billboard.h"
 #include "arch.h"
 #include "mapplane.h"
+#include "camera.h"
 
 struct Group
 {
@@ -40,12 +41,13 @@ public:
 private:
     int numberOfGroups;
     //std::list<RoadElement*> group[4];
-    Group group[5];
+    Group group[6];
     // 0 - группа для дорожного полотна
     // 1 - группа для дорожной разметки
     // 2 - группа для тротуаров, разделительных полос
-    // 3 - группа для рабочих инструментов
-    // 4 - группа для спутниковой подложки
+    // 3 - группа для камер
+    // 4 - группа для рабочих инструментов
+    // 5 - группа для спутниковой подложки
 public:
     void addElement(RoadElement* element, int groupIndex);
     void deleteElement(int elementId, int groupIndex);
@@ -61,6 +63,8 @@ signals:
 public slots:
     void setRoadVisible(bool);
     void setLinesVilible(bool);
+    void setMapVisible(bool);
+    void setRulerVisible(bool);
 
 private:
     bool modified;

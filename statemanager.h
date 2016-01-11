@@ -32,6 +32,7 @@ class RoadBuilderState;
 #include "objfilemanager.h"
 #include "jsonfilemanager.h"
 //#include "stepdialog.h"
+#include "cameraview.h"
 
 class StateManager : public QObject
 {
@@ -39,11 +40,13 @@ class StateManager : public QObject
 public:
     explicit StateManager(QObject *parent = 0);
     StateManager(Model* model, Scene2D* scene, QFormLayout* properties);
+    StateManager(Model* model, Scene2D* scene, QFormLayout* properties, CameraView* cam);
     ~StateManager();
 private:
 
     Model* model;
     Scene2D* scene;
+
 
     bool rulerActive;
     static bool log;
@@ -62,6 +65,7 @@ public:
     OBJFileManager* fileManagerOBJ;
     JSONFileManager* fileManagerJSON;
     State* currentState;
+    CameraView* camera;
 
 public:
     void setState(State* state);

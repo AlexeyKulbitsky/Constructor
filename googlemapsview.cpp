@@ -22,6 +22,7 @@ GoogleMapsView::GoogleMapsView(QWidget *parent)
 //            this,SLOT(loadCoordinates()));
     load(QUrl::fromLocalFile(QApplication::applicationDirPath() + "/google.html"));
     this->page()->settings()->setAttribute(QWebSettings::JavascriptEnabled, true);
+    active = true;
 }
 
 void GoogleMapsView::setLogging(bool status)
@@ -36,6 +37,14 @@ void GoogleMapsView::setLogging(bool status)
 void GoogleMapsView::setActive(bool status)
 {
     active = status;
+    if (active)
+    {
+        this->page()->mainFrame()->evaluateJavaScript(QString("addSearchBar();"));
+    }
+    else
+    {
+        this->page()->mainFrame()->evaluateJavaScript("map.MapOptions.disableDefaultUI = false;");
+    }
 }
 
 float GoogleMapsView::getDiagonal()

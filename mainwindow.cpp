@@ -22,10 +22,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     settings("LpGR","Constructor")
 {    
-
+    camera = NULL;
     Logger::getLogger()->startLogging();
     ui->setupUi(this);
-    setWindowTitle("Constructor ver.1.0.3");
+    setWindowTitle("Constructor ver.1.1.1");
     model = new Model(this);
     jsonFileManager = new JSONFileManager(model);
     setFileManager(jsonFileManager);
@@ -99,6 +99,17 @@ MainWindow::MainWindow(QWidget *parent) :
     layout->addWidget(scene3D);
     ui->tabWidget->insertTab(1, tabScene3D, "3D-вид");
 
+    Camera::readSensors(QApplication::applicationDirPath() + QString("/sensors.json"));
+
+    QWidget* tabCamera = new QWidget();
+    QGridLayout* camLayout = new QGridLayout(tabCamera);
+    camLayout->setMargin(0);
+    camera = new CameraView(tabCamera, scene2D);
+    camera->setModel(model);
+    jsonFileManager->setCameraView(camera);
+    scene2D->setCamera(camera);
+    camLayout->addWidget(camera);
+    ui->tabWidget->insertTab(2, tabCamera, "Камера");
     //connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(on_tabWidget_currentChanged(int)));
 
 
@@ -125,6 +136,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     /*
+     * ghjjhfghjfgjhfgjh
     QVBoxLayout* toolLayout = new QVBoxLayout();
     QComboBox* itemsComboBox = new QComboBox();
     toolLayout->addWidget(itemsComboBox);
@@ -384,8 +396,11 @@ void MainWindow::createMenu()
     toolsMenu = menuBar()->addMenu(tr("&Инструменты"));
     toolsMenu->addAction(showGridAction);
     toolsMenu->addAction(showRoadAction);
-    //toolsMenu->addAction(showLinesAction);
-    toolsMenu->addAction(showProperties);
+    toolsMenu->addAction(showLinesAction);
+    toolsMenu->addAction(showMapAction);
+    toolsMenu->addSeparator();
+    toolsMenu->addAction(showProperties);    
+    toolsMenu->addSeparator();
     toolsMenu->addAction(saveToPresetAction);
 
     contextMenu = new QMenu(this);
@@ -471,14 +486,27 @@ void MainWindow::createActions()
     showRoadAction->setShortcut(tr("Ctrl+1"));
     connect(showRoadAction, SIGNAL(toggled(bool)), this->model, SLOT(setRoadVisible(bool)));
 
-//    showLinesAction = new QAction(tr("Отображать дорожную разметку"), this);
-//    showLinesAction->setCheckable(true);
+    showLinesAction = new QAction(tr("Отображать дорожную разметку"), this);
+    showLinesAction->setCheckable(true);
 //    //showGridAction->setChecked(spreadsheet->showGrid());
-//    showLinesAction->setStatusTip(tr("Отображать/прятать дорожную разметку"));
-//    showLinesAction->setChecked(true);
-//    showLinesAction->setShortcut(tr("Ctrl+2"));
-//    //connect(showLinesAction, SIGNAL(toggled(bool)), this->model, SLOT(setLinesVilible(bool)));
+    showLinesAction->setStatusTip(tr("Отображать/прятать дорожную разметку"));
+    showLinesAction->setChecked(true);
+    showLinesAction->setShortcut(tr("Ctrl+2"));
+    connect(showLinesAction, SIGNAL(toggled(bool)), this->model, SLOT(setLinesVilible(bool)));
 
+    showMapAction = new QAction(tr("Отображать карту"), this);
+    showMapAction->setCheckable(true);
+    showMapAction->setStatusTip(tr("Отображать/прятать карту"));
+    showMapAction->setChecked(true);
+    showMapAction->setShortcut(tr("Ctrl+3"));
+    connect(showMapAction, SIGNAL(toggled(bool)), this->model, SLOT(setMapVisible(bool)));
+
+    showRulerAction = new QAction(tr("Отображать линейку"), this);
+    showRulerAction->setCheckable(true);
+    showRulerAction->setStatusTip(tr("Отображать/прятать линейку"));
+    showRulerAction->setChecked(true);
+    showRulerAction->setShortcut(tr("Ctrl+4"));
+    connect(showRulerAction, SIGNAL(toggled(bool)), this->model, SLOT(setRulerVisible(bool)));
     //////////////////////////////////////
 
     rulerAction = new QAction(tr("Линейка"), this);
@@ -488,7 +516,7 @@ void MainWindow::createActions()
     connect(rulerAction, SIGNAL(toggled(bool)), scene2D, SLOT(setRulerActive(bool)));
     connect(scene2D, SIGNAL(rulerStatusChanged(bool)), rulerAction, SLOT(setChecked(bool)));
 
-    showProperties = new QAction(tr("Инспектор объектов"), this);
+    showProperties = new QAction(tr("Отображать инспектор объектов"), this);
     showProperties->setStatusTip(tr("Отображать/прятать инспектор объектов"));
     showProperties->setCheckable(true);
     showProperties->setChecked(true);
@@ -509,7 +537,7 @@ void MainWindow::createToolBar()
     ui->mainToolBar->addAction(rulerAction);
 }
 
-MainWindow::readSettings()
+void MainWindow::readSettings()
 {
     settings.beginGroup("/Settings/MainWindow");
     QPoint pos = settings.value("pos", QPoint(200, 200)).toPoint();
@@ -519,7 +547,7 @@ MainWindow::readSettings()
     settings.endGroup();
 }
 
-MainWindow::writeSettings()
+void MainWindow::writeSettings()
 {
     settings.beginGroup("/Settings/MainWindow");
     settings.setValue("pos", pos());
@@ -622,13 +650,29 @@ void MainWindow::on_tabWidget_currentChanged(int index)
     switch (index)
     {
     case 0:
+    {
+        if (camera)
+            camera->setActive(false);
         scene2D->getProperties(scenePropertiesLayout);
+
+    }
         break;
     case 1:
+    {
+        if (camera)
+            camera->setActive(false);
         scene3D->getProperties(scenePropertiesLayout);
+
+    }
         break;
     case 2:
+    {        
+        if (camera)
+            camera->setActive(true);
 
+        camera->getProperties(scenePropertiesLayout);
+
+    }
         break;
     default:
         break;
@@ -661,7 +705,7 @@ void MainWindow::setMap(int index)
 }
 
 
-void MainWindow::contextMenuEvent(QContextMenuEvent *pe)
+void MainWindow::contextMenuEvent(QContextMenuEvent*)
 {
     //contextMenu->exec(pe->globalPos());
 }

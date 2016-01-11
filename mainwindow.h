@@ -20,6 +20,7 @@
 #include "yandexmapsview.h"
 #include "googlemapsview.h"
 #include "osmview.h"
+#include "cameraview.h"
 
 namespace Ui {
 class MainWindow;
@@ -38,6 +39,8 @@ public:
 
     Scene2D* scene2D;
     Scene3D* scene3D;
+    CameraView* camera;
+
     QGraphicsScene *scene;
     SettingsDialog* settingsDialog;
 
@@ -83,6 +86,8 @@ public:
     QAction* showGridAction;
     QAction* showRoadAction;
     QAction* showLinesAction;
+    QAction* showMapAction;
+    QAction* showRulerAction;
     QAction* saveToPresetAction;
     QAction* rulerAction;
 
@@ -97,8 +102,8 @@ public:
 
     Model* model;
 
-    readSettings();
-    writeSettings();
+    void readSettings();
+    void writeSettings();
     QString currentFileName;
 
 private:
@@ -121,7 +126,7 @@ private:
     FileManager* fileManager;
     // QWidget interface
 protected:
-    virtual void contextMenuEvent(QContextMenuEvent *pe);
+    virtual void contextMenuEvent(QContextMenuEvent*);
 };
 
 #endif // MAINWINDOW_H

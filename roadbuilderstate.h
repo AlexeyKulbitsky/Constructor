@@ -66,7 +66,7 @@ public:
     void setRoad(RoadBroken *roadBroken);
     // State interface
 public:
-    virtual void contextMenuEvent(QContextMenuEvent *pe);
+    virtual void contextMenuEvent(QContextMenuEvent *);
 
     // State interface
 public:

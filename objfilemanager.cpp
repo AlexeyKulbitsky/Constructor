@@ -18,12 +18,12 @@ OBJFileManager::~OBJFileManager()
     file = NULL;
 }
 
-bool OBJFileManager::openFile(QString source)
+bool OBJFileManager::openFile(QString)
 {
     return true;
 }
 
-bool OBJFileManager::saveFile(QString source)
+bool OBJFileManager::saveFile(QString)
 {
     return true;
 }
@@ -71,7 +71,7 @@ float* OBJFileManager::calculateNormals(int a, int b, int c)
     norm[2] = vr[2]/val;
 
 
-    return norm;
+    return &norm[0];
 
 }
 
@@ -178,13 +178,13 @@ bool OBJFileManager::loadOBJ(const char *folder, const char *filename, std::vect
                 std::vector<char*> t;
                 triangulate(temp, t);
                 temp.clear();
-                for (int i = 0; i < t.size(); ++i)
+                for (unsigned i = 0; i < t.size(); ++i)
                     temp.push_back(t[i]);
             }
             if (!hasTextures && !hasNormals)
             {
                 int a = 0;
-                for (int i = 0; i < temp.size(); ++i)
+                for (unsigned i = 0; i < temp.size(); ++i)
                 {
                     sscanf(temp[i],"%d", &a);
                     if (a < 0)
@@ -201,7 +201,7 @@ bool OBJFileManager::loadOBJ(const char *folder, const char *filename, std::vect
             }else if (hasTextures && !hasNormals)
             {
                 int a = 0, b = 0;
-                for (int i = 0; i < temp.size(); ++i)
+                for (unsigned i = 0; i < temp.size(); ++i)
                 {
                     sscanf(temp[i],"%d/%d", &a, &b);
                     if (a < 0)
@@ -221,7 +221,7 @@ bool OBJFileManager::loadOBJ(const char *folder, const char *filename, std::vect
             }else if (!hasTextures && hasNormals)
             {
                 int a = 0, b = 0;
-                for (int i = 0; i < temp.size(); ++i)
+                for (unsigned i = 0; i < temp.size(); ++i)
                 {
                     sscanf(temp[i],"%d//%d", &a, &b);
                     if (a < 0)
@@ -242,7 +242,7 @@ bool OBJFileManager::loadOBJ(const char *folder, const char *filename, std::vect
             }else if (hasTextures && hasNormals)
             {
                 int a = 0, b = 0, c = 0;
-                for (int i = 0; i < temp.size(); ++i)
+                for (unsigned i = 0; i < temp.size(); ++i)
                 {
                     sscanf(temp[i],"%d/%d/%d", &a, &b, &c);
                     if (a < 0)
@@ -284,12 +284,13 @@ bool OBJFileManager::loadOBJ(const char *folder, const char *filename, std::vect
         break;
     }
     meshes.push_back(currentMesh);
+    return true;
 }
 
 bool OBJFileManager::loadOBJ(const char *folder, const char *filename, const char *textureName, std::vector<Mesh *> &meshes, float velocity, float &scaleFactor, int axis)
 {
     this->textureName = textureName;
-    loadOBJ(folder, filename, meshes, velocity, scaleFactor, axis);
+    return loadOBJ(folder, filename, meshes, velocity, scaleFactor, axis);
 }
 
 bool OBJFileManager::loadOBJ(const QString& folder, const QString& filename, std::vector<Mesh *> &meshes, float velocity, float &scaleFactor, int axis)
@@ -397,13 +398,13 @@ bool OBJFileManager::loadOBJ(const QString& folder, const QString& filename, std
                 std::vector<char*> t;
                 triangulate(temp, t);
                 temp.clear();
-                for (int i = 0; i < t.size(); ++i)
+                for (unsigned i = 0; i < t.size(); ++i)
                     temp.push_back(t[i]);
             }
             if (!hasTextures && !hasNormals)
             {
                 int a = 0;
-                for (int i = 0; i < temp.size(); ++i)
+                for (unsigned i = 0; i < temp.size(); ++i)
                 {
                     sscanf(temp[i],"%d", &a);
                     if (a < 0)
@@ -420,7 +421,7 @@ bool OBJFileManager::loadOBJ(const QString& folder, const QString& filename, std
             }else if (hasTextures && !hasNormals)
             {
                 int a = 0, b = 0;
-                for (int i = 0; i < temp.size(); ++i)
+                for (unsigned i = 0; i < temp.size(); ++i)
                 {
                     sscanf(temp[i],"%d/%d", &a, &b);
                     if (a < 0)
@@ -440,7 +441,7 @@ bool OBJFileManager::loadOBJ(const QString& folder, const QString& filename, std
             }else if (!hasTextures && hasNormals)
             {
                 int a = 0, b = 0;
-                for (int i = 0; i < temp.size(); ++i)
+                for (unsigned i = 0; i < temp.size(); ++i)
                 {
                     sscanf(temp[i],"%d//%d", &a, &b);
                     if (a < 0)
@@ -461,7 +462,7 @@ bool OBJFileManager::loadOBJ(const QString& folder, const QString& filename, std
             }else if (hasTextures && hasNormals)
             {
                 int a = 0, b = 0, c = 0;
-                for (int i = 0; i < temp.size(); ++i)
+                for (unsigned i = 0; i < temp.size(); ++i)
                 {
                     sscanf(temp[i],"%d/%d/%d", &a, &b, &c);
                     if (a < 0)
@@ -523,6 +524,7 @@ bool OBJFileManager::loadOBJ(const QString& folder, const QString& filename, std
         }
     }
     meshes.push_back(currentMesh);
+    return true;
 }
 
 
@@ -542,7 +544,7 @@ void OBJFileManager::readTexture(char *line)
 void OBJFileManager::triangulate(std::vector<char *> in, std::vector<char *> &out)
 {
     out.clear();
-    for (int i = 2; i < in.size(); ++i)
+    for (unsigned i = 2; i < in.size(); ++i)
     {
         char temp[256];
         strcpy(temp,in[0]);
@@ -760,7 +762,7 @@ void OBJFileManager::readMtl(QString &mtlSource, std::vector<MaterialInfo *> &ma
 void OBJFileManager::readUseMtl(char *materialName, std::vector<MaterialInfo *> &materials, Mesh *currentMesh)
 {
     ////qDebug() << "Reading material: " << materialName;
-    for (int i = 0; i < materials.size(); ++i)
+    for (unsigned i = 0; i < materials.size(); ++i)
     {
         if (!strcmp(materialName,materials[i]->name))
         {

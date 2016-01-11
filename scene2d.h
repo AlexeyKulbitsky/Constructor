@@ -59,7 +59,7 @@ public:
 
    // bool tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement* element, int& index);
    // bool tryToSelectFigures(QPoint mp, RoadElement*& element);
-    void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
+    void getWindowCoord(double, double, double, double &, double &, double &);
     void getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz);
 
 
@@ -87,8 +87,9 @@ public:
     void drawRect(QPoint p1, QPoint p2);
     bool isRulerActive();
     void setModel(Model* model);
+    void setCamera(CameraView* camera);
     void setProperties(QFormLayout* properties);
-    void drawBackground(QPainter *painter);
+    void drawBackground(QPainter *);
     void setDrawRectStatus(bool status);
     void setSettings(QSettings* settings);
     void setOverlayWidget(QWebView *widget);
@@ -115,6 +116,7 @@ signals:
     void currentIndexChanged(int index);
     void widgetWidthChanged(int w);
     void widgetHeightChanged(int h);
+    void delayChanged(int value);
 
 public slots:
     void activateRuler();
@@ -144,7 +146,7 @@ public slots:
     void setWidgetHeight(int h);
     void setWidgetWidthScaleFactor(double factor);
     void setWidgetHeightScaleFactor(double factor);
-
+    void setDelay(int seconds);
     void saveImage();
 
 private:
@@ -158,11 +160,13 @@ private:
     int widgetHeight;
     float widgetWidthScaleFactor;
     float widgetHeightScaleFactor;
-
+    bool firstTime;
     QColor substrateColor;
     float substrateWidth, substrateLength;
     bool drawSubstrateStatus;
     static bool log;
+    void qSleep(int msec);
+    int delay;
     // QWidget interface
 protected:
     virtual void contextMenuEvent(QContextMenuEvent *pe);

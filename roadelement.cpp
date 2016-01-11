@@ -4,13 +4,13 @@ bool RoadElement::Ids[SIZE] = {false};
 
 QUndoStack* RoadElement::undoStack = NULL;
 
-std::vector<vec3> RoadElement::getCoordOfControl(int index)
+std::vector<vec3> RoadElement::getCoordOfControl(int)
 {
     std::vector<vec3> p; return p;
 }
 
 
-void RoadElement::setCoordForControl(int index, std::vector<vec3> &controls)
+void RoadElement::setCoordForControl(int, std::vector<vec3>&)
 {
 
 }
@@ -28,7 +28,7 @@ QJsonObject RoadElement::getJSONInfo()
 }
 
 
-void RoadElement::clearProperties(QLayout *layout)
+void RoadElement::clearProperties(QLayout *)
 
 {
     /*
@@ -58,13 +58,13 @@ void RoadElement::setModel(Model *model)
 }
 
 
-void RoadElement::addElement(RoadElement *element)
+void RoadElement::addElement(RoadElement *)
 {
 
 }
 
 
-void RoadElement::deleteElement(int index)
+void RoadElement::deleteElement(int)
 {
 
 }
@@ -76,7 +76,7 @@ int RoadElement::getNumberOfElements()
 }
 
 
-RoadElement *RoadElement::getElement(int index)
+RoadElement *RoadElement::getElement(int)
 {
     return NULL;
 }
@@ -84,7 +84,7 @@ RoadElement *RoadElement::getElement(int index)
 
 RoadElement::RoadElement()
 {
-    for (int i = 0; i < SIZE; ++i)
+    for (unsigned i = 0; i < SIZE; ++i)
     {
         if (Ids[i] == false)
         {
@@ -102,7 +102,7 @@ RoadElement::~RoadElement()
 }
 
 
-void RoadElement::rotate(float angle, float x, float y, float z)
+void RoadElement::rotate(float, float, float, float)
 {
 
 }
@@ -124,7 +124,7 @@ void RoadElement::setStepDialogs(StepDialog **dialogs, int size)
 }
 
 
-void RoadElement::deleteLine(RoadElement *line)
+void RoadElement::deleteLine(RoadElement *)
 {
 
 }
@@ -223,7 +223,7 @@ float RoadElement::calculateAngle(vec3 v1, vec3 v2)
     return angle;
 }
 
-RoadElement::setShowMeasurements(bool status)
+void RoadElement::setShowMeasurements(bool status)
 {
     showMeasurements = status;
 }

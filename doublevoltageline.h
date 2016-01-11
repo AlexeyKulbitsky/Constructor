@@ -13,10 +13,10 @@ public:
     DoubleVoltageLine();
     DoubleVoltageLine(float* axisArray, int size, float width = 0.5f,
                 QString name = "DoubleVoltageLine",
-                int layer = 1);
+                int layer = 2);
     DoubleVoltageLine(QVector<float> &axisArray, float width = 0.5f,
                 QString name = "DoubleVoltageLine",
-                int layer = 1);
+                int layer = 2);
     DoubleVoltageLine(const DoubleVoltageLine& source);
     virtual ~DoubleVoltageLine();
     // RoadElement interface

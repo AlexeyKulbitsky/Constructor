@@ -84,7 +84,7 @@ void RailWay::setSelectedStatus(bool status)
     selected = status;
 }
 
-void RailWay::drawFigure(QGLWidget *render)
+void RailWay::drawFigure(QGLWidget *)
 {
     if (log)
         Logger::getLogger()->infoLog() << "RailWay::drawFigure(QGLWidget *render)\n";
@@ -117,7 +117,7 @@ void RailWay::drawSelectionFrame()
         drawControlElement(i, 5.0f, 10.0f);
 }
 
-void RailWay::drawMeasurements(QGLWidget *render)
+void RailWay::drawMeasurements(QGLWidget *)
 {
     if (!showMeasurements)
         return;
@@ -224,7 +224,7 @@ void RailWay::changeColorOfSelectedControl(int index)
                                        << " index = " << index << "\n";
 }
 
-void RailWay::getProperties(QFormLayout *layout, QGLWidget *render)
+void RailWay::getProperties(QFormLayout *layout, QGLWidget *)
 {
     if (log)
         Logger::getLogger()->infoLog() << "RailWay::getProperties(QFormLayout *layout, QGLWidget *render)\n";
@@ -293,7 +293,7 @@ void RailWay::deleteBreak(bool front)
     if (log)
         Logger::getLogger()->infoLog() << "RailWay::deleteBreak(bool front)"
                                        << " front = " << front << "\n";
-    float x, y, z;
+    //float x, y, z;
     if (front)
     {
         axisVertexArray.pop_front();
@@ -694,7 +694,7 @@ void RailWay::setTextureArray(float textureUsize, float textureVsize)
         float y22 = vertexArray[(i + 22) * 3 + 1];
         float x23 = vertexArray[(i + 23) * 3];
         float y23 = vertexArray[(i + 23) * 3 + 1];
-        float pi = 3.14159265f;
+        //float pi = 3.14159265f;
 
         textureArray.push_back(0.0f);
         textureArray.push_back(0.0f);

@@ -31,7 +31,7 @@ private:
     QString fileType;
     // QWidget interface
 protected:
-    virtual void mouseReleaseEvent(QMouseEvent *event);
+    virtual void mouseReleaseEvent(QMouseEvent *);
 };
 
 #endif // OBJECTSLIST_H

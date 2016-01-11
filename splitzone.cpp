@@ -716,6 +716,7 @@ bool SplitZone::setFixed(bool fixed)
         Logger::getLogger()->infoLog() << "SplitZone::setFixed(bool fixed)"
                                        << " fixed = " << fixed << "\n";
     this->fixed = fixed;
+    return true;
 }
 
 void SplitZone::setHeight(double height)
@@ -1088,7 +1089,8 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
             float y2 = pointsArray[(i + 1) * 3 + 1];
 
             float r = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
-            float xR1, yR1, xR2, yR2;
+            float xR1, yR1;
+            //float xR2, yR2;
             float pi = 3.14159265f;
             float t = (x1 - x2) / r;
             if (t > 1)
@@ -1138,7 +1140,8 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
                 float x1 = pointsArray[(i - 1) * 3];
                 float y1 = pointsArray[(i - 1) * 3 + 1];
                 float r = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
-                float xR1, yR1, xR2, yR2;
+                float xR1, yR1;
+                //float xR2, yR2;
                 float pi = 3.14159265f;
                 float t = (x1 - x2) / r;
                 if (t > 1)
@@ -1253,7 +1256,7 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
                 float y2 = pointsArray[(i + 1) * 3 + 1];
 
                 float r = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
-                float xR1, yR1, xR2, yR2;
+                //float xR1, yR1, xR2, yR2;
                 float pi = 3.14159265f;
                 float t = (x1 - x2) / r;
                 if (t > 1)
@@ -1267,7 +1270,7 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
                 float alpha1 = alpha - pi / 2.0f;
                 if (alpha1 < 0)
                     alpha1 = 2.0f * pi + alpha1;
-                float alpha2 = alpha1 + pi;
+                //float alpha2 = alpha1 + pi;
                 float r1 = width / 2.0f;
 
                 lineAxis.push_back(x1 - r1 * cos(alpha1));
@@ -1404,7 +1407,8 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
             float y2 = pointsArray[(i + 1) * 3 + 1];
 
             float r = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
-            float xR1, yR1, xR2, yR2;
+            float xR1, yR1;
+            //float xR2, yR2;
             float pi = 3.14159265f;
             float t = (x1 - x2) / r;
             if (t > 1)
@@ -1454,7 +1458,8 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
                 float x1 = pointsArray[(i - 1) * 3];
                 float y1 = pointsArray[(i - 1) * 3 + 1];
                 float r = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
-                float xR1, yR1, xR2, yR2;
+                float xR1, yR1;
+                //float xR2, yR2;
                 float pi = 3.14159265f;
                 float t = (x1 - x2) / r;
                 if (t > 1)
@@ -1569,7 +1574,7 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
                 float y2 = pointsArray[(i + 1) * 3 + 1];
 
                 float r = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
-                float xR1, yR1, xR2, yR2;
+                //float xR1, yR1, xR2, yR2;
                 float pi = 3.14159265f;
                 float t = (x1 - x2) / r;
                 if (t > 1)
@@ -1583,7 +1588,7 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
                 float alpha1 = alpha - pi / 2.0f;
                 if (alpha1 < 0)
                     alpha1 = 2.0f * pi + alpha1;
-                float alpha2 = alpha1 + pi;
+                //float alpha2 = alpha1 + pi;
                 float r1 = width / 2.0f;
 
                 lineAxis.push_back(x1 + r1 * cos(alpha1));
@@ -1920,7 +1925,7 @@ void SplitZone::setBoardTextureArray(float textureUsize, float textureVsize)
         float y6 = boardVertexArray[(i + 6) * 3 + 1];
         float x7 = boardVertexArray[(i + 7) * 3];
         float y7 = boardVertexArray[(i + 7) * 3 + 1];
-        float pi = 3.14159265f;
+        //float pi = 3.14159265f;
 
         boardTextureArray.push_back(0.0f);
         boardTextureArray.push_back(0.0f);
@@ -2569,6 +2574,8 @@ std::vector<vec3> SplitZone::getCoordOfControl(int index)
     }
         break;
     default:
+        std::vector<vec3> res;
+        return res;
         break;
     }
 

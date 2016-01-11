@@ -696,7 +696,7 @@ LineBuilderState::~LineBuilderState()
 }
 
 
-void LineBuilderState::keyReleaseEvent(QKeyEvent *pe)
+void LineBuilderState::keyReleaseEvent(QKeyEvent *)
 {
     if (log)
     Logger::getLogger()->infoLog() << "LineBuilderState::keyReleaseEvent(QKeyEvent *pe)\n";
@@ -728,7 +728,7 @@ void LineBuilderState::setLine(LineBroken *lineBroken)
 }
 
 
-void LineBuilderState::contextMenuEvent(QContextMenuEvent *pe)
+void LineBuilderState::contextMenuEvent(QContextMenuEvent *)
 {
     Logger::getLogger()->infoLog() << "LineBuilderState::contextMenuEvent(QContextMenuEvent *pe)\n";
 }

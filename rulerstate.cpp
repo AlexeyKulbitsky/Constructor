@@ -266,7 +266,7 @@ void RulerState::dragEnterEvent(QDragEnterEvent *event)
     event->acceptProposedAction();
 }
 
-void RulerState::dropEvent(QDropEvent *event)
+void RulerState::dropEvent(QDropEvent *)
 {
     if (log)
         Logger::getLogger()->infoLog() << "RulerState::dropEvent(QDropEvent *event)\n";
@@ -282,7 +282,7 @@ RulerState::~RulerState()
 }
 
 
-void RulerState::keyReleaseEvent(QKeyEvent *pe)
+void RulerState::keyReleaseEvent(QKeyEvent *)
 {
 }
 
@@ -294,7 +294,7 @@ QString RulerState::getName()
     return "RulerState";
 }
 
-void RulerState::getGlobalCoord(double wx, double wy, double wz, double &x, double &y, double &z)
+void RulerState::getGlobalCoord(double, double, double, double&, double&, double&)
 {
     /*
     GLint viewport[4];
@@ -349,7 +349,7 @@ void RulerState::setLogging(bool status)
 }
 
 
-void RulerState::contextMenuEvent(QContextMenuEvent *pe)
+void RulerState::contextMenuEvent(QContextMenuEvent *)
 {
 }
 
@@ -370,7 +370,7 @@ void RulerState::del()
 {
 }
 
-void RulerState::clearProperties(QFormLayout *layout)
+void RulerState::clearProperties(QFormLayout *)
 {
 }
 
@@ -412,7 +412,7 @@ bool RulerState::tryToSelectFigures(QPoint mp, RoadElement *&element)
     glLoadIdentity();
 
     int i = 1;
-    for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
+    for (int j = model->getNumberOfGroups() - 2; j >= 0; --j)
     {
         int element = 0;
         for (QList<RoadElement*>::iterator it = model->getGroup(j).begin();
@@ -438,7 +438,7 @@ bool RulerState::tryToSelectFigures(QPoint mp, RoadElement *&element)
     if (hitsForFigure > 0) // есть совпадания и нет ошибок
     {
         i = selectBuffer[3] - 1; // имя фигуры верхняя фигура
-        for (int j = model->getNumberOfGroups() - 1; j >= 0; --j)
+        for (int j = model->getNumberOfGroups() - 2; j >= 0; --j)
         {
             if (i < model->getGroup(j).size())
             {

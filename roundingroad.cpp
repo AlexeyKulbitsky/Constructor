@@ -9,9 +9,9 @@ RoundingRoad::RoundingRoad()
 
 }
 
-RoundingRoad::RoundingRoad(float x1, float y1, float nearRadius, float angel1NearRadius, float angel2NearRadius,
-                           float x2, float y2, float farRadius, float angel1FarRadius, float angel2FarRadius,
-                           int numberOfSides, QString name, int layer)
+RoundingRoad::RoundingRoad(float, float, float, float, float,
+                           float, float, float, float, float,
+                           int, QString, int)
 {
     /*
     this->layer = layer;
@@ -631,22 +631,22 @@ void RoundingRoad::setNearTextureArray(float textUsize, float textVsize)
     y1 = vertexArrayNear[i * 3 + 1];
     x2 = vertexArrayNear[(i + 1) * 3];
     y2 = vertexArrayNear[(i + 1) * 3 + 1];
-    float s1 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
+    //float s1 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
     x2 = vertexArrayNear[(i + 1) * 3];
     y2 = vertexArrayNear[(i + 1) * 3 + 1];
     x2 = vertexArrayNear[(i + 2) * 3];
     y2 = vertexArrayNear[(i + 2) * 3 + 1];
-    float s2 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
+    //float s2 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
     x2 = vertexArrayNear[(i + 2) * 3];
     y2 = vertexArrayNear[(i + 2) * 3 + 1];
     x2 = vertexArrayNear[(i + 3) * 3];
     y2 = vertexArrayNear[(i + 3) * 3 + 1];
-    float s3 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
+    //float s3 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
     x2 = vertexArrayNear[(i + 3) * 3];
     y2 = vertexArrayNear[(i + 3) * 3 + 1];
     x2 = vertexArrayNear[(i + 4) * 3];
     y2 = vertexArrayNear[(i + 4) * 3 + 1];
-    float s4 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
+    //float s4 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
 
     for (int i = 0; i < numberOfSides; ++i)
     {
@@ -741,22 +741,22 @@ void RoundingRoad::setFarTextureArray(float textUsize, float textVsize)
     y1 = vertexArrayFar[i * 3 + 1];
     x2 = vertexArrayFar[(i + 1) * 3];
     y2 = vertexArrayFar[(i + 1) * 3 + 1];
-    float s1 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
+    //float s1 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
     x2 = vertexArrayFar[(i + 1) * 3];
     y2 = vertexArrayFar[(i + 1) * 3 + 1];
     x2 = vertexArrayFar[(i + 2) * 3];
     y2 = vertexArrayFar[(i + 2) * 3 + 1];
-    float s2 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
+    //float s2 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
     x2 = vertexArrayFar[(i + 2) * 3];
     y2 = vertexArrayFar[(i + 2) * 3 + 1];
     x2 = vertexArrayFar[(i + 3) * 3];
     y2 = vertexArrayFar[(i + 3) * 3 + 1];
-    float s3 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
+    //float s3 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
     x2 = vertexArrayFar[(i + 3) * 3];
     y2 = vertexArrayFar[(i + 3) * 3 + 1];
     x2 = vertexArrayFar[(i + 4) * 3];
     y2 = vertexArrayFar[(i + 4) * 3 + 1];
-    float s4 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
+    //float s4 = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) - ((r1 - r2)/2.0f)*((r1 - r2)/2.0f));
 
     for (int i = 0; i < numberOfSides; ++i)
     {
@@ -1252,9 +1252,10 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
     {
         return;
     }
-    int j;
-    float x1, y1, x2, y2;
-    float dr, dR;
+    //int j;
+    //float x1, y1, x2, y2;
+    float dr;
+    //float dR;
     float X, Y;
     //X = xCenter - x;
     //X = yCenter - y;
@@ -1995,14 +1996,15 @@ void RoundingRoad::addLine(float step, QString textureSource, float textureSize,
     radius += factor * step;
 
     QVector<float> vertices;
-    bool beginStepReleased = false, endStepReleased = false;
+    bool beginStepReleased = false;
+    bool endStepReleased = false;
     for (int i = 0; i <= numberOfSides; ++i)
     {
         //float angle = 2.0 * 3.1415926 * float(i) / float(numberOfSides);
         float angle = (angel_1 + (angel_2 - angel_1) * float(i) / float(numberOfSides)) * 3.1415926 / 180.0f;
         float dx = radius * cosf(angle);
         float dy = radius * sinf(angle);
-        float dr;
+        //float dr;
 
         if (!beginStepReleased)
         {
@@ -2117,7 +2119,7 @@ void RoundingRoad::addLine()
     if (log)
         Logger::getLogger()->infoLog() << "RoundingRoad::addLine()\n";
     QString textSource;
-    float lWidth;
+    float lWidth = 0.0f;
     switch(lineType)
     {
     case 0:
@@ -2273,14 +2275,15 @@ void RoundingRoad::resetLines()
 
 
         QVector<float> vertices;
-        bool beginStepReleased = false, endStepReleased = false;
+        bool beginStepReleased = false;
+        //bool endStepReleased = false;
         for (int j = 0; j <= numberOfSides; ++j)
         {
             //float angle = 2.0 * 3.1415926 * float(i) / float(numberOfSides);
             float angle = (angel_1 + (angel_2 - angel_1) * float(i) / float(numberOfSides)) * 3.1415926 / 180.0f;
             float dx = radius * cosf(angle);
             float dy = radius * sinf(angle);
-            float dr;
+            //float dr;
 
             if (!beginStepReleased)
             {
@@ -2595,6 +2598,7 @@ bool RoundingRoad::setFixed(bool fixed)
         Logger::getLogger()->infoLog() << "RoundingRoad::setFixed(bool fixed)"
                                        << " fixed = " << fixed << "\n";
     this->fixed = fixed;
+    return true;
 }
 
 
@@ -2783,7 +2787,7 @@ std::vector<vec3> RoundingRoad::getCoordOfControl(int index)
                 break;
             }
         }
-        for (int j = 0; j < lines[i].line->getCoordOfControl(index).size(); ++j)
+        for (unsigned j = 0; j < lines[i].line->getCoordOfControl(index).size(); ++j)
         {
             res.push_back(lines[i].line->getCoordOfControl(index)[j]);
         }
