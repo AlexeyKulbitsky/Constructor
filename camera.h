@@ -3,7 +3,9 @@
 
 #include <QFormLayout>
 #include <QAction>
+#include <QMenu>
 #include <QInputDialog>
+#include <QSplitter>
 #include "model.h"
 #include <GL/glu.h>
 #include "roadelement.h"
@@ -38,7 +40,6 @@ public:
            int sensor, int lens, float focalLength,
            const QString &cameraName,
            CameraView* camera);
-
     // RoadElement interface
 public:
     virtual bool isSelected();
@@ -119,7 +120,8 @@ public slots:
     void setDY(double value);
     void setDiagonalName(const QString &name);
     void setCameraName(const QString &name);
-
+    void setSensorName(const QString &name);
+    void setLensName(const QString &name);
     void setSensorWidth(double value);
     void setSensorHeight(double value);
     void setResolutionWidth(int value);
@@ -134,7 +136,11 @@ public slots:
     void addLens();
     void setMinimumFocalLength(double value);
     void setMaximumFocalLength(double value);
-    
+    void deleteSensor();
+    void deleteLens();
+    void saveSensor();
+    void saveLens();
+
 private:
     static QVector<Sensor> sensors;
 
@@ -211,6 +217,13 @@ public:
     QDoubleSpinBox *mountingHeightSpinBox;
     QDoubleSpinBox *horizontalAngleSpinBox;
     QDoubleSpinBox *verticalAngleSpinBox;
+    QLineEdit *lensLineEdit;
+    QLineEdit *sensorLineEdit;
+    QPushButton *saveCameraButton;
+    QPushButton *deleteSensorButton;
+    QPushButton *deleteLensButton;
+    QPushButton *saveSensorButton;
+    QPushButton *saveLensButton;
 
     void createProperties();
     // RoadElement interface

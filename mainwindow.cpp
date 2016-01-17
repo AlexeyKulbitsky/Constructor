@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     camera = NULL;
     Logger::getLogger()->startLogging();
     ui->setupUi(this);
-    setWindowTitle("Constructor ver.1.1.1");
+    setWindowTitle("Constructor ver.1.2.0");
     model = new Model(this);
     jsonFileManager = new JSONFileManager(model);
     setFileManager(jsonFileManager);
@@ -355,6 +355,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    Camera::saveSensors(QApplication::applicationDirPath() + QString("/sensors.json"));
     //scene3D->saveSettings();
     scene2D->saveSettings();
     writeSettings();

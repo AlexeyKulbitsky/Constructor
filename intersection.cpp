@@ -460,6 +460,7 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
                     {
                         // Ширина левая
                         roads[i]->resizeByControl(index, dx, dy, x, y);
+
                     }else
                         if (index == count + 10)
                         {
@@ -559,16 +560,25 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
                                             }
                                             else
                                             {
-//                                                 if (dr < rRes)
-//                                                 {
-//                                                     rRes = dr;
-//                                                     x1Res = x1Temp;
-//                                                     y1Res = y1Temp;
-//                                                     x2Res = p2.x;
-//                                                     y2Res = p2.y;
-//                                                 }
+                                                float rt1 = sqrt((x1Temp - t1.x) * (x1Temp - t1.x) +
+                                                                 (y1Temp - t1.y) * (y1Temp - t1.y));
+                                                float rt2 = sqrt((t2.x - t1.x) * (t2.x - t1.x) +
+                                                                 (t2.y - t1.y) * (t2.y - t1.y));
+                                                if (rt1 > rt2)
+                                                {
+                                                    x1Res = t2.x;
+                                                    y1Res = t2.y;
+                                                    x2Res = (t2.x - p1.x) + p2.x;
+                                                    y2Res = (t2.y - p1.y) + p2.y;
+                                                    break;
+                                                }
+                                                else
+                                                {
+                                                    continue;
+                                                }
+                                                //rRes = dr;
 
-                                                continue;
+
                                             }
 
                                         }
@@ -593,7 +603,10 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
 
             }
         }
-
+        qDebug() << "X1:" << x1Res;
+        qDebug() << "Y1:" << y1Res;
+        qDebug() << "X2:" << x2Res;
+        qDebug() << "Y2:" << y2Res;
         roads[i]->setVertexArray(x1Res, y1Res, x2Res, y2Res, width);
         roads[i]->setTextureArray();
 

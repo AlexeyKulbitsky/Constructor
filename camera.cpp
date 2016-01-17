@@ -12,6 +12,7 @@ QVector<Sensor> Camera::sensors;
 
 Camera::Camera(float x, float y, CameraView *camera)
 {
+
     deltaAngle = 0.0f;
     layer = 3;
     cameraName = "\0";
@@ -116,6 +117,7 @@ Camera::Camera(float x, float y, float height,
     setFOVIndexArrayFar();
     qDebug() << "gfhgf";
 }
+
 
 
 
@@ -350,7 +352,9 @@ void Camera::getProperties(QFormLayout *layout, QGLWidget *render)
     layout->addRow("Высота", sensorHeightSpinBox);
     layout->addRow("Разрешение (ширина)", resolutionWidthSpinBox);
     layout->addRow("Разрешение (высота)", resolutionHeightSpinBox);
-    layout->addRow("Используемая часть сенсора", usableSensorSpinBox);
+    layout->addRow("Используемая часть", usableSensorSpinBox);
+    layout->addRow("Сохранить изменения", saveSensorButton);
+    layout->addRow("Удалить сенсор", deleteSensorButton);
     layout->addRow("Объектив", lensComboBox);
     layout->addRow("Редактировать", editLensCheckBox);
     layout->addRow("Фокус (минимум)", minimumFocalSpinBox);
@@ -358,9 +362,12 @@ void Camera::getProperties(QFormLayout *layout, QGLWidget *render)
     layout->addRow("Фокусное расстояние", focalLengthSpinBox);
     layout->addRow("Угол обзора(гор)", xFOVSpinBox);
     layout->addRow("Угол обзора(верт)", yFOVSpinBox);
+    layout->addRow("Сохранить изменения", saveLensButton);
+    layout->addRow("Удалить объектив", deleteLensButton);
     layout->addRow("Высота установки", mountingHeightSpinBox);
     layout->addRow("Угол поворота", horizontalAngleSpinBox);
     layout->addRow("Угол наклона", verticalAngleSpinBox);
+
 
     if (render)
     {
@@ -843,6 +850,18 @@ void Camera::setCameraName(const QString &name)
     cameraName = name;
 }
 
+void Camera::setSensorName(const QString &name)
+{
+    sensors[currentSensor].name = name;
+    sensorTypeComboBox->setItemText(currentSensor, name);
+}
+
+void Camera::setLensName(const QString &name)
+{
+    sensors[currentSensor].lenses[currentLens].name = name;
+    lensComboBox->setItemText(currentLens, name);
+}
+
 void Camera::calculateFOV()
 {    
     verticalAngle += deltaAngle;
@@ -948,6 +967,8 @@ void Camera::setSensor(int sensorType)
         return;
     }
     int i = sensorType;
+    int temp = currentSensor;
+    currentSensor = sensorType;
 
     setDiagonalName(sensors[i].diagonal);
     setSensorWidth(sensors[i].width);
@@ -958,9 +979,7 @@ void Camera::setSensor(int sensorType)
     qDebug() << sensors[i].usablePart;
     //aspectRatio = sensorWidth / sensorHeight;
     //cameraView->setAspectRatio(aspectRatio);
-    int temp = currentSensor;
 
-    currentSensor = sensorType;
 
     if (temp == currentSensor)
         return;
@@ -1103,6 +1122,47 @@ void Camera::setMaximumFocalLength(double value)
     emit maximumFocalLengthChanged(value);
 }
 
+void Camera::deleteSensor()
+{
+    sensorTypeComboBox->removeItem(currentSensor);
+    sensors.removeAt(currentSensor);
+
+    if (currentSensor >= sensors.size())
+        currentSensor = sensors.size() - 1;
+
+    sensorTypeComboBox->setCurrentIndex(currentSensor);
+    setSensor(currentSensor);
+}
+
+void Camera::deleteLens()
+{
+    lensComboBox->removeItem(currentLens);
+    sensors[currentSensor].lenses.removeAt(currentLens);
+
+    if (currentLens >= sensors[currentSensor].lenses.size())
+        currentLens = sensors[currentSensor].lenses.size() - 1;
+
+    lensComboBox->setCurrentIndex(currentLens);
+    setLens(currentLens);
+}
+
+void Camera::saveSensor()
+{
+    sensors[currentSensor].diagonal = diagonalName;
+    sensors[currentSensor].width = sensorWidth;
+    sensors[currentSensor].height = sensorHeight;
+    sensors[currentSensor].resolutionWidth = resolutionWidth;
+    sensors[currentSensor].resolutionHeight = resolutionHeight;
+    sensors[currentSensor].usablePart = usablePart;
+}
+
+void Camera::saveLens()
+{
+    sensors[currentSensor].lenses[currentLens].minimum = minimumFocalLength;
+    sensors[currentSensor].lenses[currentLens].maximum = maximumFocalLength;
+}
+
+
 void Camera::createProperties()
 {
     fixedCheckBox = new QCheckBox();
@@ -1114,6 +1174,11 @@ void Camera::createProperties()
     cameraNameLineEdit->setText(cameraName);
 
     sensorTypeComboBox = new QComboBox();
+    sensorLineEdit = new QLineEdit();
+    connect(sensorLineEdit, SIGNAL(textEdited(QString)), this, SLOT(setSensorName(QString)));
+    sensorTypeComboBox->setLineEdit(sensorLineEdit);
+
+
     QStringList sensorList;
     for (int i = 0; i < sensors.size(); ++i)
     {
@@ -1127,42 +1192,53 @@ void Camera::createProperties()
     //sensorTypeComboBox->setCurrentIndex(currentSensor);
 
     sensorDiagonalLineEdit = new QLineEdit();
+    sensorDiagonalLineEdit->setText(diagonalName);
     connect(sensorDiagonalLineEdit, SIGNAL(textChanged(QString)), this, SLOT(setDiagonalName(QString)));
     connect(this, SIGNAL(diagonalNameChanged(QString)), sensorDiagonalLineEdit, SLOT(setText(QString)));
-    sensorDiagonalLineEdit->setText(diagonalName);
+
 
     sensorWidthSpinBox = new QDoubleSpinBox();
     sensorWidthSpinBox->setSingleStep(0.1);
+    sensorWidthSpinBox->setValue(sensorWidth);
     connect(sensorWidthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setSensorWidth(double)));
     connect(this, SIGNAL(sensorWidthChanged(double)), sensorWidthSpinBox, SLOT(setValue(double)));
-    sensorWidthSpinBox->setValue(sensorWidth);
+
 
     sensorHeightSpinBox = new QDoubleSpinBox();
     sensorHeightSpinBox->setSingleStep(0.1);
+    sensorHeightSpinBox->setValue(sensorHeight);
     connect(sensorHeightSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setSensorHeight(double)));
     connect(this, SIGNAL(sensorHeightChanged(double)), sensorHeightSpinBox, SLOT(setValue(double)));
-    sensorHeightSpinBox->setValue(sensorHeight);
+
 
     resolutionWidthSpinBox = new QSpinBox();
     resolutionWidthSpinBox->setMaximum(1000000);
+    resolutionWidthSpinBox->setValue(resolutionWidth);
     connect(resolutionWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setResolutionWidth(int)));
     connect(this, SIGNAL(resolutionWidthChanged(int)), resolutionWidthSpinBox, SLOT(setValue(int)));
-    resolutionWidthSpinBox->setValue(resolutionWidth);
+
 
     resolutionHeightSpinBox = new QSpinBox();
     resolutionHeightSpinBox->setMaximum(1000000);
+    resolutionHeightSpinBox->setValue(resolutionHeight);
     connect(resolutionHeightSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setResolutionHeight(int)));
     connect(this, SIGNAL(resolutionHeightChanged(int)), resolutionHeightSpinBox, SLOT(setValue(int)));
-    resolutionHeightSpinBox->setValue(resolutionHeight);
+
 
     usableSensorSpinBox = new QSpinBox();
     usableSensorSpinBox->setMaximum(1000000);
     usableSensorSpinBox->setKeyboardTracking(false);
+    usableSensorSpinBox->setValue(usablePart);
     connect(usableSensorSpinBox, SIGNAL(valueChanged(int)), this, SLOT(setUsablePart(int)));
     connect(this, SIGNAL(usablePartChanged(int)), usableSensorSpinBox, SLOT(setValue(int)));
-    usableSensorSpinBox->setValue(usablePart);
+
+
 
     lensComboBox = new QComboBox();
+    lensLineEdit = new QLineEdit();
+    connect(lensLineEdit, SIGNAL(textEdited(QString)), this, SLOT(setLensName(QString)));
+    lensComboBox->setLineEdit(lensLineEdit);
+
     QStringList lensList;
     for (int i = 0; i < sensors[currentSensor].lenses.size(); ++i)
     {
@@ -1233,12 +1309,25 @@ void Camera::createProperties()
     connect(this, SIGNAL(verticalAngleChanged(double)), verticalAngleSpinBox, SLOT(setValue(double)));
     verticalAngleSpinBox->setValue(verticalAngle);
 
+    deleteSensorButton = new QPushButton("Удалить");
+    connect(deleteSensorButton, SIGNAL(clicked(bool)), this, SLOT(deleteSensor()));
+
+    deleteLensButton = new QPushButton("Удалить");
+    connect(deleteLensButton, SIGNAL(clicked(bool)), this, SLOT(deleteLens()));
+
+    saveSensorButton = new QPushButton("Сохранить");
+    connect(saveSensorButton, SIGNAL(clicked(bool)), this, SLOT(saveSensor()));
+
+    saveLensButton = new QPushButton("Сохранить");
+    connect(saveLensButton, SIGNAL(clicked(bool)), this, SLOT(saveLens()));
+
     connect(fixedCheckBox, SIGNAL(toggled(bool)), focalLengthSpinBox, SLOT(setDisabled(bool)));
     connect(fixedCheckBox, SIGNAL(toggled(bool)), mountingHeightSpinBox, SLOT(setDisabled(bool)));
     connect(fixedCheckBox, SIGNAL(toggled(bool)), horizontalAngleSpinBox, SLOT(setDisabled(bool)));
     connect(fixedCheckBox, SIGNAL(toggled(bool)), verticalAngleSpinBox, SLOT(setDisabled(bool)));
     connect(fixedCheckBox, SIGNAL(toggled(bool)), xFOVSpinBox, SLOT(setDisabled(bool)));
     connect(fixedCheckBox, SIGNAL(toggled(bool)), yFOVSpinBox, SLOT(setDisabled(bool)));
+
     fixedCheckBox->setChecked(fixed);
 
     editSensorCheckBox = new QCheckBox();
@@ -1248,12 +1337,16 @@ void Camera::createProperties()
     connect(editSensorCheckBox, SIGNAL(toggled(bool)), resolutionWidthSpinBox, SLOT(setEnabled(bool)));
     connect(editSensorCheckBox, SIGNAL(toggled(bool)), resolutionHeightSpinBox, SLOT(setEnabled(bool)));
     connect(editSensorCheckBox, SIGNAL(toggled(bool)), usableSensorSpinBox, SLOT(setEnabled(bool)));
+    connect(editSensorCheckBox, SIGNAL(toggled(bool)), sensorLineEdit, SLOT(setEnabled(bool)));
+    connect(editSensorCheckBox, SIGNAL(toggled(bool)), deleteSensorButton, SLOT(setEnabled(bool)));
     editSensorCheckBox->toggle();
     editSensorCheckBox->toggle();
     
     editLensCheckBox = new QCheckBox();
     connect(editLensCheckBox, SIGNAL(toggled(bool)), minimumFocalSpinBox, SLOT(setEnabled(bool)));
     connect(editLensCheckBox, SIGNAL(toggled(bool)), maximumFocalSpinBox, SLOT(setEnabled(bool)));
+    connect(editLensCheckBox, SIGNAL(toggled(bool)), lensLineEdit, SLOT(setEnabled(bool)));
+    connect(editLensCheckBox, SIGNAL(toggled(bool)), deleteLensButton, SLOT(setEnabled(bool)));
     editLensCheckBox->toggle();
     editLensCheckBox->toggle();
 

@@ -121,6 +121,11 @@ MapPlane::MapPlane(const MapPlane &source)
     layer = 4;
 }
 
+MapPlane::~MapPlane()
+{
+    glDeleteTextures(1, &textureID);
+}
+
 
 
 bool MapPlane::isSelected()
@@ -233,10 +238,10 @@ QJsonObject MapPlane::getJSONInfo()
     element["Height"] = height;
     if (texture.size() == 0)
     {
-        QString fileName = QFileDialog::getSaveFileName(0, tr("Сохранить изображение"), QApplication::applicationDirPath(), tr("JPEG files (*.jpg)") );
+        QString fileName = QFileDialog::getSaveFileName(0, tr("Сохранить изображение захваченного участка карты"), QApplication::applicationDirPath(), tr("JPEG files (*.jpg)") );
         while (fileName.size() == 0)
         {
-            fileName = QFileDialog::getSaveFileName(0, tr("Сохранить изображение"), QApplication::applicationDirPath(), tr("JPEG files (*.jpg)") );
+            fileName = QFileDialog::getSaveFileName(0, tr("Сохранить изображение захваченного участка карты"), QApplication::applicationDirPath(), tr("JPEG files (*.jpg)") );
         }
         texture = fileName;
         image.save(fileName);

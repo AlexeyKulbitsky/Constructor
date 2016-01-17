@@ -2540,21 +2540,6 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
             {
                 if (i == index)
                     continue;
-//                float r;
-//                if (!lines[i].rightSide)
-//                    r = lines[i].step;
-//                else
-//                    r = width - lines[i].step;
-
-//                if (r >= r1)
-//                {
-//                    float x = line_x1 + (line_x2 - line_x1) / (width - r1) * (r - r1);
-//                    float y = line_y1 + (line_y2 - line_y1) / (width - r1) * (r - r1);
-//                    LineSimple *l = dynamic_cast<LineSimple*>(lines[i].line);
-//                    vec2 p = l->getAxisPoint_2();
-//                    l->setVertexArray(x, y, p.x, p.y, lines[i].lineWidth);
-//                    l->setTextureArray();
-//                }
                 vec2 p1(line_x1, line_y1);
                 vec2 p2(line_x2, line_y2);
                 LineSimple *l = dynamic_cast<LineSimple*>(lines[i].line);

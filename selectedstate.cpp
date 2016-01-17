@@ -234,8 +234,9 @@ void SelectedState::mouseMoveEvent(QMouseEvent *pe)
                             scene->width()/(scene->nSca * scene->ratio) * 2.0;
                     float y = (GLdouble)(scene->height() -  ptrMousePosition.y())/
                             scene->width()/(scene->nSca * scene->ratio) * 2.0;
-
+                    qDebug() << "Before Resize-----------------";
                     selectedElement->resizeByControl(controlIndex, dX, dY, x, y);
+                    qDebug() << "After Resize-----------------";
                     scene->updateGL();
                     model->setModified(true);
                     ptrMousePosition = pe->pos();
@@ -1038,16 +1039,21 @@ void SelectedState::breakElements()
         Logger::getLogger()->infoLog() << "SelectedState::breakElements()\n";
     if (selectedElement->getName() != "CompositeRoad")
         return;
+    selectedElements.clear();
     for (int i = 0; i < selectedElement->getNumberOfElements(); ++i)
     {
         RoadElement* element = selectedElement->getElement(i);
         if (element == NULL)\
             qDebug() << "element null";
         int layer = element->getLayer();
+        selectedElements.push_back(element);
         model->getGroup(layer).push_back(element);
+
         qDebug() << "number:" << i;
     }
     model->getGroup(0).removeOne(selectedElement);
+
+    selectedElement = NULL;
     qDebug() << "Good";
 }
 

@@ -88,6 +88,7 @@ void StepDialog::setDefaultLayout()
     QLabel *beginStepLabel = new QLabel("Отступ от начала");
     connect(beginStepDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setBeginStep(double)));
     connect(this, SIGNAL(beginStepChanged(double)), beginStepDoubleSpinBox, SLOT(setValue(double)));
+    beginStepDoubleSpinBox->setValue(beginStep);
 
     QHBoxLayout *beginStepLayout = new QHBoxLayout();
     beginStepLayout->addWidget(beginStepLabel);
@@ -98,6 +99,7 @@ void StepDialog::setDefaultLayout()
     QLabel *endStepLabel = new QLabel("Отступ с конца");
     connect(endStepDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setEndStep(double)));
     connect(this, SIGNAL(endStepChanged(double)), endStepDoubleSpinBox, SLOT(setValue(double)));
+    endStepDoubleSpinBox->setValue(endStep);
 
     QHBoxLayout *endStepLayout = new QHBoxLayout();
     endStepLayout->addWidget(endStepLabel);
@@ -108,6 +110,7 @@ void StepDialog::setDefaultLayout()
     lineStepDoubleSpinBox->setMinimum(0.0f);
     connect(lineStepDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setStep(double)));
     connect(this, SIGNAL(stepChanged(double)), lineStepDoubleSpinBox, SLOT(setValue(double)));
+    lineStepDoubleSpinBox->setValue(step);
 
     QHBoxLayout *lineStepLayout = new QHBoxLayout();
     lineStepLayout->addWidget(lineStepLabel);
@@ -505,6 +508,7 @@ void StepDialog::setStep(double value)
 
 void StepDialog::setLineType(int type)
 {
+    qDebug() << "SetLineType" << type;
     if (lineType == type)
         return;
     switch (type)
@@ -602,9 +606,23 @@ void StepDialog::buttonClicked()
     }
         break;
     }
-
-
     this->accept();
+    qDebug() << "Accepted";
+    setLineType(0);
+    setRightSide(true);
+    setDifferentDirection(true);
+    setBeginSide(true);
+    setStep(0.0f);
+    setBeginStep(0.0);
+    setEndStep(0.0);
+    setBeginRoundingStatus(true);
+    setEndRoundingStatus(true);
+    setSplitZoneWidth(1.0);
+    setSingleWay(true);
+    setAxisStep(0.0);
+    setSplitZoneHeight(0.1);
+    setSplitZoneType(0);
+
 }
 
 void StepDialog::setBeginRoundingStatus(bool status)

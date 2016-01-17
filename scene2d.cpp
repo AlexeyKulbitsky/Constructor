@@ -493,6 +493,8 @@ void Scene2D::drawGrid()
 {
     if (log)
         Logger::getLogger()->infoLog() << "Scene2D::drawGrid()\n";
+    if (gridStep <= 0.0f)
+        return;
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
     if (showGrid)
@@ -981,6 +983,11 @@ void Scene2D::saveImage()
         float w = dx * factor;
         float h = dy * factor;
         MapPlane *mapPlane = new MapPlane(w, h, widgetImage);
+        for (int i = 0; i < model->getGroup(mapPlane->getLayer()).size(); ++i)
+        {
+            delete model->getGroup(mapPlane->getLayer())[i];
+        }
+        model->getGroup(mapPlane->getLayer()).clear();
         model->getGroup(mapPlane->getLayer()).push_back(mapPlane);
         yandex->setActive(true);
         progress.setValue(3);
@@ -999,6 +1006,11 @@ void Scene2D::saveImage()
             float w = dx * factor;
             float h = dy * factor;
             MapPlane *mapPlane = new MapPlane(w, h, widgetImage);
+            for (int i = 0; i < model->getGroup(mapPlane->getLayer()).size(); ++i)
+            {
+                delete model->getGroup(mapPlane->getLayer())[i];
+            }
+            model->getGroup(mapPlane->getLayer()).clear();
             model->getGroup(mapPlane->getLayer()).push_back(mapPlane);
             google->setActive(true);
             progress.setValue(3);
@@ -1016,6 +1028,11 @@ void Scene2D::saveImage()
                 float w = dx * factor;
                 float h = dy * factor;
                 MapPlane *mapPlane = new MapPlane(w, h, widgetImage);
+                for (int i = 0; i < model->getGroup(mapPlane->getLayer()).size(); ++i)
+                {
+                    delete model->getGroup(mapPlane->getLayer())[i];
+                }
+                model->getGroup(mapPlane->getLayer()).clear();
                 model->getGroup(mapPlane->getLayer()).push_back(mapPlane);
                 progress.setValue(3);
             }
@@ -1097,6 +1114,8 @@ void Scene2D::setGridStep(double step)
     if (this->gridStep == step)
         return;
     this->gridStep = step;
+    if (gridStep <= 0.0f)
+        gridStep = 0.0f;
     updateGL();
     emit gridStepChanged(step);
 }
@@ -1123,6 +1142,7 @@ void Scene2D::getProperties(QFormLayout *layout)
     }
 
     QDoubleSpinBox* scaleSpinBox = new QDoubleSpinBox();
+    scaleSpinBox->setKeyboardTracking(false);
     scaleSpinBox->setMinimum(0.0);
     scaleSpinBox->setDecimals(5);
     scaleSpinBox->setValue(nSca);
@@ -1135,6 +1155,7 @@ void Scene2D::getProperties(QFormLayout *layout)
 //    scaleLayout->addWidget(scaleSpinBox);
 
     QDoubleSpinBox* scaleStepSpinBox = new QDoubleSpinBox();
+    scaleStepSpinBox->setKeyboardTracking(false);
     scaleStepSpinBox->setMinimum(0.0);
     scaleStepSpinBox->setDecimals(5);
     scaleStepSpinBox->setValue(scaleStep);
@@ -1147,6 +1168,7 @@ void Scene2D::getProperties(QFormLayout *layout)
 //    scaleStepLayout->addWidget(scaleStepSpinBox);
 
     QDoubleSpinBox* gridStepSpinBox = new QDoubleSpinBox();
+    gridStepSpinBox->setKeyboardTracking(false);
     gridStepSpinBox->setMinimum(0.0);
     gridStepSpinBox->setMaximum(1000000.0);
     gridStepSpinBox->setDecimals(5);

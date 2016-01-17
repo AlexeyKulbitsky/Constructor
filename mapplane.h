@@ -11,6 +11,7 @@ public:
     MapPlane(GLfloat width, GLfloat height, QString& texture);
     MapPlane(GLfloat width, GLfloat height, QImage& image);
     MapPlane(const MapPlane &source);
+    virtual ~MapPlane();
 
     // RoadElement interface
 public:
