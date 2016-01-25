@@ -88,7 +88,7 @@ public:
     bool isRulerActive();
     void setModel(Model* model);
     void setCamera(CameraView* camera);
-    void setProperties(QFormLayout* properties);
+    void setProperties(QVBoxLayout* properties);
     void drawBackground(QPainter *);
     void setDrawRectStatus(bool status);
     void setSettings(QSettings* settings);
@@ -153,7 +153,7 @@ private:
     QImage widgetImage;
     bool scaleImage;
     Model* model;
-    QFormLayout* properties;
+    QVBoxLayout* properties;
     bool showGrid;
     QWebView* widget;
     int widgetWidth;

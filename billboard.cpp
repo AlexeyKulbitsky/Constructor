@@ -195,7 +195,7 @@ void Billboard::changeColorOfSelectedControl(int)
 {
 }
 
-void Billboard::getProperties(QFormLayout *layout, QGLWidget *render)
+void Billboard::getProperties(QVBoxLayout *layout, QGLWidget *render)
 {
     clearProperties(layout);
 
@@ -238,11 +238,14 @@ void Billboard::getProperties(QFormLayout *layout, QGLWidget *render)
         connect(zSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
         connect(rotationSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
     }
-    layout->addRow("Зафиксировать", fixedCheckBox);
-    layout->addRow("Ширина", widthSpinBox);
-    layout->addRow("Высота", heightSpinBox);
-    layout->addRow("Высота от уровня земли", zSpinBox);
-    layout->addRow("Поворот", rotationSpinBox);
+    QFormLayout *l = new QFormLayout();
+    l->addRow("Зафиксировать", fixedCheckBox);
+    l->addRow("Ширина", widthSpinBox);
+    l->addRow("Высота", heightSpinBox);
+    l->addRow("Высота от уровня земли", zSpinBox);
+    l->addRow("Поворот", rotationSpinBox);
+
+    layout->addLayout(l);
 }
 
 bool Billboard::isFixed()
@@ -365,8 +368,15 @@ void Billboard::clearProperties(QLayout *layout)
     while(layout->count() > 0)
     {
         QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
+        if (item->layout() != NULL)
+        {
+            clearProperties(item->layout());
+            delete item->layout();
+        }
+        if (item->widget() != NULL)
+        {
+            delete item->widget();
+        }
     }
 }
 

@@ -567,7 +567,7 @@ void Scene2D::setCamera(CameraView *camera)
 }
 
 
-void Scene2D::setProperties(QFormLayout *properties)
+void Scene2D::setProperties(QVBoxLayout *properties)
 {
     if (log)
         Logger::getLogger()->infoLog() << "Scene2D::setProperties(QFormLayout *properties)\n";

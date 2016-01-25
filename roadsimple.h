@@ -61,6 +61,8 @@ public:
 
     vec2 getAxisPoint_1();
     vec2 getAxisPoint_2();
+    vec2 axis_1();
+    vec2 axis_2();
     void setCoordForAxisPoint(int index, float x, float y);
     float getWidth() { return width; }
     void setCoordForPoint(int index, float newX, float newY, float newZ);
@@ -96,6 +98,7 @@ protected:
     GLfloat red, green, blue, alpha;
     float x1, y1, x2, y2;
     float xP1, yP1, xP2, yP2;
+    vec2 axis1, axis2;
     float width, length;
     float rightWidth;
     float leftWidth;
@@ -128,7 +131,7 @@ protected:
     int splitZoneType;
     double splitZoneHeight;
     static bool log;
-    QFormLayout* layout;
+    QVBoxLayout* layout;
     QGLWidget* render;
 
     QString description;
@@ -162,7 +165,7 @@ public:
 signals:
     void widthChanged(double width);
     void lengthChanged(double length);
-    void linesChanged(QFormLayout* layout, QGLWidget* render);
+    void linesChanged(QVBoxLayout* layout, QGLWidget* render);
     void rightBoardWidthChanged(double width);
     void leftBoardWidthChanged(double width);
     void rightWidthChanged(double width);
@@ -201,37 +204,21 @@ public slots:
     void setAxisStep(double step);
     void setSplitZoneType(int type);
     void setSplitZoneHeight(double height);
-    virtual void getProperties(QFormLayout *layout, QGLWidget* render = 0);
+    virtual void getProperties(QVBoxLayout *layout, QGLWidget* render = 0);
     virtual bool setFixed(bool fixed);
     void resetLines();
 
     // RoadElement interface
 public:
     virtual std::vector<vec3> getCoordOfControl(int index);
-
-    // RoadElement interface
-public:
     virtual void clearProperties(QLayout *layout);
-
-    // RoadElement interface
-public:
     virtual void deleteLine(RoadElement *line);
-
-    // RoadElement interface
-public:
     virtual RoadElement *getCopy();
-
-    // RoadElement interface
-public:
     virtual void setCoordForControl(int index, std::vector<vec3> &controls);
-
-    // RoadElement interface
-public:
     virtual QString getName();
-
-    // RoadElement interface
-public:
     virtual void rotate(float angle, float x, float y, float z);
+
+    void resizeByControlSelf(int index, float dx, float dy, float x, float y);
 };
 
 #endif // ROADSIMPLE_H

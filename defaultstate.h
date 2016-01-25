@@ -14,7 +14,7 @@ class DefaultState : public State
     Q_OBJECT
 public:
     DefaultState();
-    DefaultState(StateManager* manager, Model* model, Scene2D* scene, QFormLayout* properties);
+    DefaultState(StateManager* manager, Model* model, Scene2D* scene, QVBoxLayout* properties);
 
     virtual ~DefaultState();
 
@@ -22,7 +22,7 @@ private:
     StateManager* stateManager;
     Model* model;
     Scene2D* scene;
-    QFormLayout* properties;
+    QVBoxLayout* properties;
 
     QPoint ptrMousePosition;
     QPoint rectPoint1, rectPoint2;
@@ -58,7 +58,7 @@ public:
     void drawRect(QPoint p1, QPoint p2);
     void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
     void getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz);
-    void clearProperties(QFormLayout* layout);
+    void clearProperties(QVBoxLayout* layout);
 
 
     // State interface

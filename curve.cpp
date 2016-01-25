@@ -551,7 +551,7 @@ void Curve::changeColorOfSelectedControl(int index)
     indexOfSelectedControl = index;
 }
 
-void Curve::getProperties(QFormLayout *layout, QGLWidget *render)
+void Curve::getProperties(QVBoxLayout *layout, QGLWidget *render)
 {
     if (log)
         Logger::getLogger()->infoLog() << "Curve::getProperties(QFormLayout *layout, QGLWidget *render)\n";
@@ -563,66 +563,66 @@ void Curve::getProperties(QFormLayout *layout, QGLWidget *render)
             Logger::getLogger()->errorLog() << "Curve::getProperties(QFormLayout *layout, QGLWidget *render) layout = NULL\n";
         QApplication::exit(0);
     }
-    this->layout = layout;
-    this->render = render;
+//    this->layout = layout;
+//    this->render = render;
 
-    QCheckBox *fixedCheckBox = new QCheckBox();
-    fixedCheckBox->setChecked(fixed);
-    connect(fixedCheckBox, SIGNAL(toggled(bool)), this, SLOT(setFixed(bool)));
+//    QCheckBox *fixedCheckBox = new QCheckBox();
+//    fixedCheckBox->setChecked(fixed);
+//    connect(fixedCheckBox, SIGNAL(toggled(bool)), this, SLOT(setFixed(bool)));
 
-    QDoubleSpinBox *leftLengthDoubleSpinBox = new QDoubleSpinBox();
-    leftLengthDoubleSpinBox->setKeyboardTracking(false);
-    leftLengthDoubleSpinBox->setMinimum(0.0);
-    leftLengthDoubleSpinBox->setValue(leftLength);
-    connect(this, SIGNAL(leftLengthChanged(double)), leftLengthDoubleSpinBox, SLOT(setValue(double)));
-    connect(leftLengthDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setLeftLength(double)));
+//    QDoubleSpinBox *leftLengthDoubleSpinBox = new QDoubleSpinBox();
+//    leftLengthDoubleSpinBox->setKeyboardTracking(false);
+//    leftLengthDoubleSpinBox->setMinimum(0.0);
+//    leftLengthDoubleSpinBox->setValue(leftLength);
+//    connect(this, SIGNAL(leftLengthChanged(double)), leftLengthDoubleSpinBox, SLOT(setValue(double)));
+//    connect(leftLengthDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setLeftLength(double)));
 
-    QDoubleSpinBox *rightLengthDoubleSpinBox = new QDoubleSpinBox();
-    rightLengthDoubleSpinBox->setKeyboardTracking(false);
-    rightLengthDoubleSpinBox->setMinimum(0.0);
-    rightLengthDoubleSpinBox->setValue(rightLength);
-    connect(this, SIGNAL(rightLengthChanged(double)), rightLengthDoubleSpinBox, SLOT(setValue(double)));
-    connect(rightLengthDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setRightLength(double)));
+//    QDoubleSpinBox *rightLengthDoubleSpinBox = new QDoubleSpinBox();
+//    rightLengthDoubleSpinBox->setKeyboardTracking(false);
+//    rightLengthDoubleSpinBox->setMinimum(0.0);
+//    rightLengthDoubleSpinBox->setValue(rightLength);
+//    connect(this, SIGNAL(rightLengthChanged(double)), rightLengthDoubleSpinBox, SLOT(setValue(double)));
+//    connect(rightLengthDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setRightLength(double)));
 
-    QCheckBox *showBoardCheckBox = new QCheckBox();
-    showBoardCheckBox->setChecked(showBoard);
-    connect(showBoardCheckBox, SIGNAL(toggled(bool)), this, SLOT(setBoardShowStatus(bool)));
+//    QCheckBox *showBoardCheckBox = new QCheckBox();
+//    showBoardCheckBox->setChecked(showBoard);
+//    connect(showBoardCheckBox, SIGNAL(toggled(bool)), this, SLOT(setBoardShowStatus(bool)));
 
-    QDoubleSpinBox *boardWidthDoubleSpinBox = new QDoubleSpinBox();
-    boardWidthDoubleSpinBox->setKeyboardTracking(false);
-    boardWidthDoubleSpinBox->setMinimum(0.0);
-    boardWidthDoubleSpinBox->setValue(boardWidth);
-    connect(this, SIGNAL(boardWidthChanged(double)), boardWidthDoubleSpinBox, SLOT(setValue(double)));
-    connect(boardWidthDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setBoardWidth(double)));
+//    QDoubleSpinBox *boardWidthDoubleSpinBox = new QDoubleSpinBox();
+//    boardWidthDoubleSpinBox->setKeyboardTracking(false);
+//    boardWidthDoubleSpinBox->setMinimum(0.0);
+//    boardWidthDoubleSpinBox->setValue(boardWidth);
+//    connect(this, SIGNAL(boardWidthChanged(double)), boardWidthDoubleSpinBox, SLOT(setValue(double)));
+//    connect(boardWidthDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setBoardWidth(double)));
 
-    QDoubleSpinBox *angleDoubleSpinBox = new QDoubleSpinBox();
-    angleDoubleSpinBox->setKeyboardTracking(false);
-    angleDoubleSpinBox->setMinimum(0.0);
-    angleDoubleSpinBox->setMaximum(720.0);
-    angleDoubleSpinBox->setValue(angleRounding);
-    connect(this, SIGNAL(angleChanged(double)), angleDoubleSpinBox, SLOT(setValue(double)));
-    connect(angleDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setAngle(double)));
+//    QDoubleSpinBox *angleDoubleSpinBox = new QDoubleSpinBox();
+//    angleDoubleSpinBox->setKeyboardTracking(false);
+//    angleDoubleSpinBox->setMinimum(0.0);
+//    angleDoubleSpinBox->setMaximum(720.0);
+//    angleDoubleSpinBox->setValue(angleRounding);
+//    connect(this, SIGNAL(angleChanged(double)), angleDoubleSpinBox, SLOT(setValue(double)));
+//    connect(angleDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setAngle(double)));
 
-    QCheckBox *showMeasurementsCheckBox = new QCheckBox();
-    showMeasurementsCheckBox->setChecked(showMeasurements);
-    connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setShowMeasurements(bool)));
+//    QCheckBox *showMeasurementsCheckBox = new QCheckBox();
+//    showMeasurementsCheckBox->setChecked(showMeasurements);
+//    connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setShowMeasurements(bool)));
 
-    if (render)
-    {
-        connect(leftLengthDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
-        connect(rightLengthDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
-        connect(showBoardCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
-        connect(boardWidthDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
-        connect(angleDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
-        connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
-    }
-    layout->addRow("Зафиксировать", fixedCheckBox);
-    layout->addRow("Левая сторона", leftLengthDoubleSpinBox);
-    layout->addRow("Правая сторона", rightLengthDoubleSpinBox);
-    layout->addRow("Угол", angleDoubleSpinBox);
-    layout->addRow("Тротуар", showBoardCheckBox);
-    layout->addRow("Ширина", boardWidthDoubleSpinBox);
-    layout->addRow("Размеры", showMeasurementsCheckBox);
+//    if (render)
+//    {
+//        connect(leftLengthDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+//        connect(rightLengthDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+//        connect(showBoardCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
+//        connect(boardWidthDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+//        connect(angleDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+//        connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
+//    }
+//    layout->addRow("Зафиксировать", fixedCheckBox);
+//    layout->addRow("Левая сторона", leftLengthDoubleSpinBox);
+//    layout->addRow("Правая сторона", rightLengthDoubleSpinBox);
+//    layout->addRow("Угол", angleDoubleSpinBox);
+//    layout->addRow("Тротуар", showBoardCheckBox);
+//    layout->addRow("Ширина", boardWidthDoubleSpinBox);
+//    layout->addRow("Размеры", showMeasurementsCheckBox);
 }
 
 bool Curve::isFixed()

@@ -149,7 +149,7 @@ void DoubleVoltageLine::changeColorOfSelectedControl(int)
 
 }
 
-void DoubleVoltageLine::getProperties(QFormLayout *layout, QGLWidget *render)
+void DoubleVoltageLine::getProperties(QVBoxLayout *layout, QGLWidget *render)
 {
     clearProperties(layout);
     QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
@@ -175,9 +175,12 @@ void DoubleVoltageLine::getProperties(QFormLayout *layout, QGLWidget *render)
         connect(widthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
         connect(heightSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
     }
-    layout->addRow("Зафиксировать", fixedCheckBox);
-    layout->addRow("Ширина между проводами", widthSpinBox);
-    layout->addRow("Высота", heightSpinBox);
+    QFormLayout *l = new QFormLayout();
+    l->addRow("Зафиксировать", fixedCheckBox);
+    l->addRow("Ширина между проводами", widthSpinBox);
+    l->addRow("Высота", heightSpinBox);
+
+    layout->addLayout(l);
 }
 
 bool DoubleVoltageLine::isFixed()
@@ -453,8 +456,15 @@ void DoubleVoltageLine::clearProperties(QLayout *layout)
     while(layout->count() > 0)
     {
         QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
+        if (item->layout() != NULL)
+        {
+            clearProperties(item->layout());
+            delete item->layout();
+        }
+        if (item->widget() != NULL)
+        {
+            delete item->widget();
+        }
     }
 }
 

@@ -160,7 +160,7 @@ void VoltageLine::changeColorOfSelectedControl(int)
 {
 }
 
-void VoltageLine::getProperties(QFormLayout *layout, QGLWidget *render)
+void VoltageLine::getProperties(QVBoxLayout *layout, QGLWidget *render)
 {
     clearProperties(layout);
     QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
@@ -186,9 +186,13 @@ void VoltageLine::getProperties(QFormLayout *layout, QGLWidget *render)
         connect(widthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
         connect(heightSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
     }
-    layout->addRow("Зафиксировать", fixedCheckBox);
-    layout->addRow("Толщина", widthSpinBox);
-    layout->addRow("Высота", heightSpinBox);
+
+    QFormLayout *l = new QFormLayout();
+    l->addRow("Зафиксировать", fixedCheckBox);
+    l->addRow("Толщина", widthSpinBox);
+    l->addRow("Высота", heightSpinBox);
+
+    layout->addLayout(l);
 }
 
 bool VoltageLine::isFixed()
@@ -546,8 +550,15 @@ void VoltageLine::clearProperties(QLayout *layout)
     while(layout->count() > 0)
     {
         QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
+        if (item->layout() != NULL)
+        {
+            clearProperties(item->layout());
+            delete item->layout();
+        }
+        if (item->widget() != NULL)
+        {
+            delete item->widget();
+        }
     }
 }
 

@@ -834,7 +834,7 @@ QJsonObject LineBroken::getJSONInfo()
 }
 
 
-void LineBroken::getProperties(QFormLayout *layout, QGLWidget* render)
+void LineBroken::getProperties(QVBoxLayout *layout, QGLWidget* render)
 {
     if (log)
     Logger::getLogger()->infoLog() << "LineBroken::getProperties(QFormLayout *layout, QGLWidget* render)\n";
@@ -864,8 +864,11 @@ void LineBroken::getProperties(QFormLayout *layout, QGLWidget* render)
     {
         connect(widthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
     }
-    layout->addRow("Зафиксировать", fixedCheckBox);
-    layout->addRow("Ширина", widthSpinBox);
+    QFormLayout *l = new QFormLayout();
+    l->addRow("Зафиксировать", fixedCheckBox);
+    l->addRow("Ширина", widthSpinBox);
+
+    layout->addLayout(l);
 }
 
 
@@ -1056,7 +1059,14 @@ void LineBroken::clearProperties(QLayout *layout)
     while(layout->count() > 0)
     {
         QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
+        if (item->layout() != NULL)
+        {
+            clearProperties(item->layout());
+            delete item->layout();
+        }
+        if (item->widget() != NULL)
+        {
+            delete item->widget();
+        }
     }
 }

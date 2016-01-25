@@ -39,8 +39,8 @@ class StateManager : public QObject
     Q_OBJECT
 public:
     explicit StateManager(QObject *parent = 0);
-    StateManager(Model* model, Scene2D* scene, QFormLayout* properties);
-    StateManager(Model* model, Scene2D* scene, QFormLayout* properties, CameraView* cam);
+    StateManager(Model* model, Scene2D* scene, QVBoxLayout* properties);
+    StateManager(Model* model, Scene2D* scene, QVBoxLayout* properties, CameraView* cam);
     ~StateManager();
 private:
 

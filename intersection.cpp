@@ -4,6 +4,8 @@
 #include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QCheckBox>
+#include <QToolBox>
+#include <QTableWidget>
 #include "mainwindow.h"
 
 bool Intersection::log = true;
@@ -104,8 +106,8 @@ Intersection::Intersection(float x, float y, int numberOfRoads)
     setTextureArray(texture1USize, texture1VSize);
     setIndexArray();
     selected = fixed = false;
-    connect(this, SIGNAL(intersectionsChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
-    connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
+    connect(this, SIGNAL(intersectionsChanged(QVBoxLayout*,QGLWidget*)),SLOT(getProperties(QVBoxLayout*,QGLWidget*)));
+    connect(this, SIGNAL(linesChanged(QVBoxLayout*,QGLWidget*)),SLOT(getProperties(QVBoxLayout*,QGLWidget*)));
 
 }
 
@@ -157,8 +159,8 @@ Intersection::Intersection(const Intersection &source)
     fixed = source.fixed;
     elementX = source.elementX;
     elementY = source.elementY;
-    connect(this, SIGNAL(intersectionsChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
-    connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
+    connect(this, SIGNAL(intersectionsChanged(QVBoxLayout*,QGLWidget*)),SLOT(getProperties(QVBoxLayout*,QGLWidget*)));
+    connect(this, SIGNAL(linesChanged(QVBoxLayout*,QGLWidget*)),SLOT(getProperties(QVBoxLayout*,QGLWidget*)));
 
 }
 
@@ -209,8 +211,8 @@ Intersection::Intersection(QVector<RoadSimple *> &roads, QVector<Curve *> &curve
     setTextureArray(texture1USize, texture1VSize);
     setIndexArray();
     selected = fixed = false;
-    connect(this, SIGNAL(intersectionsChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
-    connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
+    connect(this, SIGNAL(intersectionsChanged(QVBoxLayout*,QGLWidget*)),SLOT(getProperties(QVBoxLayout*,QGLWidget*)));
+    connect(this, SIGNAL(linesChanged(QVBoxLayout*,QGLWidget*)),SLOT(getProperties(QVBoxLayout*,QGLWidget*)));
 
 }
 
@@ -322,8 +324,8 @@ void Intersection::drawMeasurements(QGLWidget *render)
     glBegin(GL_LINES);
     for (int i = 0; i < roads.size(); ++i)
     {
-        vec2 p1 = roads[i]->getAxisPoint_1();
-        vec2 p2 = roads[i]->getAxisPoint_2();
+        vec2 p1 = roads[i]->axis_1();
+        vec2 p2 = roads[i]->axis_2();
         glColor3f(0.0f, 1.0f, 0.0f);
         glVertex3f(p1.x, p1.y, 0.03f);
         glColor3f(0.0f, 1.0f, 0.0f);
@@ -331,6 +333,18 @@ void Intersection::drawMeasurements(QGLWidget *render)
     }
     glEnd();
     glDisable(GL_LINE_STIPPLE);
+
+    glBegin(GL_LINES);
+    for (int i = 0; i < roads.size(); ++i)
+    {
+        vec2 p1 = roads[i]->getAxisPoint_1();
+        vec2 p2 = roads[i]->getAxisPoint_2();
+        glColor3f(0.0f, 0.0f, 1.0f);
+        glVertex3f(p1.x, p1.y, 0.03f);
+        glColor3f(0.0f, 0.0f, 1.0f);
+        glVertex3f(p2.x, p2.y, 0.03f);
+    }
+    glEnd();
 
     for (int i = 0; i < roads.size(); ++i)
     {
@@ -433,11 +447,37 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
         if (index == count + 5)
         {
             // Поворот
+
+            vec3 point1 = roads[i]->getCoordOfPoint(0);
+            vec3 point2 = roads[i]->getCoordOfPoint(3);
+            vec3 ax1 = point2 - point1;
+
+            float prevLength = sqrt((point1.x - point2.x)*(point1.x - point2.x) +
+                                    (point1.y - point2.y)*(point1.y - point2.y));
+
             roads[i]->resizeByControl(index, dx, dy, x, y);
+
+            calculateRoadIntersections();
+            point1 = roads[i]->getCoordOfPoint(0);
+            point2 = roads[i]->getCoordOfPoint(3);
+            float curLength = sqrt((point1.x - point2.x)*(point1.x - point2.x) +
+                                   (point1.y - point2.y)*(point1.y - point2.y));
+            int j = i == 0 ? roads.size() - 1 : i - 1;
+            if (curLength < curves[j]->getLeftLength())
+            {
+                float factor = prevLength / curLength - prevLength /  curves[j]->getLeftLength();
+                vec3 ax2 = point2 - point1;
+                float angle = calculateAngle(ax1, ax2);
+                roads[i]->rotate(angle * factor,
+                                 roads[i]->getAxisPoint_1().x,
+                                 roads[i]->getAxisPoint_1().y,
+                                 0.0f);
+            }
+
             float pi = 3.14159265f;
             vec2 p1 = roads[i]->getAxisPoint_1();
             vec2 p2 = roads[i]->getAxisPoint_2();
-            int j = i == roads.size() - 1 ? 0 : i + 1;
+            j = i == roads.size() - 1 ? 0 : i + 1;
             vec2 t1 = roads[j]->getAxisPoint_1();
             vec2 t2 = roads[j]->getAxisPoint_2();
             float angle = calculateAngle(p1, p2, t1, t2) * 180.0f / pi;
@@ -445,22 +485,148 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
             angles[i]->setAngle(angle);
             j = i == 0 ? roads.size() - 1 : i - 1;
             angles[j]->setAngle(angles[j]->getAngle() - delta);
+
+
+            // Приведение длины следующего рукава к прежней длине
+            float a1, a2, b1, b2, c1, c2;
+            vec2 axis1 = roads[i]->axis_1();
+            vec2 axis2 = roads[i]->axis_2();
+            a1 = axis2.y - axis1.y;
+            b1 = axis1.x - axis2.x;
+            c1 = axis1.y * (axis2.x - axis1.x) - axis1.x * (axis2.y - axis1.y);
+
+            j = i == 0 ? roads.size() - 1 : i - 1;
+            vec2 axis3 = roads[j]->axis_1();
+            vec2 axis4 = roads[j]->axis_2();
+
+            a2 = axis4.y - axis3.y;
+            b2 = axis3.x - axis4.x;
+            c2 = axis3.y * (axis4.x - axis3.x) - axis3.x * (axis4.y - axis3.y);
+            float xTemp, yTemp;
+            if (calculateLinesIntersection(a1, b1, c1, a2, b2, c2, xTemp, yTemp))
+            {
+
+            }
+            else
+            {
+                QMessageBox::critical(0, "Ошибка", "Невозможно найти пересечение осевых линий рукавов для изменения длины соседнего рукава (при повороте).");
+                return;
+            }
+            delta = sqrt((axis3.x - axis4.x)*(axis3.x - axis4.x) + (axis3.y - axis4.y)*(axis3.y - axis4.y));
+            roads[j]->setVertexArray(xTemp, yTemp,
+                                     xTemp + (axis4.x - axis3.x) * roads[j]->getLength() / delta,
+                                     yTemp + (axis4.y - axis3.y) * roads[j]->getLength() / delta,
+                                     roads[j]->getWidth());
+
         }else
             if (index == count + 7)
             {
                 // Длина
+                float length = roads[i]->getLength();
+                float dxL = roads[i]->getCoordOfPoint(2).x - roads[i]->getCoordOfPoint(1).x;
+                float dyL = roads[i]->getCoordOfPoint(2).y - roads[i]->getCoordOfPoint(1).y;
+                float dxR = roads[i]->getCoordOfPoint(3).x - roads[i]->getCoordOfPoint(0).x;
+                float dyR = roads[i]->getCoordOfPoint(3).y - roads[i]->getCoordOfPoint(0).y;
+                float leftLength = sqrt(dxL*dxL + dyL*dyL);
+                float rightLength = sqrt(dxR*dxR + dyR*dyR);
+
                 roads[i]->resizeByControl(index, dx, dy, x, y);
+
+                float dx1 = roads[i]->getCoordOfPoint(2).x - roads[i]->getCoordOfPoint(1).x;
+                float dy1 = roads[i]->getCoordOfPoint(2).y - roads[i]->getCoordOfPoint(1).y;
+                float r = sqrt(dx1 * dx1 + dy1 * dy1);
+                float l = curves[i]->getRightLength();
+                if (l > (r - length + leftLength))
+                {
+                    roads[i]->resizeByControl(index, dx1 * (l - r + length - leftLength) / r, dy1 * (l - r + length - leftLength) / r, x + dx, y + dy);
+                }
+                dx1 = roads[i]->getCoordOfPoint(3).x - roads[i]->getCoordOfPoint(0).x;
+                dy1 = roads[i]->getCoordOfPoint(3).y - roads[i]->getCoordOfPoint(0).y;
+                r = sqrt(dx1 * dx1 + dy1 * dy1);
+                int j = i == 0 ? roads.size() - 1 : i - 1;
+                l = curves[j]->getLeftLength();
+                if (l > r - length + rightLength)
+                {
+                    roads[i]->resizeByControl(index, dx1 * (l - r + length - rightLength) / r, dy1 * (l - r + length - rightLength) / r, x + dx, y + dy);
+                }
+
             }else
                 if (index == count + 8)
                 {
                     // Ширина правая
                     roads[i]->resizeByControl(index, dx, dy, x, y);
+                    //roads[i]->resizeByControlSelf(index, dx, dy, x, y);
+                    int j = i == 0 ? roads.size() - 1 : i - 1;
+                    vec3 p1 = roads[j]->getCoordOfPoint(1);
+                    vec3 p2 = roads[j]->getCoordOfPoint(2);
+                    float dx1 = p2.x - p1.x;
+                    float dy1 = p2.y - p1.y;
+                    vec3 s1 = roads[j]->getCoordOfPoint(0);
+                    vec3 s2 = roads[j]->getCoordOfPoint(3);
+                    float dx2 = s2.x - s1.x;
+                    float dy2 = s2.y - s1.y;
+                    float res = dx1*dx2 + dy1*dy2;
+                    if (res < 0)
+                    {
+                        float s = sqrt(dx1*dx1 + dy1*dy1);
+                        float l = curves[j]->getRightLength();
+                        roads[i]->resizeByControl(index,
+                                                 dx1 * (l + s) / s,
+                                                 dy1 * (l + s) / s,
+                                                  x + dx, y + dy);
+                    }
+                    else
+                    {
+                        float s = sqrt((p2.x - p1.x)*(p2.x - p1.x) + (p2.y - p1.y)*(p2.y - p1.y));
+                        float l = curves[j]->getRightLength();
+                        if (l > s)
+                        {
+                            roads[i]->resizeByControl(index,
+                                                     (p1.x - p2.x) * (l - s) / s,
+                                                     (p1.y - p2.y) * (l - s) / s,
+                                                      x + dx, y + dy);
+                        }
+                    }
+
+
                 }else
                     if (index == count + 9)
                     {
                         // Ширина левая
                         roads[i]->resizeByControl(index, dx, dy, x, y);
+                        //roads[i]->resizeByControlSelf(index, dx, dy, x, y);
 
+                        int j = i == roads.size() - 1 ? 0 : i + 1;
+                        vec3 p1 = roads[j]->getCoordOfPoint(0);
+                        vec3 p2 = roads[j]->getCoordOfPoint(3);
+                        float dx1 = p2.x - p1.x;
+                        float dy1 = p2.y - p1.y;
+                        vec3 s1 = roads[j]->getCoordOfPoint(1);
+                        vec3 s2 = roads[j]->getCoordOfPoint(2);
+                        float dx2 = s2.x - s1.x;
+                        float dy2 = s2.y - s1.y;
+                        float res = dx1*dx2 + dy1*dy2;
+                        if (res < 0)
+                        {
+                            float s = sqrt(dx1*dx1 + dy1*dy1);
+                            float l = curves[j]->getRightLength();
+                            roads[i]->resizeByControl(index,
+                                                     dx1 * (l + s) / s,
+                                                     dy1 * (l + s) / s,
+                                                      x + dx, y + dy);
+                        }
+                        else
+                        {
+                            float s = sqrt((p2.x - p1.x)*(p2.x - p1.x) + (p2.y - p1.y)*(p2.y - p1.y));
+                            float l = curves[i]->getLeftLength();
+                            if (l > s)
+                            {
+                                roads[i]->resizeByControl(index,
+                                                         (p1.x - p2.x) * (l - s) / s,
+                                                         (p1.y - p2.y) * (l - s) / s,
+                                                          x + dx, y + dy);
+                            }
+                        }
                     }else
                         if (index == count + 10)
                         {
@@ -497,164 +663,174 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
     else
     {
         roads[i]->move(dx, dy);
-        vec2 p1 = roads[i]->getAxisPoint_1();
-        vec2 p2 = roads[i]->getAxisPoint_2();
-        float width = roads[i]->getWidth();
+        int m = i == 0 ? roads.size() - 1 : i - 1;
+        //roads[m]->move(dx, dy);
+        // Проверка на выход за границы справа
+        vec3 k1 = roads[i]->getCoordOfPoint(0);
+        vec3 k2 = roads[i]->getCoordOfPoint(3);
 
         float a1, a2, b1, b2, c1, c2;
 
-        a1 = p2.y - p1.y;
-        b1 = p1.x - p2.x;
-        c1 = p1.y * (p2.x - p1.x) - p1.x * (p2.y - p1.y);
+        a1 = k2.y - k1.y;
+        b1 = k1.x - k2.x;
+        c1 = k1.y * (k2.x - k1.x) - k1.x * (k2.y - k1.y);
+        int j = i == 0 ? roads.size() - 1 : i - 1;
+        vec3 t1 = roads[j]->getCoordOfPoint(1);
+        vec3 t2 = roads[j]->getCoordOfPoint(2);
 
-        float x1Res = 0.0f, y1Res = 0.0f, x2Res = 0.0f, y2Res = 0.0f, rRes = 1000000.0f;
-        //float x1Res = p1.x, y1Res = p1.y, x2Res = p2.x, y2Res = p2.y, rRes = 1000000.0f;
-        for (int j = 0; j < roads.size(); ++j)
+        a2 = t2.y - t1.y;
+        b2 = t1.x - t2.x;
+        c2 = t1.y * (t2.x - t1.x) - t1.x * (t2.y - t1.y);
+        float xTemp;
+        float yTemp;
+
+        if (calculateLinesIntersection(a1, b1, c1, a2, b2, c2, xTemp, yTemp))
         {
-            if (j == i)
+
+        }
+        else
+        {
+            QMessageBox::critical(0, "Ошибка", "Невозможно найти пересечение границ рукавов перекрестка для смещения вправо.");
+            return;
+        }
+        j = i == 0 ? roads.size() - 1 : i - 1;
+        //vec3 p1 = roads[j]->getCoordOfPoint(1);
+        vec3 p1(xTemp, yTemp, 0.0f);
+        vec3 p2 = roads[j]->getCoordOfPoint(2);
+        float dx1 = p2.x - p1.x;
+        float dy1 = p2.y - p1.y;
+        vec3 s1 = roads[j]->getCoordOfPoint(0);
+        vec3 s2 = roads[j]->getCoordOfPoint(3);
+        float dx2 = s2.x - s1.x;
+        float dy2 = s2.y - s1.y;
+        float res = dx1*dx2 + dy1*dy2;
+        if (res < 0)
+        {
+            float s = sqrt(dx1*dx1 + dy1*dy1);
+            float l = curves[j]->getRightLength();
+            roads[i]->move(dx1 * (l + s) / s, dy1 * (l + s) / s);
+            //roads[m]->move(dx1 * (l + s) / s, dy1 * (l + s) / s);
+        }
+        else
+        {
+            float s = sqrt((p2.x - p1.x)*(p2.x - p1.x) + (p2.y - p1.y)*(p2.y - p1.y));
+            float l = curves[j]->getRightLength();
+            if (l > s)
             {
-                continue;
-            }
-            else
-            {
-                vec2 t1 = roads[j]->getAxisPoint_1();
-                vec2 t2 = roads[j]->getAxisPoint_2();
-
-                a2 = t2.y - t1.y;
-                b2 = t1.x - t2.x;
-                c2 = t1.y * (t2.x - t1.x) - t1.x * (t2.y - t1.y);
-                float x1Temp;
-                float y1Temp;
-
-                if (calculateLinesIntersection(a1, b1, c1, a2, b2, c2, x1Temp, y1Temp))
-                {
-                   // float dr = //sqrt((p2.x - x1Temp)*(p2.x - x1Temp) + (p2.y - y1Temp)*(p2.y - y1Temp)) -
-                   //         sqrt((p1.x - x1Temp)*(p1.x - x1Temp) + (p1.y - y1Temp)*(p1.y - y1Temp));
-                                        // Если отрезки пересекаются
-                                        if (((p1.x >= x1Temp && p2.x <= x1Temp) || (p1.x <= x1Temp && p2.x >= x1Temp)) &&
-                                            ((t1.x >= x1Temp && t2.x <= x1Temp) || (t1.x <= x1Temp && t2.x >= x1Temp)) &&
-                                            ((p1.y >= y1Temp && p2.y <= y1Temp) || (p1.y <= y1Temp && p2.y >= y1Temp)) &&
-                                            ((t1.y >= y1Temp && t2.y <= y1Temp) || (t1.y <= y1Temp && t2.y >= y1Temp)))
-                                        {
-                                            x1Res = x1Temp;
-                                            y1Res = y1Temp;
-                                            x2Res = p2.x;
-                                            y2Res = p2.y;
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            float dr = sqrt((p2.x - x1Temp)*(p2.x - x1Temp) + (p2.y - y1Temp)*(p2.y - y1Temp)) -
-                                                    sqrt((p1.x - x1Temp)*(p1.x - x1Temp) + (p1.y - y1Temp)*(p1.y - y1Temp));
-                                            //float dr = sqrt((p1.x - x1Temp)*(p1.x - x1Temp) + (p1.y - y1Temp)*(p1.y - y1Temp));
-                                            // Если отрезки не пересекаются, находим ближайший
-                                            if ((((t1.x <= x1Temp) && (t2.x >= x1Temp))||((t1.x >= x1Temp) && (t2.x <= x1Temp)) ||
-                                                (((t1.y <= y1Temp) && (t2.y >= y1Temp))||((t1.y >= y1Temp) && (t2.y <= y1Temp)))) &&
-                                                     dr < rRes)
-                                            {
-                                                rRes = dr;
-                                                x1Res = x1Temp;
-                                                y1Res = y1Temp;
-                                                x2Res = p2.x;
-                                                y2Res = p2.y;
-                                            }
-                                            else
-                                            {
-                                                float rt1 = sqrt((x1Temp - t1.x) * (x1Temp - t1.x) +
-                                                                 (y1Temp - t1.y) * (y1Temp - t1.y));
-                                                float rt2 = sqrt((t2.x - t1.x) * (t2.x - t1.x) +
-                                                                 (t2.y - t1.y) * (t2.y - t1.y));
-                                                if (rt1 > rt2)
-                                                {
-                                                    x1Res = t2.x;
-                                                    y1Res = t2.y;
-                                                    x2Res = (t2.x - p1.x) + p2.x;
-                                                    y2Res = (t2.y - p1.y) + p2.y;
-                                                    break;
-                                                }
-                                                else
-                                                {
-                                                    continue;
-                                                }
-                                                //rRes = dr;
-
-
-                                            }
-
-                                        }
-
-
-
-
-
-//                    if (dr < rRes)
-//                    {
-//                        rRes = dr;
-//                        x1Res = x1Temp;
-//                        y1Res = y1Temp;
-//                        x2Res = p2.x;
-//                        y2Res = p2.y;
-//                    }
-
-                }
-                else
-                    continue;
-
-
+                roads[i]->move((p1.x - p2.x) * (l - s) / s, (p1.y - p2.y) * (l - s) / s);
+                //roads[m]->move((p1.x - p2.x) * (l - s) / s, (p1.y - p2.y) * (l - s) / s);
             }
         }
-        qDebug() << "X1:" << x1Res;
-        qDebug() << "Y1:" << y1Res;
-        qDebug() << "X2:" << x2Res;
-        qDebug() << "Y2:" << y2Res;
-        roads[i]->setVertexArray(x1Res, y1Res, x2Res, y2Res, width);
-        roads[i]->setTextureArray();
 
-        int j = i == 0 ? roads.size() - 1 : i - 1;
-        vec2 axis1 = roads[j]->getAxisPoint_1();
-        vec2 axis2 = roads[j]->getAxisPoint_2();
-        vec2 axis1_1 = roads[i]->getAxisPoint_1();
-        float w = roads[i]->getRightWidth() + curves[j]->getRightLength();
-        float dx1 = axis1_1.x - axis1.x;
-        float dy1 = axis1_1.y - axis1.y;
-        float r1 = sqrt(dx1 * dx1 + dy1 * dy1);
-        float dx2 = axis2.x - axis1.x;
-        float dy2 = axis2.y - axis1.y;
-        float r2 = sqrt(dx2 * dx2 + dy2 * dy2);
+        // Проверка на выход за границы слева
+
+        k1 = roads[i]->getCoordOfPoint(1);
+        k2 = roads[i]->getCoordOfPoint(2);
 
 
-        if ((r1 + w) > r2)
+        a1 = k2.y - k1.y;
+        b1 = k1.x - k2.x;
+        c1 = k1.y * (k2.x - k1.x) - k1.x * (k2.y - k1.y);
+        j = i == roads.size() - 1 ? 0 : i + 1;
+        t1 = roads[j]->getCoordOfPoint(0);
+        t2 = roads[j]->getCoordOfPoint(3);
+
+        a2 = t2.y - t1.y;
+        b2 = t1.x - t2.x;
+        c2 = t1.y * (t2.x - t1.x) - t1.x * (t2.y - t1.y);
+
+        if (calculateLinesIntersection(a1, b1, c1, a2, b2, c2, xTemp, yTemp))
         {
-            float dr = r2 - r1 - w;
-            float DX = dr * dx2 / r2;
-            float DY = dr * dy2 / r2;
-            if (fabs(r2) < 1e-5)
-                DX = DY = 0.0f;
-            roads[i]->move(DX, DY);
+
+        }
+        else
+        {
+            QMessageBox::critical(0, "Ошибка", "Невозможно найти пересечение границ рукавов перекрестка для смещения влево.");
+            return;
         }
 
         j = i == roads.size() - 1 ? 0 : i + 1;
-        axis1 = roads[j]->getAxisPoint_1();
-        axis2 = roads[j]->getAxisPoint_2();
-        axis1_1 = roads[i]->getAxisPoint_1();
-        w = roads[i]->getLeftWidth() + curves[i]->getLeftLength();
-        dx1 = axis1_1.x - axis1.x;
-        dy1 = axis1_1.y - axis1.y;
-        r1 = sqrt(dx1 * dx1 + dy1 * dy1);
-        dx2 = axis2.x - axis1.x;
-        dy2 = axis2.y - axis1.y;
-        r2 = sqrt(dx2 * dx2 + dy2 * dy2);
-
-
-        if ((r1 + w) > r2)
+        //p1 = roads[j]->getCoordOfPoint(0);
+        p1 = vec3(xTemp, yTemp, 0.0f);
+        p2 = roads[j]->getCoordOfPoint(3);
+        dx1 = p2.x - p1.x;
+        dy1 = p2.y - p1.y;
+        s1 = roads[j]->getCoordOfPoint(1);
+        s2 = roads[j]->getCoordOfPoint(2);
+        dx2 = s2.x - s1.x;
+        dy2 = s2.y - s1.y;
+        res = dx1*dx2 + dy1*dy2;
+        if (res < 0)
         {
-            float dr = r2 - r1 - w;
-            float DX = dr * dx2 / r2;
-            float DY = dr * dy2 / r2;
-            if (fabs(r2) < 1e-5)
-                DX = DY = 0.0f;
-            roads[i]->move(DX, DY);
+            float s = sqrt(dx1*dx1 + dy1*dy1);
+            float l = curves[j]->getRightLength();
+            roads[i]->move(dx1 * (l + s) / s, dy1 * (l + s) / s);
+            //roads[m]->move(dx1 * (l + s) / s, dy1 * (l + s) / s);
         }
+        else
+        {
+            float s = sqrt((p2.x - p1.x)*(p2.x - p1.x) + (p2.y - p1.y)*(p2.y - p1.y));
+            float l = curves[i]->getLeftLength();
+            if (l > s)
+            {
+                roads[i]->move((p1.x - p2.x) * (l - s) / s, (p1.y - p2.y) * (l - s) / s);
+                //roads[m]->move((p1.x - p2.x) * (l - s) / s, (p1.y - p2.y) * (l - s) / s);
+            }
+        }
+
+        // Приведение длины рукава к прежней длине
+        vec2 axis1 = roads[i]->axis_1();
+        vec2 axis2 = roads[i]->axis_2();
+        a1 = axis2.y - axis1.y;
+        b1 = axis1.x - axis2.x;
+        c1 = axis1.y * (axis2.x - axis1.x) - axis1.x * (axis2.y - axis1.y);
+
+        j = i == roads.size() - 1 ? 0 : i + 1;
+        vec2 axis3 = roads[j]->axis_1();
+        vec2 axis4 = roads[j]->axis_2();
+
+        a2 = axis4.y - axis3.y;
+        b2 = axis3.x - axis4.x;
+        c2 = axis3.y * (axis4.x - axis3.x) - axis3.x * (axis4.y - axis3.y);
+        if (calculateLinesIntersection(a1, b1, c1, a2, b2, c2, xTemp, yTemp))
+        {
+
+        }
+        else
+        {
+            QMessageBox::critical(0, "Ошибка", "Невозможно найти пересечение осевых линий рукавов.");
+            return;
+        }
+        float delta = sqrt((axis1.x - axis2.x)*(axis1.x - axis2.x) + (axis1.y - axis2.y)*(axis1.y - axis2.y));
+        roads[i]->setVertexArray(xTemp, yTemp,
+                                 xTemp + (axis2.x - axis1.x) * roads[i]->getLength() / delta,
+                                 yTemp + (axis2.y - axis1.y) * roads[i]->getLength() / delta,
+                                 roads[i]->getWidth());
+
+
+        // Приведение длины следующего рукава к прежней длине
+        j = i == 0 ? roads.size() - 1 : i - 1;
+        axis3 = roads[j]->axis_1();
+        axis4 = roads[j]->axis_2();
+
+        a2 = axis4.y - axis3.y;
+        b2 = axis3.x - axis4.x;
+        c2 = axis3.y * (axis4.x - axis3.x) - axis3.x * (axis4.y - axis3.y);
+        if (calculateLinesIntersection(a1, b1, c1, a2, b2, c2, xTemp, yTemp))
+        {
+
+        }
+        else
+        {
+            QMessageBox::critical(0, "Ошибка", "Невозможно найти пересечение осевых линий рукавов для изменения длины соседнего рукава.");
+            return;
+        }
+        delta = sqrt((axis3.x - axis4.x)*(axis3.x - axis4.x) + (axis3.y - axis4.y)*(axis3.y - axis4.y));
+        roads[j]->setVertexArray(xTemp, yTemp,
+                                 xTemp + (axis4.x - axis3.x) * roads[j]->getLength() / delta,
+                                 yTemp + (axis4.y - axis3.y) * roads[j]->getLength() / delta,
+                                 roads[j]->getWidth());
+
     }
 
 
@@ -692,7 +868,7 @@ void Intersection::changeColorOfSelectedControl(int index)
     indexOfSelectedControl = index;
 }
 
-void Intersection::getProperties(QFormLayout *layout, QGLWidget *render)
+void Intersection::getProperties(QVBoxLayout *layout, QGLWidget *render)
 {
     if (log)
         Logger::getLogger()->infoLog() << "Intersection::getProperties(QFormLayout *layout, QGLWidget *render)\n";
@@ -709,20 +885,47 @@ void Intersection::getProperties(QFormLayout *layout, QGLWidget *render)
 
     clearProperties(layout);
 
+    QFormLayout *l = new QFormLayout();
 
     QCheckBox *fixedCheckBox = new QCheckBox();
     fixedCheckBox->setChecked(fixed);
     QObject::connect(fixedCheckBox, SIGNAL(toggled(bool)), this, SLOT(setFixed(bool)));
-    layout->addRow("Зафиксировать", fixedCheckBox);
+    l->addRow("Зафиксировать", fixedCheckBox);
 
     QCheckBox *showMeasurementsCheckBox = new QCheckBox();
     showMeasurementsCheckBox->setChecked(showMeasurements);
     connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setShowMeasurements(bool)));
     connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
-    layout->addRow("Размеры", showMeasurementsCheckBox);
+    l->addRow("Размеры", showMeasurementsCheckBox);
+
+    layout->addLayout(l);
 
     for (int i = 0; i < roads.size(); ++i)
     {
+
+        QWidget *widget = new QWidget(layout->parentWidget());
+        QFormLayout *layer = new QFormLayout(widget);
+        //widget->setLayout(layer);
+        QListWidget *list = new QListWidget(layout->parentWidget());
+
+//        list->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//        list->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//        list->setFixedSize(list->sizeHintForColumn(0) + 2 * list->frameWidth(),
+//                          list->sizeHintForRow(0) * list->count() + 2 * list->frameWidth());
+//        list->setMinimumHeight(list->sizeHintForColumn(0));
+        QSizePolicy sp = list->sizePolicy();
+        sp.setVerticalPolicy(QSizePolicy::Preferred);
+        list->setSizePolicy(sp);
+
+        QPushButton *showButton = new QPushButton("Рукав " + QString::number(i + 1));
+        showButton->setCheckable(true);
+        connect(showButton, SIGNAL(toggled(bool)), widget, SLOT(setVisible(bool)));
+        connect(showButton, SIGNAL(toggled(bool)), list, SLOT(setVisible(bool)));
+        showButton->toggle();
+
+        layout->addWidget(showButton);
+        layout->addWidget(widget);
+        layout->addWidget(list);
 
         QDoubleSpinBox *widthDoubleSpinBox = new QDoubleSpinBox();
         widthDoubleSpinBox->setKeyboardTracking(false);
@@ -732,9 +935,9 @@ void Intersection::getProperties(QFormLayout *layout, QGLWidget *render)
         QObject::connect(widthDoubleSpinBox, SIGNAL(valueChanged(double)), roads[i], SLOT(setWidth(double)));
         if (render)
         {
-            QObject::connect(widthDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+            //QObject::connect(widthDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
         }
-        layout->addRow("Рукав " + QString::number(i + 1) + " (ширина)", widthDoubleSpinBox);
+        layer->addRow("Ширина", widthDoubleSpinBox);
         QPushButton *addLinePushButton = new QPushButton("+");
 
         connect(stepDialogs[i], SIGNAL(lineTypeChanged(int)), roads[i], SLOT(setLineType(int)));
@@ -756,23 +959,56 @@ void Intersection::getProperties(QFormLayout *layout, QGLWidget *render)
         connect(stepDialogs[i], SIGNAL(accepted()), this, SLOT(addLine()));
         if (render)
         {
-            connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)), render, SLOT(updateGL()));
+            connect(this, SIGNAL(linesChanged(QVBoxLayout*,QGLWidget*)), render, SLOT(updateGL()));
         }
+
+
         for (int j = 0; j < roads[i]->lines.size(); ++j)
         {
-            QPushButton* b = new QPushButton(QString::number(j + 1));
-            connect(b, SIGNAL(clicked(bool)), roads[i], SLOT(deleteLine()));
-            connect(b, SIGNAL(clicked(bool)), this, SLOT(deleteLine()));
-            layout->addRow("Удалить линию ",b);
+//            QPushButton* b = new QPushButton(QString::number(j + 1));
+//            connect(b, SIGNAL(clicked(bool)), roads[i], SLOT(deleteLine()));
+//            connect(b, SIGNAL(clicked(bool)), this, SLOT(deleteLine()));
+//            layer->addRow("Удалить линию ",b);
+
+            QPushButton *editButton = new QPushButton();
+            editButton->setContentsMargins(0, 0, 0, 0);
+            editButton->setText("Редактировать");
+            QListWidgetItem *item = new QListWidgetItem();
+            //item->setSizeHint(QSize(0,20));
+            list->addItem(item);
+
+            QWidget *itemWidget = new QWidget(list);
+            QHBoxLayout *itemLayout = new QHBoxLayout(itemWidget);
+            itemLayout->setMargin(0);
+            itemLayout->setContentsMargins(5, 0, 5, 0);
+            itemWidget->setLayout(itemLayout);
+            itemLayout->addWidget(new QLabel(QString("Линия №") + QString::number(j + 1)));
+            itemLayout->addWidget(editButton);
+            list->setItemWidget(item, itemWidget);
         }
         connect(roads[i], SIGNAL(lineDeleted()), this, SLOT(deleteLine()));
-        layout->addRow("Добавить разметку", addLinePushButton);
+        layer->addRow("Добавить разметку", addLinePushButton);
+
+
+
     }
 
 
 
     for (int i = 0; i < curves.size(); ++i)
     {
+        QWidget *widget = new QWidget(layout->parentWidget());
+        QFormLayout *layer = new QFormLayout(widget);
+        //widget->setLayout(layer);
+
+        QPushButton *showButton = new QPushButton("Закругление " + QString::number(i + 1));
+        showButton->setCheckable(true);
+        connect(showButton, SIGNAL(toggled(bool)), widget, SLOT(setVisible(bool)));
+        showButton->toggle();
+
+        layout->addWidget(showButton);
+        layout->addWidget(widget);
+
         QDoubleSpinBox *leftLengthDoubleSpinBox = new QDoubleSpinBox();
         leftLengthDoubleSpinBox->setKeyboardTracking(false);
         leftLengthDoubleSpinBox->setValue(curves[i]->getLeftLength());
@@ -818,14 +1054,13 @@ void Intersection::getProperties(QFormLayout *layout, QGLWidget *render)
             connect(angleDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
             connect(boardWidthDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
         }
-        layout->addRow("Закругление " + QString::number(i + 1), showBoardCheckBox);
-        layout->addRow("Левая сторона", leftLengthDoubleSpinBox);
-        layout->addRow("Правая сторона", rightLengthDoubleSpinBox);
-        layout->addRow("Угол", angleDoubleSpinBox);
-        layout->addRow("Ширина тротуара", boardWidthDoubleSpinBox);
+        layer->addRow("Отображать", showBoardCheckBox);
+        layer->addRow("Левая сторона", leftLengthDoubleSpinBox);
+        layer->addRow("Правая сторона", rightLengthDoubleSpinBox);
+        layer->addRow("Угол", angleDoubleSpinBox);
+        layer->addRow("Ширина тротуара", boardWidthDoubleSpinBox);
+
     }
-
-
 
 }
 
@@ -1062,6 +1297,7 @@ void Intersection::resetWidth()
             break;
         }
     }
+    qDebug() << "Index" << index;
     if (index < 0)
         return;
 
@@ -1077,79 +1313,6 @@ void Intersection::resetWidth()
         qDebug() << "Left";
         roads[j]->setRightWidth(roads[index]->getLeftWidth());
     }
-    //    vec3 p1 = roads[index]->getCoordOfPoint(1);
-    //    vec3 p2 = roads[index]->getCoordOfPoint(2);
-    //    j = index == roads.size() - 1 ? 0 : index + 1;
-    //    vec3 p3 = roads[j]->getCoordOfPoint(0);
-    //    vec3 p4 = roads[j]->getCoordOfPoint(3);
-    //    float leftLength = curves[index]->getLeftLength();
-    //    float dx1 = p2.x - p1.x;
-    //    float dy1 = p2.y - p1.y;
-    //    float r1 = sqrt(dx1*dx1 + dy1*dy1);
-    //    float dx2 = p4.x - p3.x;
-    //    float dy2 = p4.y - p3.y;
-    //    float r2 = sqrt(dx2*dx2 + dy2*dy2);
-    //    float a1, b1, c1;
-    //    float a2, b2, c2;
-    //    float x, y;
-    //    a1 = p1.y - p2.y;
-    //    b1 = p2.x - p1.x;
-    //    c1 = p1.x * p2.y - p2.x * p1.y;
-
-    //    a2 = p3.y - p4.y;
-    //    b2 = p4.x - p3.x;
-    //    c2 = p3.x * p4.y - p4.x * p3.y;
-
-    //    if (!calculateLinesIntersection(a1, b1, c1, a2, b2, c2, x, y))
-    //        return;
-    //    x += dx2 / r2 * (leftLength + 0.01f);
-    //    y += dy2 / r2 * (leftLength + 0.01f);
-    //    float res = (p4.x - p2.x) * (y - p2.y) - (x - p2.x) * (p4.y - p2.y);
-    //    if (res < 0)
-    //    {
-    //        float dx = x - p4.x;
-    //        float dy = y - p4.y;
-
-    //        int count = roads[j]->getNumberOfControls() - 12;
-    //        roads[j]->resizeByControl(count + 7, dx, dy, 0.0f, 0.0f);
-    //    }
-
-
-
-    //    p1 = roads[index]->getCoordOfPoint(0);
-    //    p2 = roads[index]->getCoordOfPoint(3);
-    //    j = index == 0 ? roads.size() - 1 : index - 1;
-    //    p3 = roads[j]->getCoordOfPoint(1);
-    //    p4 = roads[j]->getCoordOfPoint(2);
-    //    float rightLength = curves[j]->getRightLength();
-    //    dx1 = p2.x - p1.x;
-    //    dy1 = p2.y - p1.y;
-    //    r1 = sqrt(dx1*dx1 + dy1*dy1);
-    //    dx2 = p4.x - p3.x;
-    //    dy2 = p4.y - p3.y;
-    //    r2 = sqrt(dx2*dx2 + dy2*dy2);
-    //    a1 = p1.y - p2.y;
-    //    b1 = p2.x - p1.x;
-    //    c1 = p1.x * p2.y - p2.x * p1.y;
-
-    //    a2 = p3.y - p4.y;
-    //    b2 = p4.x - p3.x;
-    //    c2 = p3.x * p4.y - p4.x * p3.y;
-
-    //    if (!calculateLinesIntersection(a1, b1, c1, a2, b2, c2, x, y))
-    //        return;
-    //    x += dx2 / r2 * (rightLength + 0.01f);
-    //    y += dy2 / r2 * (rightLength + 0.01f);
-    //    res = (p4.x - p2.x) * (y - p2.y) - (x - p2.x) * (p4.y - p2.y);
-    //    if (res > 0)
-    //    {
-    //        float dx = x - p4.x;
-    //        float dy = y - p4.y;
-
-    //        int count = roads[j]->getNumberOfControls() - 12;
-    //        roads[j]->resizeByControl(count + 7, dx, dy, 0.0f, 0.0f);
-    //    }
-    //    recalculateRoads();
     calculateRoadIntersections();
     calculateRoundings();
     setRoadsTextures();
@@ -1230,11 +1393,19 @@ void Intersection::clearProperties(QLayout *layout)
     for (int i = 0; i < 10; ++i)
         disconnect(stepDialogs[i], 0, 0, 0);
     disconnect(stepDialog, 0, 0, 0);
+
     while(layout->count() > 0)
     {
         QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
+        if (item->layout() != NULL)
+        {
+            clearProperties(item->layout());
+            delete item->layout();
+        }
+        if (item->widget() != NULL)
+        {
+            delete item->widget();
+        }
     }
 }
 

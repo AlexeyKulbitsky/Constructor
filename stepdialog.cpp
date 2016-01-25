@@ -279,7 +279,7 @@ void StepDialog::setSplitZoneLayout()
     splitZoneHeightSpinBox->setEnabled(false);
     connect(splitZoneHeightSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setSplitZoneHeight(double)));
     connect(this, SIGNAL(splitZoneHeightChanged(double)), splitZoneHeightSpinBox, SLOT(setValue(double)));
-    connect(this, SIGNAL(splitZoneHeightEnabledChanged(bool)), splitZoneHeightSpinBox, SLOT(setEnabled(bool)));
+    connect(this, SIGNAL(splitZoneHeightEnabledChanged(bool)), splitZoneHeightSpinBox, SLOT(setDisabled(bool)));
 
     QLabel* splitZoneHeightLabel = new QLabel("Высота");
 
@@ -692,16 +692,20 @@ void StepDialog::setSplitZoneType(int type)
     switch (type)
     {
     case 0:
-        emit splitZoneHeightEnabledChanged(false);
+        //emit splitZoneHeightEnabledChanged(false);
+        emit splitZoneHeightEnabledChanged(true);
         break;
     case 1:
-        emit splitZoneHeightEnabledChanged(true);
+        //emit splitZoneHeightEnabledChanged(true);
+        emit splitZoneHeightEnabledChanged(false);
         break;
     case 2:
-        emit splitZoneHeightEnabledChanged(true);
+        //emit splitZoneHeightEnabledChanged(true);
+        emit splitZoneHeightEnabledChanged(false);
         break;
     default:
-        emit splitZoneHeightEnabledChanged(false);
+        //emit splitZoneHeightEnabledChanged(false);
+        emit splitZoneHeightEnabledChanged(true);
         break;
     }
 }

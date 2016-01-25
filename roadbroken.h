@@ -101,7 +101,7 @@ protected:
     bool singleWay;
     int splitZoneType;
     double splitZoneHeight;
-    QFormLayout* layout;
+    QVBoxLayout* layout;
     QGLWidget* render;
     static bool log;
 public:
@@ -158,7 +158,7 @@ signals:
     void rightBoardWidthChanged(double width);
     void leftBoardWidthChanged(double width);
 
-    void linesChanged(QFormLayout* layout, QGLWidget* render);
+    void linesChanged(QVBoxLayout* layout, QGLWidget* render);
 
 public slots:
     static void setLogging(bool status);
@@ -193,7 +193,7 @@ public slots:
     void setAxisStep(double step);
     void setSplitZoneType(int type);
     void setSplitZoneHeight(double height);
-    virtual void getProperties(QFormLayout *layout, QGLWidget* render = 0);
+    virtual void getProperties(QVBoxLayout *layout, QGLWidget* render = 0);
 
 
     // RoadElement interface

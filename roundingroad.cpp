@@ -1662,7 +1662,7 @@ QJsonObject RoundingRoad::getJSONInfo()
 }
 
 
-void RoundingRoad::getProperties(QFormLayout *layout, QGLWidget* render)
+void RoundingRoad::getProperties(QVBoxLayout *layout, QGLWidget* render)
 {
     if (log)
         Logger::getLogger()->infoLog() << "RoundingRoad::getProperties(QFormLayout *layout, QGLWidget* render)\n";
@@ -1791,37 +1791,40 @@ void RoundingRoad::getProperties(QFormLayout *layout, QGLWidget* render)
     connect(addLineButton, SIGNAL(clicked(bool)), stepDialog, SLOT(exec()));
     connect(stepDialog, SIGNAL(accepted()), this, SLOT(addLine()));
 
+    QFormLayout *l = new QFormLayout();
 
-    layout->addRow("Дуга:", new QLabel("внутренняя"));
-    layout->addRow("Радиус", nearRadiusSpinBox);
-    layout->addRow("Угол 1", angel_1_NearRadiusSpinBox);
-    layout->addRow("Угол 2", angel_2_NearRadiusSpinBox);
+    l->addRow("Дуга:", new QLabel("внутренняя"));
+    l->addRow("Радиус", nearRadiusSpinBox);
+    l->addRow("Угол 1", angel_1_NearRadiusSpinBox);
+    l->addRow("Угол 2", angel_2_NearRadiusSpinBox);
 
-    layout->addRow("Дуга:", new QLabel("наружная"));
-    layout->addRow("Радиус", farRadiusSpinBox);
-    layout->addRow("Угол 1", angel_1_FarRadiusSpinBox);
-    layout->addRow("Угол 2", angel_2_FarRadiusSpinBox);
+    l->addRow("Дуга:", new QLabel("наружная"));
+    l->addRow("Радиус", farRadiusSpinBox);
+    l->addRow("Угол 1", angel_1_FarRadiusSpinBox);
+    l->addRow("Угол 2", angel_2_FarRadiusSpinBox);
 
     QCheckBox *showMeasurementsCheckBox = new QCheckBox();
     showMeasurementsCheckBox->setChecked(showMeasurements);
     connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setShowMeasurements(bool)));
     connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
-    layout->addRow("Размеры", showMeasurementsCheckBox);
+    l->addRow("Размеры", showMeasurementsCheckBox);
 
-    layout->addRow("Зафиксировать", fixedCheckBox);
-    layout->addRow("Ближний тротуар",showNearBoardCheckBox);
-    layout->addRow("Ширина", nearBoardWidthSpinBox);
-    layout->addRow("Дальний тротуар",showFarBoardCheckBox);
-    layout->addRow("Ширина", farBoardWidthSpinBox);
+    l->addRow("Зафиксировать", fixedCheckBox);
+    l->addRow("Ближний тротуар",showNearBoardCheckBox);
+    l->addRow("Ширина", nearBoardWidthSpinBox);
+    l->addRow("Дальний тротуар",showFarBoardCheckBox);
+    l->addRow("Ширина", farBoardWidthSpinBox);
     for (int i = 0; i < lines.size(); ++i)
     {
         QPushButton* b = new QPushButton(QString::number(i + 1));
         connect(b, SIGNAL(clicked(bool)), this, SLOT(deleteLine()));
-        layout->addRow("Удалить линию ",b);
+        l->addRow("Удалить линию ",b);
     }
 
 
-    layout->addRow("Добавить линию", addLineButton);
+    l->addRow("Добавить линию", addLineButton);
+
+    layout->addLayout(l);
 }
 
 void RoundingRoad::setNearRadius(double nearRadius)
@@ -2804,8 +2807,15 @@ void RoundingRoad::clearProperties(QLayout *layout)
     while(layout->count() > 0)
     {
         QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
+        if (item->layout() != NULL)
+        {
+            clearProperties(item->layout());
+            delete item->layout();
+        }
+        if (item->widget() != NULL)
+        {
+            delete item->widget();
+        }
     }
 }
 

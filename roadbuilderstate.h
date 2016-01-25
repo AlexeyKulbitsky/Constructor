@@ -14,7 +14,7 @@ class RoadBuilderState: public State
     Q_OBJECT
 public:
     RoadBuilderState();
-    RoadBuilderState(StateManager* manager, Model* model, Scene2D* scene, QFormLayout* properties);
+    RoadBuilderState(StateManager* manager, Model* model, Scene2D* scene, QVBoxLayout* properties);
 
     virtual ~RoadBuilderState();
 
@@ -22,7 +22,7 @@ private:
     StateManager* stateManager;
     Model* model;
     Scene2D* scene;
-    QFormLayout* properties;
+    QVBoxLayout* properties;
 
     RoadBroken* roadBroken;
 
@@ -61,7 +61,7 @@ public:
     // State interface
 public:
     virtual QString getName();
-    void clearProperties(QFormLayout* layout);
+    void clearProperties(QVBoxLayout* layout);
     virtual void clear();
     void setRoad(RoadBroken *roadBroken);
     // State interface

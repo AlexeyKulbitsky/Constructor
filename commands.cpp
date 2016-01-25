@@ -182,7 +182,7 @@ void ResizeByControlCommand::setLogging(bool status)
 
 bool DeleteCommand::log = true;
 
-DeleteCommand::DeleteCommand(RoadElement *element, Model *model, StateManager* stateManager, QFormLayout *layout, int groupIndex, int elementIndex, Scene2D* scene2D, QUndoCommand *parent)
+DeleteCommand::DeleteCommand(RoadElement *element, Model *model, StateManager* stateManager, QVBoxLayout *layout, int groupIndex, int elementIndex, Scene2D* scene2D, QUndoCommand *parent)
     : QUndoCommand(parent)
 {
     if (log)
@@ -201,7 +201,7 @@ DeleteCommand::DeleteCommand(RoadElement *element, Model *model, StateManager* s
     this->scene2D = scene2D;
 }
 
-DeleteCommand::DeleteCommand(QList<RoadElement *> &elements, Model *model, StateManager* stateManager, QFormLayout *layout, Scene2D *scene2D, QUndoCommand *parent)
+DeleteCommand::DeleteCommand(QList<RoadElement *> &elements, Model *model, StateManager* stateManager, QVBoxLayout *layout, Scene2D *scene2D, QUndoCommand *parent)
     : QUndoCommand(parent)
 {
     for (int i = 0; i < elements.size(); ++i)
@@ -359,7 +359,7 @@ void DeleteCommand::setLogging(bool status)
 
 bool InsertCommand::log = true;
 
-InsertCommand::InsertCommand(RoadElement *element, StateManager *stateManager, QFormLayout *layout, Model *model, int groupIndex, Scene2D *scene2D, QUndoCommand *parent)
+InsertCommand::InsertCommand(RoadElement *element, StateManager *stateManager, QVBoxLayout *layout, Model *model, int groupIndex, Scene2D *scene2D, QUndoCommand *parent)
     : QUndoCommand(parent)
 {
     if (log)
@@ -515,7 +515,7 @@ void AddLineBrokenBreakCommand::setLogging(bool status)
 // PasteCommand................................
 bool PasteCommand::log = true;
 
-PasteCommand::PasteCommand(StateManager* stateManager, QFormLayout *layout,
+PasteCommand::PasteCommand(StateManager* stateManager, QVBoxLayout *layout,
                            Scene2D* scene2D, Model* model, QUndoCommand* parent)
     : QUndoCommand(parent)
 {

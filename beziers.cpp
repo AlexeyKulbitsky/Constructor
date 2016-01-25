@@ -154,7 +154,7 @@ void Beziers::changeColorOfSelectedControl(int)
 {
 }
 
-void Beziers::getProperties(QFormLayout *, QGLWidget *)
+void Beziers::getProperties(QVBoxLayout *, QGLWidget *)
 {
 }
 

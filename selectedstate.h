@@ -11,16 +11,16 @@ class SelectedState: public State
     Q_OBJECT
 public:
     SelectedState();
-    SelectedState(StateManager* manager, Model* model, Scene2D* scene, QFormLayout* properties);
+    SelectedState(StateManager* manager, Model* model, Scene2D* scene, QVBoxLayout* properties);
     virtual ~SelectedState();
     QList<RoadElement*> selectedElements;
 
-    void clearProperties(QFormLayout *layout);
+    void clearProperties(QVBoxLayout *layout);
 private:
     StateManager* stateManager;
     Model* model;
     Scene2D* scene;
-    QFormLayout* properties;
+    QVBoxLayout* properties;
     QList<RoadElement*>::iterator it;
     RoadElement* selectedElement;
     ResizeByControlCommand* resizeByControlCommand;

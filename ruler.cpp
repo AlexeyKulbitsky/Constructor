@@ -479,7 +479,7 @@ void Ruler::changeColorOfSelectedControl(int index)
     indexOfSelectedControl = index;
 }
 
-void Ruler::getProperties(QFormLayout *, QGLWidget *)
+void Ruler::getProperties(QVBoxLayout *, QGLWidget *)
 {
 }
 

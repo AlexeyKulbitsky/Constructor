@@ -34,7 +34,7 @@ public:
     virtual int getNumberOfControls();
     virtual int controlsForPoint();
     virtual void changeColorOfSelectedControl(int index);
-    virtual void getProperties(QFormLayout *layout, QGLWidget *render);
+    virtual void getProperties(QVBoxLayout *layout, QGLWidget *render);
     virtual bool isFixed();
     virtual int getLayer();
     virtual void clear();
@@ -123,6 +123,7 @@ public:
     virtual void setCoordForControl(int index, std::vector<vec3> &controls);
     virtual void clearProperties(QLayout *layout);
     virtual QJsonObject getJSONInfo();
+    bool isRight() { return right; }
 };
 
 #endif // CURVE_H

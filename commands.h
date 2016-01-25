@@ -64,8 +64,8 @@ private:
 class DeleteCommand : public QUndoCommand
 {
 public:
-    DeleteCommand(RoadElement* element, Model* model, StateManager* stateManager, QFormLayout* layout, int groupIndex, int elementIndex, Scene2D *scene2D, QUndoCommand* parent = 0);
-    DeleteCommand(QList<RoadElement*>& elements, Model* model, StateManager* stateManager, QFormLayout* layout, Scene2D* scene2D, QUndoCommand* parent = 0);
+    DeleteCommand(RoadElement* element, Model* model, StateManager* stateManager, QVBoxLayout* layout, int groupIndex, int elementIndex, Scene2D *scene2D, QUndoCommand* parent = 0);
+    DeleteCommand(QList<RoadElement*>& elements, Model* model, StateManager* stateManager, QVBoxLayout* layout, Scene2D* scene2D, QUndoCommand* parent = 0);
     ~DeleteCommand();
     // QUndoCommand interface
 public:
@@ -81,7 +81,7 @@ private:
     Model* model;
     Scene2D* scene2D;
     StateManager* stateManager;
-    QFormLayout* layout;
+    QVBoxLayout* layout;
     int groupIndex;
     int elementIndex;
     static bool log;
@@ -90,7 +90,7 @@ private:
 class InsertCommand : public QUndoCommand
 {
 public:
-    InsertCommand(RoadElement* element, StateManager* stateManager, QFormLayout* layout, Model* model, int groupIndex, Scene2D* scene2D, QUndoCommand* parent = 0);
+    InsertCommand(RoadElement* element, StateManager* stateManager, QVBoxLayout* layout, Model* model, int groupIndex, Scene2D* scene2D, QUndoCommand* parent = 0);
     ~InsertCommand();
     // QUndoCommand interface
 public:
@@ -103,7 +103,7 @@ private:
     Model* model;
     Scene2D* scene2D;
     StateManager* stateManager;
-    QFormLayout* layout;
+    QVBoxLayout* layout;
     int groupIndex;
     int elementIndex;
     bool isInModel;
@@ -151,7 +151,7 @@ class PasteCommand : public QUndoCommand
 {
 public:
     PasteCommand(StateManager* stateManager,
-                 QFormLayout* layout,
+                 QVBoxLayout* layout,
                  Scene2D* scene2D, Model* model, QUndoCommand* parent = 0);
     ~PasteCommand();
     // QUndoCommand interface
@@ -169,7 +169,7 @@ private:
     bool isInModel;
 
     StateManager* stateManager;
-    QFormLayout* layout;
+    QVBoxLayout* layout;
 };
 
 class AddLineCommand : public QUndoCommand

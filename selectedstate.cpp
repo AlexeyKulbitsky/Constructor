@@ -23,7 +23,7 @@ SelectedState::SelectedState()
     controlIndex = -1;
 }
 
-SelectedState::SelectedState(StateManager *manager, Model *model, Scene2D* scene, QFormLayout *properties)
+SelectedState::SelectedState(StateManager *manager, Model *model, Scene2D* scene, QVBoxLayout *properties)
 {
     if (log)
         Logger::getLogger()->infoLog() << "Creating SelectedState\n";
@@ -234,9 +234,7 @@ void SelectedState::mouseMoveEvent(QMouseEvent *pe)
                             scene->width()/(scene->nSca * scene->ratio) * 2.0;
                     float y = (GLdouble)(scene->height() -  ptrMousePosition.y())/
                             scene->width()/(scene->nSca * scene->ratio) * 2.0;
-                    qDebug() << "Before Resize-----------------";
                     selectedElement->resizeByControl(controlIndex, dX, dY, x, y);
-                    qDebug() << "After Resize-----------------";
                     scene->updateGL();
                     model->setModified(true);
                     ptrMousePosition = pe->pos();
@@ -516,7 +514,7 @@ SelectedState::~SelectedState()
     breakAction = NULL;
 }
 
-void SelectedState::clearProperties(QFormLayout *layout)
+void SelectedState::clearProperties(QVBoxLayout *layout)
 {
     if (log)
         Logger::getLogger()->infoLog() << "SelectedState::clearProperties(QFormLayout *layout)\n";

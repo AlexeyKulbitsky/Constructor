@@ -59,7 +59,7 @@ public:
     virtual void paste();
     virtual void cut();
     virtual void del();
-    virtual void clearProperties(QFormLayout *);
+    virtual void clearProperties(QVBoxLayout *);
     bool tryToSelectFigures(QPoint mp, RoadElement*& element);
     bool tryToSelectControlsInSelectedFigure(QPoint mp, RoadElement* element, int& index);
 

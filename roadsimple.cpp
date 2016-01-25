@@ -62,7 +62,7 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, QString name, int
     fixed = false;
     layout = NULL;
     render = NULL;
-    connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
+    connect(this, SIGNAL(linesChanged(QVBoxLayout*,QGLWidget*)),SLOT(getProperties(QVBoxLayout*,QGLWidget*)));
 }
 
 RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, float width, float red, float green, float blue, float alpha, QString name, int layer, QString description)
@@ -108,7 +108,7 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, float width, floa
     fixed = false;
     layout = NULL;
     render = NULL;
-    connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
+    connect(this, SIGNAL(linesChanged(QVBoxLayout*,QGLWidget*)),SLOT(getProperties(QVBoxLayout*,QGLWidget*)));
 }
 
 RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, float width,
@@ -173,7 +173,7 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2, float width,
     fixed = false;
     layout = NULL;
     render = NULL;
-    connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
+    connect(this, SIGNAL(linesChanged(QVBoxLayout*,QGLWidget*)),SLOT(getProperties(QVBoxLayout*,QGLWidget*)));
 }
 
 RoadSimple::RoadSimple(float x1, float y1, float x2, float y2,
@@ -243,7 +243,7 @@ RoadSimple::RoadSimple(float x1, float y1, float x2, float y2,
     this->fixed = fixed;
     layout = NULL;
     render = NULL;
-    connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
+    connect(this, SIGNAL(linesChanged(QVBoxLayout*,QGLWidget*)),SLOT(getProperties(QVBoxLayout*,QGLWidget*)));
 }
 
 RoadSimple::RoadSimple(const RoadSimple &source)
@@ -369,7 +369,7 @@ RoadSimple::RoadSimple(const RoadSimple &source)
         lines[i].differentDirections = source.lines[i].differentDirections;
         lines[i].splitZoneWidth = source.lines[i].splitZoneWidth;
     }
-    connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
+    connect(this, SIGNAL(linesChanged(QVBoxLayout*,QGLWidget*)),SLOT(getProperties(QVBoxLayout*,QGLWidget*)));
 
 }
 
@@ -411,6 +411,10 @@ void RoadSimple::setVertexArray(float x1, float y1, float x2, float y2, float wi
     this->y2 = y2;
     this->width = width;
     this->length = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    axis1.x = x1 + (x1 - x2) * 100 / length;
+    axis1.y = y1 + (y1 - y2) * 100 / length;
+    axis2.x = x2 + (x2 - x1) * 100 / length;
+    axis2.y = y2 + (y2 - y1) * 100 / length;
     float r1 = rightWidth;
     float r2 = leftWidth;
     float dx1 = sqrt(r1*r1*(y2-y1)*(y2-y1)/((y2-y1)*(y2-y1) + (x2-x1)*(x2-x1)));
@@ -904,6 +908,16 @@ vec2 RoadSimple::getAxisPoint_2()
     return res;
 }
 
+vec2 RoadSimple::axis_1()
+{
+    return axis1;
+}
+
+vec2 RoadSimple::axis_2()
+{
+    return axis2;
+}
+
 void RoadSimple::setCoordForAxisPoint(int index, float x, float y)
 {
     if (log)
@@ -1081,7 +1095,10 @@ void RoadSimple::move(float dx, float dy, float dz)
     this->y1 += dy;
     this->x2 += dx;
     this->y2 += dy;
-
+    axis1.x += dx;
+    axis1.y += dy;
+    axis2.x += dx;
+    axis2.y += dy;
     elementX += dx;
     elementY += dy;
 }
@@ -1866,7 +1883,7 @@ void RoadSimple::setSelectedStatus(bool status)
 }
 
 
-void RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)
+void RoadSimple::getProperties(QVBoxLayout *layout, QGLWidget* render)
 {
 
     if (log)
@@ -1874,6 +1891,9 @@ void RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)
     this->layout = layout;
     this->render = render;
     this->clearProperties(layout);
+
+    QFormLayout *l = new QFormLayout();
+
     QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
     widthSpinBox->setKeyboardTracking(false);
     QDoubleSpinBox* lengthSpinBox = new QDoubleSpinBox();
@@ -1892,15 +1912,15 @@ void RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)
     fixedCheckBox->setChecked(fixed);
     QObject::connect(fixedCheckBox, SIGNAL(toggled(bool)), this, SLOT(setFixed(bool)));
 
-    layout->addRow("Длина", lengthSpinBox);
-    layout->addRow("Ширина", widthSpinBox);
-    layout->addRow("Зафиксировать", fixedCheckBox);
+    l->addRow("Длина", lengthSpinBox);
+    l->addRow("Ширина", widthSpinBox);
+    l->addRow("Зафиксировать", fixedCheckBox);
 
     QCheckBox *showMeasurementsCheckBox = new QCheckBox();
     showMeasurementsCheckBox->setChecked(showMeasurements);
     connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setShowMeasurements(bool)));
     connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
-    layout->addRow("Размеры", showMeasurementsCheckBox);
+    l->addRow("Размеры", showMeasurementsCheckBox);
 
     if (render)
     {
@@ -1938,11 +1958,11 @@ void RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)
             connect(showRightBoardCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
             connect(showLeftBoardCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
         }
-        layout->addRow("Ширина правого тротуара", rightBoardSpinBox);
-        layout->addRow("Ширина левого тротуара", leftBoardSpinBox);
+        l->addRow("Ширина правого тротуара", rightBoardSpinBox);
+        l->addRow("Ширина левого тротуара", leftBoardSpinBox);
 
-        layout->addRow("Правый тротуар", showRightBoardCheckBox);
-        layout->addRow("Левый тротуар", showLeftBoardCheckBox);
+        l->addRow("Правый тротуар", showRightBoardCheckBox);
+        l->addRow("Левый тротуар", showLeftBoardCheckBox);
 
         QPushButton *addLineButton = new QPushButton("+");
 
@@ -1971,13 +1991,13 @@ void RoadSimple::getProperties(QFormLayout *layout, QGLWidget* render)
         {
             QPushButton* b = new QPushButton(QString::number(i + 1));
             connect(b, SIGNAL(clicked(bool)), this, SLOT(deleteLine()));
-            layout->addRow("Удалить линию ",b);
+            l->addRow("Удалить линию ",b);
         }
 
-        layout->addRow("Добавить линию", addLineButton);
+        l->addRow("Добавить линию", addLineButton);
     }
 
-
+    layout->addLayout(l);
 
 
 
@@ -2482,6 +2502,8 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
         line_y1 = Y1 + (Y2 - Y1) / r * d;
 
         float dr = ((X3 - X1)*(line_x1 - X1) + (Y3 - Y1)*(line_y1 - Y1)) / d;
+        if (fabs(d) < 1e-7)
+            dr = 0.0f;
         dr = d - dr;
         r = sqrt((X4 - X3)*(X4 - X3) + (Y4 - Y3)*(Y4 - Y3));
         line_x2 = X3 + (X4 - X3) / r * dr;
@@ -2531,10 +2553,10 @@ void RoadSimple::addLine(float step, QString textureSource, float textureSize, f
                     r1 = width - lines[index].step;
                 else
                     r1 = lines[index].step;
-//            line_x1 = line_x1 + (line_x2 - line_x1) / width * r1;
-//            line_y1 = line_y1 + (line_y2 - line_y1) / width * r1;
-            line_x2 = line_x2 + (line_x1 - line_x2) / width * r1;
-            line_y2 = line_y2 + (line_y1 - line_y2) / width * r1;
+            line_x1 = line_x1 + (line_x2 - line_x1) / width * r1;
+            line_y1 = line_y1 + (line_y2 - line_y1) / width * r1;
+            //line_x2 = line_x2 + (line_x1 - line_x2) / width * r1;
+            //line_y2 = line_y2 + (line_y1 - line_y2) / width * r1;
 
             for (int i = 0; i < lines.size(); ++i)
             {
@@ -3171,8 +3193,15 @@ void RoadSimple::clearProperties(QLayout *layout)
     while(layout->count() > 0)
     {
         QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
+        if (item->layout() != NULL)
+        {
+            clearProperties(item->layout());
+            delete item->layout();
+        }
+        if (item->widget() != NULL)
+        {
+            delete item->widget();
+        }
     }
 }
 
@@ -3375,4 +3404,46 @@ void RoadSimple::rotate(float angle, float x, float y, float )
     setTextureArray();
     for (int i = 0; i < lines.size(); ++i)
         lines[i].line->rotate(angle, x, y, 0.0f);
+}
+
+void RoadSimple::resizeByControlSelf(int index, float dx, float dy, float x, float y)
+{
+    switch (index)
+    {
+    case 8:
+    {
+        float dr = ((xP1 - xP2)*dx + (yP1 - yP2)*dy)/
+                sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
+        rightWidth += dr;
+        if (rightWidth < 0.0f)
+        {
+            rightWidth = 0.001f;
+            width = leftWidth + 0.001f;
+        }
+        else
+            width += dr;
+        setVertexArray(x1, y1, x2, y2, width);
+        setTextureArray();
+    }
+        break;
+    case 9:
+    {
+        float dr = ((xP2 - xP1)*dx + (yP2 - yP1)*dy)/
+                sqrt((xP2 - xP1)*(xP2 - xP1) + (yP2 - yP1)*(yP2 - yP1));
+
+        leftWidth += dr;
+        if (leftWidth < 0.0f)
+        {
+            leftWidth = 0.001f;
+            width = rightWidth + 0.001f;
+        }
+        else
+            width += dr;
+        setVertexArray(x1, y1, x2, y2, width);
+        setTextureArray();
+    }
+        break;
+    default:
+        break;
+    }
 }

@@ -25,7 +25,7 @@ public:
     virtual int getNumberOfControls();
     virtual int controlsForPoint();
     virtual void changeColorOfSelectedControl(int index);
-    virtual void getProperties(QFormLayout *layout, QGLWidget *render);
+    virtual void getProperties(QVBoxLayout *layout, QGLWidget *render);
     virtual bool isFixed();
     virtual int getLayer();
 

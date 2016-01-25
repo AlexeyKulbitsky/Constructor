@@ -197,7 +197,7 @@ void MapPlane::changeColorOfSelectedControl(int)
 {
 }
 
-void MapPlane::getProperties(QFormLayout *, QGLWidget *)
+void MapPlane::getProperties(QVBoxLayout *, QGLWidget *)
 {
 }
 

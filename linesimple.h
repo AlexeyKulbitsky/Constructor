@@ -75,7 +75,7 @@ public:
 
     // RoadElement interface
 public:
-    virtual void getProperties(QFormLayout *layout, QGLWidget* render = 0);
+    virtual void getProperties(QVBoxLayout *layout, QGLWidget* render = 0);
 
 signals:
     void widthChanged(double width);

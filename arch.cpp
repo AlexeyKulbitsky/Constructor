@@ -321,13 +321,66 @@ void Arch::changeColorOfSelectedControl(int)
 {
 }
 
-void Arch::getProperties(QFormLayout *layout, QGLWidget *render)
+void Arch::getProperties(QVBoxLayout *layout, QGLWidget *render)
 {
+//    clearProperties(layout);
+
+//    QCheckBox* fixedCheckBox = new QCheckBox();
+//    fixedCheckBox->setChecked(fixed);
+//    connect(fixedCheckBox, SIGNAL(toggled(bool)), this, SLOT(setFixed(bool)));
+
+//    QDoubleSpinBox* rotationSpinBox = new QDoubleSpinBox();
+//    rotationSpinBox->setKeyboardTracking(false);
+//    rotationSpinBox->setMinimum(-720.0);
+//    rotationSpinBox->setMaximum(720.0f);
+//    rotationSpinBox->setValue(rotation);
+//    connect(rotationSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setRotation(double)));
+//    connect(this, SIGNAL(rotationChanged(double)), rotationSpinBox, SLOT(setValue(double)));
+
+//    QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
+//    widthSpinBox->setKeyboardTracking(false);
+//    widthSpinBox->setValue(width);
+//    connect(widthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setWidth(double)));
+//    connect(this, SIGNAL(widthChanged(double)), widthSpinBox, SLOT(setValue(double)));
+
+//    QDoubleSpinBox* heightSpinBox = new QDoubleSpinBox();
+//    heightSpinBox->setKeyboardTracking(false);
+//    heightSpinBox->setValue(height);
+//    connect(heightSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setHeight(double)));
+//    connect(this, SIGNAL(heightChanged(double)), heightSpinBox, SLOT(setValue(double)));
+
+//    QDoubleSpinBox* zSpinBox = new QDoubleSpinBox();
+//    zSpinBox->setKeyboardTracking(false);
+//    zSpinBox->setValue(z);
+//    connect(zSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setZ(double)));
+//    connect(this, SIGNAL(zChanged(double)), zSpinBox, SLOT(setValue(double)));
+
+
+//    if (render)
+//    {
+//        connect(rotationSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+//        connect(widthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+//        connect(heightSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+//        connect(zSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+//    }
+
+//    layout->addRow("Зафиксировать", fixedCheckBox);
+//    layout->addRow("Поворот", rotationSpinBox);
+//    layout->addRow("Ширина", widthSpinBox);
+//    layout->addRow("Высота арки", heightSpinBox);
+//    layout->addRow("Высота от уровня земли", zSpinBox);
+
+
+
     clearProperties(layout);
 
     QCheckBox* fixedCheckBox = new QCheckBox();
     fixedCheckBox->setChecked(fixed);
     connect(fixedCheckBox, SIGNAL(toggled(bool)), this, SLOT(setFixed(bool)));
+
+//    QHBoxLayout* fixedLayout = new QHBoxLayout();
+//    fixedLayout->addWidget(new QLabel("Зафиксировать"));
+//    fixedLayout->addWidget(fixedCheckBox);
 
     QDoubleSpinBox* rotationSpinBox = new QDoubleSpinBox();
     rotationSpinBox->setKeyboardTracking(false);
@@ -337,11 +390,19 @@ void Arch::getProperties(QFormLayout *layout, QGLWidget *render)
     connect(rotationSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setRotation(double)));
     connect(this, SIGNAL(rotationChanged(double)), rotationSpinBox, SLOT(setValue(double)));
 
+//    QHBoxLayout* rotationLayout = new QHBoxLayout();
+//    rotationLayout->addWidget(new QLabel("Поворот"));
+//    rotationLayout->addWidget(rotationSpinBox);
+
     QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
     widthSpinBox->setKeyboardTracking(false);
     widthSpinBox->setValue(width);
     connect(widthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setWidth(double)));
     connect(this, SIGNAL(widthChanged(double)), widthSpinBox, SLOT(setValue(double)));
+
+//    QHBoxLayout* widthLayout = new QHBoxLayout();
+//    widthLayout->addWidget(new QLabel("Ширина"));
+//    widthLayout->addWidget(widthSpinBox);
 
     QDoubleSpinBox* heightSpinBox = new QDoubleSpinBox();
     heightSpinBox->setKeyboardTracking(false);
@@ -349,11 +410,19 @@ void Arch::getProperties(QFormLayout *layout, QGLWidget *render)
     connect(heightSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setHeight(double)));
     connect(this, SIGNAL(heightChanged(double)), heightSpinBox, SLOT(setValue(double)));
 
+//    QHBoxLayout* heightLayout = new QHBoxLayout();
+//    heightLayout->addWidget(new QLabel("Высота арки"));
+//    heightLayout->addWidget(heightSpinBox);
+
     QDoubleSpinBox* zSpinBox = new QDoubleSpinBox();
     zSpinBox->setKeyboardTracking(false);
     zSpinBox->setValue(z);
     connect(zSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setZ(double)));
     connect(this, SIGNAL(zChanged(double)), zSpinBox, SLOT(setValue(double)));
+
+//    QHBoxLayout* zLayout = new QHBoxLayout();
+//    zLayout->addWidget(new QLabel("Высота от уровня земли"));
+//    zLayout->addWidget(zSpinBox);
 
 
     if (render)
@@ -364,11 +433,13 @@ void Arch::getProperties(QFormLayout *layout, QGLWidget *render)
         connect(zSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
     }
 
-    layout->addRow("Зафиксировать", fixedCheckBox);
-    layout->addRow("Поворот", rotationSpinBox);
-    layout->addRow("Ширина", widthSpinBox);
-    layout->addRow("Высота арки", heightSpinBox);
-    layout->addRow("Высота от уровня земли", zSpinBox);
+    QFormLayout* l = new QFormLayout();
+    l->addRow("Зафиксировать", fixedCheckBox);
+    l->addRow("Поворот", rotationSpinBox);
+    l->addRow("Ширина", widthSpinBox);
+    l->addRow("Высота арки", heightSpinBox);
+    l->addRow("Высота от уровня земли", zSpinBox);
+    layout->addLayout(l);
 }
 
 bool Arch::isFixed()
@@ -678,9 +749,25 @@ void Arch::clearProperties(QLayout *layout)
     while(layout->count() > 0)
     {
         QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
+        if (item->layout() != NULL)
+        {
+            clearProperties(item->layout());
+            delete item->layout();
+            qDebug() << "Layout deleted";
+        }
+        if (item->widget() != NULL)
+        {
+            delete item->widget();
+            qDebug() << "Widget deleted";
+        }
+//        if (!item->isEmpty())
+//        {
+//            delete item;
+//        }
+        qDebug() << "Item deleted";
     }
+    qDebug() << "Everything deleted";
+
 }
 
 

@@ -54,7 +54,7 @@ public:
     virtual int controlsForPoint();
     virtual void changeColorOfSelectedControl(int index);
     virtual QJsonObject getJSONInfo();
-    virtual void getProperties(QFormLayout *layout, QGLWidget *render);
+    virtual void getProperties(QVBoxLayout *layout, QGLWidget *render);
     virtual bool isFixed();
 
 signals:

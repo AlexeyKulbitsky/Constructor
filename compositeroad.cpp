@@ -246,7 +246,7 @@ void CompositeRoad::changeColorOfSelectedControl(int index)
                                    << "index = " << index << "\n";
 }
 
-void CompositeRoad::getProperties(QFormLayout *, QGLWidget *)
+void CompositeRoad::getProperties(QVBoxLayout *, QGLWidget *)
 {
     if (log)
     Logger::getLogger()->infoLog() << "CompositeRoad::getProperties(QFormLayout *layout, QGLWidget *render\n)";

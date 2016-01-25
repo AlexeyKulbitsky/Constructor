@@ -35,6 +35,14 @@ struct vec3
         this->y = y;
         this->z = z;
     }
+    vec3 operator- (const vec3& p)
+    {
+        vec3 res;
+        res.x = this->x - p.x;
+        res.y = this->y - p.y;
+        res.z = this->x - p.z;
+        return res;
+    }
 };
 struct vec2
 {
@@ -185,7 +193,7 @@ public:
     virtual QString getName();
     virtual void setName(const QString& name) { this->name = name; }
     virtual QJsonObject getJSONInfo();
-    virtual void getProperties(QFormLayout* layout, QGLWidget* render = 0) = 0;
+    virtual void getProperties(QVBoxLayout* layout, QGLWidget* render = 0) = 0;
     virtual void clearProperties(QLayout* layout);
     virtual void setModel(Model* model);
     virtual bool isFixed() = 0;

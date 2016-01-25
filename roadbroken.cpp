@@ -3574,13 +3574,16 @@ QJsonObject RoadBroken::getJSONInfo()
 }
 
 
-void RoadBroken::getProperties(QFormLayout *layout, QGLWidget* render)
+void RoadBroken::getProperties(QVBoxLayout *layout, QGLWidget* render)
 {
     if (log)
         Logger::getLogger()->infoLog() << "RoadBroken::getProperties(QFormLayout *layout, QGLWidget* render)\n";    
     this->layout = layout;
     this->render = render;
     clearProperties(layout);
+
+    QFormLayout *l = new QFormLayout();
+
     QCheckBox* showRightBoardCheckBox = new QCheckBox();
     QCheckBox* showLeftBoardCheckBox = new QCheckBox();
     QCheckBox* fixedCheckBox = new QCheckBox();
@@ -3639,26 +3642,28 @@ void RoadBroken::getProperties(QFormLayout *layout, QGLWidget* render)
 
 
 
-    layout->addRow("Ширина правого тротуара", rightBoardSpinBox);
-    layout->addRow("Ширина левого тротуара", leftBoardSpinBox);
-    layout->addRow("Зафиксировать", fixedCheckBox);
-    layout->addRow("Правый тротуар", showRightBoardCheckBox);
-    layout->addRow("Левый тротуар", showLeftBoardCheckBox);
+    l->addRow("Ширина правого тротуара", rightBoardSpinBox);
+    l->addRow("Ширина левого тротуара", leftBoardSpinBox);
+    l->addRow("Зафиксировать", fixedCheckBox);
+    l->addRow("Правый тротуар", showRightBoardCheckBox);
+    l->addRow("Левый тротуар", showLeftBoardCheckBox);
 
     QCheckBox *showMeasurementsCheckBox = new QCheckBox();
     showMeasurementsCheckBox->setChecked(showMeasurements);
     connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setShowMeasurements(bool)));
     connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
-    layout->addRow("Размеры", showMeasurementsCheckBox);
+    l->addRow("Размеры", showMeasurementsCheckBox);
 
     for (int i = 0; i < lines.size(); ++i)
     {
         QPushButton* b = new QPushButton(QString::number(i + 1));
         connect(b, SIGNAL(clicked(bool)), this, SLOT(deleteLine()));
-        layout->addRow("Удалить линию ",b);
+        l->addRow("Удалить линию ",b);
     }
 
-    layout->addRow("Добавить линию", addLineButton);
+    l->addRow("Добавить линию", addLineButton);
+
+    layout->addLayout(l);
 }
 
 
@@ -4528,8 +4533,15 @@ void RoadBroken::clearProperties(QLayout *layout)
     while(layout->count() > 0)
     {
         QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
+        if (item->layout() != NULL)
+        {
+            clearProperties(item->layout());
+            delete item->layout();
+        }
+        if (item->widget() != NULL)
+        {
+            delete item->widget();
+        }
     }
 }
 

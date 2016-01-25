@@ -19,7 +19,7 @@ LineBuilderState::LineBuilderState()
     linking = false;
 }
 
-LineBuilderState::LineBuilderState(StateManager *manager, Model *model, Scene2D *scene, QFormLayout *properties)
+LineBuilderState::LineBuilderState(StateManager *manager, Model *model, Scene2D *scene, QVBoxLayout *properties)
 {
     if (log)
     Logger::getLogger()->infoLog() << "Creating LineBuilderState\n";
@@ -601,7 +601,7 @@ bool LineBuilderState::tryToSelectFigures(QPoint mp)
     }
 }
 
-void LineBuilderState::clearProperties(QFormLayout *layout)
+void LineBuilderState::clearProperties(QVBoxLayout *layout)
 {
     if (log)
     Logger::getLogger()->infoLog() << "LineBuilderState::clearProperties(QFormLayout *layout)\n";

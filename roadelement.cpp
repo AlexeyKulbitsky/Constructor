@@ -28,27 +28,22 @@ QJsonObject RoadElement::getJSONInfo()
 }
 
 
-void RoadElement::clearProperties(QLayout *)
+void RoadElement::clearProperties(QLayout *layout)
 
 {
-    /*
-        QLayoutItem *item;
-        while((layout->count() > 0)) {
-            item = layout->itemAt(0);
-            if (item->layout()) {
-                clearProperties(item->layout());
-                delete item->layout();
-            }
-            if (item->widget()) {
-                delete item->widget();
-            }
-            delete item;
+    while(layout->count() > 0)
+    {
+        QLayoutItem *item = layout->takeAt(0);
+        if (item->layout() != NULL)
+        {
+            clearProperties(item->layout());
+            delete item->layout();
         }
-      */
-   // QLayoutItem *child;
-  //  while ((child = layout->takeAt(0)) != 0) {
-  //      delete child;
-  //  }
+        if (item->widget() != NULL)
+        {
+            delete item->widget();
+        }
+    }
 }
 
 

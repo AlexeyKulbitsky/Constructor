@@ -86,7 +86,7 @@ public:
     virtual std::vector<vec3> getCoordOfControl(int index);
     void rotate(float angle, float x, float y, float z);
     virtual QJsonObject getJSONInfo();
-    virtual void getProperties(QFormLayout *layout, QGLWidget* render = 0);
+    virtual void getProperties(QVBoxLayout *layout, QGLWidget* render = 0);
     virtual bool isFixed();
     virtual void addBreak(bool front);
     virtual void deleteBreak(bool front);

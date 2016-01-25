@@ -338,36 +338,38 @@ void Camera::changeColorOfSelectedControl(int index)
 {
 }
 
-void Camera::getProperties(QFormLayout *layout, QGLWidget *render)
+void Camera::getProperties(QVBoxLayout *layout, QGLWidget *render)
 {
     properties = layout;
     createProperties();
 
-    layout->addRow("Зафиксировать", fixedCheckBox);
-    layout->addRow("Название камеры", cameraNameLineEdit);
-    layout->addRow("Сенсор", sensorTypeComboBox);
-    layout->addRow("Редактировать сенсор", editSensorCheckBox);
-    layout->addRow("Диагональ", sensorDiagonalLineEdit);
-    layout->addRow("Ширина", sensorWidthSpinBox);
-    layout->addRow("Высота", sensorHeightSpinBox);
-    layout->addRow("Разрешение (ширина)", resolutionWidthSpinBox);
-    layout->addRow("Разрешение (высота)", resolutionHeightSpinBox);
-    layout->addRow("Используемая часть", usableSensorSpinBox);
-    layout->addRow("Сохранить изменения", saveSensorButton);
-    layout->addRow("Удалить сенсор", deleteSensorButton);
-    layout->addRow("Объектив", lensComboBox);
-    layout->addRow("Редактировать", editLensCheckBox);
-    layout->addRow("Фокус (минимум)", minimumFocalSpinBox);
-    layout->addRow("Фокус (максимум)", maximumFocalSpinBox);
-    layout->addRow("Фокусное расстояние", focalLengthSpinBox);
-    layout->addRow("Угол обзора(гор)", xFOVSpinBox);
-    layout->addRow("Угол обзора(верт)", yFOVSpinBox);
-    layout->addRow("Сохранить изменения", saveLensButton);
-    layout->addRow("Удалить объектив", deleteLensButton);
-    layout->addRow("Высота установки", mountingHeightSpinBox);
-    layout->addRow("Угол поворота", horizontalAngleSpinBox);
-    layout->addRow("Угол наклона", verticalAngleSpinBox);
+    QFormLayout *l = new QFormLayout();
+    l->addRow("Зафиксировать", fixedCheckBox);
+    l->addRow("Название камеры", cameraNameLineEdit);
+    l->addRow("Сенсор", sensorTypeComboBox);
+    l->addRow("Редактировать сенсор", editSensorCheckBox);
+    l->addRow("Диагональ", sensorDiagonalLineEdit);
+    l->addRow("Ширина", sensorWidthSpinBox);
+    l->addRow("Высота", sensorHeightSpinBox);
+    l->addRow("Разрешение (ширина)", resolutionWidthSpinBox);
+    l->addRow("Разрешение (высота)", resolutionHeightSpinBox);
+    l->addRow("Используемая часть", usableSensorSpinBox);
+    l->addRow("Сохранить изменения", saveSensorButton);
+    l->addRow("Удалить сенсор", deleteSensorButton);
+    l->addRow("Объектив", lensComboBox);
+    l->addRow("Редактировать", editLensCheckBox);
+    l->addRow("Фокус (минимум)", minimumFocalSpinBox);
+    l->addRow("Фокус (максимум)", maximumFocalSpinBox);
+    l->addRow("Фокусное расстояние", focalLengthSpinBox);
+    l->addRow("Угол обзора(гор)", xFOVSpinBox);
+    l->addRow("Угол обзора(верт)", yFOVSpinBox);
+    l->addRow("Сохранить изменения", saveLensButton);
+    l->addRow("Удалить объектив", deleteLensButton);
+    l->addRow("Высота установки", mountingHeightSpinBox);
+    l->addRow("Угол поворота", horizontalAngleSpinBox);
+    l->addRow("Угол наклона", verticalAngleSpinBox);
 
+    layout->addLayout(l);
 
     if (render)
     {
@@ -1447,10 +1449,15 @@ void Camera::clearProperties(QLayout *layout)
     while(layout->count() > 0)
     {
         QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
-        //item->widget()->hide();
-        //layout->removeItem(item);
+        if (item->layout() != NULL)
+        {
+            clearProperties(item->layout());
+            delete item->layout();
+        }
+        if (item->widget() != NULL)
+        {
+            delete item->widget();
+        }
     }
 }
 

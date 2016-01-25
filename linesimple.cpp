@@ -619,7 +619,7 @@ QJsonObject LineSimple::getJSONInfo()
 }
 
 
-void LineSimple::getProperties(QFormLayout *layout, QGLWidget* render)
+void LineSimple::getProperties(QVBoxLayout *layout, QGLWidget* render)
 {
     if (log)
         Logger::getLogger()->infoLog() << "LineSimple::getProperties(QFormLayout *layout, QGLWidget* render)\n";
@@ -632,37 +632,37 @@ void LineSimple::getProperties(QFormLayout *layout, QGLWidget* render)
         QApplication::exit(0);
     }
 
-    QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
-    widthSpinBox->setKeyboardTracking(false);
-    QDoubleSpinBox* lengthSpinBox = new QDoubleSpinBox();
-    lengthSpinBox->setKeyboardTracking(false);
-    QCheckBox* fixedCheckBox = new QCheckBox();
+//    QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
+//    widthSpinBox->setKeyboardTracking(false);
+//    QDoubleSpinBox* lengthSpinBox = new QDoubleSpinBox();
+//    lengthSpinBox->setKeyboardTracking(false);
+//    QCheckBox* fixedCheckBox = new QCheckBox();
 
-    widthSpinBox->setValue(width);
-    connect(this, SIGNAL(widthChanged(double)), widthSpinBox, SLOT(setValue(double)));
-    connect(widthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setWidth(double)));
+//    widthSpinBox->setValue(width);
+//    connect(this, SIGNAL(widthChanged(double)), widthSpinBox, SLOT(setValue(double)));
+//    connect(widthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setWidth(double)));
 
-    lengthSpinBox->setValue(length);
-    connect(this, SIGNAL(lengthChanged(double)), lengthSpinBox, SLOT(setValue(double)));
-    connect(lengthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setLength(double)));
+//    lengthSpinBox->setValue(length);
+//    connect(this, SIGNAL(lengthChanged(double)), lengthSpinBox, SLOT(setValue(double)));
+//    connect(lengthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setLength(double)));
 
-    fixedCheckBox->setChecked(fixed);
-    QObject::connect(fixedCheckBox, SIGNAL(toggled(bool)), this, SLOT(setFixed(bool)));
-    if (render)
-    {
-        connect(widthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
-        connect(lengthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
-    }
+//    fixedCheckBox->setChecked(fixed);
+//    QObject::connect(fixedCheckBox, SIGNAL(toggled(bool)), this, SLOT(setFixed(bool)));
+//    if (render)
+//    {
+//        connect(widthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+//        connect(lengthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+//    }
 
-    QCheckBox *showMeasurementsCheckBox = new QCheckBox();
-    showMeasurementsCheckBox->setChecked(showMeasurements);
-    connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setShowMeasurements(bool)));
-    connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
-    layout->addRow("Размеры", showMeasurementsCheckBox);
+//    QCheckBox *showMeasurementsCheckBox = new QCheckBox();
+//    showMeasurementsCheckBox->setChecked(showMeasurements);
+//    connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setShowMeasurements(bool)));
+//    connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
+//    layout->addRow("Размеры", showMeasurementsCheckBox);
 
-    layout->addRow("Длина", lengthSpinBox);
-    layout->addRow("Ширина", widthSpinBox);
-    layout->addRow("Зафиксировать", fixedCheckBox);
+//    layout->addRow("Длина", lengthSpinBox);
+//    layout->addRow("Ширина", widthSpinBox);
+//    layout->addRow("Зафиксировать", fixedCheckBox);
 }
 
 void LineSimple::setWidth(double width)
@@ -883,7 +883,14 @@ void LineSimple::clearProperties(QLayout *layout)
     while(layout->count() > 0)
     {
         QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
+        if (item->layout() != NULL)
+        {
+            clearProperties(item->layout());
+            delete item->layout();
+        }
+        if (item->widget() != NULL)
+        {
+            delete item->widget();
+        }
     }
 }

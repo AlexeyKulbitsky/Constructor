@@ -17,7 +17,7 @@ StateManager::StateManager(QObject *parent) : QObject(parent)
     model = NULL;
 }
 
-StateManager::StateManager(Model *model, Scene2D* scene, QFormLayout *properties)
+StateManager::StateManager(Model *model, Scene2D* scene, QVBoxLayout *properties)
 {    
     if (log)
     Logger::getLogger()->infoLog() << "StateManager::StateManager(Model *model, Scene2D* scene, QFormLayout *properties)\n";
@@ -63,7 +63,7 @@ StateManager::StateManager(Model *model, Scene2D* scene, QFormLayout *properties
     currentState = defaultState;
 }
 
-StateManager::StateManager(Model *model, Scene2D *scene, QFormLayout *properties, CameraView *cam)
+StateManager::StateManager(Model *model, Scene2D *scene, QVBoxLayout *properties, CameraView *cam)
     : StateManager(model, scene, properties)
 {
     camera = cam;

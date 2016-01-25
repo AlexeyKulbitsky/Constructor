@@ -370,7 +370,7 @@ void RulerState::del()
 {
 }
 
-void RulerState::clearProperties(QFormLayout *)
+void RulerState::clearProperties(QVBoxLayout *)
 {
 }
 

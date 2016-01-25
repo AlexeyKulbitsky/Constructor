@@ -620,7 +620,7 @@ void SplitZone::changeColorOfSelectedControl(int index)
     indexOfSelectedControl = index;
 }
 
-void SplitZone::getProperties(QFormLayout *layout, QGLWidget *render)
+void SplitZone::getProperties(QVBoxLayout *layout, QGLWidget *render)
 {
     if (log)
         Logger::getLogger()->infoLog() << "SplitZone::getProperties(QFormLayout *layout, QGLWidget *render)\n";
@@ -633,6 +633,9 @@ void SplitZone::getProperties(QFormLayout *layout, QGLWidget *render)
         QApplication::exit(0);
     }
     clearProperties(layout);
+
+    QFormLayout *l = new QFormLayout();
+
     QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
     widthSpinBox->setKeyboardTracking(false);
 
@@ -646,15 +649,15 @@ void SplitZone::getProperties(QFormLayout *layout, QGLWidget *render)
     QObject::connect(fixedCheckBox, SIGNAL(toggled(bool)), this, SLOT(setFixed(bool)));
 
     connect(widthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
-    layout->addRow("Зафиксировать", fixedCheckBox);
+    l->addRow("Зафиксировать", fixedCheckBox);
 
     QCheckBox *showMeasurementsCheckBox = new QCheckBox();
     showMeasurementsCheckBox->setChecked(showMeasurements);
     connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), this, SLOT(setShowMeasurements(bool)));
     connect(showMeasurementsCheckBox, SIGNAL(toggled(bool)), render, SLOT(updateGL()));
-    layout->addRow("Размеры", showMeasurementsCheckBox);
+    l->addRow("Размеры", showMeasurementsCheckBox);
 
-    layout->addRow("Ширина", widthSpinBox);
+    l->addRow("Ширина", widthSpinBox);
 
     switch (type)
     {
@@ -666,7 +669,7 @@ void SplitZone::getProperties(QFormLayout *layout, QGLWidget *render)
         connect(this, SIGNAL(lineWidthChanged(double)), lineWidthSpinBox, SLOT(setValue(double)));
         connect(lineWidthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setLineWidth(double)));
         connect(lineWidthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
-        layout->addRow("Толщина линии", lineWidthSpinBox);
+        l->addRow("Толщина линии", lineWidthSpinBox);
     }
         break;
     case 1:
@@ -678,13 +681,14 @@ void SplitZone::getProperties(QFormLayout *layout, QGLWidget *render)
         connect(this, SIGNAL(heightChanged(double)), heightSpinBox, SLOT(setValue(double)));
         connect(heightSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setHeight(double)));
         connect(heightSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
-        layout->addRow("Высота", heightSpinBox);
+        l->addRow("Высота", heightSpinBox);
     }
         break;
     default:
         break;
     }
 
+    layout->addLayout(l);
 
 }
 
@@ -2611,8 +2615,15 @@ void SplitZone::clearProperties(QLayout *layout)
     while(layout->count() > 0)
     {
         QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
+        if (item->layout() != NULL)
+        {
+            clearProperties(item->layout());
+            delete item->layout();
+        }
+        if (item->widget() != NULL)
+        {
+            delete item->widget();
+        }
     }
 }
 

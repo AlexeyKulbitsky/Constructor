@@ -59,14 +59,14 @@ public:
 
 signals:
     void intersectionsChanged();
-    void intersectionsChanged(QFormLayout*,QGLWidget*);
+    void intersectionsChanged(QVBoxLayout*,QGLWidget*);
     void roundingsChanged();
     void roadAdded();
-    void linesChanged(QFormLayout* layout, QGLWidget* render);
+    void linesChanged(QVBoxLayout* layout, QGLWidget* render);
 
 public slots:
     virtual bool setFixed(bool fixed);
-    virtual void getProperties(QFormLayout *layout, QGLWidget *render);
+    virtual void getProperties(QVBoxLayout *layout, QGLWidget *render);
 
     bool calculateRoadIntersections();
     void calculateRoundings();
@@ -101,7 +101,7 @@ private:
     QVector<bool> showBoardStatus;
 
     QVector<Angle*> angles;
-    QFormLayout* layout;
+    QVBoxLayout* layout;
     QGLWidget* render;
     static bool log;
     // RoadElement interface

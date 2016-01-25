@@ -22,7 +22,7 @@ RoadBuilderState::RoadBuilderState()
     scene->setMouseTracking(true);
 }
 
-RoadBuilderState::RoadBuilderState(StateManager *manager, Model *model, Scene2D *scene, QFormLayout *properties)
+RoadBuilderState::RoadBuilderState(StateManager *manager, Model *model, Scene2D *scene, QVBoxLayout *properties)
 {
     if (log)
     Logger::getLogger()->infoLog() << "Creating RoadBuilderState\n";
@@ -627,7 +627,7 @@ QString RoadBuilderState::getName()
     return "RoadBuilderState";
 }
 
-void RoadBuilderState::clearProperties(QFormLayout *layout)
+void RoadBuilderState::clearProperties(QVBoxLayout *layout)
 {
     if (log)
     Logger::getLogger()->infoLog() << "RoadBuilderState::clearProperties(QFormLayout *layout)\n";

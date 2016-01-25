@@ -267,7 +267,7 @@ void Pole::changeColorOfSelectedControl(int index)
     indexOfSelectedControl = index;
 }
 
-void Pole::getProperties(QFormLayout *layout, QGLWidget *render)
+void Pole::getProperties(QVBoxLayout *layout, QGLWidget *render)
 {
     clearProperties(layout);
 
@@ -295,9 +295,12 @@ void Pole::getProperties(QFormLayout *layout, QGLWidget *render)
         connect(diameterSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
     }
 
-    layout->addRow("Зафиксировать", fixedCheckBox);
-    layout->addRow("Диаметр", diameterSpinBox);
-    layout->addRow("Высота", heightSpinBox);
+    QFormLayout *l = new QFormLayout();
+    l->addRow("Зафиксировать", fixedCheckBox);
+    l->addRow("Диаметр", diameterSpinBox);
+    l->addRow("Высота", heightSpinBox);
+
+    layout->addLayout(l);
 }
 
 bool Pole::isFixed()
@@ -455,8 +458,15 @@ void Pole::clearProperties(QLayout *layout)
     while(layout->count() > 0)
     {
         QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
+        if (item->layout() != NULL)
+        {
+            clearProperties(item->layout());
+            delete item->layout();
+        }
+        if (item->widget() != NULL)
+        {
+            delete item->widget();
+        }
     }
 }
 

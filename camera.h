@@ -54,7 +54,7 @@ public:
     virtual int getNumberOfControls();
     virtual int controlsForPoint();
     virtual void changeColorOfSelectedControl(int index);
-    virtual void getProperties(QFormLayout *layout, QGLWidget *render);
+    virtual void getProperties(QVBoxLayout *layout, QGLWidget *render);
     virtual bool isFixed();
     virtual int getLayer();
     virtual void clear();
@@ -195,7 +195,7 @@ private:
     int currentLens;
 
 public:
-    QFormLayout *properties;
+    QVBoxLayout *properties;
 
     QSpinBox *usableSensorSpinBox;
     QCheckBox *editSensorCheckBox;

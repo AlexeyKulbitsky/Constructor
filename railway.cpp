@@ -224,7 +224,7 @@ void RailWay::changeColorOfSelectedControl(int index)
                                        << " index = " << index << "\n";
 }
 
-void RailWay::getProperties(QFormLayout *layout, QGLWidget *)
+void RailWay::getProperties(QVBoxLayout *layout, QGLWidget *)
 {
     if (log)
         Logger::getLogger()->infoLog() << "RailWay::getProperties(QFormLayout *layout, QGLWidget *render)\n";
@@ -1045,8 +1045,15 @@ void RailWay::clearProperties(QLayout *layout)
     while(layout->count() > 0)
     {
         QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
+        if (item->layout() != NULL)
+        {
+            clearProperties(item->layout());
+            delete item->layout();
+        }
+        if (item->widget() != NULL)
+        {
+            delete item->widget();
+        }
     }
 }
 

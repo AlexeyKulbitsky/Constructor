@@ -17,7 +17,7 @@ class LineBuilderState: public State
     Q_OBJECT
 public:
     LineBuilderState();
-    LineBuilderState(StateManager* manager, Model* model, Scene2D* scene, QFormLayout* properties);
+    LineBuilderState(StateManager* manager, Model* model, Scene2D* scene, QVBoxLayout* properties);
 
     virtual ~LineBuilderState();
 
@@ -25,7 +25,7 @@ private:
     StateManager* stateManager;
     Model* model;
     Scene2D* scene;
-    QFormLayout* properties;
+    QVBoxLayout* properties;
 
     LineBroken* lineBroken;
 
@@ -67,7 +67,7 @@ public:
 
     bool tryToSelectControlsInSelectedFigure(QPoint mp);
     bool tryToSelectFigures(QPoint mp);
-    void clearProperties(QFormLayout* layout);
+    void clearProperties(QVBoxLayout* layout);
     void setGroupIndex(int index);
     void setElementIndex(int index);
     virtual void clear();

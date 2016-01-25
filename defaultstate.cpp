@@ -19,7 +19,7 @@ DefaultState::DefaultState()
     selectedElementsCount = 0;
 }
 
-DefaultState::DefaultState(StateManager *manager, Model *model, Scene2D* scene, QFormLayout *properties)
+DefaultState::DefaultState(StateManager *manager, Model *model, Scene2D* scene, QVBoxLayout *properties)
 {
     if (log)
         Logger::getLogger()->infoLog() << "Creating DefaultState\n";
@@ -730,7 +730,7 @@ DefaultState::~DefaultState()
     properties = NULL;
 }
 
-void DefaultState::clearProperties(QFormLayout *layout)
+void DefaultState::clearProperties(QVBoxLayout *layout)
 {
     if (log)
         Logger::getLogger()->infoLog() << "DefaultState::clearProperties(QFormLayout *layout)\n";

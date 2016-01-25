@@ -304,7 +304,7 @@ void RoadElement3D::changeColorOfSelectedControl(int index)
     indexOfSelectedControl = index;
 }
 
-void RoadElement3D::getProperties(QFormLayout *layout, QGLWidget *)
+void RoadElement3D::getProperties(QVBoxLayout *layout, QGLWidget *)
 {
     while(QLayoutItem* child = layout->takeAt(0))
     {
@@ -341,9 +341,13 @@ void RoadElement3D::getProperties(QFormLayout *layout, QGLWidget *)
     //connect(rotationSlider, SIGNAL(sliderMoved(int)), this, SLOT(setZRotation(int)));
     //connect(this, SIGNAL(zRotationChanged(int)), rotationSlider, SLOT(setValue(int)));
 
-    layout->addRow("Поворот:", rotationSpinBox);
-    layout->addRow("Растяжение по X:", xScaleSpinBox);
-    layout->addRow("Растяжение по Y:", yScaleSpinBox);
+    QFormLayout *l = new QFormLayout();
+
+    l->addRow("Поворот:", rotationSpinBox);
+    l->addRow("Растяжение по X:", xScaleSpinBox);
+    l->addRow("Растяжение по Y:", yScaleSpinBox);
+
+    layout->addLayout(l);
 }
 
 bool RoadElement3D::isFixed()

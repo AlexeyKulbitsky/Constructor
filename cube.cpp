@@ -920,49 +920,49 @@ QJsonObject Cube::getJSONInfo()
     return element;
 }
 
-void Cube::getProperties(QFormLayout *layout, QGLWidget *render)
+void Cube::getProperties(QVBoxLayout *layout, QGLWidget *render)
 {
-    clearProperties(layout);
+//    clearProperties(layout);
 
-    QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
-    widthSpinBox->setKeyboardTracking(false);
-    widthSpinBox->setMinimum(0.001);
-    widthSpinBox->setValue(width);
-    connect(widthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setWidth(double)));
-    connect(this, SIGNAL(widthChanged(double)), widthSpinBox, SLOT(setValue(double)));
+//    QDoubleSpinBox* widthSpinBox = new QDoubleSpinBox();
+//    widthSpinBox->setKeyboardTracking(false);
+//    widthSpinBox->setMinimum(0.001);
+//    widthSpinBox->setValue(width);
+//    connect(widthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setWidth(double)));
+//    connect(this, SIGNAL(widthChanged(double)), widthSpinBox, SLOT(setValue(double)));
 
-    QDoubleSpinBox* lengthSpinBox = new QDoubleSpinBox();
-    lengthSpinBox->setKeyboardTracking(false);
-    lengthSpinBox->setMinimum(0.001);
-    lengthSpinBox->setValue(length);
-    connect(lengthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setLength(double)));
-    connect(this, SIGNAL(lengthChanged(double)), lengthSpinBox, SLOT(setValue(double)));
+//    QDoubleSpinBox* lengthSpinBox = new QDoubleSpinBox();
+//    lengthSpinBox->setKeyboardTracking(false);
+//    lengthSpinBox->setMinimum(0.001);
+//    lengthSpinBox->setValue(length);
+//    connect(lengthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setLength(double)));
+//    connect(this, SIGNAL(lengthChanged(double)), lengthSpinBox, SLOT(setValue(double)));
 
-    QDoubleSpinBox* heightSpinBox = new QDoubleSpinBox();
-    heightSpinBox->setKeyboardTracking(false);
-    heightSpinBox->setMinimum(0.001);
-    heightSpinBox->setValue(height);
-    connect(heightSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setHeight(double)));
-    connect(this, SIGNAL(heightChanged(double)), heightSpinBox, SLOT(setValue(double)));
+//    QDoubleSpinBox* heightSpinBox = new QDoubleSpinBox();
+//    heightSpinBox->setKeyboardTracking(false);
+//    heightSpinBox->setMinimum(0.001);
+//    heightSpinBox->setValue(height);
+//    connect(heightSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setHeight(double)));
+//    connect(this, SIGNAL(heightChanged(double)), heightSpinBox, SLOT(setValue(double)));
 
-    QDoubleSpinBox* zSpinBox = new QDoubleSpinBox();
-    zSpinBox->setKeyboardTracking(false);
-    zSpinBox->setMinimum(-1000.0);
-    zSpinBox->setValue(z);
-    connect(zSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setZ(double)));
-    connect(this, SIGNAL(zChanged(double)), zSpinBox, SLOT(setValue(double)));
+//    QDoubleSpinBox* zSpinBox = new QDoubleSpinBox();
+//    zSpinBox->setKeyboardTracking(false);
+//    zSpinBox->setMinimum(-1000.0);
+//    zSpinBox->setValue(z);
+//    connect(zSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setZ(double)));
+//    connect(this, SIGNAL(zChanged(double)), zSpinBox, SLOT(setValue(double)));
 
-    if (render)
-    {
-        connect(widthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
-        connect(lengthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
-        connect(heightSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
-        connect(zSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
-    }
-    layout->addRow("Ширина", widthSpinBox);
-    layout->addRow("Длина", lengthSpinBox);
-    layout->addRow("Высота элемента", heightSpinBox);
-    layout->addRow("Высота от уровня земли", zSpinBox);
+//    if (render)
+//    {
+//        connect(widthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+//        connect(lengthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+//        connect(heightSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+//        connect(zSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+//    }
+//    layout->addRow("Ширина", widthSpinBox);
+//    layout->addRow("Длина", lengthSpinBox);
+//    layout->addRow("Высота элемента", heightSpinBox);
+//    layout->addRow("Высота от уровня земли", zSpinBox);
 }
 
 bool Cube::isFixed()

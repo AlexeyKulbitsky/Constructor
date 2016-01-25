@@ -45,7 +45,8 @@ MainWindow::MainWindow(QWidget *parent) :
     propertiesScrollArea->setMaximumWidth(300);
 
     propertiesWidget = new QWidget(propertiesDockWidget);
-    propertiesLayout = new QFormLayout(propertiesWidget);
+    propertiesLayout = new QVBoxLayout(propertiesWidget);
+    propertiesLayout->setAlignment(Qt::AlignTop);
     propertiesWidget->setLayout(propertiesLayout);
     propertiesScrollArea->setWidget(propertiesWidget);
     propertiesScrollArea->setWidgetResizable(true);

@@ -56,7 +56,7 @@ public:
 
     QScrollArea *propertiesScrollArea;
     QWidget *propertiesWidget;
-    QFormLayout *propertiesLayout;
+    QVBoxLayout *propertiesLayout;
     QDockWidget *propertiesDockWidget;
 
     QDockWidget *elementsDockWidget;

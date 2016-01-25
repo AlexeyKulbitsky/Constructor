@@ -302,7 +302,7 @@ void RoadElementOBJ::changeColorOfSelectedControl(int)
 {
 }
 
-void RoadElementOBJ::getProperties(QFormLayout *layout, QGLWidget *render)
+void RoadElementOBJ::getProperties(QVBoxLayout *layout, QGLWidget *render)
 {
     clearProperties(layout);
     QDoubleSpinBox* rotationSpinBox = new QDoubleSpinBox();
@@ -357,12 +357,15 @@ void RoadElementOBJ::getProperties(QFormLayout *layout, QGLWidget *render)
         connect(zTranslationSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
     }
 
-    layout->addRow("Поворот:", rotationSpinBox);
-    layout->addRow("Масштабирование", scaleSpinBox);
-    layout->addRow("Масштаб по X", xScaleSpinBox);
-    layout->addRow("Масштаб по Y", yScaleSpinBox);
-    layout->addRow("Масштаб по Z", zScaleSpinBox);
-    layout->addRow("Высота", zTranslationSpinBox);
+    QFormLayout *l = new QFormLayout();
+    l->addRow("Поворот:", rotationSpinBox);
+    l->addRow("Масштабирование", scaleSpinBox);
+    l->addRow("Масштаб по X", xScaleSpinBox);
+    l->addRow("Масштаб по Y", yScaleSpinBox);
+    l->addRow("Масштаб по Z", zScaleSpinBox);
+    l->addRow("Высота", zTranslationSpinBox);
+
+    layout->addLayout(l);
 }
 
 bool RoadElementOBJ::isFixed()
@@ -573,8 +576,15 @@ void RoadElementOBJ::clearProperties(QLayout *layout)
     while(layout->count() > 0)
     {
         QLayoutItem *item = layout->takeAt(0);
-        delete item->widget();
-        delete item;
+        if (item->layout() != NULL)
+        {
+            clearProperties(item->layout());
+            delete item->layout();
+        }
+        if (item->widget() != NULL)
+        {
+            delete item->widget();
+        }
     }
 }
 

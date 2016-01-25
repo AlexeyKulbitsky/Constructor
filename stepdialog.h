@@ -14,6 +14,97 @@
 #include <QStackedLayout>
 #include <QCheckBox>
 
+namespace Line
+{
+enum LineType
+{
+    SingleSolid = 0,
+    SingleIntermittent,
+    DoubleSolid,
+    DoubleIntermittentLeft,
+    DoubleIntermittentRight,
+    DoubleIntermittent,
+    SplitZone,
+    StopLine,
+    TramWays
+};
+
+enum SplitZoneType
+{
+    Marking = 0,
+    Board,
+    Grass
+};
+
+}
+
+
+
+
+struct LineLinkedToRoad
+{
+    Line::LineType type;
+    float step;
+    float beginStep;
+    float endStep;
+    bool linkedToRightSide; // Привязка к правой стороне по ходу движения (иначе к левой)
+    bool linkedToBeginSide; // Привязка к началу (иначе к концу)
+
+    Line::SplitZoneType splitZoneType;
+    bool beginRounding;
+    bool endRounding;
+    float splitZoneHeight;
+    float splitZoneWidth;
+
+    // Конструктор для простой разметки
+    LineLinkedToRoad(Line::LineType lineType,
+               bool lineLinkedToRightSide, float lineStep,
+               float lineBeginStep, float lineEndStep):
+        type(lineType),
+        step(lineStep),
+        beginStep(lineBeginStep), endStep(lineEndStep),
+        linkedToRightSide(lineLinkedToRightSide), linkedToBeginSide(false),
+
+        splitZoneType(Line::Marking),
+        beginRounding(false),
+        endRounding(false),
+        splitZoneHeight(0.0f),
+        splitZoneWidth(0.0f)
+    {
+    }
+
+    // Конструктор для разделительной зоны
+    LineLinkedToRoad(Line::LineType lineType,
+               bool lineLinkedToRightSide, float lineStep,
+               float lineBeginStep, float lineEndStep,
+               Line::SplitZoneType lineSplitZoneType,
+               bool lineSplitZoneBeginRounding, bool lineZoneEndRounding,
+               float lineSplitZoneHeight, float lineSplitZoneWidth):
+        LineLinkedToRoad(lineType,
+                   lineLinkedToRightSide, lineStep,
+                   lineBeginStep, lineEndStep)
+    {
+        splitZoneType = lineSplitZoneType;
+        beginRounding = lineSplitZoneBeginRounding;
+        endRounding = lineZoneEndRounding;
+        splitZoneHeight = lineSplitZoneHeight;
+        splitZoneWidth = lineSplitZoneWidth;
+    }
+
+    // Конструктор для Стоп-линии
+    LineLinkedToRoad(Line::LineType lineType,
+               bool lineLinkedToRightSide,
+               bool lineLinkedToBeginSide,
+               float lineStep):
+        type(lineType),
+        linkedToRightSide(lineLinkedToRightSide),
+        linkedToBeginSide(lineLinkedToBeginSide),
+        step(lineStep)
+    {
+    }
+
+};
+
 class StepDialog: public QDialog
 {
     Q_OBJECT

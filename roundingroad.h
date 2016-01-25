@@ -99,7 +99,7 @@ private:
     int splitZoneType;
     double splitZoneHeight;
 
-    QFormLayout* layout;
+    QVBoxLayout* layout;
     QGLWidget* render;
     static bool log;
 
@@ -158,7 +158,7 @@ signals:
     void angel_1_FarRadiusChanged(double angel1);
     void angel_2_FarRadiusChanged(double angel2);
 
-    void linesChanged(QFormLayout* layout, QGLWidget* render);
+    void linesChanged(QVBoxLayout* layout, QGLWidget* render);
 
     void nearBoardWidthChanged(double width);
     void farBoardWidthChanged(double width);
@@ -200,7 +200,7 @@ public slots:
     void setNearBoardWidth(double width);
     void setFarBoardWidth(double width);
 
-    virtual void getProperties(QFormLayout *layout, QGLWidget* render = 0);
+    virtual void getProperties(QVBoxLayout *layout, QGLWidget* render = 0);
     // RoadElement interface
 public:
     virtual bool isFixed();
