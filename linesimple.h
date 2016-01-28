@@ -31,6 +31,7 @@ protected:
     QString textureSource;
     GLfloat red, green, blue, alpha;
     GLfloat x1, y1, x2, y2;
+    GLfloat xStep, yStep;
     float width, length;
     float size;
     int layer;
@@ -54,21 +55,24 @@ public:
     LineSimple(const LineSimple& source);
 
     bool hasPoint(GLfloat x, GLfloat y);
-    void drawFigure(QGLWidget* render = 0);
-    void drawSelectionFrame();
-    void move(float dx, float dy, float dz = 0);
-    void drawControlElement(int index, float lineWidth = 5.0, float pointSize = 5.0);
-    QCursor getCursorForControlElement(int index);
-    void resizeByControl(int index, float dx, float dy, float x, float y);
-    int getNumberOfControls() { return 9; }
-    int controlsForPoint() { return 1;}
-    void changeColorOfSelectedControl(int index);
+    virtual void drawFigure(QGLWidget* render = 0);
+    virtual void drawSelectionFrame();
+    virtual void move(float dx, float dy, float dz = 0);
+    virtual void drawControlElement(int index, float lineWidth = 5.0, float pointSize = 5.0);
+    virtual QCursor getCursorForControlElement(int index);
+    virtual void resizeByControl(int index, float dx, float dy, float x, float y);
+    virtual int getNumberOfControls() { return 9; }
+    virtual int controlsForPoint() { return 1;}
+    virtual void changeColorOfSelectedControl(int index);
     vec2 getAxisPoint_1(){return vec2(x1, y1);}
     vec2 getAxisPoint_2(){return vec2(x2, y2);}
     QPoint getCoorninateOfPointControl(int index);
     void drawDescription(QGLWidget* render = 0, float red = 1.0f, float green = 1.0f, float blue = 1.0f);
     static void setLogging(bool status);
     static bool getLogging() { return log; }
+    void setXStep(float x) { xStep = x; }
+    void setYStep(float y) { yStep = y; }
+
     // RoadElement interface
 public:
     virtual QJsonObject getJSONInfo();
@@ -90,37 +94,17 @@ public:
     virtual bool isFixed();
     void setLength(float length, bool front);
     float getLength() { return length; }
+    float getWidth() { return width; }
     // RoadElement interface
 public:
     virtual void drawMeasurements(QGLWidget *render);
-
-    // RoadElement interface
-public slots:
     virtual bool setFixed(bool fixed);
-
-    // RoadElement interface
-public:
     virtual int getLayer();
-
-    // RoadElement interface
-public:
     virtual void clear();
-
-    // RoadElement interface
-public:
     virtual std::vector<vec3> getCoordOfControl(int index);
     void rotate(float angle, float x, float y, float z);
-
-    // RoadElement interface
-public:
     virtual RoadElement *getCopy();
-
-    // RoadElement interface
-public:
     virtual void setCoordForControl(int index, std::vector<vec3> &controls);
-
-    // RoadElement interface
-public:
     virtual void clearProperties(QLayout *layout);
 };
 

@@ -207,8 +207,8 @@ public:
     virtual void setStepDialog(StepDialog* dialog);
     virtual void setStepDialogs(StepDialog** dialogs, int size);
     virtual void deleteLine(RoadElement* line);
-    virtual void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
-    virtual void getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz);
+    static void getWindowCoord(double x, double y, double z, double &wx, double &wy, double &wz);
+    static void getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz);
     virtual float getElementX() { return elementX; }
     virtual float getElementY() { return elementY; }
     virtual RoadElement* getCopy() = 0;
@@ -217,6 +217,9 @@ public:
     virtual bool calculateLinesIntersection(float a1, float b1, float c1,
                                     float a2, float b2, float c2,
                                     float& x, float& y);
+    virtual bool calculateLinesIntersection(vec2 p1, vec2 p2,
+                                            vec2 s1, vec2 s2,
+                                            float& x, float& y);
     virtual float calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4);
     virtual float calculateAngle(vec3 v1, vec3 v2);
     virtual unsigned int getSize() { return sizeof(*this); }

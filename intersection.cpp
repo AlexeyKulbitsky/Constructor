@@ -295,7 +295,7 @@ void Intersection::drawFigure(QGLWidget *render)
 
     for (int i = 0; i < roads.size(); ++i)
     {
-        roads[i]->drawFigure();
+        roads[i]->drawFigure(render);
     }
 
     if (indexOfSelectedControl >=0 && indexOfSelectedControl < getNumberOfControls())
@@ -444,6 +444,10 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
     if (index != roads[i]->getNumberOfControls())
     {
         int count = roads[i]->getNumberOfControls() - 12;
+        if (index < count)
+        {
+            roads[i]->resizeByControl(index, dx, dy, x, y);
+        } else
         if (index == count + 5)
         {
             // Поворот
@@ -802,10 +806,12 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
             return;
         }
         float delta = sqrt((axis1.x - axis2.x)*(axis1.x - axis2.x) + (axis1.y - axis2.y)*(axis1.y - axis2.y));
-        roads[i]->setVertexArray(xTemp, yTemp,
-                                 xTemp + (axis2.x - axis1.x) * roads[i]->getLength() / delta,
-                                 yTemp + (axis2.y - axis1.y) * roads[i]->getLength() / delta,
-                                 roads[i]->getWidth());
+//        roads[i]->setVertexArray(xTemp, yTemp,
+//                                 xTemp + (axis2.x - axis1.x) * roads[i]->getLength() / delta,
+//                                 yTemp + (axis2.y - axis1.y) * roads[i]->getLength() / delta,
+//                                 roads[i]->getWidth());
+        roads[i]->move(xTemp - roads[i]->getAxisPoint_1().x,
+                       yTemp - roads[i]->getAxisPoint_1().y);
 
 
         // Приведение длины следующего рукава к прежней длине
@@ -826,10 +832,12 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
             return;
         }
         delta = sqrt((axis3.x - axis4.x)*(axis3.x - axis4.x) + (axis3.y - axis4.y)*(axis3.y - axis4.y));
-        roads[j]->setVertexArray(xTemp, yTemp,
-                                 xTemp + (axis4.x - axis3.x) * roads[j]->getLength() / delta,
-                                 yTemp + (axis4.y - axis3.y) * roads[j]->getLength() / delta,
-                                 roads[j]->getWidth());
+//        roads[j]->setVertexArray(xTemp, yTemp,
+//                                 xTemp + (axis4.x - axis3.x) * roads[j]->getLength() / delta,
+//                                 yTemp + (axis4.y - axis3.y) * roads[j]->getLength() / delta,
+//                                 roads[j]->getWidth());
+        roads[j]->move(xTemp - roads[j]->getAxisPoint_1().x,
+                       yTemp - roads[j]->getAxisPoint_1().y);
 
     }
 
@@ -940,23 +948,10 @@ void Intersection::getProperties(QVBoxLayout *layout, QGLWidget *render)
         layer->addRow("Ширина", widthDoubleSpinBox);
         QPushButton *addLinePushButton = new QPushButton("+");
 
-        connect(stepDialogs[i], SIGNAL(lineTypeChanged(int)), roads[i], SLOT(setLineType(int)));
-        connect(stepDialogs[i], SIGNAL(rightSideChanged(bool)), roads[i], SLOT(setRightSide(bool)));
-        connect(stepDialogs[i], SIGNAL(stepChanged(double)), roads[i], SLOT(setStep(double)));
-        connect(stepDialogs[i], SIGNAL(beginStepChanged(double)), roads[i], SLOT(setBeginStep(double)));
-        connect(stepDialogs[i], SIGNAL(endStepChanged(double)), roads[i], SLOT(setEndStep(double)));
-        connect(stepDialogs[i], SIGNAL(beginSideChanged(bool)), roads[i], SLOT(setBeginSide(bool)));
-        connect(stepDialogs[i], SIGNAL(beginRoundingChanged(bool)), roads[i], SLOT(setBeginRounding(bool)));
-        connect(stepDialogs[i], SIGNAL(endRoundingChanged(bool)), roads[i], SLOT(setEndRounding(bool)));
-        connect(stepDialogs[i], SIGNAL(splitZoneWidthChanged(double)), roads[i], SLOT(setSplitZoneWidth(double)));
-        connect(stepDialogs[i], SIGNAL(differentDirectionsChanged(bool)), roads[i], SLOT(setDifferentDirections(bool)));
-        connect(stepDialogs[i], SIGNAL(singleWayChanged(bool)), roads[i], SLOT(setSingleWay(bool)));
-        connect(stepDialogs[i], SIGNAL(axisStepChanged(double)), roads[i], SLOT(setAxisStep(double)));
-        connect(stepDialogs[i], SIGNAL(splitZoneTypeChanged(int)), roads[i], SLOT(setSplitZoneType(int)));
-        connect(stepDialogs[i], SIGNAL(splitZoneHeightChanged(double)), roads[i], SLOT(setSplitZoneHeight(double)));
         connect(addLinePushButton, SIGNAL(clicked(bool)), stepDialogs[i], SLOT(exec()));
-        connect(stepDialogs[i], SIGNAL(accepted()), roads[i], SLOT(addLine()));
+        connect(stepDialogs[i], SIGNAL(lineCreated(LineLinkedToRoad)), roads[i], SLOT(constructLine(LineLinkedToRoad)));
         connect(stepDialogs[i], SIGNAL(accepted()), this, SLOT(addLine()));
+
         if (render)
         {
             connect(this, SIGNAL(linesChanged(QVBoxLayout*,QGLWidget*)), render, SLOT(updateGL()));

@@ -174,6 +174,21 @@ bool RoadElement::calculateLinesIntersection(float a1, float b1, float c1, float
     return true;
 }
 
+bool RoadElement::calculateLinesIntersection(vec2 p1, vec2 p2, vec2 s1, vec2 s2, float& x, float& y)
+{
+    float a1, a2, b1, b2, c1, c2;
+
+    a1 = p2.y - p1.y;
+    b1 = p1.x - p2.x;
+    c1 = p1.y * (p2.x - p1.x) - p1.x * (p2.y - p1.y);
+
+    a2 = s2.y - s1.y;
+    b2 = s1.x - s2.x;
+    c2 = s1.y * (s2.x - s1.x) - s1.x * (s2.y - s1.y);
+
+    return calculateLinesIntersection(a1, b1, c1, a2, b2, c2, x, y);
+}
+
 float RoadElement::calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4)
 {
     float dx1 = p2.x - p1.x;

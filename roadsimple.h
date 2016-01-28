@@ -76,7 +76,7 @@ public:
     QVector<GLfloat> vertexArrayRight;
     QVector<GLfloat> vertexArrayLeft;
 
-    QVector<LineLinked> lines;
+    QVector<LineLinkedToRoad> lines;
 protected:
     QVector<GLfloat> textureArrayRight;
     QVector<GLfloat> textureArrayLeft;
@@ -85,6 +85,7 @@ protected:
     QVector<GLubyte> indexArrayRight;
 
     GLfloat VertexArray[4][3];
+    GLfloat vertexArrayEtalon[4][3];
     GLfloat ColorArray[4][4];
     GLubyte IndexArray[2][3]; // количество полигонов
     GLfloat TextureArray[4][2];
@@ -97,6 +98,7 @@ protected:
     bool useColor;
     GLfloat red, green, blue, alpha;
     float x1, y1, x2, y2;
+
     float xP1, yP1, xP2, yP2;
     vec2 axis1, axis2;
     float width, length;
@@ -116,20 +118,8 @@ protected:
     bool showRightBoard;
     bool showLeftBoard;
 
-    bool rightSide;
-    bool beginSide;
-    bool beginRounding;
-    bool endRounding;
-    double splitZoneWidth;
-    bool differentDirections;
-    double step;
-    int lineType;
-    double beginStep;
-    double endStep;
-    double axisStep;
-    bool singleWay;
-    int splitZoneType;
-    double splitZoneHeight;
+
+    LineLinkedToRoad currentLineLinked;
     static bool log;
     QVBoxLayout* layout;
     QGLWidget* render;
@@ -161,6 +151,7 @@ public:
     float getLength();
     float getRightWidth() { return rightWidth; }
     float getLeftWidth() { return leftWidth; }
+    void calculateStopLineIntersections(LineSimple* lineSimple);
 
 signals:
     void widthChanged(double width);
@@ -184,26 +175,15 @@ public slots:
     void setRightBoardWidth(double width);
     void setLeftBoardWidth(double width);
 
-    void addLine(float step, QString textureSource, float textureSize, float lineWidth, int lineType, bool rightSide, float beginStep, float endStep);
-    void addLine();
-    void addLine(LineLinked line);
+    void constructLine(QString textureSource, float textureSize);
+    void constructLine(LineLinkedToRoad line);
 
-    void setRightSide(bool status);
-    void setBeginSide(bool status);
-    void setBeginRounding(bool status);
-    void setEndRounding(bool status);
-    void setDifferentDirections(bool status);
-    void setStep(double value);
-    void setLineType(int type);
+    void addLine(LineLinkedToRoad line);
+
     void deleteLine();
     void deleteLine(LineLinked line);
-    void setBeginStep(double step);
-    void setEndStep(double step);
-    void setSplitZoneWidth(double value);
-    void setSingleWay(bool status);
-    void setAxisStep(double step);
-    void setSplitZoneType(int type);
-    void setSplitZoneHeight(double height);
+    void deleteLine(LineLinkedToRoad line);
+
     virtual void getProperties(QVBoxLayout *layout, QGLWidget* render = 0);
     virtual bool setFixed(bool fixed);
     void resetLines();

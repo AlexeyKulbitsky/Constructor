@@ -687,6 +687,18 @@ AddLineCommand::AddLineCommand(RoundingRoad *roundingRoad, LineBrokenLinked brok
     this->scene = scene;
 }
 
+AddLineCommand::AddLineCommand(RoadSimple *roadSimple, LineLinkedToRoad line, QGLWidget *scene, QUndoCommand *parent)
+    : QUndoCommand(parent)
+{
+    type = 0;
+    isInFigure = false;
+    this->roadSimple = roadSimple;
+    //lineLinked = new LineLinked();
+    //*lineLinked = linked;
+    this->line = line;
+    this->scene = scene;
+}
+
 AddLineCommand::~AddLineCommand()
 {
     if (!isInFigure)
@@ -720,7 +732,7 @@ void AddLineCommand::undo()
     switch (type)
     {
     case 0:
-        roadSimple->deleteLine(*lineLinked);
+        roadSimple->deleteLine(line);
         break;
     case 1:
         roadBroken->deleteLine(*lineBrokenLinkedToRoadBroken);
@@ -741,7 +753,7 @@ void AddLineCommand::redo()
     switch (type)
     {
     case 0:
-        roadSimple->addLine(*lineLinked);
+        roadSimple->addLine(line);
         break;
     case 1:
         roadBroken->addLine(*lineBrokenLinkedToRoadBroken);
@@ -823,7 +835,8 @@ void DeleteLineCommand::undo()
     switch (type)
     {
     case 0:
-        roadSimple->addLine(*lineLinked);
+        //roadSimple->addLine(*lineLinked);
+        //roadSimple->addLine(*line);
         break;
     case 1:
         roadBroken->addLine(*lineBrokenLinkedToRoadBroken);

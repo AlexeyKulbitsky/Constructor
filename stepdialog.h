@@ -13,7 +13,10 @@
 #include <QGroupBox>
 #include <QStackedLayout>
 #include <QCheckBox>
+#include <QVector3D>
+#include <QGLWidget>
 
+class RoadElement;
 namespace Line
 {
 enum LineType
@@ -43,66 +46,44 @@ enum SplitZoneType
 
 struct LineLinkedToRoad
 {
-    Line::LineType type;
-    float step;
-    float beginStep;
-    float endStep;
-    bool linkedToRightSide; // Привязка к правой стороне по ходу движения (иначе к левой)
-    bool linkedToBeginSide; // Привязка к началу (иначе к концу)
+    RoadElement *line = NULL;
+    Line::LineType type = Line::SingleSolid;
+    float step = 0.0f;
+    float beginStep = 0.0f;
+    float endStep = 0.0f;
+    bool linkedToRightSide = true; // Привязка к правой стороне по ходу движения (иначе к левой)
+    bool linkedToBeginSide = true; // Привязка к началу (иначе к концу)
 
-    Line::SplitZoneType splitZoneType;
-    bool beginRounding;
-    bool endRounding;
-    float splitZoneHeight;
-    float splitZoneWidth;
+    Line::SplitZoneType splitZoneType = Line::Marking;
+    bool beginRounding = true;
+    bool endRounding = true;
+    float splitZoneHeight = 0.0f;
+    float splitZoneWidth = 0.0f;
 
-    // Конструктор для простой разметки
-    LineLinkedToRoad(Line::LineType lineType,
-               bool lineLinkedToRightSide, float lineStep,
-               float lineBeginStep, float lineEndStep):
-        type(lineType),
-        step(lineStep),
-        beginStep(lineBeginStep), endStep(lineEndStep),
-        linkedToRightSide(lineLinkedToRightSide), linkedToBeginSide(false),
+    float lineWidth = 0.0f;
 
-        splitZoneType(Line::Marking),
-        beginRounding(false),
-        endRounding(false),
-        splitZoneHeight(0.0f),
-        splitZoneWidth(0.0f)
-    {
-    }
+    bool singleWay = true;
+    float axisStep = 0.0f;
 
-    // Конструктор для разделительной зоны
-    LineLinkedToRoad(Line::LineType lineType,
-               bool lineLinkedToRightSide, float lineStep,
-               float lineBeginStep, float lineEndStep,
-               Line::SplitZoneType lineSplitZoneType,
-               bool lineSplitZoneBeginRounding, bool lineZoneEndRounding,
-               float lineSplitZoneHeight, float lineSplitZoneWidth):
-        LineLinkedToRoad(lineType,
-                   lineLinkedToRightSide, lineStep,
-                   lineBeginStep, lineEndStep)
-    {
-        splitZoneType = lineSplitZoneType;
-        beginRounding = lineSplitZoneBeginRounding;
-        endRounding = lineZoneEndRounding;
-        splitZoneHeight = lineSplitZoneHeight;
-        splitZoneWidth = lineSplitZoneWidth;
-    }
+    bool isActive = false;
+    void drawDescription(QGLWidget*);
 
-    // Конструктор для Стоп-линии
-    LineLinkedToRoad(Line::LineType lineType,
-               bool lineLinkedToRightSide,
-               bool lineLinkedToBeginSide,
-               float lineStep):
-        type(lineType),
-        linkedToRightSide(lineLinkedToRightSide),
-        linkedToBeginSide(lineLinkedToBeginSide),
-        step(lineStep)
-    {
-    }
+    QVector3D stepPoint_Begin;
+    QVector3D stepPoint_End;
+    QVector3D endStepPoint_Begin;
+    QVector3D endStepPoint_End;
+    QVector3D beginStepPoint_Begin;
+    QVector3D beginStepPoint_End;
+    void drawLineDescription(QGLWidget*);
 
+    void drawSplitZoneDescription(QGLWidget*);
+    void drawStopLineDescription(QGLWidget*);
+};
+
+enum StepDialogUsingTarget
+{
+    Create = 0,
+    Edit
 };
 
 class StepDialog: public QDialog
@@ -111,6 +92,9 @@ class StepDialog: public QDialog
 public:
     StepDialog(QWidget *parent = 0);
     ~StepDialog();
+
+    void setUsingTarget(StepDialogUsingTarget usingTarget);
+    void clear();
 
 private:
     QStackedLayout *layout;
@@ -125,20 +109,8 @@ private:
     void setTramwaysLayout();
 
 public:
-    bool rightSide;
-    bool beginSide;
-    bool beginRounding;
-    bool endRounding;
-    double splitZoneWidth;
-    bool differentDirections;
-    double step;
-    int lineType;
-    double beginStep;
-    double endStep;
-    bool singleWay;
-    double axisStep;
-    double splitZoneHeight;
-    int splitZoneType;
+    LineLinkedToRoad line;
+    StepDialogUsingTarget usingTarget;
 
 signals:
     void rightSideChanged(bool status);
@@ -147,7 +119,6 @@ signals:
     void beginStepChanged(double step);
     void endStepChanged(double step);
     void beginSideChanged(bool status);
-    void differentDirectionsChanged(bool status);
     void beginRoundingChanged(bool status);
     void endRoundingChanged(bool status);
     void splitZoneWidthChanged(double value);
@@ -157,15 +128,15 @@ signals:
     void splitZoneTypeChanged(int type);
     void splitZoneHeightEnabledChanged(bool status);
 
+    void lineCreated(LineLinkedToRoad value);
+
 public slots:
     void setRightSide(bool status);
-    void setDifferentDirection(bool status);
     void setBeginSide(bool status);
     void setStep(double value);
     void setLineType(int type);
     void setBeginStep(double step);
     void setEndStep(double step);
-    void changeGroupBox(int index);
     void buttonClicked();
     void setBeginRoundingStatus(bool status);
     void setEndRoundingStatus(bool status);
@@ -174,6 +145,7 @@ public slots:
     void setAxisStep(double step);
     void setSplitZoneHeight(double value);
     void setSplitZoneType(int type);
+
 };
 
 #endif // STEPDIALOG_H

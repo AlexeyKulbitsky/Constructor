@@ -368,7 +368,7 @@ RoadSimple *JSONFileManager::readRoadSimple(QJsonObject &obj)
             QJsonObject line = lines[i].toObject();
             QJsonObject lineElement = line["Line"].toObject();
             QString name = lineElement["Name"].toString();
-            LineLinked lineLinked;
+            LineLinkedToRoad lineLinked;
 
             if (name == "LineBroken" ||
                 name == "Tramways")
@@ -381,14 +381,13 @@ RoadSimple *JSONFileManager::readRoadSimple(QJsonObject &obj)
             if (name == "LineSimple")
                 lineLinked.line = readLineSimple(lineElement);
 
-            lineLinked.lineType = line["LineType"].toInt();
+            lineLinked.type = Line::LineType(line["LineType"].toInt());
             lineLinked.lineWidth = line["LineWidth"].toDouble();
-            lineLinked.rightSide = line["RightSide"].toBool();
+            lineLinked.linkedToRightSide = line["RightSide"].toBool();
             lineLinked.step = line["Step"].toDouble();
-            lineLinked.beginSide = line["BeginSide"].toBool();
+            lineLinked.linkedToBeginSide = line["BeginSide"].toBool();
             lineLinked.beginStep = line["BeginStep"].toDouble();
             lineLinked.endStep = line["EndStep"].toDouble();
-            lineLinked.differentDirections = line["DifferentDirections"].toBool();
             lineLinked.splitZoneWidth = line["SplitZoneWidth"].toDouble();
             road->addLine(lineLinked);
         }

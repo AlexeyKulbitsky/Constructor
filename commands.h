@@ -4,6 +4,7 @@
 #include <QUndoCommand>
 #include <QFormLayout>
 #include <QGLWidget>
+#include "stepdialog.h"
 class RoadElement;
 class Scene2D;
 class Model;
@@ -17,6 +18,7 @@ struct vec3;
 struct LineBrokenLinked;
 struct LineBrokenLinkedToRoadBroken;
 struct LineLinked;
+
 
 class MoveCommand : public QUndoCommand
 {
@@ -178,6 +180,8 @@ public:
     AddLineCommand(RoadSimple* roadSimple, LineLinked linked, QGLWidget* scene, QUndoCommand* parent = 0);
     AddLineCommand(RoadBroken* roadBroken, LineBrokenLinkedToRoadBroken brokenLinkedToRoadBroken, QGLWidget *scene, QUndoCommand* parent = 0);
     AddLineCommand(RoundingRoad* roundingRoad, LineBrokenLinked brokenLinked, QGLWidget *scene, QUndoCommand* parent = 0);
+
+    AddLineCommand(RoadSimple* roadSimple, LineLinkedToRoad line, QGLWidget* scene, QUndoCommand* parent = 0);
     ~AddLineCommand();
 private:
     int type;
@@ -189,6 +193,8 @@ private:
     LineBrokenLinkedToRoadBroken* lineBrokenLinkedToRoadBroken;
     LineBrokenLinked* lineBrokenLinked;
     QGLWidget* scene;
+
+    LineLinkedToRoad line;
     // QUndoCommand interface
 public:
     virtual void undo();
