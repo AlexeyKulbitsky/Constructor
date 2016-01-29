@@ -712,6 +712,15 @@ void SplitZone::clear()
         Logger::getLogger()->infoLog() << "SplitZone::clear()\n";
 }
 
+vec3 SplitZone::getAxisPoint(int index)
+{
+    if (index < 0 || index > getNumberOfControls())
+        return vec3(0.0f, 0.0f, 0.0f);
+    return vec3(axisArray[index * 3],
+                axisArray[index * 3 + 1],
+                axisArray[index * 3 + 2]);
+}
+
 
 
 bool SplitZone::setFixed(bool fixed)

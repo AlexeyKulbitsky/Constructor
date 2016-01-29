@@ -1272,8 +1272,19 @@ void RoadSimple::drawControlElement(int index, float lineWidth, float pointSize)
         }
     }
     else
-    {        
-        lines[index].line->drawFigure();
+    {
+        int i;
+        for (i = 0; i < lines.size(); ++i)
+        {
+            if (index > lines[i].line->getNumberOfControls())
+                index -= (lines[i].line->getNumberOfControls() + 1);
+            else
+                break;
+        }
+        if (lines[i].line->getNumberOfControls() == index)
+            lines[i].line->drawFigure();
+        else
+            lines[i].line->drawControlElement(index, lineWidth, pointSize);
     }
 
 
@@ -1298,535 +1309,779 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
     if (index < lineControls)
     {
 
-        switch (lines[index].type)
+        int i;
+        for (i = 0; i < lines.size(); ++i)
         {
-        //case Line::SplitZone:
-        //    break;
-        case Line::StopLine:
-        {
-            float ds = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
-            float dr = ((x1 - x2)*dx + (y1 - y2)*dy)/ds;
-            lines[index].line->move((x1 - x2) * dr / ds,
-                                    (y1 - y2) * dr / ds);
-
-            // Обрезка всех существующих линий до стоп-линии
-            calculateStopLineIntersections(qobject_cast<LineSimple*>(lines[index].line));
-
-        }
-            break;
-        default:
-        {
-            float ds = sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
-            float dr = ((xP1 - xP2)*dx + (yP1 - yP2)*dy)/ds;
-            lines[index].line->move((xP1 - xP2) * dr / ds,
-                                    (yP1 - yP2) * dr / ds);
-            if (lines[index].linkedToRightSide)
-                lines[index].step -= dr;
+            if (index > lines[i].line->getNumberOfControls())
+                index -= (lines[i].line->getNumberOfControls() + 1);
             else
-                lines[index].step += dr;
-
-            LineSimple *l = qobject_cast<LineSimple*>(lines[index].line);
-            vec2 p1 = l->getAxisPoint_1();
-            vec2 p2 = l->getAxisPoint_2();
-            float length = l->getLength();
-            QVector3D step1((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f, 0.2f);
-            float factor = lines[index].linkedToRightSide ? 1.0f : -1.0f;
-            QVector3D step2(step1.x() + factor * (xP1 - xP2) * lines[index].step / ds,
-                            step1.y() + factor * (yP1 - yP2) * lines[index].step / ds,
-                            0.2f);
-            QVector3D beginStep1(p1.x, p1.y, 0.2f);
-            QVector3D beginStep2(p1.x + (p1.x - p2.x) * lines[index].beginStep / length,
-                                 p1.y + (p1.y - p2.y) * lines[index].beginStep / length,
-                                 0.2f);
-            QVector3D endStep1(p2.x, p2.y, 0.2f);
-            QVector3D endStep2(p2.x + (p2.x - p1.x) * lines[index].endStep / length,
-                               p2.y + (p2.y - p1.y) * lines[index].endStep / length,
-                               0.2f);
-            lines[index].stepPoint_Begin = step1;
-            lines[index].stepPoint_End = step2;
-            lines[index].beginStepPoint_Begin = beginStep1;
-            lines[index].beginStepPoint_End = beginStep2;
-            lines[index].endStepPoint_Begin = endStep1;
-            lines[index].endStepPoint_End = endStep2;
-            lines[index].isActive = true;
-            qDebug() << "Resized";
-            Line::LineType type = lines[index].type;
-            if (type == Line::SingleSolid ||
-                    type == Line::DoubleSolid ||
-                    type == Line::SplitZone)
+                break;
+        }
+        if (lines[i].line->getNumberOfControls() == index)
+        {
+            switch (lines[i].type)
             {
-                for (int i = 0; i < lines.size(); ++i)
+            case Line::SplitZone:
+            {
+                float ds = sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
+                float dr = ((xP1 - xP2)*dx + (yP1 - yP2)*dy)/ds;
+
+                if (lines[i].linkedToRightSide)
                 {
-                    if (lines[i].type == Line::StopLine)
+                    if ((lines[i].step + lines[i].splitZoneWidth - dr) > width)
+                        dr = lines[i].step + lines[i].splitZoneWidth - width;
+                    else
+                        if ((lines[i].step - dr) < 0.0f)
+                            dr = lines[i].step;
+                    lines[i].step -= dr;
+                }
+                else
+                {
+                    if ((lines[i].step + lines[i].splitZoneWidth + dr) > width)
+                        dr = width - lines[i].step - lines[i].splitZoneWidth;
+                    else
+                        if ((lines[i].step + dr) < 0.0f)
+                            dr = -lines[i].step;
+                    lines[i].step += dr;
+                }
+                lines[i].line->move((xP1 - xP2) * dr / ds,
+                                    (yP1 - yP2) * dr / ds);
+                // Внесли изменения в структуру для отрисовки отступов
+                SplitZone *l = qobject_cast<SplitZone*>(lines[i].line);
+                vec3 p1 = l->getAxisPoint(0);
+                vec3 p2 = l->getAxisPoint(l->getNumberOfControls() - 1);
+                float length = sqrt((p2.x - p1.x)*(p2.x - p1.x) +
+                                    (p2.y - p1.y)*(p2.y - p1.y));
+                float factor = lines[i].linkedToRightSide ? 1.0f : -1.0f;
+                QVector3D step1((p1.x + p2.x) / 2.0f + factor * (xP1 - xP2) * lines[i].splitZoneWidth / (ds * 2.0f),
+                                (p1.y + p2.y) / 2.0f + factor * (yP1 - yP2) * lines[i].splitZoneWidth / (ds * 2.0f),
+                                0.2f);
+                QVector3D step2(step1.x() + factor * (xP1 - xP2) * lines[i].step / ds,
+                                step1.y() + factor * (yP1 - yP2) * lines[i].step / ds,
+                                0.2f);
+                QVector3D beginStep1(p1.x, p1.y, 0.2f);
+                QVector3D beginStep2(p1.x + (p1.x - p2.x) * lines[i].beginStep / length,
+                                     p1.y + (p1.y - p2.y) * lines[i].beginStep / length,
+                                     0.2f);
+                QVector3D endStep1(p2.x, p2.y, 0.2f);
+                QVector3D endStep2(p2.x + (p2.x - p1.x) * lines[i].endStep / length,
+                                   p2.y + (p2.y - p1.y) * lines[i].endStep / length,
+                                   0.2f);
+                lines[i].stepPoint_Begin = step1;
+                lines[i].stepPoint_End = step2;
+                lines[i].beginStepPoint_Begin = beginStep1;
+                lines[i].beginStepPoint_End = beginStep2;
+                lines[i].endStepPoint_Begin = endStep1;
+                lines[i].endStepPoint_End = endStep2;
+                lines[i].isActive = true;
+                // Передвинули привязанный конец стоп-линии вместе с иходной линией
+                for (int j = 0; j < lines.size(); ++j)
+                {
+                    if (lines[j].type == Line::StopLine)
                     {
-                        lines[i].line->resizeByControl(1, (xP1 - xP2) * dr / ds,
+                        lines[j].line->resizeByControl(1, (xP1 - xP2) * dr / ds,
                                                        (yP1 - yP2) * dr / ds, dx, dy);
                     }
                 }
+
             }
-        }
-            break;
-        }
-    }
-    else
-    if (index >= lineControls)
-    {
-        index -= lineControls;
-
-        switch (index)
-        {
-        case 0:
-        {
-            float X1 = VertexArray[0][0];
-            float Y1 = VertexArray[0][1];
-            float X2 = VertexArray[3][0];
-            float Y2 = VertexArray[3][1];
-            float X3 = X1 + dx;
-            float Y3 = Y1 + dy;
-            float dx1 = X1 - X2;
-            float dy1 = Y1 - Y2;
-            float r1 = sqrt(dx1*dx1 + dy1*dy1);
-            float dx2 = X3 - X2;
-            float dy2 = Y3 - Y2;
-            float r2 = sqrt(dx2*dx2 + dy2*dy2);
-            float pi = 3.14159265f;
-            float t = dx1 / r1;
-            if (t > 1)
-                t = 1.0f;
-            if (t < -1)
-                t = -1.0f;
-            float angle1 = acos(t);
-            if (dy1 < 0)
-                angle1 = 2.0f * pi - angle1;
-            t = dx2 / r2;
-            if (t > 1)
-                t = 1.0f;
-            if (t < -1)
-                t = -1.0f;
-            float angle2 = acos(t);
-            if (dy2 < 0)
-                angle2 = 2.0f * pi - angle2;
-            float angle = angle2 - angle1;
-            x1 -= X2;
-            y1 -= Y2;
-            x2 -= X2;
-            y2 -= Y2;
-            float tx = x1, ty = y1;
-            x1 = tx * cos(angle) - ty * sin(angle);
-            y1 = tx * sin(angle) + ty * cos(angle);
-            tx = x2;
-            ty = y2;
-            x2 = tx * cos(angle) - ty * sin(angle);
-            y2 = tx * sin(angle) + ty * cos(angle);
-            x1 += X2;
-            y1 += Y2;
-            x2 += X2;
-            y2 += Y2;
-            setVertexArray(x1, y1, x2, y2, width);
-            setTextureArray();
-            for (int i = 0; i < lines.size(); ++i)
-                lines[i].line->rotate(angle, X2, Y2, 0.0f);
-            //emit lengthChanged(length);
-        }
-            break;
-        case 1:
-        {
-            float X1 = VertexArray[1][0];
-            float Y1 = VertexArray[1][1];
-            float X2 = VertexArray[2][0];
-            float Y2 = VertexArray[2][1];
-            float X3 = X1 + dx;
-            float Y3 = Y1 + dy;
-            float dx1 = X1 - X2;
-            float dy1 = Y1 - Y2;
-            float r1 = sqrt(dx1*dx1 + dy1*dy1);
-            float dx2 = X3 - X2;
-            float dy2 = Y3 - Y2;
-            float r2 = sqrt(dx2*dx2 + dy2*dy2);
-            float pi = 3.14159265f;
-            float t = dx1 / r1;
-            if (t > 1)
-                t = 1.0f;
-            if (t < -1)
-                t = -1.0f;
-            float angle1 = acos(t);
-            if (dy1 < 0)
-                angle1 = 2.0f * pi - angle1;
-            t = dx2 / r2;
-            if (t > 1)
-                t = 1.0f;
-            if (t < -1)
-                t = -1.0f;
-            float angle2 = acos(t);
-            if (dy2 < 0)
-                angle2 = 2.0f * pi - angle2;
-            float angle = angle2 - angle1;
-            x1 -= X2;
-            y1 -= Y2;
-            x2 -= X2;
-            y2 -= Y2;
-            float tx = x1, ty = y1;
-            x1 = tx * cos(angle) - ty * sin(angle);
-            y1 = tx * sin(angle) + ty * cos(angle);
-            tx = x2;
-            ty = y2;
-            x2 = tx * cos(angle) - ty * sin(angle);
-            y2 = tx * sin(angle) + ty * cos(angle);
-            x1 += X2;
-            y1 += Y2;
-            x2 += X2;
-            y2 += Y2;
-            setVertexArray(x1, y1, x2, y2, width);
-            setTextureArray();
-            for (int i = 0; i < lines.size(); ++i)
-                lines[i].line->rotate(angle, X2, Y2, 0.0f);
-        }
-            break;
-        case 2:
-        {
-            float X1 = VertexArray[2][0];
-            float Y1 = VertexArray[2][1];
-            float X2 = VertexArray[1][0];
-            float Y2 = VertexArray[1][1];
-            float X3 = X1 + dx;
-            float Y3 = Y1 + dy;
-            float dx1 = X1 - X2;
-            float dy1 = Y1 - Y2;
-            float r1 = sqrt(dx1*dx1 + dy1*dy1);
-            float dx2 = X3 - X2;
-            float dy2 = Y3 - Y2;
-            float r2 = sqrt(dx2*dx2 + dy2*dy2);
-            float pi = 3.14159265f;
-            float t = dx1 / r1;
-            if (t > 1)
-                t = 1.0f;
-            if (t < -1)
-                t = -1.0f;
-            float angle1 = acos(t);
-            if (dy1 < 0)
-                angle1 = 2.0f * pi - angle1;
-            t = dx2 / r2;
-            if (t > 1)
-                t = 1.0f;
-            if (t < -1)
-                t = -1.0f;
-            float angle2 = acos(t);
-            if (dy2 < 0)
-                angle2 = 2.0f * pi - angle2;
-            float angle = angle2 - angle1;
-            x1 -= X2;
-            y1 -= Y2;
-            x2 -= X2;
-            y2 -= Y2;
-            float tx = x1, ty = y1;
-            x1 = tx * cos(angle) - ty * sin(angle);
-            y1 = tx * sin(angle) + ty * cos(angle);
-            tx = x2;
-            ty = y2;
-            x2 = tx * cos(angle) - ty * sin(angle);
-            y2 = tx * sin(angle) + ty * cos(angle);
-            x1 += X2;
-            y1 += Y2;
-            x2 += X2;
-            y2 += Y2;
-            setVertexArray(x1, y1, x2, y2, width);
-            setTextureArray();
-            for (int i = 0; i < lines.size(); ++i)
-                lines[i].line->rotate(angle, X2, Y2, 0.0f);
-        }
-            break;
-        case 3:
-        {
-            float X1 = VertexArray[3][0];
-            float Y1 = VertexArray[3][1];
-            float X2 = VertexArray[0][0];
-            float Y2 = VertexArray[0][1];
-            float X3 = X1 + dx;
-            float Y3 = Y1 + dy;
-            float dx1 = X1 - X2;
-            float dy1 = Y1 - Y2;
-            float r1 = sqrt(dx1*dx1 + dy1*dy1);
-            float dx2 = X3 - X2;
-            float dy2 = Y3 - Y2;
-            float r2 = sqrt(dx2*dx2 + dy2*dy2);
-            float pi = 3.14159265f;
-            float t = dx1 / r1;
-            if (t > 1)
-                t = 1.0f;
-            if (t < -1)
-                t = -1.0f;
-            float angle1 = acos(t);
-            if (dy1 < 0)
-                angle1 = 2.0f * pi - angle1;
-            t = dx2 / r2;
-            if (t > 1)
-                t = 1.0f;
-            if (t < -1)
-                t = -1.0f;
-            float angle2 = acos(t);
-            if (dy2 < 0)
-                angle2 = 2.0f * pi - angle2;
-            float angle = angle2 - angle1;
-            x1 -= X2;
-            y1 -= Y2;
-            x2 -= X2;
-            y2 -= Y2;
-            float tx = x1, ty = y1;
-            x1 = tx * cos(angle) - ty * sin(angle);
-            y1 = tx * sin(angle) + ty * cos(angle);
-            tx = x2;
-            ty = y2;
-            x2 = tx * cos(angle) - ty * sin(angle);
-            y2 = tx * sin(angle) + ty * cos(angle);
-            x1 += X2;
-            y1 += Y2;
-            x2 += X2;
-            y2 += Y2;
-            setVertexArray(x1, y1, x2, y2, width);
-            setTextureArray();
-            for (int i = 0; i < lines.size(); ++i)
-                lines[i].line->rotate(angle, X2, Y2, 0.0f);
-        }
-            break;
-        case 4:
-        {
-            float X1 = x1;
-            float Y1 = y1;
-            float X2 = x2;
-            float Y2 = y2;
-            float X3 = X1 + dx;
-            float Y3 = Y1 + dy;
-            float dx1 = X1 - X2;
-            float dy1 = Y1 - Y2;
-            float r1 = sqrt(dx1*dx1 + dy1*dy1);
-            float dx2 = X3 - X2;
-            float dy2 = Y3 - Y2;
-            float r2 = sqrt(dx2*dx2 + dy2*dy2);
-            float pi = 3.14159265f;
-            float t = dx1 / r1;
-            if (t > 1)
-                t = 1.0f;
-            if (t < -1)
-                t = -1.0f;
-            float angle1 = acos(t);
-            if (dy1 < 0)
-                angle1 = 2.0f * pi - angle1;
-
-            t = dx2 / r2;
-            if (t > 1)
-                t = 1.0f;
-            if (t < -1)
-                t = -1.0f;
-            float angle2 = acos(t);
-            if (dy2 < 0)
-                angle2 = 2.0f * pi - angle2;
-            float angle = angle2 - angle1;
-            //qDebug() << "Angle:" << angle;
-            x1 -= X2;
-            y1 -= Y2;
-            float tx = x1, ty = y1;
-            x1 = tx * cos(angle) - ty * sin(angle);
-            y1 = tx * sin(angle) + ty * cos(angle);
-            x1 += X2;
-            y1 += Y2;
-            setVertexArray(x1, y1, x2, y2, width);
-            setTextureArray();
-            for (int i = 0; i < lines.size(); ++i)
-                lines[i].line->rotate(angle, X2, Y2, 0.0f);
-        }
-            break;
-        case 5:
-        {
-            float X1 = x2;
-            float Y1 = y2;
-            float X2 = x1;
-            float Y2 = y1;
-            float X3 = X1 + dx;
-            float Y3 = Y1 + dy;
-            float dx1 = X1 - X2;
-            float dy1 = Y1 - Y2;
-            float r1 = sqrt(dx1*dx1 + dy1*dy1);
-            float dx2 = X3 - X2;
-            float dy2 = Y3 - Y2;
-            float r2 = sqrt(dx2*dx2 + dy2*dy2);
-            float pi = 3.14159265f;
-
-            float t = dx1 / r1;
-            if (t > 1)
-                t = 1.0f;
-            if (t < -1)
-                t = -1.0f;
-            float angle1 = acos(t);
-            if (dy1 < 0)
-                angle1 = 2.0f * pi - angle1;
-
-            t = dx2 / r2;
-            if (t > 1)
-                t = 1.0f;
-            if (t < -1)
-                t = -1.0f;
-            float angle2 = acos(t);
-            if (dy2 < 0)
-                angle2 = 2.0f * pi - angle2;
-            float angle = angle2 - angle1;
-            //qDebug() << "Angle:" << angle;
-            x2 -= X2;
-            y2 -= Y2;
-            float tx = x2, ty = y2;
-            x2 = tx * cos(angle) - ty * sin(angle);
-            y2 = tx * sin(angle) + ty * cos(angle);
-            x2 += X2;
-            y2 += Y2;
-            setVertexArray(x1, y1, x2, y2, width);
-            setTextureArray();
-            for (int i = 0; i < lines.size(); ++i)
-                lines[i].line->rotate(angle, X2, Y2, 0.0f);
-        }
-            break;
-        case 6:
-        {
-            // Первый торец
-            float dx1 = x1 - x2;
-            float dy1 = y1 - y2;
-            float dr = (dx * dx1 + dy * dy1) / length;
-            x1 += dx1 / length * dr;
-            y1 += dy1 / length * dr;
-            setVertexArray(x1, y1, x2, y2, width);
-            setTextureArray();
-            for (int i = 0; i < lines.size(); ++i)
+                break;
+                //case Line::TramWays:
+                //    break;
+            case Line::StopLine:
             {
-                if (lines[i].type != Line::StopLine)
-                    lines[i].line->resizeByControl(0,dx1 / length * dr,dy1 / length * dr,x,y);
+                float ds = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+                float dr = ((x1 - x2)*dx + (y1 - y2)*dy)/ds;
+                lines[i].line->move((x1 - x2) * dr / ds,
+                                    (y1 - y2) * dr / ds);
+
+                // Обрезка всех существующих линий до стоп-линии
+                calculateStopLineIntersections(qobject_cast<LineSimple*>(lines[i].line));
+
             }
-            emit lengthChanged(length);
-        }
-            break;
-
-        case 7:
-        {
-            // Второй торец
-            float dx1 = x2 - x1;
-            float dy1 = y2 - y1;
-            float dr = (dx * dx1 + dy * dy1) / length;
-            x2 += dx1 / length * dr;
-            y2 += dy1 / length * dr;
-            for (int i = 0; i < lines.size(); ++i)
+                break;
+            default:
             {
-                if (lines[i].type != Line::StopLine)
-                    lines[i].line->resizeByControl(1,dx1 / length * dr,dy1 / length * dr,x,y);
-            }
-            setVertexArray(x1, y1, x2, y2, width);
-            setTextureArray();
+                float ds = sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
+                float dr = ((xP1 - xP2)*dx + (yP1 - yP2)*dy)/ds;
 
-            emit lengthChanged(length);
-        }
-            break;
-
-        case 8:
-        {
-            float ds = sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
-            float dr = ((xP1 - xP2)*dx + (yP1 - yP2)*dy)/ds;
-
-            rightWidth += dr;
-            if (rightWidth < 0.0f)
-            {
-                //dr -= rightWidth - 0.001f;
-                rightWidth = 0.001f;
-                width = leftWidth + 0.001f;                
-            }
-            else
-                width += dr;
-
-            for (int i = 0; i < lines.size(); ++i)
-            {
-                if (lines[i].type == Line::StopLine)
-                    lines[i].line->resizeByControl(1, (xP1 - xP2) * dr / ds,
-                                                   (yP1 - yP2) * dr / ds,
-                                                   x, y);
-                else
                 if (lines[i].linkedToRightSide)
-                    lines[i].line->move((xP1 - xP2) * dr / ds,
-                                        (yP1 - yP2) * dr / ds);
-            }
-            setVertexArray(x1, y1, x2, y2, width);
-            setTextureArray();
-            emit rightWidthChanged(rightWidth);
-            emit widthChanged(width);
-        }
-            break;
-        case 9:
-        {
-            float ds = sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
-            float dr = ((xP2 - xP1)*dx + (yP2 - yP1)*dy)/ds;
-
-            leftWidth += dr;
-            if (leftWidth < 0.0f)
-            {
-                //dr -= leftWidth - 0.001f;
-                leftWidth = 0.001f;
-                width = rightWidth + 0.001f;               
-            }
-            else
-                width += dr;
-            for (int i = 0; i < lines.size(); ++i)
-            {
-                if (lines[i].type == Line::StopLine)
-                    lines[i].line->resizeByControl(0, (xP2 - xP1) * dr / ds,
-                                                   (yP2 - yP1) * dr / ds,
-                                                   x, y);
+                {
+                    if ((lines[i].step - dr) > width)
+                        dr = lines[i].step - width;
+                    else
+                        if ((lines[i].step - dr) < 0.0f)
+                            dr = lines[i].step;
+                    lines[i].step -= dr;
+                }
                 else
-                if (!lines[i].linkedToRightSide)
-                    lines[i].line->move((xP2 - xP1) * dr / ds,
-                                        (yP2 - yP1) * dr / ds);
+                {
+                    if ((lines[i].step + dr) > width)
+                        dr = width - lines[i].step;
+                    else
+                        if ((lines[i].step + dr) < 0.0f)
+                            dr = -lines[i].step;
+                    lines[i].step += dr;
+                }
+                lines[i].line->move((xP1 - xP2) * dr / ds,
+                                    (yP1 - yP2) * dr / ds);
+                // Внесли изменения в структуру для отрисовки отступов
+                LineSimple *l = qobject_cast<LineSimple*>(lines[i].line);
+                vec2 p1 = l->getAxisPoint_1();
+                vec2 p2 = l->getAxisPoint_2();
+                float length = l->getLength();
+                QVector3D step1((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f, 0.2f);
+                float factor = lines[i].linkedToRightSide ? 1.0f : -1.0f;
+                QVector3D step2(step1.x() + factor * (xP1 - xP2) * lines[i].step / ds,
+                                step1.y() + factor * (yP1 - yP2) * lines[i].step / ds,
+                                0.2f);
+                QVector3D beginStep1(p1.x, p1.y, 0.2f);
+                QVector3D beginStep2(p1.x + (p1.x - p2.x) * lines[i].beginStep / length,
+                                     p1.y + (p1.y - p2.y) * lines[i].beginStep / length,
+                                     0.2f);
+                QVector3D endStep1(p2.x, p2.y, 0.2f);
+                QVector3D endStep2(p2.x + (p2.x - p1.x) * lines[i].endStep / length,
+                                   p2.y + (p2.y - p1.y) * lines[i].endStep / length,
+                                   0.2f);
+                lines[i].stepPoint_Begin = step1;
+                lines[i].stepPoint_End = step2;
+                lines[i].beginStepPoint_Begin = beginStep1;
+                lines[i].beginStepPoint_End = beginStep2;
+                lines[i].endStepPoint_Begin = endStep1;
+                lines[i].endStepPoint_End = endStep2;
+                lines[i].isActive = true;
+                // Передвинули привязанный конец стоп-линии вместе с иходной линией
+                Line::LineType type = lines[i].type;
+                if (type == Line::SingleSolid ||
+                        type == Line::DoubleSolid)
+                {
+                    for (int j = 0; j < lines.size(); ++j)
+                    {
+                        if (lines[j].type == Line::StopLine)
+                        {
+                            lines[j].line->resizeByControl(1, (xP1 - xP2) * dr / ds,
+                                                           (yP1 - yP2) * dr / ds, dx, dy);
+                        }
+                    }
+                }
             }
-            setVertexArray(x1, y1, x2, y2, width);
-            setTextureArray();
+                break;
+            }
+        }
 
-            emit leftWidthChanged(leftWidth);
-            emit widthChanged(width);
-        }
-            break;
-        case 10:
-            // Правый
+        else
         {
-            float dr = ((xP1 - xP2)*dx + (yP1 - yP2)*dy)/
-                    sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
-            rightBoardWidth += dr;
-            setVertexArray(x1,y1,x2,y2,width);
-            emit rightBoardWidthChanged(rightBoardWidth);
+            switch (lines[i].type)
+            {
+            case Line::StopLine:
+                break;
+            case Line::SplitZone:
+            {
+                SplitZone *l = qobject_cast<SplitZone*>(lines[i].line);
+                vec3 p1 = l->getAxisPoint(0);
+                vec3 p2 = l->getAxisPoint(l->getNumberOfControls() - 1);
+                float length = sqrt((p2.x - p1.x)*(p2.x - p1.x) +
+                                    (p2.y - p1.y)*(p2.y - p1.y));
+                switch (index)
+                {
+                // Перетащили за начало линии
+                case 0:
+                {
+                    float dr = ((p2.x - p1.x)*dx + (p2.y - p1.y)*dy)/length;
+                    if (dr > length)
+                        dr = length - 0.001f;
+                    else
+                        if ((lines[i].beginStep + dr) < 0.0f)
+                            dr = -lines[i].beginStep;
+                    lines[i].beginStep += dr;
+                    l->resizeByControl(index, (p2.x - p1.x) * dr / length,
+                                       (p2.y - p1.y) * dr / length,
+                                       x, y);
+                }
+                    break;
+                // Перетащили за конец линии
+                case 1:
+                {
+                    float dr = ((p1.x - p2.x)*dx + (p1.y - p2.y)*dy)/length;
+                    if (dr > length)
+                        dr = length - 0.001f;
+                    else
+                        if ((lines[i].endStep + dr) < 0.0f)
+                            dr = -lines[i].endStep;
+                    lines[i].endStep += dr;
+                    l->resizeByControl(index,
+                                       (p1.x - p2.x) * dr / length,
+                                       (p1.y - p2.y) * dr / length,
+                                       x, y);
+                }
+                    break;
+                default:
+                    break;
+                }
+                // Внесли изменения в структуру для отрисовки отступов
+                float ds = sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
+                float factor = lines[i].linkedToRightSide ? 1.0f : -1.0f;
+                QVector3D step1((p1.x + p2.x) / 2.0f + factor * (xP1 - xP2) * lines[i].splitZoneWidth / (ds * 2.0f),
+                                (p1.y + p2.y) / 2.0f + factor * (yP1 - yP2) * lines[i].splitZoneWidth / (ds * 2.0f),
+                                0.2f);
+                QVector3D step2(step1.x() + factor * (xP1 - xP2) * lines[i].step / ds,
+                                step1.y() + factor * (yP1 - yP2) * lines[i].step / ds,
+                                0.2f);
+                QVector3D beginStep1(p1.x, p1.y, 0.2f);
+                QVector3D beginStep2(p1.x + (p1.x - p2.x) * lines[i].beginStep / length,
+                                     p1.y + (p1.y - p2.y) * lines[i].beginStep / length,
+                                     0.2f);
+                QVector3D endStep1(p2.x, p2.y, 0.2f);
+                QVector3D endStep2(p2.x + (p2.x - p1.x) * lines[i].endStep / length,
+                                   p2.y + (p2.y - p1.y) * lines[i].endStep / length,
+                                   0.2f);
+                lines[i].stepPoint_Begin = step1;
+                lines[i].stepPoint_End = step2;
+                lines[i].beginStepPoint_Begin = beginStep1;
+                lines[i].beginStepPoint_End = beginStep2;
+                lines[i].endStepPoint_Begin = endStep1;
+                lines[i].endStepPoint_End = endStep2;
+                lines[i].isActive = true;
+            }
+                break;
+            case Line::TramWays:
+                break;
+                // Любая простая линия
+            default:
+            {
+                LineSimple *l = qobject_cast<LineSimple*>(lines[i].line);
+                vec2 p1 = l->getAxisPoint_1();
+                vec2 p2 = l->getAxisPoint_2();
+                float length = l->getLength();
+                switch (index)
+                {
+                // Перетащили за начало линии
+                case 0:
+                {
+                    float dr = ((p2.x - p1.x)*dx + (p2.y - p1.y)*dy)/length;
+                    if (dr > l->getLength())
+                        dr = l->getLength() - 0.001f;
+                    else
+                        if ((lines[i].beginStep + dr) < 0.0f)
+                            dr = -lines[i].beginStep;
+                    lines[i].beginStep += dr;
+                    l->resizeByControl(index, (p2.x - p1.x) * dr / length,
+                                       (p2.y - p1.y) * dr / length,
+                                       x, y);
+                }
+                    break;
+                // Перетащили за конец линии
+                case 1:
+                {
+                    float dr = ((p1.x - p2.x)*dx + (p1.y - p2.y)*dy)/length;
+                    if (dr > l->getLength())
+                        dr = l->getLength() - 0.001f;
+                    else
+                        if ((lines[i].endStep + dr) < 0.0f)
+                            dr = -lines[i].endStep;
+                    lines[i].endStep += dr;
+                    l->resizeByControl(index,
+                                       (p1.x - p2.x) * dr / length,
+                                       (p1.y - p2.y) * dr / length,
+                                       x, y);
+                }
+                    break;
+                default:
+                    break;
+                }
+                // Внесли изменения в структуру для отрисовки отступов
+                p1 = l->getAxisPoint_1();
+                p2 = l->getAxisPoint_2();
+                length = l->getLength();
+                float ds = sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
+                QVector3D step1((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f, 0.2f);
+                float factor = lines[i].linkedToRightSide ? 1.0f : -1.0f;
+                QVector3D step2(step1.x() + factor * (xP1 - xP2) * lines[i].step / ds,
+                                step1.y() + factor * (yP1 - yP2) * lines[i].step / ds,
+                                0.2f);
+                QVector3D beginStep1(p1.x, p1.y, 0.2f);
+                QVector3D beginStep2(p1.x + (p1.x - p2.x) * lines[i].beginStep / length,
+                                     p1.y + (p1.y - p2.y) * lines[i].beginStep / length,
+                                     0.2f);
+                QVector3D endStep1(p2.x, p2.y, 0.2f);
+                QVector3D endStep2(p2.x + (p2.x - p1.x) * lines[i].endStep / length,
+                                   p2.y + (p2.y - p1.y) * lines[i].endStep / length,
+                                   0.2f);
+                lines[i].stepPoint_Begin = step1;
+                lines[i].stepPoint_End = step2;
+                lines[i].beginStepPoint_Begin = beginStep1;
+                lines[i].beginStepPoint_End = beginStep2;
+                lines[i].endStepPoint_Begin = endStep1;
+                lines[i].endStepPoint_End = endStep2;
+                lines[i].isActive = true;
+            }
+                break;
+            }
         }
-            break;
-        case 11:
-        {
-            float dr = ((xP2 - xP1)*dx + (yP2 - yP1)*dy)/
-                    sqrt((xP2 - xP1)*(xP2 - xP1) + (yP2 - yP1)*(yP2 - yP1));
-            leftBoardWidth += dr;
-            setVertexArray(x1,y1,x2,y2,width);
-            emit leftBoardWidthChanged(leftBoardWidth);
-        }
-            break;
 
-        default:
-            break;
-        }
-        setTextureArray();
+
+
+
     }
     else
-    {
-//        int i;
-//        for (i = 0; i < lines.size(); ++i)
-//        {
-//            if (index >= lines[i].line->getNumberOfControls())
-//            {
-//                index -= lines[i].line->getNumberOfControls();
-//            }
-//            else
-//            {
-//                break;
-//            }
-//        }
-//        lines[i].line->resizeByControl(index, dx, dy, x, y);
-    }
+        if (index >= lineControls)
+        {
+            index -= lineControls;
+
+            switch (index)
+            {
+            case 0:
+            {
+                float X1 = VertexArray[0][0];
+                float Y1 = VertexArray[0][1];
+                float X2 = VertexArray[3][0];
+                float Y2 = VertexArray[3][1];
+                float X3 = X1 + dx;
+                float Y3 = Y1 + dy;
+                float dx1 = X1 - X2;
+                float dy1 = Y1 - Y2;
+                float r1 = sqrt(dx1*dx1 + dy1*dy1);
+                float dx2 = X3 - X2;
+                float dy2 = Y3 - Y2;
+                float r2 = sqrt(dx2*dx2 + dy2*dy2);
+                float pi = 3.14159265f;
+                float t = dx1 / r1;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float angle1 = acos(t);
+                if (dy1 < 0)
+                    angle1 = 2.0f * pi - angle1;
+                t = dx2 / r2;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float angle2 = acos(t);
+                if (dy2 < 0)
+                    angle2 = 2.0f * pi - angle2;
+                float angle = angle2 - angle1;
+                x1 -= X2;
+                y1 -= Y2;
+                x2 -= X2;
+                y2 -= Y2;
+                float tx = x1, ty = y1;
+                x1 = tx * cos(angle) - ty * sin(angle);
+                y1 = tx * sin(angle) + ty * cos(angle);
+                tx = x2;
+                ty = y2;
+                x2 = tx * cos(angle) - ty * sin(angle);
+                y2 = tx * sin(angle) + ty * cos(angle);
+                x1 += X2;
+                y1 += Y2;
+                x2 += X2;
+                y2 += Y2;
+                setVertexArray(x1, y1, x2, y2, width);
+                setTextureArray();
+                for (int i = 0; i < lines.size(); ++i)
+                    lines[i].line->rotate(angle, X2, Y2, 0.0f);
+                //emit lengthChanged(length);
+            }
+                break;
+            case 1:
+            {
+                float X1 = VertexArray[1][0];
+                float Y1 = VertexArray[1][1];
+                float X2 = VertexArray[2][0];
+                float Y2 = VertexArray[2][1];
+                float X3 = X1 + dx;
+                float Y3 = Y1 + dy;
+                float dx1 = X1 - X2;
+                float dy1 = Y1 - Y2;
+                float r1 = sqrt(dx1*dx1 + dy1*dy1);
+                float dx2 = X3 - X2;
+                float dy2 = Y3 - Y2;
+                float r2 = sqrt(dx2*dx2 + dy2*dy2);
+                float pi = 3.14159265f;
+                float t = dx1 / r1;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float angle1 = acos(t);
+                if (dy1 < 0)
+                    angle1 = 2.0f * pi - angle1;
+                t = dx2 / r2;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float angle2 = acos(t);
+                if (dy2 < 0)
+                    angle2 = 2.0f * pi - angle2;
+                float angle = angle2 - angle1;
+                x1 -= X2;
+                y1 -= Y2;
+                x2 -= X2;
+                y2 -= Y2;
+                float tx = x1, ty = y1;
+                x1 = tx * cos(angle) - ty * sin(angle);
+                y1 = tx * sin(angle) + ty * cos(angle);
+                tx = x2;
+                ty = y2;
+                x2 = tx * cos(angle) - ty * sin(angle);
+                y2 = tx * sin(angle) + ty * cos(angle);
+                x1 += X2;
+                y1 += Y2;
+                x2 += X2;
+                y2 += Y2;
+                setVertexArray(x1, y1, x2, y2, width);
+                setTextureArray();
+                for (int i = 0; i < lines.size(); ++i)
+                    lines[i].line->rotate(angle, X2, Y2, 0.0f);
+            }
+                break;
+            case 2:
+            {
+                float X1 = VertexArray[2][0];
+                float Y1 = VertexArray[2][1];
+                float X2 = VertexArray[1][0];
+                float Y2 = VertexArray[1][1];
+                float X3 = X1 + dx;
+                float Y3 = Y1 + dy;
+                float dx1 = X1 - X2;
+                float dy1 = Y1 - Y2;
+                float r1 = sqrt(dx1*dx1 + dy1*dy1);
+                float dx2 = X3 - X2;
+                float dy2 = Y3 - Y2;
+                float r2 = sqrt(dx2*dx2 + dy2*dy2);
+                float pi = 3.14159265f;
+                float t = dx1 / r1;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float angle1 = acos(t);
+                if (dy1 < 0)
+                    angle1 = 2.0f * pi - angle1;
+                t = dx2 / r2;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float angle2 = acos(t);
+                if (dy2 < 0)
+                    angle2 = 2.0f * pi - angle2;
+                float angle = angle2 - angle1;
+                x1 -= X2;
+                y1 -= Y2;
+                x2 -= X2;
+                y2 -= Y2;
+                float tx = x1, ty = y1;
+                x1 = tx * cos(angle) - ty * sin(angle);
+                y1 = tx * sin(angle) + ty * cos(angle);
+                tx = x2;
+                ty = y2;
+                x2 = tx * cos(angle) - ty * sin(angle);
+                y2 = tx * sin(angle) + ty * cos(angle);
+                x1 += X2;
+                y1 += Y2;
+                x2 += X2;
+                y2 += Y2;
+                setVertexArray(x1, y1, x2, y2, width);
+                setTextureArray();
+                for (int i = 0; i < lines.size(); ++i)
+                    lines[i].line->rotate(angle, X2, Y2, 0.0f);
+            }
+                break;
+            case 3:
+            {
+                float X1 = VertexArray[3][0];
+                float Y1 = VertexArray[3][1];
+                float X2 = VertexArray[0][0];
+                float Y2 = VertexArray[0][1];
+                float X3 = X1 + dx;
+                float Y3 = Y1 + dy;
+                float dx1 = X1 - X2;
+                float dy1 = Y1 - Y2;
+                float r1 = sqrt(dx1*dx1 + dy1*dy1);
+                float dx2 = X3 - X2;
+                float dy2 = Y3 - Y2;
+                float r2 = sqrt(dx2*dx2 + dy2*dy2);
+                float pi = 3.14159265f;
+                float t = dx1 / r1;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float angle1 = acos(t);
+                if (dy1 < 0)
+                    angle1 = 2.0f * pi - angle1;
+                t = dx2 / r2;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float angle2 = acos(t);
+                if (dy2 < 0)
+                    angle2 = 2.0f * pi - angle2;
+                float angle = angle2 - angle1;
+                x1 -= X2;
+                y1 -= Y2;
+                x2 -= X2;
+                y2 -= Y2;
+                float tx = x1, ty = y1;
+                x1 = tx * cos(angle) - ty * sin(angle);
+                y1 = tx * sin(angle) + ty * cos(angle);
+                tx = x2;
+                ty = y2;
+                x2 = tx * cos(angle) - ty * sin(angle);
+                y2 = tx * sin(angle) + ty * cos(angle);
+                x1 += X2;
+                y1 += Y2;
+                x2 += X2;
+                y2 += Y2;
+                setVertexArray(x1, y1, x2, y2, width);
+                setTextureArray();
+                for (int i = 0; i < lines.size(); ++i)
+                    lines[i].line->rotate(angle, X2, Y2, 0.0f);
+            }
+                break;
+            case 4:
+            {
+                float X1 = x1;
+                float Y1 = y1;
+                float X2 = x2;
+                float Y2 = y2;
+                float X3 = X1 + dx;
+                float Y3 = Y1 + dy;
+                float dx1 = X1 - X2;
+                float dy1 = Y1 - Y2;
+                float r1 = sqrt(dx1*dx1 + dy1*dy1);
+                float dx2 = X3 - X2;
+                float dy2 = Y3 - Y2;
+                float r2 = sqrt(dx2*dx2 + dy2*dy2);
+                float pi = 3.14159265f;
+                float t = dx1 / r1;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float angle1 = acos(t);
+                if (dy1 < 0)
+                    angle1 = 2.0f * pi - angle1;
+
+                t = dx2 / r2;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float angle2 = acos(t);
+                if (dy2 < 0)
+                    angle2 = 2.0f * pi - angle2;
+                float angle = angle2 - angle1;
+                //qDebug() << "Angle:" << angle;
+                x1 -= X2;
+                y1 -= Y2;
+                float tx = x1, ty = y1;
+                x1 = tx * cos(angle) - ty * sin(angle);
+                y1 = tx * sin(angle) + ty * cos(angle);
+                x1 += X2;
+                y1 += Y2;
+                setVertexArray(x1, y1, x2, y2, width);
+                setTextureArray();
+                for (int i = 0; i < lines.size(); ++i)
+                    lines[i].line->rotate(angle, X2, Y2, 0.0f);
+            }
+                break;
+            case 5:
+            {
+                float X1 = x2;
+                float Y1 = y2;
+                float X2 = x1;
+                float Y2 = y1;
+                float X3 = X1 + dx;
+                float Y3 = Y1 + dy;
+                float dx1 = X1 - X2;
+                float dy1 = Y1 - Y2;
+                float r1 = sqrt(dx1*dx1 + dy1*dy1);
+                float dx2 = X3 - X2;
+                float dy2 = Y3 - Y2;
+                float r2 = sqrt(dx2*dx2 + dy2*dy2);
+                float pi = 3.14159265f;
+
+                float t = dx1 / r1;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float angle1 = acos(t);
+                if (dy1 < 0)
+                    angle1 = 2.0f * pi - angle1;
+
+                t = dx2 / r2;
+                if (t > 1)
+                    t = 1.0f;
+                if (t < -1)
+                    t = -1.0f;
+                float angle2 = acos(t);
+                if (dy2 < 0)
+                    angle2 = 2.0f * pi - angle2;
+                float angle = angle2 - angle1;
+                //qDebug() << "Angle:" << angle;
+                x2 -= X2;
+                y2 -= Y2;
+                float tx = x2, ty = y2;
+                x2 = tx * cos(angle) - ty * sin(angle);
+                y2 = tx * sin(angle) + ty * cos(angle);
+                x2 += X2;
+                y2 += Y2;
+                setVertexArray(x1, y1, x2, y2, width);
+                setTextureArray();
+                for (int i = 0; i < lines.size(); ++i)
+                    lines[i].line->rotate(angle, X2, Y2, 0.0f);
+            }
+                break;
+            case 6:
+            {
+                // Первый торец
+                float dx1 = x1 - x2;
+                float dy1 = y1 - y2;
+                float dr = (dx * dx1 + dy * dy1) / length;
+                x1 += dx1 / length * dr;
+                y1 += dy1 / length * dr;
+                setVertexArray(x1, y1, x2, y2, width);
+                setTextureArray();
+                for (int i = 0; i < lines.size(); ++i)
+                {
+                    if (lines[i].type != Line::StopLine)
+                        lines[i].line->resizeByControl(0,dx1 / length * dr,dy1 / length * dr,x,y);
+                }
+                emit lengthChanged(length);
+            }
+                break;
+
+            case 7:
+            {
+                // Второй торец
+                float dx1 = x2 - x1;
+                float dy1 = y2 - y1;
+                float dr = (dx * dx1 + dy * dy1) / length;
+                x2 += dx1 / length * dr;
+                y2 += dy1 / length * dr;
+                for (int i = 0; i < lines.size(); ++i)
+                {
+                    if (lines[i].type != Line::StopLine)
+                        lines[i].line->resizeByControl(1,dx1 / length * dr,dy1 / length * dr,x,y);
+                }
+                setVertexArray(x1, y1, x2, y2, width);
+                setTextureArray();
+
+                emit lengthChanged(length);
+            }
+                break;
+
+            case 8:
+            {
+                float ds = sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
+                float dr = ((xP1 - xP2)*dx + (yP1 - yP2)*dy)/ds;
+
+                rightWidth += dr;
+                if (rightWidth < 0.0f)
+                {
+                    //dr -= rightWidth - 0.001f;
+                    rightWidth = 0.001f;
+                    width = leftWidth + 0.001f;
+                }
+                else
+                    width += dr;
+
+                for (int i = 0; i < lines.size(); ++i)
+                {
+                    if (lines[i].type == Line::StopLine)
+                        lines[i].line->resizeByControl(1, (xP1 - xP2) * dr / ds,
+                                                       (yP1 - yP2) * dr / ds,
+                                                       x, y);
+                    else
+                        if (lines[i].linkedToRightSide)
+                            lines[i].line->move((xP1 - xP2) * dr / ds,
+                                                (yP1 - yP2) * dr / ds);
+                }
+                setVertexArray(x1, y1, x2, y2, width);
+                setTextureArray();
+                emit rightWidthChanged(rightWidth);
+                emit widthChanged(width);
+            }
+                break;
+            case 9:
+            {
+                float ds = sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
+                float dr = ((xP2 - xP1)*dx + (yP2 - yP1)*dy)/ds;
+
+                leftWidth += dr;
+                if (leftWidth < 0.0f)
+                {
+                    //dr -= leftWidth - 0.001f;
+                    leftWidth = 0.001f;
+                    width = rightWidth + 0.001f;
+                }
+                else
+                    width += dr;
+                for (int i = 0; i < lines.size(); ++i)
+                {
+                    if (lines[i].type == Line::StopLine)
+                        lines[i].line->resizeByControl(0, (xP2 - xP1) * dr / ds,
+                                                       (yP2 - yP1) * dr / ds,
+                                                       x, y);
+                    else
+                        if (!lines[i].linkedToRightSide)
+                            lines[i].line->move((xP2 - xP1) * dr / ds,
+                                                (yP2 - yP1) * dr / ds);
+                }
+                setVertexArray(x1, y1, x2, y2, width);
+                setTextureArray();
+
+                emit leftWidthChanged(leftWidth);
+                emit widthChanged(width);
+            }
+                break;
+            case 10:
+                // Правый
+            {
+                float dr = ((xP1 - xP2)*dx + (yP1 - yP2)*dy)/
+                        sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
+                rightBoardWidth += dr;
+                setVertexArray(x1,y1,x2,y2,width);
+                emit rightBoardWidthChanged(rightBoardWidth);
+            }
+                break;
+            case 11:
+            {
+                float dr = ((xP2 - xP1)*dx + (yP2 - yP1)*dy)/
+                        sqrt((xP2 - xP1)*(xP2 - xP1) + (yP2 - yP1)*(yP2 - yP1));
+                leftBoardWidth += dr;
+                setVertexArray(x1,y1,x2,y2,width);
+                emit leftBoardWidthChanged(leftBoardWidth);
+            }
+                break;
+
+            default:
+                break;
+            }
+            setTextureArray();
+        }
+        else
+        {
+            //        int i;
+            //        for (i = 0; i < lines.size(); ++i)
+            //        {
+            //            if (index >= lines[i].line->getNumberOfControls())
+            //            {
+            //                index -= lines[i].line->getNumberOfControls();
+            //            }
+            //            else
+            //            {
+            //                break;
+            //            }
+            //        }
+            //        lines[i].line->resizeByControl(index, dx, dy, x, y);
+        }
 
 }
 
@@ -1836,9 +2091,8 @@ int RoadSimple::getNumberOfControls()
         Logger::getLogger()->infoLog() << "RoadSimple::getNumberOfControls()\n";
     int roadControls = 12;
     int lineControls = 0;
-//    for (int i = 0; i < lines.size(); ++i)
-//        lineControls += lines[i].line->getNumberOfControls();
-    lineControls = lines.size();
+    for (int i = 0; i < lines.size(); ++i)
+        lineControls += (lines[i].line->getNumberOfControls() + 1);
     return roadControls + lineControls;
 }
 
@@ -2083,231 +2337,231 @@ void RoadSimple::resetLines()
     if (log)
         Logger::getLogger()->infoLog() << "RoadSimple::resetLines()\n";
 
-//    for (int i = 0; i < lines.size(); ++i)
-//    {
-//        float line_x1, line_x2, line_y1, line_y2;
-//        float r1;
-//        if (!currentLineLinked.linkedToRightSide)
-//            r1 = width - currentLineLinked.step;
-//        else
-//            r1 = currentLineLinked.step;
+    //    for (int i = 0; i < lines.size(); ++i)
+    //    {
+    //        float line_x1, line_x2, line_y1, line_y2;
+    //        float r1;
+    //        if (!currentLineLinked.linkedToRightSide)
+    //            r1 = width - currentLineLinked.step;
+    //        else
+    //            r1 = currentLineLinked.step;
 
-//        float x0 = VertexArray[0][0];
-//        float y0 = VertexArray[0][1];
-//        float x1 = VertexArray[1][0];
-//        float y1 = VertexArray[1][1];
-//        float x2 = VertexArray[2][0];
-//        float y2 = VertexArray[2][1];
-//        float x3 = VertexArray[3][0];
-//        float y3 = VertexArray[3][1];
-
-
-//        // Начальная точка для линии
-//        float x = x0 + (x1 - x0) * r1 / width;
-//        float y = y0 + (y1 - y0) * r1 / width;
-//        float R = sqrt((x3 - x0) * (x3 - x0) + (y3 - y0) * (y3 - y0));
-//        line_x1 = x + (x3 - x0) / R * currentLineLinked.beginStep;
-//        line_y1 = y + (y3 - y0) / R * currentLineLinked.beginStep;
-
-//        // Конечная точка для линии
-//        x = x3 + (x2 - x3) * r1 / width;
-//        y = y3 + (y2 - y3) * r1 / width;
-//        line_x2 = x + (x0 - x3) / R * currentLineLinked.endStep;
-//        line_y2 = y + (y0 - y3) / R * currentLineLinked.endStep;
-
-//        switch (currentLineLinked.type)
-//        {
-//        case Line::SplitZone:
-//            qDebug() << "SplitZone";
-//            switch (currentLineLinked.splitZoneType)
-//            {
-//            case Line::Marking:
-//            {
-//                currentLineLinked.line = new SplitZone(line_x1, line_y1, 0.02f,
-//                                                       line_x2, line_y2, 0.02f,
-//                                                       currentLineLinked.splitZoneWidth,
-//                                                       currentLineLinked.beginRounding,
-//                                                       currentLineLinked.endRounding,
-//                                                       QString("Линия №") + QString::number(lines.size() + 1));
-//            }
-//                break;
-//            case Line::Grass:
-//            {
-//                currentLineLinked.line = new SplitZone(line_x1, line_y1, 0.02f,
-//                                                       line_x2, line_y2, 0.02f,
-//                                                       currentLineLinked.splitZoneWidth,
-//                                                       currentLineLinked.beginRounding,
-//                                                       currentLineLinked.endRounding,
-//                                                       currentLineLinked.splitZoneType,
-//                                                       currentLineLinked.splitZoneHeight,
-//                                                       "/models/city_roads/board.jpg",
-//                                                       0.25f, 6.0f,
-//                                                       "/models/city_roads/grass.jpg",
-//                                                       3.0f, 3.0f,
-//                                                       QString("Линия №") + QString::number(lines.size() + 1));
-//            }
-//                break;
-//            case Line::Board:
-//            {
-//                currentLineLinked.line = new SplitZone(line_x1, line_y1, 0.02f,
-//                                                       line_x2, line_y2, 0.02f,
-//                                                       currentLineLinked.splitZoneWidth,
-//                                                       currentLineLinked.beginRounding,
-//                                                       currentLineLinked.endRounding,
-//                                                       currentLineLinked.splitZoneType,
-//                                                       currentLineLinked.splitZoneHeight,
-//                                                       "/models/city_roads/board.jpg",
-//                                                       0.25f, 6.0f,
-//                                                       "/models/city_roads/nr_07S.jpg",
-//                                                       6.0f, 6.0f,
-//                                                       QString("Линия №") + QString::number(lines.size() + 1));
-//            }
-//                break;
-//            default:
-//                break;
-//            }
-//            break;
-//        case Line::StopLine:
-//        {
-//            qDebug() << "StopLine";
-//            // Нахождение перпендикуляра
-//            if (currentLineLinked.linkedToBeginSide)
-//            {
-//                float dx, dy, r;
-//                if (currentLineLinked.linkedToRightSide)
-//                {
-//                    dx = VertexArray[0][0] - VertexArray[3][0];
-//                    dy = VertexArray[0][1] - VertexArray[3][1];
-//                }
-//                else
-//                {
-//                    dx = VertexArray[1][0] - VertexArray[2][0];
-//                    dy = VertexArray[1][1] - VertexArray[2][1];
-//                }
-//                r = sqrt(dx * dx + dy * dy);
-//                line_x1 = VertexArray[2][0] + (dx / r) * (r - currentLineLinked.step);
-//                line_y1 = VertexArray[2][1] + (dy / r) * (r - currentLineLinked.step);
-//                line_x2 = VertexArray[3][0] + (dx / r) * (r - currentLineLinked.step);
-//                line_y2 = VertexArray[3][1] + (dy / r) * (r - currentLineLinked.step);
-//            }
-//            else
-//            {
-//                float dx = VertexArray[0][0] - VertexArray[3][0];
-//                float dy = VertexArray[0][1] - VertexArray[3][1];
-//                float r = sqrt(dx * dx + dy * dy);
-//                line_x1 = VertexArray[2][0] + (dx / r) * currentLineLinked.step;
-//                line_y1 = VertexArray[2][1] + (dy / r) * currentLineLinked.step;
-//                line_x2 = VertexArray[3][0] + (dx / r) * currentLineLinked.step;
-//                line_y2 = VertexArray[3][1] + (dy / r) * currentLineLinked.step;
-//            }
-
-//            // Обрезка перпендикуляра до нужной длины
-
-//            int index = -1;
-//            for (int i = 0; i < lines.size(); ++i)
-//            {
-
-//                if (lines[i].line->getName() == "SplitZone")
-//                {
-//                    index = i;
-//                    break;
-//                }
-//                else
-//                    if (lines[i].type == Line::SingleSolid ||
-//                            lines[i].type == Line::DoubleSolid)
-//                    {
-//                        index = i;
-//                        break;
-//                    }
-//            }
-
-//            if (index >= 0)
-//            {
-//                float r1;
-//                if (lines[index].line->getName() == "SplitZone")
-//                {
-//                    if (lines[index].linkedToRightSide)
-//                        r1 = width - lines[index].step - lines[index].splitZoneWidth / 2.0f;
-//                    else
-//                        r1 = lines[index].step - lines[index].splitZoneWidth / 2.0f;
-//                }
-//                else
-//                    if (lines[index].linkedToRightSide)
-//                        r1 = width - lines[index].step;
-//                    else
-//                        r1 = lines[index].step;
-//                line_x2 = line_x1 + (line_x2 - line_x1) / width * r1;
-//                line_y2 = line_y1 + (line_y2 - line_y1) / width * r1;
+    //        float x0 = VertexArray[0][0];
+    //        float y0 = VertexArray[0][1];
+    //        float x1 = VertexArray[1][0];
+    //        float y1 = VertexArray[1][1];
+    //        float x2 = VertexArray[2][0];
+    //        float y2 = VertexArray[2][1];
+    //        float x3 = VertexArray[3][0];
+    //        float y3 = VertexArray[3][1];
 
 
-//                // Обрезка всех существующих линий до стоп-линии
-//                for (int i = 0; i < lines.size(); ++i)
-//                {
-//                    if (i == index ||
-//                        lines[i].type == Line::SplitZone ||
-//                        lines[i].type == Line::StopLine ||
-//                        lines[i].type == Line::TramWays)
-//                        continue;
-//                    vec2 p1(line_x1, line_y1);
-//                    vec2 p2(line_x2, line_y2);
-//                    //LineSimple *l = dynamic_cast<LineSimple*>(lines[i].line);
-//                    LineSimple *l = qobject_cast<LineSimple*>(lines[i].line);
-//                    assert(l != 0);
-//                    vec2 t1 = l->getAxisPoint_1();
-//                    vec2 t2 = l->getAxisPoint_2();
+    //        // Начальная точка для линии
+    //        float x = x0 + (x1 - x0) * r1 / width;
+    //        float y = y0 + (y1 - y0) * r1 / width;
+    //        float R = sqrt((x3 - x0) * (x3 - x0) + (y3 - y0) * (y3 - y0));
+    //        line_x1 = x + (x3 - x0) / R * currentLineLinked.beginStep;
+    //        line_y1 = y + (y3 - y0) / R * currentLineLinked.beginStep;
 
-//                    float xTemp, yTemp;
-//                    float a1, a2, b1, b2, c1, c2;
+    //        // Конечная точка для линии
+    //        x = x3 + (x2 - x3) * r1 / width;
+    //        y = y3 + (y2 - y3) * r1 / width;
+    //        line_x2 = x + (x0 - x3) / R * currentLineLinked.endStep;
+    //        line_y2 = y + (y0 - y3) / R * currentLineLinked.endStep;
 
-//                    a1 = p1.y - p2.y;
-//                    b1 = p2.x - p1.x;
-//                    c1 = p1.x * p2.y - p2.x * p1.y;
+    //        switch (currentLineLinked.type)
+    //        {
+    //        case Line::SplitZone:
+    //            qDebug() << "SplitZone";
+    //            switch (currentLineLinked.splitZoneType)
+    //            {
+    //            case Line::Marking:
+    //            {
+    //                currentLineLinked.line = new SplitZone(line_x1, line_y1, 0.02f,
+    //                                                       line_x2, line_y2, 0.02f,
+    //                                                       currentLineLinked.splitZoneWidth,
+    //                                                       currentLineLinked.beginRounding,
+    //                                                       currentLineLinked.endRounding,
+    //                                                       QString("Линия №") + QString::number(lines.size() + 1));
+    //            }
+    //                break;
+    //            case Line::Grass:
+    //            {
+    //                currentLineLinked.line = new SplitZone(line_x1, line_y1, 0.02f,
+    //                                                       line_x2, line_y2, 0.02f,
+    //                                                       currentLineLinked.splitZoneWidth,
+    //                                                       currentLineLinked.beginRounding,
+    //                                                       currentLineLinked.endRounding,
+    //                                                       currentLineLinked.splitZoneType,
+    //                                                       currentLineLinked.splitZoneHeight,
+    //                                                       "/models/city_roads/board.jpg",
+    //                                                       0.25f, 6.0f,
+    //                                                       "/models/city_roads/grass.jpg",
+    //                                                       3.0f, 3.0f,
+    //                                                       QString("Линия №") + QString::number(lines.size() + 1));
+    //            }
+    //                break;
+    //            case Line::Board:
+    //            {
+    //                currentLineLinked.line = new SplitZone(line_x1, line_y1, 0.02f,
+    //                                                       line_x2, line_y2, 0.02f,
+    //                                                       currentLineLinked.splitZoneWidth,
+    //                                                       currentLineLinked.beginRounding,
+    //                                                       currentLineLinked.endRounding,
+    //                                                       currentLineLinked.splitZoneType,
+    //                                                       currentLineLinked.splitZoneHeight,
+    //                                                       "/models/city_roads/board.jpg",
+    //                                                       0.25f, 6.0f,
+    //                                                       "/models/city_roads/nr_07S.jpg",
+    //                                                       6.0f, 6.0f,
+    //                                                       QString("Линия №") + QString::number(lines.size() + 1));
+    //            }
+    //                break;
+    //            default:
+    //                break;
+    //            }
+    //            break;
+    //        case Line::StopLine:
+    //        {
+    //            qDebug() << "StopLine";
+    //            // Нахождение перпендикуляра
+    //            if (currentLineLinked.linkedToBeginSide)
+    //            {
+    //                float dx, dy, r;
+    //                if (currentLineLinked.linkedToRightSide)
+    //                {
+    //                    dx = VertexArray[0][0] - VertexArray[3][0];
+    //                    dy = VertexArray[0][1] - VertexArray[3][1];
+    //                }
+    //                else
+    //                {
+    //                    dx = VertexArray[1][0] - VertexArray[2][0];
+    //                    dy = VertexArray[1][1] - VertexArray[2][1];
+    //                }
+    //                r = sqrt(dx * dx + dy * dy);
+    //                line_x1 = VertexArray[2][0] + (dx / r) * (r - currentLineLinked.step);
+    //                line_y1 = VertexArray[2][1] + (dy / r) * (r - currentLineLinked.step);
+    //                line_x2 = VertexArray[3][0] + (dx / r) * (r - currentLineLinked.step);
+    //                line_y2 = VertexArray[3][1] + (dy / r) * (r - currentLineLinked.step);
+    //            }
+    //            else
+    //            {
+    //                float dx = VertexArray[0][0] - VertexArray[3][0];
+    //                float dy = VertexArray[0][1] - VertexArray[3][1];
+    //                float r = sqrt(dx * dx + dy * dy);
+    //                line_x1 = VertexArray[2][0] + (dx / r) * currentLineLinked.step;
+    //                line_y1 = VertexArray[2][1] + (dy / r) * currentLineLinked.step;
+    //                line_x2 = VertexArray[3][0] + (dx / r) * currentLineLinked.step;
+    //                line_y2 = VertexArray[3][1] + (dy / r) * currentLineLinked.step;
+    //            }
 
-//                    a2 = t1.y - t2.y;
-//                    b2 = t2.x - t1.x;
-//                    c2 = t1.x * t2.y - t2.x * t1.y;
-//                    if (!calculateLinesIntersection(a1, b1, c1,
-//                                                    a2, b2, c2,
-//                                                    xTemp, yTemp))
-//                        continue;
-//    //                if (((p1.x >= xTemp && p2.x <= xTemp) || (p1.x <= xTemp && p2.x >= xTemp)) &&
-//    //                        ((p1.y >= yTemp && p2.y <= yTemp) || (p1.y <= yTemp && p2.y >= yTemp)))
-//                    if (((t1.x >= xTemp && t2.x <= xTemp) || (t1.x <= xTemp && t2.x >= xTemp)) &&
-//                            ((t1.y >= yTemp && t2.y <= yTemp) || (t1.y <= yTemp && t2.y >= yTemp)))
-//                    {
-//                        l->setVertexArray(xTemp, yTemp, t2.x, t2.y, lines[i].lineWidth);
-//                        l->setTextureArray();
-//                    }
-//                }
-//            }
-//            currentLineLinked.line = new LineSimple(line_x1, line_y1,
-//                                       line_x2, line_y2,
-//                                       currentLineLinked.lineWidth,
-//                                       textureSource, textureSize, "LineSimple", 1,
-//                                       QString("Линия №") + QString::number(lines.size() + 1));
-//        }
-//            break;
-//            /*
-//        case 8:
-//        {
-//            line.line = new LineSimple(line_x1, line_y1, line_x2, line_y2, lineWidth, textureSource, textureSize, "LineSimple", 1,
-//                                       QString("Линия №") + QString::number(lines.size() + 1));
-//        }
-//            break;
-//            */
-//        default:
-//        {
-//            qDebug() << "LineSimple";
-//            currentLineLinked.line = new LineSimple(line_x1, line_y1,
-//                                                    line_x2, line_y2,
-//                                                    currentLineLinked.lineWidth,
-//                                                    textureSource, textureSize, "LineSimple", 1,
-//                                                    QString("Линия №") + QString::number(lines.size() + 1));
-//        }
-//            break;
-//        }
+    //            // Обрезка перпендикуляра до нужной длины
 
-//    }
+    //            int index = -1;
+    //            for (int i = 0; i < lines.size(); ++i)
+    //            {
+
+    //                if (lines[i].line->getName() == "SplitZone")
+    //                {
+    //                    index = i;
+    //                    break;
+    //                }
+    //                else
+    //                    if (lines[i].type == Line::SingleSolid ||
+    //                            lines[i].type == Line::DoubleSolid)
+    //                    {
+    //                        index = i;
+    //                        break;
+    //                    }
+    //            }
+
+    //            if (index >= 0)
+    //            {
+    //                float r1;
+    //                if (lines[index].line->getName() == "SplitZone")
+    //                {
+    //                    if (lines[index].linkedToRightSide)
+    //                        r1 = width - lines[index].step - lines[index].splitZoneWidth / 2.0f;
+    //                    else
+    //                        r1 = lines[index].step - lines[index].splitZoneWidth / 2.0f;
+    //                }
+    //                else
+    //                    if (lines[index].linkedToRightSide)
+    //                        r1 = width - lines[index].step;
+    //                    else
+    //                        r1 = lines[index].step;
+    //                line_x2 = line_x1 + (line_x2 - line_x1) / width * r1;
+    //                line_y2 = line_y1 + (line_y2 - line_y1) / width * r1;
+
+
+    //                // Обрезка всех существующих линий до стоп-линии
+    //                for (int i = 0; i < lines.size(); ++i)
+    //                {
+    //                    if (i == index ||
+    //                        lines[i].type == Line::SplitZone ||
+    //                        lines[i].type == Line::StopLine ||
+    //                        lines[i].type == Line::TramWays)
+    //                        continue;
+    //                    vec2 p1(line_x1, line_y1);
+    //                    vec2 p2(line_x2, line_y2);
+    //                    //LineSimple *l = dynamic_cast<LineSimple*>(lines[i].line);
+    //                    LineSimple *l = qobject_cast<LineSimple*>(lines[i].line);
+    //                    assert(l != 0);
+    //                    vec2 t1 = l->getAxisPoint_1();
+    //                    vec2 t2 = l->getAxisPoint_2();
+
+    //                    float xTemp, yTemp;
+    //                    float a1, a2, b1, b2, c1, c2;
+
+    //                    a1 = p1.y - p2.y;
+    //                    b1 = p2.x - p1.x;
+    //                    c1 = p1.x * p2.y - p2.x * p1.y;
+
+    //                    a2 = t1.y - t2.y;
+    //                    b2 = t2.x - t1.x;
+    //                    c2 = t1.x * t2.y - t2.x * t1.y;
+    //                    if (!calculateLinesIntersection(a1, b1, c1,
+    //                                                    a2, b2, c2,
+    //                                                    xTemp, yTemp))
+    //                        continue;
+    //    //                if (((p1.x >= xTemp && p2.x <= xTemp) || (p1.x <= xTemp && p2.x >= xTemp)) &&
+    //    //                        ((p1.y >= yTemp && p2.y <= yTemp) || (p1.y <= yTemp && p2.y >= yTemp)))
+    //                    if (((t1.x >= xTemp && t2.x <= xTemp) || (t1.x <= xTemp && t2.x >= xTemp)) &&
+    //                            ((t1.y >= yTemp && t2.y <= yTemp) || (t1.y <= yTemp && t2.y >= yTemp)))
+    //                    {
+    //                        l->setVertexArray(xTemp, yTemp, t2.x, t2.y, lines[i].lineWidth);
+    //                        l->setTextureArray();
+    //                    }
+    //                }
+    //            }
+    //            currentLineLinked.line = new LineSimple(line_x1, line_y1,
+    //                                       line_x2, line_y2,
+    //                                       currentLineLinked.lineWidth,
+    //                                       textureSource, textureSize, "LineSimple", 1,
+    //                                       QString("Линия №") + QString::number(lines.size() + 1));
+    //        }
+    //            break;
+    //            /*
+    //        case 8:
+    //        {
+    //            line.line = new LineSimple(line_x1, line_y1, line_x2, line_y2, lineWidth, textureSource, textureSize, "LineSimple", 1,
+    //                                       QString("Линия №") + QString::number(lines.size() + 1));
+    //        }
+    //            break;
+    //            */
+    //        default:
+    //        {
+    //            qDebug() << "LineSimple";
+    //            currentLineLinked.line = new LineSimple(line_x1, line_y1,
+    //                                                    line_x2, line_y2,
+    //                                                    currentLineLinked.lineWidth,
+    //                                                    textureSource, textureSize, "LineSimple", 1,
+    //                                                    QString("Линия №") + QString::number(lines.size() + 1));
+    //        }
+    //            break;
+    //        }
+
+    //    }
 
 }
 
@@ -2454,9 +2708,17 @@ void RoadSimple::constructLine(QString textureSource, float textureSize)
     float line_x1, line_x2, line_y1, line_y2;
     float r1;
     if (!currentLineLinked.linkedToRightSide)
+    {
         r1 = width - currentLineLinked.step;
+        if (currentLineLinked.type == Line::SplitZone)
+            r1 -= currentLineLinked.splitZoneWidth / 2.0f;
+    }
     else
+    {
         r1 = currentLineLinked.step;
+        if (currentLineLinked.type == Line::SplitZone)
+            r1 += currentLineLinked.splitZoneWidth / 2.0f;
+    }
 
     float x0 = VertexArray[0][0];
     float y0 = VertexArray[0][1];
@@ -2610,9 +2872,9 @@ void RoadSimple::constructLine(QString textureSource, float textureSize)
             for (int i = 0; i < lines.size(); ++i)
             {
                 if (//i == index ||
-                    lines[i].type == Line::SplitZone ||
-                    lines[i].type == Line::StopLine ||
-                    lines[i].type == Line::TramWays)
+                        lines[i].type == Line::SplitZone ||
+                        lines[i].type == Line::StopLine ||
+                        lines[i].type == Line::TramWays)
                     continue;
                 vec2 p1(line_x1, line_y1);
                 vec2 p2(line_x2, line_y2);
@@ -2638,8 +2900,8 @@ void RoadSimple::constructLine(QString textureSource, float textureSize)
                     continue;
                 if (((p1.x >= xTemp && p2.x <= xTemp) || (p1.x <= xTemp && p2.x >= xTemp)) &&
                         ((p1.y >= yTemp && p2.y <= yTemp) || (p1.y <= yTemp && p2.y >= yTemp)))
-                //if (((t1.x >= xTemp && t2.x <= xTemp) || (t1.x <= xTemp && t2.x >= xTemp)) &&
-                //        ((t1.y >= yTemp && t2.y <= yTemp) || (t1.y <= yTemp && t2.y >= yTemp)))
+                    //if (((t1.x >= xTemp && t2.x <= xTemp) || (t1.x <= xTemp && t2.x >= xTemp)) &&
+                    //        ((t1.y >= yTemp && t2.y <= yTemp) || (t1.y <= yTemp && t2.y >= yTemp)))
                 {
                     l->setVertexArray(xTemp, yTemp, t2.x, t2.y, lines[i].lineWidth);
                     l->setTextureArray();
@@ -2647,10 +2909,10 @@ void RoadSimple::constructLine(QString textureSource, float textureSize)
             }
         }
         currentLineLinked.line = new LineSimple(line_x1, line_y1,
-                                   line_x2, line_y2,
-                                   currentLineLinked.lineWidth,
-                                   textureSource, textureSize, "LineSimple", 1,
-                                   QString("Линия №") + QString::number(lines.size() + 1));
+                                                line_x2, line_y2,
+                                                currentLineLinked.lineWidth,
+                                                textureSource, textureSize, "LineSimple", 1,
+                                                QString("Линия №") + QString::number(lines.size() + 1));
     }
         break;
         /*
@@ -2672,7 +2934,7 @@ void RoadSimple::constructLine(QString textureSource, float textureSize)
     }
         break;
     }
-    currentLineLinked.line->setSelectedStatus(false);
+    currentLineLinked.line->setSelectedStatus(true);
     //lines.push_back(currentLineLinked);
     //lines.push_back(currentLineLinked);
     RoadElement::undoStack->push(new AddLineCommand(this, currentLineLinked, render));
@@ -2718,19 +2980,19 @@ void RoadSimple::constructLine(LineLinkedToRoad line)
         break;
     case 8:
     {
-//        textSource = QString("/models/city_roads/tramways.png");
-//        lWidth = 1.5f;
-//        if (!singleWay)
-//        {
-//            addLine(step + axisStep / 2.0, textSource, 1.5f, lWidth, lineType, rightSide, beginStep, endStep);
-//            addLine(step - axisStep / 2.0, textSource, 1.5f, lWidth, lineType, rightSide, beginStep, endStep);
-//            return;
-//        }
-//        else
-//        {
-//            addLine(step, textSource, 1.5f, lWidth, lineType, rightSide, beginStep, endStep);
-//            return;
-//        }
+        //        textSource = QString("/models/city_roads/tramways.png");
+        //        lWidth = 1.5f;
+        //        if (!singleWay)
+        //        {
+        //            addLine(step + axisStep / 2.0, textSource, 1.5f, lWidth, lineType, rightSide, beginStep, endStep);
+        //            addLine(step - axisStep / 2.0, textSource, 1.5f, lWidth, lineType, rightSide, beginStep, endStep);
+        //            return;
+        //        }
+        //        else
+        //        {
+        //            addLine(step, textSource, 1.5f, lWidth, lineType, rightSide, beginStep, endStep);
+        //            return;
+        //        }
     }
         break;
     default:
@@ -2752,32 +3014,32 @@ void RoadSimple::addLine(LineLinkedToRoad line)
 
 void RoadSimple::deleteLine()
 {
-//    if (log)
-//        Logger::getLogger()->infoLog() << "RoadSimple::deleteLine()\n";
-//    QPushButton * b = qobject_cast<QPushButton*>(sender());
-//    if (!b) return;
-//    ////qDebug() << "delete line " << b->text();
-//    int i = b->text().toInt() - 1;
+    //    if (log)
+    //        Logger::getLogger()->infoLog() << "RoadSimple::deleteLine()\n";
+    //    QPushButton * b = qobject_cast<QPushButton*>(sender());
+    //    if (!b) return;
+    //    ////qDebug() << "delete line " << b->text();
+    //    int i = b->text().toInt() - 1;
 
-//    RoadElement::undoStack->push(new DeleteLineCommand(this, lines[i], render));
+    //    RoadElement::undoStack->push(new DeleteLineCommand(this, lines[i], render));
 
-//    //lines.remove(i);
+    //    //lines.remove(i);
 
-//    for (int i = 0; i < lines.size(); ++i)
-//    {
-//        if (lines[i].lineType != 6)
-//        {
-//            LineSimple* line = dynamic_cast<LineSimple*>(lines[i].line);
-//            line->setDescription(QString("Линия №") + QString::number(i + 1));
-//        }
-//        else
-//        {
-//            SplitZone* line = dynamic_cast<SplitZone*>(lines[i].line);
-//            line->setDescription(QString("Линия №") + QString::number(i + 1));
-//        }
-//    }
-//    if (this->layout && this->render)
-//        emit linesChanged(layout, render);
+    //    for (int i = 0; i < lines.size(); ++i)
+    //    {
+    //        if (lines[i].lineType != 6)
+    //        {
+    //            LineSimple* line = dynamic_cast<LineSimple*>(lines[i].line);
+    //            line->setDescription(QString("Линия №") + QString::number(i + 1));
+    //        }
+    //        else
+    //        {
+    //            SplitZone* line = dynamic_cast<SplitZone*>(lines[i].line);
+    //            line->setDescription(QString("Линия №") + QString::number(i + 1));
+    //        }
+    //    }
+    //    if (this->layout && this->render)
+    //        emit linesChanged(layout, render);
 }
 
 void RoadSimple::deleteLine(LineLinked line)
@@ -2977,8 +3239,8 @@ void RoadSimple::calculateStopLineIntersections(LineSimple *lineSimple)
     for (int i = 0; i < lines.size(); ++i)
     {
         if (lines[i].type == Line::SplitZone ||
-            lines[i].type == Line::StopLine ||
-            lines[i].type == Line::TramWays)
+                lines[i].type == Line::StopLine ||
+                lines[i].type == Line::TramWays)
             continue;
         vec2 p1(line_x1, line_y1);
         vec2 p2(line_x2, line_y2);
@@ -3150,19 +3412,22 @@ std::vector<vec3> RoadSimple::getCoordOfControl(int index)
         int i;
         for (i = 0; i < lines.size(); ++i)
         {
-            if (index >= lines[i].line->getNumberOfControls())
-            {
-                index -= lines[i].line->getNumberOfControls();
-            }
+            if (index > lines[i].line->getNumberOfControls())
+                index -= (lines[i].line->getNumberOfControls() + 1);
             else
-            {
                 break;
+        }
+        if (lines[i].line->getNumberOfControls() == index)
+            res.push_back(vec3(lines[i].line->getElementX(),
+                               lines[i].line->getElementY(),
+                               0.0f));
+        else
+            for (unsigned j = 0; j < lines[i].line->getCoordOfControl(index).size(); ++j)
+            {
+                res.push_back(lines[i].line->getCoordOfControl(index)[j]);
             }
-        }
-        for (unsigned j = 0; j < lines[i].line->getCoordOfControl(index).size(); ++j)
-        {
-            res.push_back(lines[i].line->getCoordOfControl(index)[j]);
-        }
+
+
     }
     return res;
 }
@@ -3348,16 +3613,19 @@ void RoadSimple::setCoordForControl(int index, std::vector<vec3> &controls)
         int i;
         for (i = 0; i < lines.size(); ++i)
         {
-            if (index >= lines[i].line->getNumberOfControls())
-            {
-                index -= lines[i].line->getNumberOfControls();
-            }
+            if (index > lines[i].line->getNumberOfControls())
+                index -= (lines[i].line->getNumberOfControls() + 1);
             else
-            {
                 break;
-            }
         }
-        lines[i].line->setCoordForControl(index, controls);
+        if (lines[i].line->getNumberOfControls() == index)
+        {
+            float dx = controls[0].x - lines[i].line->getElementX();
+            float dy = controls[0].y - lines[i].line->getElementY();
+            lines[i].line->move(dx, dy);
+        }
+        else
+            lines[i].line->setCoordForControl(index, controls);
     }
 }
 

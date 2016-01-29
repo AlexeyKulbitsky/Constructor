@@ -427,10 +427,6 @@ void LineSimple::drawControlElement(int index, float lineWidth, float pointSize)
         glEnd();
     }
         break;
-    case 2:
-    {
-    }
-        break;
     default:
         break;
     }
@@ -464,19 +460,6 @@ void LineSimple::resizeByControl(int index, float dx, float dy, float x, float y
         y2 += dy;
         setVertexArray(x1, y1, x2, y2, width);
         emit lengthChanged(length);
-        break;
-
-    case 2:
-    {
-    }
-        break;
-    case 3:
-    {
-        float dr = sqrt(dx * dx + dy * dy);
-        float res = dx * (x2 - x1) + dy * (y2 - y1);
-        float factor = res < 0 ? -1 : 1;
-        setVertexArray(x1, y1, x2, y2, width + dr * factor);
-    }
         break;
     default:
         break;

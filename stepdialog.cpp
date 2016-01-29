@@ -629,7 +629,7 @@ void LineLinkedToRoad::drawLineDescription(QGLWidget *render)
 
 void LineLinkedToRoad::drawSplitZoneDescription(QGLWidget *render)
 {
-
+    drawLineDescription(render);
 }
 
 void LineLinkedToRoad::drawStopLineDescription(QGLWidget *render)

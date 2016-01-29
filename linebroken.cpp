@@ -641,6 +641,15 @@ void LineBroken::setLogging(bool status)
     Logger::getLogger()->infoLog() << "--------------------\n";
 }
 
+vec3 LineBroken::getAxisPoint(int index)
+{
+    if (index < 0 || index > getNumberOfControls())
+        return vec3(0.0f, 0.0f, 0.0f);
+    return vec3(vertexArrayForAxis[index * 3],
+                vertexArrayForAxis[index * 3 + 1],
+                vertexArrayForAxis[index * 3 + 2]);
+}
+
 
 
 void LineBroken::drawSelectionFrame()

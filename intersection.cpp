@@ -431,7 +431,7 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
                                        << " y = " << y << "\n";
     if (fixed)
         return;
-    //int INDEX = index;
+
     int i;
     for (i = 0; i < roads.size(); ++i)
     {
@@ -446,6 +446,7 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
         int count = roads[i]->getNumberOfControls() - 12;
         if (index < count)
         {
+
             roads[i]->resizeByControl(index, dx, dy, x, y);
         } else
         if (index == count + 5)

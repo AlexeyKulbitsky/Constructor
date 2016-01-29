@@ -62,7 +62,7 @@ public:
     virtual bool isFixed();
     virtual int getLayer();
     virtual void clear();
-
+    vec3 getAxisPoint(int index);
 signals:
     void widthChanged(double width);
     void heightChanged(double height);

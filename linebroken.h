@@ -28,7 +28,7 @@ public:
 
     static bool getLogging() { return log; }
     static void setLogging(bool status);
-
+    virtual vec3 getAxisPoint(int index);
 private:
     static bool log;
 

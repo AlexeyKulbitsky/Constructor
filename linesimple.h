@@ -61,7 +61,7 @@ public:
     virtual void drawControlElement(int index, float lineWidth = 5.0, float pointSize = 5.0);
     virtual QCursor getCursorForControlElement(int index);
     virtual void resizeByControl(int index, float dx, float dy, float x, float y);
-    virtual int getNumberOfControls() { return 9; }
+    virtual int getNumberOfControls() { return 2; }
     virtual int controlsForPoint() { return 1;}
     virtual void changeColorOfSelectedControl(int index);
     vec2 getAxisPoint_1(){return vec2(x1, y1);}
