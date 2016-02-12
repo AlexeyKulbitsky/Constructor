@@ -182,6 +182,7 @@ public:
     AddLineCommand(RoundingRoad* roundingRoad, LineBrokenLinked brokenLinked, QGLWidget *scene, QUndoCommand* parent = 0);
 
     AddLineCommand(RoadSimple* roadSimple, LineLinkedToRoad line, QGLWidget* scene, QUndoCommand* parent = 0);
+    AddLineCommand(RoundingRoad* roundingRoad, LineLinkedToRoad line, QGLWidget* scene, QUndoCommand* parent = 0);
     ~AddLineCommand();
 private:
     int type;

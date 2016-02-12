@@ -35,8 +35,8 @@ enum LineType
 enum SplitZoneType
 {
     Marking = 0,
-    Board,
-    Grass
+    Grass,
+    Board
 };
 
 }
@@ -51,6 +51,9 @@ struct LineLinkedToRoad
     float step = 0.0f;
     float beginStep = 0.0f;
     float endStep = 0.0f;
+    float rightStep = 0.0f;
+    float leftStep = 0.0f;
+
     bool linkedToRightSide = true; // Привязка к правой стороне по ходу движения (иначе к левой)
     bool linkedToBeginSide = true; // Привязка к началу (иначе к концу)
 
@@ -75,8 +78,10 @@ struct LineLinkedToRoad
     QVector3D beginStepPoint_Begin;
     QVector3D beginStepPoint_End;
     void drawLineDescription(QGLWidget*);
-
     void drawSplitZoneDescription(QGLWidget*);
+    void drawTramWaysDescription(QGLWidget*);
+
+    QVector3D linkedPoint;
     void drawStopLineDescription(QGLWidget*);
 };
 
@@ -94,6 +99,7 @@ public:
     ~StepDialog();
 
     void setUsingTarget(StepDialogUsingTarget usingTarget);
+    void setLine(LineLinkedToRoad line);
     void clear();
 
 private:
@@ -118,6 +124,8 @@ signals:
     void lineTypeChanged(int type);
     void beginStepChanged(double step);
     void endStepChanged(double step);
+    void rightStepChanged(double step);
+    void leftStepChanged(double step);
     void beginSideChanged(bool status);
     void beginRoundingChanged(bool status);
     void endRoundingChanged(bool status);
@@ -129,6 +137,10 @@ signals:
     void splitZoneHeightEnabledChanged(bool status);
 
     void lineCreated(LineLinkedToRoad value);
+    void lineDeleted(LineLinkedToRoad value);
+    void lineEdited(LineLinkedToRoad value);
+
+    void useDeleteButton(bool status);
 
 public slots:
     void setRightSide(bool status);
@@ -145,7 +157,9 @@ public slots:
     void setAxisStep(double step);
     void setSplitZoneHeight(double value);
     void setSplitZoneType(int type);
-
+    void deleteButtonClicked();
+    void setRightStep(double step);
+    void setLeftStep(double step);
 };
 
 #endif // STEPDIALOG_H

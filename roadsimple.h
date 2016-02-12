@@ -6,6 +6,7 @@
 #include <QCheckBox>
 #include <GL/glu.h>
 #include "linesimple.h"
+#include <QListWidget>
 
 struct LineLinked
 {
@@ -63,6 +64,8 @@ public:
     vec2 getAxisPoint_2();
     vec2 axis_1();
     vec2 axis_2();
+    vec2 getPerpendicular_1();
+    vec2 getPerpendicular_2();
     void setCoordForAxisPoint(int index, float x, float y);
     float getWidth() { return width; }
     void setCoordForPoint(int index, float newX, float newY, float newZ);
@@ -123,7 +126,6 @@ protected:
     static bool log;
     QVBoxLayout* layout;
     QGLWidget* render;
-
     QString description;
 public:
 
@@ -162,6 +164,7 @@ signals:
     void rightWidthChanged(double width);
     void leftWidthChanged(double width);
     void lineDeleted();
+    void linesChanged();
 
 public slots:
     static void setLogging(bool status);
@@ -180,6 +183,9 @@ public slots:
 
     void addLine(LineLinkedToRoad line);
 
+    void editLine();
+    void editLine(LineLinkedToRoad line);
+
     void deleteLine();
     void deleteLine(LineLinked line);
     void deleteLine(LineLinkedToRoad line);
@@ -187,7 +193,6 @@ public slots:
     virtual void getProperties(QVBoxLayout *layout, QGLWidget* render = 0);
     virtual bool setFixed(bool fixed);
     void resetLines();
-
     // RoadElement interface
 public:
     virtual std::vector<vec3> getCoordOfControl(int index);

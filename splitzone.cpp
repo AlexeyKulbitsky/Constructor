@@ -1725,6 +1725,7 @@ void SplitZone::reset()
         line->setTextureArray();
         break;
     case 1:
+        qDebug() << "Grass";
         setBoardVertexArray();
         setBoardTextureArray(texture1USize, texture1VSize);
         setBoardIndexArray();
@@ -2202,8 +2203,10 @@ void SplitZone::drawDescription(QGLWidget *render, float red, float green, float
     {
         GLdouble x, y, z;
         GLdouble wx, wy, wz;
-        x = xCenter;
-        y = yCenter;
+//        x = xCenter;
+//        y = yCenter;
+        x = elementX;
+        y = elementY;
         z = 0.0f;
         QFont shrift = QFont("Times", 8, QFont::Black);
         getWindowCoord(x, y, z, wx, wy, wz);

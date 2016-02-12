@@ -923,6 +923,16 @@ vec2 RoadSimple::axis_2()
     return axis2;
 }
 
+vec2 RoadSimple::getPerpendicular_1()
+{
+    return vec2(xP1, yP1);
+}
+
+vec2 RoadSimple::getPerpendicular_2()
+{
+    return vec2(xP2, yP2);
+}
+
 void RoadSimple::setCoordForAxisPoint(int index, float x, float y)
 {
     if (log)
@@ -1392,12 +1402,160 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
             {
                 float ds = sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
                 float dr = ((x1 - x2)*dx + (y1 - y2)*dy)/ds;
+
                 lines[i].line->move((x1 - x2) * dr / ds,
                                     (y1 - y2) * dr / ds);
 
                 // Обрезка всех существующих линий до стоп-линии
-                calculateStopLineIntersections(qobject_cast<LineSimple*>(lines[i].line));
+                //calculateStopLineIntersections(qobject_cast<LineSimple*>(lines[i].line));
 
+                LineSimple *l = qobject_cast<LineSimple*>(lines[i].line);
+                vec2 p1 = l->getAxisPoint_1();
+                vec2 p2 = l->getAxisPoint_2();
+                float length = sqrt((p2.x - p1.x)*(p2.x - p1.x) +
+                                    (p2.y - p1.y)*(p2.y - p1.y));
+                QVector3D step1((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f, 0.2f);
+                float factor = lines[i].linkedToBeginSide ? 1.0f : -1.0f;
+                vec3 p;
+                if (lines[i].linkedToBeginSide)
+                {
+                    lines[i].step -= dr;
+                    if (lines[i].linkedToRightSide)
+                    {
+                        p = getCoordOfPoint(0);
+                        vec3 p3 = getCoordOfPoint(0);
+                        vec3 p4 = getCoordOfPoint(3);
+                        float xTemp, yTemp;
+                        calculateLinesIntersection(p1, p2, vec2(p3.x, p3.y), vec2(p4.x, p4.y),
+                                                   xTemp, yTemp);
+                        lines[i].step = sqrt((p.x - xTemp) * (p.x - xTemp) +
+                                             (p.y - yTemp) * (p.y - yTemp));
+                    }
+                    else
+                    {
+                        p = getCoordOfPoint(1);
+                        vec3 p3 = getCoordOfPoint(1);
+                        vec3 p4 = getCoordOfPoint(2);
+                        float xTemp, yTemp;
+                        calculateLinesIntersection(p1, p2, vec2(p3.x, p3.y), vec2(p4.x, p4.y),
+                                                   xTemp, yTemp);
+                        lines[i].step = sqrt((p.x - xTemp) * (p.x - xTemp) +
+                                             (p.y - yTemp) * (p.y - yTemp));
+                    }
+
+                }
+                else
+                {
+                    lines[i].step += dr;
+                    if (lines[i].linkedToRightSide)
+                    {
+                        p = getCoordOfPoint(3);
+                        vec3 p3 = getCoordOfPoint(0);
+                        vec3 p4 = getCoordOfPoint(3);
+                        float xTemp, yTemp;
+                        calculateLinesIntersection(p1, p2, vec2(p3.x, p3.y), vec2(p4.x, p4.y),
+                                                   xTemp, yTemp);
+                        lines[i].step = sqrt((p.x - xTemp) * (p.x - xTemp) +
+                                             (p.y - yTemp) * (p.y - yTemp));
+                    }
+                    else
+                    {
+                        p = getCoordOfPoint(2);
+                        vec3 p3 = getCoordOfPoint(1);
+                        vec3 p4 = getCoordOfPoint(2);
+                        float xTemp, yTemp;
+                        calculateLinesIntersection(p1, p2, vec2(p3.x, p3.y), vec2(p4.x, p4.y),
+                                                   xTemp, yTemp);
+                        lines[i].step = sqrt((p.x - xTemp) * (p.x - xTemp) +
+                                             (p.y - yTemp) * (p.y - yTemp));
+                    }
+
+                }
+                QVector3D step2(step1.x() + factor * (x1 - x2) * lines[i].step / this->length,
+                               step1.y() + factor * (y1 - y2) * lines[i].step / this->length,
+                               0.2f);
+                QVector3D linkedPoint(p.x, p.y, p.z);
+                QVector3D leftStep1(p1.x, p1.y, 0.2f);
+                QVector3D leftStep2(p1.x + (p1.x - p2.x) * lines[i].leftStep / length,
+                                     p1.y + (p1.y - p2.y) * lines[i].leftStep / length,
+                                     0.2f);
+                QVector3D rightStep1(p2.x, p2.y, 0.2f);
+                QVector3D rightStep2(p2.x + (p2.x - p1.x) * lines[i].rightStep / length,
+                                   p2.y + (p2.y - p1.y) * lines[i].rightStep / length,
+                                   0.2f);
+                lines[i].stepPoint_Begin = step1;
+                lines[i].stepPoint_End = step2;
+                lines[i].linkedPoint = linkedPoint;
+                lines[i].beginStepPoint_Begin = rightStep1;
+                lines[i].beginStepPoint_End = rightStep2;
+                lines[i].endStepPoint_Begin = leftStep1;
+                lines[i].endStepPoint_End = leftStep2;
+                lines[i].isActive = true;
+
+            }
+                break;
+            case Line::TramWays:
+            {
+                float ds = sqrt((xP1 - xP2)*(xP1 - xP2) + (yP1 - yP2)*(yP1 - yP2));
+                float dr = ((xP1 - xP2)*dx + (yP1 - yP2)*dy)/ds;
+
+//                if (lines[i].linkedToRightSide)
+//                {
+//                    if ((lines[i].step - dr) > width)
+//                        dr = lines[i].step - width;
+//                    else
+//                        if ((lines[i].step - dr) < 0.0f)
+//                            dr = lines[i].step;
+//                    lines[i].step -= dr;
+//                }
+//                else
+//                {
+//                    if ((lines[i].step + dr) > width)
+//                        dr = width - lines[i].step;
+//                    else
+//                        if ((lines[i].step + dr) < 0.0f)
+//                            dr = -lines[i].step;
+//                    lines[i].step += dr;
+//                }
+                if (lines[i].linkedToRightSide)
+                {
+                    if ((lines[i].step + 1.5f - dr) > width)
+                        dr = lines[i].step + 1.5f - width;
+                    else
+                        if ((lines[i].step - dr) < 0.0f)
+                            dr = lines[i].step;
+                    lines[i].step -= dr;
+                }
+                else
+                {
+                    if ((lines[i].step + 1.5f + dr) > width)
+                        dr = width - lines[i].step - 1.5f;
+                    else
+                        if ((lines[i].step + dr) < 0.0f)
+                            dr = -lines[i].step;
+                    lines[i].step += dr;
+                }
+                lines[i].line->move((xP1 - xP2) * dr / ds,
+                                    (yP1 - yP2) * dr / ds);
+                // Внесли изменения в структуру для отрисовки отступов
+                LineSimple *l = qobject_cast<LineSimple*>(lines[i].line);
+                vec2 p1 = l->getAxisPoint_1();
+                vec2 p2 = l->getAxisPoint_2();
+//                QVector3D step1((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f, 0.2f);
+//                float factor = lines[i].linkedToRightSide ? 1.0f : -1.0f;
+//                QVector3D step2(step1.x() + factor * (xP1 - xP2) * lines[i].step / ds,
+//                                step1.y() + factor * (yP1 - yP2) * lines[i].step / ds,
+//                                0.2f);
+                float factor = lines[i].linkedToRightSide ? 1.0f : -1.0f;
+                QVector3D step1((p1.x + p2.x) / 2.0f + factor * (xP1 - xP2) * 1.5f / (ds * 2.0f),
+                                (p1.y + p2.y) / 2.0f + factor * (yP1 - yP2) * 1.5f / (ds * 2.0f),
+                                0.2f);
+                QVector3D step2(step1.x() + factor * (xP1 - xP2) * lines[i].step / ds,
+                                step1.y() + factor * (yP1 - yP2) * lines[i].step / ds,
+                                0.2f);
+                lines[i].stepPoint_Begin = step1;
+                lines[i].stepPoint_End = step2;
+                lines[i].isActive = true;
             }
                 break;
             default:
@@ -1451,19 +1609,19 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
                 lines[i].endStepPoint_End = endStep2;
                 lines[i].isActive = true;
                 // Передвинули привязанный конец стоп-линии вместе с иходной линией
-                Line::LineType type = lines[i].type;
-                if (type == Line::SingleSolid ||
-                        type == Line::DoubleSolid)
-                {
-                    for (int j = 0; j < lines.size(); ++j)
-                    {
-                        if (lines[j].type == Line::StopLine)
-                        {
-                            lines[j].line->resizeByControl(1, (xP1 - xP2) * dr / ds,
-                                                           (yP1 - yP2) * dr / ds, dx, dy);
-                        }
-                    }
-                }
+//                Line::LineType type = lines[i].type;
+//                if (type == Line::SingleSolid ||
+//                        type == Line::DoubleSolid)
+//                {
+//                    for (int j = 0; j < lines.size(); ++j)
+//                    {
+//                        if (lines[j].type == Line::StopLine)
+//                        {
+//                            lines[j].line->resizeByControl(1, (xP1 - xP2) * dr / ds,
+//                                                           (yP1 - yP2) * dr / ds, dx, dy);
+//                        }
+//                    }
+//                }
             }
                 break;
             }
@@ -1474,6 +1632,99 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
             switch (lines[i].type)
             {
             case Line::StopLine:
+            {
+                LineSimple *l = qobject_cast<LineSimple*>(lines[i].line);
+                vec2 p1 = l->getAxisPoint_1();
+                vec2 p2 = l->getAxisPoint_2();
+                float length = l->getLength();
+
+                QVector3D step1((p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f, 0.2f);
+                float factor = lines[i].linkedToBeginSide ? 1.0f : -1.0f;
+                vec3 p;
+                // Выбор точки привязки на дороге
+                if (lines[i].linkedToBeginSide)
+                {
+                    if (lines[i].linkedToRightSide)
+                    {
+                        p = getCoordOfPoint(0);
+                    }
+                    else
+                    {
+                        p = getCoordOfPoint(1);
+                    }
+
+                }
+                else
+                {
+                    if (lines[i].linkedToRightSide)
+                    {
+                        p = getCoordOfPoint(3);
+                    }
+                    else
+                    {
+                        p = getCoordOfPoint(2);
+                    }
+
+                }
+
+                switch (index)
+                {
+                // Перетащили за начало линии
+                case 0:
+                {
+                    float dr = ((p2.x - p1.x)*dx + (p2.y - p1.y)*dy)/length;
+                    if (dr > l->getLength())
+                        dr = l->getLength() - 0.001f;
+                    else
+                        if ((lines[i].leftStep + dr) < 0.0f)
+                            dr = -lines[i].leftStep;
+                    lines[i].leftStep += dr;
+                    l->resizeByControl(index, (p2.x - p1.x) * dr / length,
+                                       (p2.y - p1.y) * dr / length,
+                                       x, y);
+                }
+                    break;
+                // Перетащили за конец линии
+                case 1:
+                {
+                    float dr = ((p1.x - p2.x)*dx + (p1.y - p2.y)*dy)/length;
+                    if (dr > l->getLength())
+                        dr = l->getLength() - 0.001f;
+                    else
+                        if ((lines[i].rightStep + dr) < 0.0f)
+                            dr = -lines[i].rightStep;
+                    lines[i].rightStep += dr;
+                    l->resizeByControl(index,
+                                       (p1.x - p2.x) * dr / length,
+                                       (p1.y - p2.y) * dr / length,
+                                       x, y);
+                }
+                    break;
+                default:
+                    break;
+                }
+                // Внесли изменения в структуру для отрисовки отступов
+                QVector3D step2(step1.x() + factor * (x1 - x2) * lines[i].step / this->length,
+                               step1.y() + factor * (y1 - y2) * lines[i].step / this->length,
+                               0.2f);
+                QVector3D linkedPoint(p.x, p.y, p.z);
+                QVector3D leftStep1(p1.x, p1.y, 0.2f);
+                QVector3D leftStep2(p1.x + (p1.x - p2.x) * lines[i].leftStep / length,
+                                     p1.y + (p1.y - p2.y) * lines[i].leftStep / length,
+                                     0.2f);
+                QVector3D rightStep1(p2.x, p2.y, 0.2f);
+                QVector3D rightStep2(p2.x + (p2.x - p1.x) * lines[i].rightStep / length,
+                                   p2.y + (p2.y - p1.y) * lines[i].rightStep / length,
+                                   0.2f);
+                lines[i].stepPoint_Begin = step1;
+                lines[i].stepPoint_End = step2;
+                lines[i].linkedPoint = linkedPoint;
+                lines[i].beginStepPoint_Begin = rightStep1;
+                lines[i].beginStepPoint_End = rightStep2;
+                lines[i].endStepPoint_Begin = leftStep1;
+                lines[i].endStepPoint_End = leftStep2;
+                lines[i].isActive = true;
+            }
                 break;
             case Line::SplitZone:
             {
@@ -1482,14 +1733,15 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
                 vec3 p2 = l->getAxisPoint(l->getNumberOfControls() - 1);
                 float length = sqrt((p2.x - p1.x)*(p2.x - p1.x) +
                                     (p2.y - p1.y)*(p2.y - p1.y));
+                float w = lines[i].splitZoneWidth;
                 switch (index)
                 {
                 // Перетащили за начало линии
                 case 0:
                 {
                     float dr = ((p2.x - p1.x)*dx + (p2.y - p1.y)*dy)/length;
-                    if (dr > length)
-                        dr = length - 0.001f;
+                    if (dr > length - w)
+                        dr = length - w - 0.001f;
                     else
                         if ((lines[i].beginStep + dr) < 0.0f)
                             dr = -lines[i].beginStep;
@@ -1503,8 +1755,8 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
                 case 1:
                 {
                     float dr = ((p1.x - p2.x)*dx + (p1.y - p2.y)*dy)/length;
-                    if (dr > length)
-                        dr = length - 0.001f;
+                    if (dr > length - w)
+                        dr = length - w - 0.001f;
                     else
                         if ((lines[i].endStep + dr) < 0.0f)
                             dr = -lines[i].endStep;
@@ -2565,6 +2817,7 @@ void RoadSimple::resetLines()
 
 }
 
+
 void RoadSimple::setWidth(double width)
 {
     if (log)
@@ -2712,12 +2965,18 @@ void RoadSimple::constructLine(QString textureSource, float textureSize)
         r1 = width - currentLineLinked.step;
         if (currentLineLinked.type == Line::SplitZone)
             r1 -= currentLineLinked.splitZoneWidth / 2.0f;
+        else
+        if (currentLineLinked.type == Line::TramWays)
+            r1 -= 0.75f;
     }
     else
     {
         r1 = currentLineLinked.step;
         if (currentLineLinked.type == Line::SplitZone)
             r1 += currentLineLinked.splitZoneWidth / 2.0f;
+        else
+        if (currentLineLinked.type == Line::TramWays)
+            r1 += 0.75f;
     }
 
     float x0 = VertexArray[0][0];
@@ -2829,100 +3088,24 @@ void RoadSimple::constructLine(QString textureSource, float textureSize)
             line_y2 = VertexArray[3][1] + (dy / r) * currentLineLinked.step;
         }
 
-        // Обрезка перпендикуляра до нужной длины
+        float line_x1_final = line_x1 + (line_x2 - line_x1) * currentLineLinked.leftStep / width;
+        float line_y1_final = line_y1 + (line_y2 - line_y1) * currentLineLinked.leftStep / width;
+        float line_x2_final = line_x2 + (line_x1 - line_x2) * currentLineLinked.rightStep / width;
+        float line_y2_final = line_y2 + (line_y1 - line_y2) * currentLineLinked.rightStep / width;
 
-        int index = -1;
-        for (int i = 0; i < lines.size(); ++i)
-        {
-
-            if (lines[i].line->getName() == "SplitZone")
-            {
-                index = i;
-                break;
-            }
-            else
-                if (lines[i].type == Line::SingleSolid ||
-                        lines[i].type == Line::DoubleSolid)
-                {
-                    index = i;
-                    break;
-                }
-        }
-
-        if (index >= 0)
-        {
-            float r1;
-            if (lines[index].line->getName() == "SplitZone")
-            {
-                if (lines[index].linkedToRightSide)
-                    r1 = width - lines[index].step - lines[index].splitZoneWidth / 2.0f;
-                else
-                    r1 = lines[index].step - lines[index].splitZoneWidth / 2.0f;
-            }
-            else
-                if (lines[index].linkedToRightSide)
-                    r1 = width - lines[index].step;
-                else
-                    r1 = lines[index].step;
-            line_x2 = line_x1 + (line_x2 - line_x1) / width * r1;
-            line_y2 = line_y1 + (line_y2 - line_y1) / width * r1;
-
-
-            // Обрезка всех существующих линий до стоп-линии
-            for (int i = 0; i < lines.size(); ++i)
-            {
-                if (//i == index ||
-                        lines[i].type == Line::SplitZone ||
-                        lines[i].type == Line::StopLine ||
-                        lines[i].type == Line::TramWays)
-                    continue;
-                vec2 p1(line_x1, line_y1);
-                vec2 p2(line_x2, line_y2);
-                //LineSimple *l = dynamic_cast<LineSimple*>(lines[i].line);
-                LineSimple *l = qobject_cast<LineSimple*>(lines[i].line);
-                assert(l != 0);
-                vec2 t1 = l->getAxisPoint_1();
-                vec2 t2 = l->getAxisPoint_2();
-
-                float xTemp, yTemp;
-                float a1, a2, b1, b2, c1, c2;
-
-                a1 = p1.y - p2.y;
-                b1 = p2.x - p1.x;
-                c1 = p1.x * p2.y - p2.x * p1.y;
-
-                a2 = t1.y - t2.y;
-                b2 = t2.x - t1.x;
-                c2 = t1.x * t2.y - t2.x * t1.y;
-                if (!calculateLinesIntersection(a1, b1, c1,
-                                                a2, b2, c2,
-                                                xTemp, yTemp))
-                    continue;
-                if (((p1.x >= xTemp && p2.x <= xTemp) || (p1.x <= xTemp && p2.x >= xTemp)) &&
-                        ((p1.y >= yTemp && p2.y <= yTemp) || (p1.y <= yTemp && p2.y >= yTemp)))
-                    //if (((t1.x >= xTemp && t2.x <= xTemp) || (t1.x <= xTemp && t2.x >= xTemp)) &&
-                    //        ((t1.y >= yTemp && t2.y <= yTemp) || (t1.y <= yTemp && t2.y >= yTemp)))
-                {
-                    l->setVertexArray(xTemp, yTemp, t2.x, t2.y, lines[i].lineWidth);
-                    l->setTextureArray();
-                }
-            }
-        }
-        currentLineLinked.line = new LineSimple(line_x1, line_y1,
-                                                line_x2, line_y2,
+        currentLineLinked.line = new LineSimple(line_x1_final, line_y1_final,
+                                                line_x2_final, line_y2_final,
                                                 currentLineLinked.lineWidth,
                                                 textureSource, textureSize, "LineSimple", 1,
                                                 QString("Линия №") + QString::number(lines.size() + 1));
+
+//        currentLineLinked.line = new LineSimple(line_x1, line_y1,
+//                                                line_x2, line_y2,
+//                                                currentLineLinked.lineWidth,
+//                                                textureSource, textureSize, "LineSimple", 1,
+//                                                QString("Линия №") + QString::number(lines.size() + 1));
     }
         break;
-        /*
-    case 8:
-    {
-        line.line = new LineSimple(line_x1, line_y1, line_x2, line_y2, lineWidth, textureSource, textureSize, "LineSimple", 1,
-                                   QString("Линия №") + QString::number(lines.size() + 1));
-    }
-        break;
-        */
     default:
     {
         qDebug() << "LineSimple";
@@ -2935,8 +3118,6 @@ void RoadSimple::constructLine(QString textureSource, float textureSize)
         break;
     }
     currentLineLinked.line->setSelectedStatus(true);
-    //lines.push_back(currentLineLinked);
-    //lines.push_back(currentLineLinked);
     RoadElement::undoStack->push(new AddLineCommand(this, currentLineLinked, render));
 }
 
@@ -2978,21 +3159,27 @@ void RoadSimple::constructLine(LineLinkedToRoad line)
         textSource = "/models/city_roads/solid.png";
         currentLineLinked.lineWidth = 0.4f;
         break;
-    case 8:
+    case Line::TramWays:
     {
-        //        textSource = QString("/models/city_roads/tramways.png");
-        //        lWidth = 1.5f;
-        //        if (!singleWay)
-        //        {
-        //            addLine(step + axisStep / 2.0, textSource, 1.5f, lWidth, lineType, rightSide, beginStep, endStep);
-        //            addLine(step - axisStep / 2.0, textSource, 1.5f, lWidth, lineType, rightSide, beginStep, endStep);
-        //            return;
-        //        }
-        //        else
-        //        {
-        //            addLine(step, textSource, 1.5f, lWidth, lineType, rightSide, beginStep, endStep);
-        //            return;
-        //        }
+        textSource = QString("/models/city_roads/tramways.png");
+        currentLineLinked.lineWidth = 1.5f;
+        if (!currentLineLinked.singleWay)
+        {
+            float axisStep = currentLineLinked.axisStep;
+            currentLineLinked.singleWay = true;
+            currentLineLinked.axisStep = 0.0f;
+
+            currentLineLinked.step += axisStep / 2.0f;
+            constructLine(textSource, 1.5f);
+            currentLineLinked.step -= axisStep;
+            constructLine(textSource, 1.5f);
+            return;
+        }
+        else
+        {
+            constructLine(textSource, 1.5f);
+            return;
+        }
     }
         break;
     default:
@@ -3006,8 +3193,292 @@ void RoadSimple::constructLine(LineLinkedToRoad line)
 void RoadSimple::addLine(LineLinkedToRoad line)
 {
     lines.push_back(line);
-    if (layout && render)
-        emit linesChanged(layout, render);
+    //if (layout && render)
+    //    emit linesChanged(layout, render);
+    emit linesChanged();
+}
+
+void RoadSimple::editLine()
+{
+    bool ok;
+    int i = sender()->objectName().toInt(&ok);
+    if (ok)
+    {
+        qDebug() << "Index =" << i;
+    }
+    else
+    {
+        QMessageBox::critical(0,"Ошибка","RoadSimple::editLine(). objectName кнопки отправителя не конвертируется в int");
+        return;
+    }
+    if (i < 0 || i >= lines.size())
+    {
+        QMessageBox::critical(0, "Ошибка", "RoadSimple::editLine(). Выход индекса за пределы массива");
+        return;
+    }
+    switch(lines[i].type)
+    {
+    case Line::StopLine:
+        break;
+    case Line::SplitZone:
+        break;
+    case Line::TramWays:
+        break;
+    default:
+        break;
+    }
+    if (stepDialog)
+    {
+        stepDialog->setLine(lines[i]);
+        stepDialog->setUsingTarget(Edit);
+        stepDialog->exec();
+        stepDialog->setUsingTarget(Create);
+    }
+    else
+    {
+        qDebug() << "No StepDialog";
+    }
+
+}
+
+void RoadSimple::editLine(LineLinkedToRoad line)
+{
+    int i;
+    for (i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].line == line.line)
+            break;
+    }
+    if (i >= lines.size())
+    {
+        QMessageBox::critical(0, "Ошибка", "RoadSimple::editLine(LineLinkedToRoad line). Невозможно найти переденную линию из списка линий дороги");
+        return;
+    }
+    QString textureSource;
+    switch(line.type)
+    {
+    case Line::SingleSolid:
+        textureSource = "/models/city_roads/solid.png";
+        line.lineWidth = 0.1f;
+        break;
+    case Line::SingleIntermittent:
+        textureSource = "/models/city_roads/inter.png";
+        line.lineWidth = 0.1f;
+        break;
+    case Line::DoubleSolid:
+        textureSource = "/models/city_roads/d_solid.png";
+        line.lineWidth = 0.25f;
+        break;
+    case Line::DoubleIntermittentLeft:
+        textureSource = "/models/city_roads/d_inter_l.png";
+        line.lineWidth = 0.25f;
+        break;
+    case Line::DoubleIntermittentRight:
+        textureSource = "/models/city_roads/d_inter_r.png";
+        line.lineWidth = 0.25f;
+        break;
+    case Line::DoubleIntermittent:
+        textureSource = "/models/city_roads/d_inter.png";
+        line.lineWidth = 0.25f;
+        break;
+    case Line::StopLine:
+        textureSource = "/models/city_roads/solid.png";
+        line.lineWidth = 0.4f;
+        break;
+    case Line::TramWays:
+        textureSource = QString("/models/city_roads/tramways.png");
+        line.lineWidth = 1.5f;
+        break;
+    default:
+        break;
+
+    }
+
+    qDebug() << "Texture source chosen";
+
+    float line_x1, line_x2, line_y1, line_y2;
+    float r1;
+    if (lines[i].line)
+        delete lines[i].line;
+    lines[i].line = NULL;
+    lines[i] = line;
+    if (!line.linkedToRightSide)
+    {
+        r1 = width - line.step;
+        if (line.type == Line::SplitZone)
+            r1 -= line.splitZoneWidth / 2.0f;
+        else
+        if (line.type == Line::TramWays)
+            r1 -= 0.75f;
+    }
+    else
+    {
+        r1 = line.step;
+        if (line.type == Line::SplitZone)
+            r1 += line.splitZoneWidth / 2.0f;
+        else
+        if (line.type == Line::TramWays)
+            r1 += 0.75f;
+    }
+
+    float x0 = VertexArray[0][0];
+    float y0 = VertexArray[0][1];
+    float x1 = VertexArray[1][0];
+    float y1 = VertexArray[1][1];
+    float x2 = VertexArray[2][0];
+    float y2 = VertexArray[2][1];
+    float x3 = VertexArray[3][0];
+    float y3 = VertexArray[3][1];
+
+
+    // Начальная точка для линии
+    float x = x0 + (x1 - x0) * r1 / width;
+    float y = y0 + (y1 - y0) * r1 / width;
+    float R = sqrt((x3 - x0) * (x3 - x0) + (y3 - y0) * (y3 - y0));
+    line_x1 = x + (x3 - x0) / R * line.beginStep;
+    line_y1 = y + (y3 - y0) / R * line.beginStep;
+
+    // Конечная точка для линии
+    x = x3 + (x2 - x3) * r1 / width;
+    y = y3 + (y2 - y3) * r1 / width;
+    line_x2 = x + (x0 - x3) / R * line.endStep;
+    line_y2 = y + (y0 - y3) / R * line.endStep;
+
+    switch (line.type)
+    {
+    case Line::SplitZone:
+        switch (line.splitZoneType)
+        {
+        case Line::Marking:
+        {
+            lines[i].line = new SplitZone(line_x1, line_y1, 0.02f,
+                                                   line_x2, line_y2, 0.02f,
+                                                   line.splitZoneWidth,
+                                                   line.beginRounding,
+                                                   line.endRounding,
+                                                   QString("Линия №") + QString::number(i + 1));
+        }
+            break;
+        case Line::Grass:
+        {
+            lines[i].line = new SplitZone(line_x1, line_y1, 0.02f,
+                                                   line_x2, line_y2, 0.02f,
+                                                   line.splitZoneWidth,
+                                                   line.beginRounding,
+                                                   line.endRounding,
+                                                   line.splitZoneType,
+                                                   line.splitZoneHeight,
+                                                   "/models/city_roads/board.jpg",
+                                                   0.25f, 6.0f,
+                                                   "/models/city_roads/grass.jpg",
+                                                   3.0f, 3.0f,
+                                                   QString("Линия №") + QString::number(i + 1));
+        }
+            break;
+        case Line::Board:
+        {
+            lines[i].line = new SplitZone(line_x1, line_y1, 0.02f,
+                                                   line_x2, line_y2, 0.02f,
+                                                   line.splitZoneWidth,
+                                                   line.beginRounding,
+                                                   line.endRounding,
+                                                   line.splitZoneType,
+                                                   line.splitZoneHeight,
+                                                   "/models/city_roads/board.jpg",
+                                                   0.25f, 6.0f,
+                                                   "/models/city_roads/nr_07S.jpg",
+                                                   6.0f, 6.0f,
+                                                   QString("Линия №") + QString::number(i + 1));
+        }
+            break;
+        default:
+            break;
+        }
+        break;
+    case Line::StopLine:
+    {
+        // Нахождение перпендикуляра
+        if (line.linkedToBeginSide)
+        {
+            float dx, dy, r;
+            if (line.linkedToRightSide)
+            {
+                dx = VertexArray[0][0] - VertexArray[3][0];
+                dy = VertexArray[0][1] - VertexArray[3][1];
+            }
+            else
+            {
+                dx = VertexArray[1][0] - VertexArray[2][0];
+                dy = VertexArray[1][1] - VertexArray[2][1];
+            }
+            r = sqrt(dx * dx + dy * dy);
+            line_x1 = VertexArray[2][0] + (dx / r) * (r - line.step);
+            line_y1 = VertexArray[2][1] + (dy / r) * (r - line.step);
+            line_x2 = VertexArray[3][0] + (dx / r) * (r - line.step);
+            line_y2 = VertexArray[3][1] + (dy / r) * (r - line.step);
+        }
+        else
+        {
+            float dx = VertexArray[0][0] - VertexArray[3][0];
+            float dy = VertexArray[0][1] - VertexArray[3][1];
+            float r = sqrt(dx * dx + dy * dy);
+            line_x1 = VertexArray[2][0] + (dx / r) * line.step;
+            line_y1 = VertexArray[2][1] + (dy / r) * line.step;
+            line_x2 = VertexArray[3][0] + (dx / r) * line.step;
+            line_y2 = VertexArray[3][1] + (dy / r) * line.step;
+        }
+
+        float line_x1_final = line_x1 + (line_x2 - line_x1) * line.leftStep / width;
+        float line_y1_final = line_y1 + (line_y2 - line_y1) * line.leftStep / width;
+        float line_x2_final = line_x2 + (line_x1 - line_x2) * line.rightStep / width;
+        float line_y2_final = line_y2 + (line_y1 - line_y2) * line.rightStep / width;
+
+        lines[i].line = new LineSimple(line_x1_final, line_y1_final,
+                                                line_x2_final, line_y2_final,
+                                                line.lineWidth,
+                                                textureSource, 6.0f, "LineSimple", 1,
+                                                QString("Линия №") + QString::number(i + 1));
+
+    }
+        break;
+    case Line::TramWays:
+    {
+//        if (!line.singleWay)
+//        {
+//            line.step += line.axisStep / 2.0f;
+//            constructLine(textSource, 1.5f);
+//            lines[i].line = new LineSimple(line_x1, line_y1,
+//                                           line_x2, line_y2,
+//                                           line.lineWidth,
+//                                           textureSource, 6.0f, "LineSimple", 1,
+//                                           QString("Линия №") + QString::number(i + 1));
+//            line.step -= line.axisStep;
+//            constructLine(textSource, 1.5f);
+//            return;
+//        }
+//        else
+//        {
+//            constructLine(textSource, 1.5f);
+//            return;
+//        }
+        lines[i].line = new LineSimple(line_x1, line_y1,
+                                       line_x2, line_y2,
+                                       line.lineWidth,
+                                       textureSource, 1.5f, "LineSimple", 1,
+                                       QString("Линия №") + QString::number(i + 1));
+    }
+        break;
+    default:
+    {
+        lines[i].line = new LineSimple(line_x1, line_y1,
+                                                line_x2, line_y2,
+                                                line.lineWidth,
+                                                textureSource, 6.0f, "LineSimple", 1,
+                                                QString("Линия №") + QString::number(i + 1));
+    }
+        break;
+    }
+    qDebug() << "Line created";
 }
 
 
@@ -3064,9 +3535,32 @@ void RoadSimple::deleteLine(LineLinkedToRoad line)
         if (lines[i].line == line.line)
             break;
     }
+    if (i >= lines.size())
+    {
+        QMessageBox::critical(0, "Ошибка", "RoadSimple::deleteLine. Невозможно найти переденную линию из списка линий дороги");
+        return;
+    }
     lines.removeAt(i);
     if (this->layout && this->render)
         emit linesChanged(layout, render);
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        switch (lines[i].type)
+        {
+        case Line::SplitZone:
+        {
+            SplitZone *splitZone = qobject_cast<SplitZone*>(lines[i].line);
+            splitZone->setDescription(QString("Линия №") + QString::number(i + 1));
+        }
+            break;
+        default:
+        {
+            LineSimple *lineSimple = qobject_cast<LineSimple*>(lines[i].line);
+            lineSimple->setDescription(QString("Линия №") + QString::number(i + 1));
+        }
+            break;
+        }
+    }
     emit lineDeleted();
 }
 

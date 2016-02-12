@@ -426,8 +426,8 @@ void Scene2D::drawRect(QPoint p1, QPoint p2)
         Logger::getLogger()->infoLog() << "Scene2D::drawRect(QPoint p1, QPoint p2)\n";
     GLdouble x1, y1, z1;
     GLdouble x2, y2, z2;
-    getWorldCoord(p1.x(), p1.y(), 0, x1, y1, z1);
-    getWorldCoord(p2.x(), p2.y(), 0, x2, y2, z2);
+    getWorldCoord(p1.x(), p1.y(), 0.2f, x1, y1, z1);
+    getWorldCoord(p2.x(), p2.y(), 0.2f, x2, y2, z2);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
     glLineWidth(1.0f);

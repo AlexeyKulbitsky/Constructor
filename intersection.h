@@ -81,6 +81,7 @@ public slots:
     void setAngle(double angle);
     void deleteLine();
     void addLine();
+    void updateListWidget();
 
 private:
     bool selected;
@@ -103,7 +104,9 @@ private:
     QVector<Angle*> angles;
     QVBoxLayout* layout;
     QGLWidget* render;
+    QVector<QListWidget*> lists;
     static bool log;
+    bool drawWarning;
     // RoadElement interface
 public:
     virtual void clear();

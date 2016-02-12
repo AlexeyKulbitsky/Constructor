@@ -410,8 +410,6 @@ void DefaultState::dropEvent(QDropEvent *event)
         {
             intersection = new Intersection(x, y, numberOfRoads);
             intersection->setModel(model);
-            qDebug() << "Size of Intersection in self:" << intersection->getSize();
-            qDebug() << "Size of Intersection:" << sizeof(*intersection);
             RoadElement::undoStack->push(new InsertCommand(intersection, stateManager, properties, model, 0, scene));
         }
         return;

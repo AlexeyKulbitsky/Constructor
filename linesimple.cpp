@@ -320,7 +320,6 @@ void LineSimple::drawFigure(QGLWidget* )
         drawControlElement(indexOfSelectedControl, 5.0f, 10.0);
         glEnable(GL_DEPTH_TEST);
     }
-
 }
 
 

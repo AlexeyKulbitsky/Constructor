@@ -31,7 +31,12 @@ StepDialog(QWidget *parent):QDialog(parent)
     connect(okPushButton, SIGNAL(clicked(bool)), this, SLOT(buttonClicked()));
     QPushButton *cancelPushButton = new QPushButton("Cancel");
     connect(cancelPushButton, SIGNAL(clicked(bool)), this, SLOT(close()));
+    QPushButton *deleteButton = new QPushButton("Удалить");
+    connect(deleteButton, SIGNAL(clicked(bool)), this, SLOT(deleteButtonClicked()));
+    connect(this, SIGNAL(useDeleteButton(bool)), deleteButton, SLOT(setVisible(bool)));
+    deleteButton->setVisible(false);
     QHBoxLayout *buttonsLayout = new QHBoxLayout();
+    buttonsLayout->addWidget(deleteButton);
     buttonsLayout->addWidget(okPushButton);
     buttonsLayout->addWidget(cancelPushButton);
 
@@ -46,6 +51,7 @@ StepDialog(QWidget *parent):QDialog(parent)
     setTramwaysLayout();
     setLayout(mainLayout);
 
+    usingTarget = Create;
 }
 
 StepDialog::~StepDialog()
@@ -70,6 +76,62 @@ StepDialog::~StepDialog()
 void StepDialog::setUsingTarget(StepDialogUsingTarget usingTarget)
 {
     this->usingTarget = usingTarget;
+    switch(usingTarget)
+    {
+    case Create:
+        emit useDeleteButton(false);
+        break;
+    case Edit:
+        emit useDeleteButton(true);
+        break;
+    default:
+        break;
+    }
+}
+
+void StepDialog::setLine(LineLinkedToRoad line)
+{
+
+    setLineType(line.type);
+    setStep(line.step);
+    switch(line.type)
+    {
+    case Line::StopLine:
+    {
+        setRightSide(line.linkedToRightSide);
+        setBeginSide(line.linkedToBeginSide);
+        setRightStep(line.rightStep);
+        setLeftStep(line.leftStep);
+    }
+        break;
+    case Line::SplitZone:
+    {
+        setSplitZoneType(line.splitZoneType);
+        setRightSide(line.linkedToRightSide);
+        setBeginStep(line.beginStep);
+        setEndStep(line.endStep);
+        setBeginRoundingStatus(line.beginRounding);
+        setEndRoundingStatus(line.endRounding);
+        setSplitZoneWidth(line.splitZoneWidth);
+        setSplitZoneHeight(line.splitZoneHeight);
+    }
+        break;
+    case Line::TramWays:
+    {
+
+    }
+        break;
+    default:
+    {
+        setRightSide(line.linkedToRightSide);
+        setBeginStep(line.beginStep);
+        setEndStep(line.endStep);
+    }
+        break;
+    }
+
+    this->line = line;
+
 }
 
 void StepDialog::clear()
@@ -160,12 +222,30 @@ void StepDialog::setStopLineLayout()
 
     QLabel *lineStepLabel = new QLabel("Отступ");
     QDoubleSpinBox *lineStepDoubleSpinBox = new QDoubleSpinBox();
-    lineStepDoubleSpinBox->setMinimum(0.0f);
+    lineStepDoubleSpinBox->setMinimum(0.0);
     connect(lineStepDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setStep(double)));
     connect(this, SIGNAL(stepChanged(double)), lineStepDoubleSpinBox, SLOT(setValue(double)));
     QHBoxLayout *lineStepLayout = new QHBoxLayout();
     lineStepLayout->addWidget(lineStepLabel);
     lineStepLayout->addWidget(lineStepDoubleSpinBox);
+
+    QLabel *rightStepLabel = new QLabel("Отступ от правого края");
+    QDoubleSpinBox *rightStepDoubleSpinBox = new QDoubleSpinBox();
+    rightStepDoubleSpinBox->setMinimum(0.0);
+    connect(rightStepDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setRightStep(double)));
+    connect(this, SIGNAL(rightStepChanged(double)), rightStepDoubleSpinBox, SLOT(setValue(double)));
+    QHBoxLayout *rightStepLayout = new QHBoxLayout();
+    rightStepLayout->addWidget(rightStepLabel);
+    rightStepLayout->addWidget(rightStepDoubleSpinBox);
+
+    QLabel *leftStepLabel = new QLabel("Отступ от левого края");
+    QDoubleSpinBox *leftStepDoubleSpinBox = new QDoubleSpinBox();
+    leftStepDoubleSpinBox->setMinimum(0.0);
+    connect(leftStepDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setLeftStep(double)));
+    connect(this, SIGNAL(leftStepChanged(double)), leftStepDoubleSpinBox, SLOT(setValue(double)));
+    QHBoxLayout *leftStepLayout = new QHBoxLayout();
+    leftStepLayout->addWidget(leftStepLabel);
+    leftStepLayout->addWidget(leftStepDoubleSpinBox);
 
     QVBoxLayout *leftRightLayout = new QVBoxLayout();
     leftRightLayout->addWidget(leftSideRadioButton);
@@ -195,6 +275,8 @@ void StepDialog::setStopLineLayout()
     QVBoxLayout *stopLayout = new QVBoxLayout();
     stopLayout->addWidget(beginEndGroupBox);
     stopLayout->addWidget(leftRightGroupBox);
+    stopLayout->addLayout(rightStepLayout);
+    stopLayout->addLayout(leftStepLayout);
     stopLayout->addLayout(lineStepLayout);
 
     QGroupBox *stopLineGroupBox = new QGroupBox();
@@ -217,7 +299,7 @@ void StepDialog::setSplitZoneLayout()
     splitZoneTypeComboBox->addItem("Газон");
     splitZoneTypeComboBox->addItem("Тротуар");
     connect(splitZoneTypeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setSplitZoneType(int)));
-    connect(this, SIGNAL(splitZoneTypeChanged(int)), splitZoneTypeComboBox, SLOT(setCurrentIndex(int)));
+    //connect(this, SIGNAL(splitZoneTypeChanged(int)), splitZoneTypeComboBox, SLOT(setCurrentIndex(int)));
 
     QHBoxLayout *splitZoneTypeLayout = new QHBoxLayout();
     splitZoneTypeLayout->addWidget(splitZoneTypeLabel);
@@ -227,9 +309,12 @@ void StepDialog::setSplitZoneLayout()
     splitZoneHeightSpinBox->setMinimum(0.0);
     splitZoneHeightSpinBox->setValue(line.splitZoneHeight);
     splitZoneHeightSpinBox->setEnabled(false);
+
+
+    //connect(this, SIGNAL(splitZoneHeightChanged(double)), splitZoneHeightSpinBox, SLOT(setValue(double)));
+
     connect(splitZoneHeightSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setSplitZoneHeight(double)));
-    connect(this, SIGNAL(splitZoneHeightChanged(double)), splitZoneHeightSpinBox, SLOT(setValue(double)));
-    connect(this, SIGNAL(splitZoneHeightEnabledChanged(bool)), splitZoneHeightSpinBox, SLOT(setDisabled(bool)));
+    connect(this, SIGNAL(splitZoneHeightEnabledChanged(bool)), splitZoneHeightSpinBox, SLOT(setEnabled(bool)));
 
     QLabel* splitZoneHeightLabel = new QLabel("Высота");
 
@@ -301,7 +386,6 @@ void StepDialog::setSplitZoneLayout()
     leftRightLayout->addWidget(beginRoundingCheckBox);
     leftRightLayout->addWidget(endRoundingCheckBox);
     leftRightLayout->addLayout(splitZoneWidthLayout);
-    //leftRightLayout->addWidget(directionsGroupBox);
     leftRightLayout->addLayout(lineStepLayout);
     leftRightLayout->addLayout(beginStepLayout);
     leftRightLayout->addLayout(endStepLayout);
@@ -344,7 +428,8 @@ void StepDialog::setTramwaysLayout()
     singleDoubleLayout->addWidget(doubleWayRadioButton);
     singleDoubleLayout->addLayout(waysStepLayout);
     QGroupBox* singleDoubleGroupBox = new QGroupBox();
-    singleDoubleGroupBox->setLayout(singleDoubleLayout);
+    singleDoubleGroupBox->setLayout(singleDoubleLayout);    
+    connect(this, SIGNAL(useDeleteButton(bool)), singleDoubleGroupBox, SLOT(setHidden(bool)));
 
     QRadioButton *leftSideRadioButton = new QRadioButton("Привязать к левой стороне");
     QRadioButton *rightSideRadioButton = new QRadioButton("Привязать к правой стороне");
@@ -401,11 +486,12 @@ void StepDialog::setBeginSide(bool status)
 }
 
 void StepDialog::setStep(double value)
-{
+{    
     if (line.step == value)
         return;
     line.step = value;
     emit stepChanged(value);
+    qDebug() << "Step =" << value;
 }
 
 void StepDialog::setLineType(int type)
@@ -457,7 +543,19 @@ void StepDialog::buttonClicked()
         line.type = Line::SingleSolid;
     this->accept();
 
-    emit lineCreated(line);
+    switch (usingTarget)
+    {
+    case Create:
+        emit lineCreated(line);
+        break;
+    case Edit:
+        emit lineEdited(line);
+        break;
+    default:
+        break;
+    }
+
+
 
 }
 
@@ -525,25 +623,59 @@ void StepDialog::setSplitZoneType(int type)
         return;
     line.splitZoneType = Line::SplitZoneType(type);
     emit splitZoneTypeChanged(type);
+    bool enable = false;
     switch (type)
     {
-    case 0:
-        emit splitZoneHeightEnabledChanged(false);
-        //emit splitZoneHeightEnabledChanged(true);
+    case Line::Marking:
+    {
+        qDebug() << "Marking";
+        enable = false;
+    }
         break;
-    case 1:
-        emit splitZoneHeightEnabledChanged(true);
-        //emit splitZoneHeightEnabledChanged(false);
+    case Line::Grass:
+    {
+        qDebug() << "Grass";
+        enable = true;
+    }
         break;
-    case 2:
-        emit splitZoneHeightEnabledChanged(true);
-        //emit splitZoneHeightEnabledChanged(false);
+    case Line::Board:
+    {
+        qDebug() << "Board";
+        enable = true;
+    }
         break;
     default:
-        emit splitZoneHeightEnabledChanged(false);
-        //emit splitZoneHeightEnabledChanged(true);
         break;
     }
+    emit splitZoneHeightEnabledChanged(enable);
+}
+
+void StepDialog::deleteButtonClicked()
+{
+    int result = QMessageBox::warning(this, tr("Удаление разметки"),
+                                 tr("Вы действительно хотите удалить линию разметки?"),
+                                 QMessageBox::Yes | QMessageBox::No);
+    if (result == QMessageBox::Yes)
+    {
+        emit lineDeleted(line);
+    }
+    this->reject();
+}
+
+void StepDialog::setRightStep(double step)
+{
+    if (line.rightStep == step)
+        return;
+    line.rightStep = step;
+    emit rightStepChanged(step);
+}
+
+void StepDialog::setLeftStep(double step)
+{
+    if (line.leftStep == step)
+        return;
+    line.leftStep = step;
+    emit leftStepChanged(step);
 }
 
 
@@ -561,6 +693,7 @@ void LineLinkedToRoad::drawDescription(QGLWidget *render)
         drawStopLineDescription(render);
         break;
     case Line::TramWays:
+        drawTramWaysDescription(render);
         break;
     default:
         drawLineDescription(render);
@@ -632,7 +765,96 @@ void LineLinkedToRoad::drawSplitZoneDescription(QGLWidget *render)
     drawLineDescription(render);
 }
 
+void LineLinkedToRoad::drawTramWaysDescription(QGLWidget *render)
+{
+    glLineWidth(1.0f);
+    glColor3f(1.0f, 1.0f, 0.0f);
+    glBegin(GL_LINES);
+    // Отступ
+    glVertex3f(stepPoint_Begin.x(), stepPoint_Begin.y(), stepPoint_Begin.z());
+    glVertex3f(stepPoint_End.x(), stepPoint_End.y(), stepPoint_End.z());
+    glEnd();
+    if (!render)
+    {
+        return;
+    }
+    GLdouble x, y, z;
+    GLdouble wx, wy, wz;
+    QFont shrift = QFont("Times", 8, QFont::Bold);
+    float x1, x2, y1, y2;
+
+    // Отрисовка шага
+    x1 = stepPoint_Begin.x();
+    y1 = stepPoint_Begin.y();
+    x2 = stepPoint_End.x();
+    y2 = stepPoint_End.y();
+    x = (x1 + x2) / 2.0f;
+    y = (y1 + y2) / 2.0f;
+    z = 0.0f;
+    RoadElement::getWindowCoord(x, y, z, wx, wy, wz);
+    render->renderText(wx + 5, wy + 5, QString("%1").arg(step, 0, 'f', 2), shrift);
+
+}
+
 void LineLinkedToRoad::drawStopLineDescription(QGLWidget *render)
 {
+    glLineWidth(1.0f);
+    glColor3f(1.0f, 1.0f, 0.0f);
+    glBegin(GL_LINES);
+    // Отступ
+    glVertex3f(stepPoint_Begin.x(), stepPoint_Begin.y(), stepPoint_Begin.z());
+    glVertex3f(stepPoint_End.x(), stepPoint_End.y(), stepPoint_End.z());
+    // Отступ от начала
+    glVertex3f(linkedPoint.x(), linkedPoint.y(), linkedPoint.z());
+    glVertex3f(stepPoint_End.x(), stepPoint_End.y(), stepPoint_End.z());
+    // Отступ от левой стороны
+    glVertex3f(beginStepPoint_Begin.x(), beginStepPoint_Begin.y(), beginStepPoint_Begin.z());
+    glVertex3f(beginStepPoint_End.x(), beginStepPoint_End.y(), beginStepPoint_End.z());
+    // Отступ от правой стороны
+    glVertex3f(endStepPoint_Begin.x(), endStepPoint_Begin.y(), endStepPoint_Begin.z());
+    glVertex3f(endStepPoint_End.x(), endStepPoint_End.y(), endStepPoint_End.z());
+    glEnd();
+    if (!render)
+    {
+        return;
+    }
+    GLdouble x, y, z;
+    GLdouble wx, wy, wz;
+    QFont shrift = QFont("Times", 8, QFont::Bold);
+    float x1, x2, y1, y2;
+
+    // Отрисовка шага
+    x1 = stepPoint_Begin.x();
+    y1 = stepPoint_Begin.y();
+    x2 = stepPoint_End.x();
+    y2 = stepPoint_End.y();
+    x = (x1 + x2) / 2.0f;
+    y = (y1 + y2) / 2.0f;
+    z = 0.0f;
+    RoadElement::getWindowCoord(x, y, z, wx, wy, wz);
+    render->renderText(wx + 5, wy + 5, QString("%1").arg(step, 0, 'f', 2), shrift);
+
+    // Отрисовка шага от левой стороны
+    x1 = endStepPoint_Begin.x();
+    y1 = endStepPoint_Begin.y();
+    x2 = endStepPoint_End.x();
+    y2 = endStepPoint_End.y();
+    x = (x1 + x2) / 2.0f;
+    y = (y1 + y2) / 2.0f;
+    z = 0.0f;
+    RoadElement::getWindowCoord(x, y, z, wx, wy, wz);
+    render->renderText(wx + 5, wy + 5, QString("%1").arg(leftStep, 0, 'f', 2), shrift);
+
+    // Отрисовка шага от правой стороны
+    x1 = beginStepPoint_Begin.x();
+    y1 = beginStepPoint_Begin.y();
+    x2 = beginStepPoint_End.x();
+    y2 = beginStepPoint_End.y();
+    x = (x1 + x2) / 2.0f;
+    y = (y1 + y2) / 2.0f;
+    z = 0.0f;
+    RoadElement::getWindowCoord(x, y, z, wx, wy, wz);
+    render->renderText(wx + 5, wy + 5, QString("%1").arg(rightStep, 0, 'f', 2), shrift);
+
 
 }

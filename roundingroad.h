@@ -47,7 +47,7 @@ private:
     QVector<GLubyte> indexArray; // количество полигонов
     QVector<GLfloat> textureArray;
 
-    QVector<LineBrokenLinked> lines;
+    QVector<LineLinkedToRoad> lines;
 
     GLubyte* indexArrayForSelection;
     GLfloat* colorArrayForSelection;
@@ -102,6 +102,7 @@ private:
     QVBoxLayout* layout;
     QGLWidget* render;
     static bool log;
+    LineLinkedToRoad currentLineLinked;
 
 public:
     RoundingRoad();
@@ -175,12 +176,19 @@ public slots:
     void addLine(float step, QString textureSource, float textureSize, float lineWidth, int lineType, bool nearSide);
     void addLine();
     void addLine(LineBrokenLinked line);
+    void addLine(LineLinkedToRoad line);
+
+    void constructLine(QString textureSource, float textureSize);
+    void constructLine(LineLinkedToRoad line);
+    void calculateVertexArray(LineLinkedToRoad line, QVector<float>& vertexArray);
 
     void setNearSide(bool status);
     void setStep(double value);
     void setLineType(int type);
     void deleteLine();
     void deleteLine(LineBrokenLinked line);
+    void deleteLine(LineLinkedToRoad line);
+
     void resetLines();
     void setBeginStep(double step);
     void setEndStep(double step);
