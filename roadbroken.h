@@ -4,6 +4,7 @@
 #include "roadelement.h"
 #include <QVector>
 #include <GL/glu.h>
+#include <QListWidget>
 #include "linebroken.h"
 #include "splitzone.h"
 
@@ -64,7 +65,7 @@ protected:
     QVector<GLubyte> indexArrayRight;
     QVector<GLubyte> indexArrayLeft;
 
-    QVector<LineBrokenLinkedToRoadBroken> lines;
+    QVector<LineLinkedToRoad> lines;
 
     int textureID[2];
     float texture_1Usize, texture_1Vsize;
@@ -104,6 +105,9 @@ protected:
     QVBoxLayout* layout;
     QGLWidget* render;
     static bool log;
+    QListWidget *list;
+    LineLinkedToRoad currentLineLinked;
+
 public:
     void setVertexArray(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, GLfloat width);
     void setVertexArray(QVector<GLfloat>& vertexArray);
@@ -123,7 +127,8 @@ public:
     void setLeftTextureArray(float textureUsize, float textureVsize);
     void setLeftIndexArray();
 
-    void getVertexArrayForLineAxis(QVector<float> &axisArray, bool rightSide, float step, float beginStep, float endStep);
+    void getVertexArrayForLineAxis(QVector<float> &axisArray, LineLinkedToRoad &line);
+    void getVertexArrayForStopLine(QVector<float> &axisArray, LineLinkedToRoad &line);
 
     GLuint getTextures(QString source);
     void setIndexArray();
@@ -159,6 +164,8 @@ signals:
     void leftBoardWidthChanged(double width);
 
     void linesChanged(QVBoxLayout* layout, QGLWidget* render);
+    void lineAdded();
+    void lineDeleted();
 
 public slots:
     static void setLogging(bool status);
@@ -172,15 +179,24 @@ public slots:
 
     virtual bool isFixed();
 
+    void constructLine(QString textureSource, float textureSize);
+    void constructLine(LineLinkedToRoad line);
+
     void addLine(float step, QString textureSource, float textureSize, float lineWidth, int lineType, bool rightSide);
     void addLine();
     void addLine(LineBrokenLinkedToRoadBroken line);
+    void addLine(LineLinkedToRoad line);
+    void editLine();
+    void editLine(LineLinkedToRoad line);
 
     void setRightSide(bool status);
     void setStep(double value);
     void setLineType(int type);
     void deleteLine();
     void deleteLine(LineBrokenLinkedToRoadBroken line);
+    void deleteLine(LineLinkedToRoad line);
+    void removeLine(LineLinkedToRoad line);
+
     void resetLines();
     void setBeginStep(double step);
     void setEndStep(double step);
@@ -194,7 +210,7 @@ public slots:
     void setSplitZoneType(int type);
     void setSplitZoneHeight(double height);
     virtual void getProperties(QVBoxLayout *layout, QGLWidget* render = 0);
-
+    void updateListWidget();
 
     // RoadElement interface
 public:

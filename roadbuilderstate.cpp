@@ -719,7 +719,11 @@ void RoadBuilderState::del()
 {
     if (log)
     Logger::getLogger()->infoLog() << "RoadBuilderState::del()\n";
-    RoadElement::undoStack->push(new DeleteCommand(roadBroken, model, stateManager, properties, groupIndex, elementIndex, scene));
+    int result = QMessageBox::warning(0, tr("Удаление элемента"),
+                                 tr("Вы действительно хотите удалить выделенный элемент?"),
+                                 QMessageBox::Yes | QMessageBox::No);
+    if (result == QMessageBox::Yes)
+        RoadElement::undoStack->push(new DeleteCommand(roadBroken, model, stateManager, properties, groupIndex, elementIndex, scene));
 }
 
 

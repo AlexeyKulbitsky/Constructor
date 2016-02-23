@@ -39,7 +39,7 @@ protected:
     QVector<GLfloat> VertexArray;
     QVector<GLfloat> ColorArray;
     QVector<GLfloat> TextureArray;
-    QVector<GLubyte> IndexArray;
+    QVector<GLuint> IndexArray;
 
     GLuint textureID[1];
     int numberOfVertices;
@@ -55,13 +55,13 @@ protected:
     bool fixed;
     // Рамка для выделения
 
-    QVector<GLubyte> IndexArrayForSelection;
+    QVector<GLuint> IndexArrayForSelection;
     QVector<GLfloat> ColorArrayForSelection;
 
 
     QVector<GLfloat> vertexArrayForAxis;
     QVector<GLfloat> colorArrayForAxis;
-    QVector<GLubyte> indexArrayForAxis;
+    QVector<GLuint> indexArrayForAxis;
     int numberOfVerticesOfAxis;
     int numberOfAxises;
     bool selected;
@@ -75,6 +75,7 @@ public:
     LineBroken(float width, float* axisVertices, int size, QString source, float textureSize, QString name, int layer, QString description);
     LineBroken(const LineBroken& source);
     virtual ~LineBroken();
+    QVector<float> getAxisArray() { return vertexArrayForAxis; }
     bool hasPoint(GLfloat x, GLfloat y);
     void drawFigure(QGLWidget* render = 0);
     void drawSelectionFrame();

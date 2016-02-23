@@ -89,6 +89,7 @@ RoadElement::RoadElement()
         }
     }
     showMeasurements = true;
+    drawRoad = drawLines = true;
 }
 
 RoadElement::~RoadElement()

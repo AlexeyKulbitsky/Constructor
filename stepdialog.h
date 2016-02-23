@@ -83,6 +83,9 @@ struct LineLinkedToRoad
 
     QVector3D linkedPoint;
     void drawStopLineDescription(QGLWidget*);
+
+    QVector<GLfloat> beginStepPoints;
+    QVector<GLfloat> endStepPoints;
 };
 
 enum StepDialogUsingTarget

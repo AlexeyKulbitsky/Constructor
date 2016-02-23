@@ -796,70 +796,90 @@ void RoadSimple::drawFigure(QGLWidget* render)
             Logger::getLogger()->warningLog() << "RoadSimple::drawFigure(QGLWidget* render) render = NULL\n";
     }
 
-    if (!useColor)
+    if (drawRoad)
     {
-        glDisableClientState(GL_COLOR_ARRAY);
-        glEnable(GL_TEXTURE_2D);
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glBindTexture(GL_TEXTURE_2D, textureID[0]);
-        //getTextures(textureSource);
-        glVertexPointer(3, GL_FLOAT, 0, VertexArray);
-        glTexCoordPointer(2, GL_FLOAT, 0, TextureArray);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, IndexArray);
-
-
-
-        ///////////////////////////////////
-
-        if (showRightBoard)
+        if (!useColor)
         {
-            ////qDebug() << "RoadSimple: text1" << textureID[1];
-            glBindTexture(GL_TEXTURE_2D, textureID[1]);
-            glVertexPointer(3, GL_FLOAT, 0, vertexArrayRight.begin());
-            glTexCoordPointer(2, GL_FLOAT, 0, textureArrayRight.begin());
-            glDrawElements(GL_TRIANGLES, indexArrayRight.size(), GL_UNSIGNED_BYTE, indexArrayRight.begin());
+            glDisableClientState(GL_COLOR_ARRAY);
+            glEnable(GL_TEXTURE_2D);
+            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+            glBindTexture(GL_TEXTURE_2D, textureID[0]);
+            //getTextures(textureSource);
+            glVertexPointer(3, GL_FLOAT, 0, VertexArray);
+            glTexCoordPointer(2, GL_FLOAT, 0, TextureArray);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, IndexArray);
+
+
+
+            ///////////////////////////////////
+
+            if (showRightBoard)
+            {
+                ////qDebug() << "RoadSimple: text1" << textureID[1];
+                glBindTexture(GL_TEXTURE_2D, textureID[1]);
+                glVertexPointer(3, GL_FLOAT, 0, vertexArrayRight.begin());
+                glTexCoordPointer(2, GL_FLOAT, 0, textureArrayRight.begin());
+                glDrawElements(GL_TRIANGLES, indexArrayRight.size(), GL_UNSIGNED_BYTE, indexArrayRight.begin());
+            }
+            if (showLeftBoard)
+            {
+                ////qDebug() << "RoadSimple: text1" << textureID[1];
+                glBindTexture(GL_TEXTURE_2D, textureID[1]);
+                glVertexPointer(3, GL_FLOAT, 0, vertexArrayLeft.begin());
+                glTexCoordPointer(2, GL_FLOAT, 0, textureArrayLeft.begin());
+                glDrawElements(GL_TRIANGLES, indexArrayLeft.size(), GL_UNSIGNED_BYTE, indexArrayLeft.begin());
+            }
+    //        for (int i = 0; i < lines.size(); ++i)
+    //        {
+    //            lines[i].line->drawFigure();
+    //            lines[i].drawDescription(render);
+    //        }
+            //////////////////////////////////////////
+
+            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+            glDisable(GL_TEXTURE_2D);
+            glEnableClientState(GL_COLOR_ARRAY);
         }
-        if (showLeftBoard)
+        else
         {
-            ////qDebug() << "RoadSimple: text1" << textureID[1];
-            glBindTexture(GL_TEXTURE_2D, textureID[1]);
-            glVertexPointer(3, GL_FLOAT, 0, vertexArrayLeft.begin());
-            glTexCoordPointer(2, GL_FLOAT, 0, textureArrayLeft.begin());
-            glDrawElements(GL_TRIANGLES, indexArrayLeft.size(), GL_UNSIGNED_BYTE, indexArrayLeft.begin());
+
+            glVertexPointer(3, GL_FLOAT, 0, VertexArray);
+            glColorPointer(4, GL_FLOAT, 0, ColorArray);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, IndexArray);
         }
+
+        if (selected == true)
+        {
+            glDisable(GL_DEPTH_TEST);
+            // Если фигуры выбрана - изменяем цвет заливки
+            setColorArray(0.7f, 0.7f, 0.7f, alpha);
+            drawSelectionFrame();
+            glEnable(GL_DEPTH_TEST);
+        }
+        if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
+        {
+            glDisable(GL_DEPTH_TEST);
+            drawControlElement(indexOfSelectedControl, 5.0f, 10.0f);
+            glEnable(GL_DEPTH_TEST);
+        }
+    }
+    else
+    {
+        qDebug() << "Draw RoadSimple = false";
+    }
+    if (drawLines)
+    {
         for (int i = 0; i < lines.size(); ++i)
         {
             lines[i].line->drawFigure();
             lines[i].drawDescription(render);
         }
-        //////////////////////////////////////////
-
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-        glDisable(GL_TEXTURE_2D);
-        glEnableClientState(GL_COLOR_ARRAY);
     }
     else
     {
-
-        glVertexPointer(3, GL_FLOAT, 0, VertexArray);
-        glColorPointer(4, GL_FLOAT, 0, ColorArray);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, IndexArray);
+        qDebug() << "Draw Lines in RoadSimple = false";
     }
 
-    if (selected == true)
-    {
-        glDisable(GL_DEPTH_TEST);
-        // Если фигуры выбрана - изменяем цвет заливки
-        setColorArray(0.7f, 0.7f, 0.7f, alpha);
-        drawSelectionFrame();
-        glEnable(GL_DEPTH_TEST);
-    }
-    if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
-    {
-        glDisable(GL_DEPTH_TEST);
-        drawControlElement(indexOfSelectedControl, 5.0f, 10.0f);
-        glEnable(GL_DEPTH_TEST);
-    }
 }
 
 
@@ -1128,6 +1148,8 @@ void RoadSimple::drawControlElement(int index, float lineWidth, float pointSize)
     int lineControls = getNumberOfControls() - 12;
     if (index >= lineControls)
     {
+        if (!drawRoad)
+            return;
         index -= lineControls;
 
         switch(index)
@@ -1283,6 +1305,8 @@ void RoadSimple::drawControlElement(int index, float lineWidth, float pointSize)
     }
     else
     {
+        if (!drawLines)
+            return;
         int i;
         for (i = 0; i < lines.size(); ++i)
         {
@@ -1475,12 +1499,12 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
                                step1.y() + factor * (y1 - y2) * lines[i].step / this->length,
                                0.2f);
                 QVector3D linkedPoint(p.x, p.y, p.z);
-                QVector3D leftStep1(p1.x, p1.y, 0.2f);
-                QVector3D leftStep2(p1.x + (p1.x - p2.x) * lines[i].leftStep / length,
+                QVector3D rightStep1(p1.x, p1.y, 0.2f);
+                QVector3D rightStep2(p1.x + (p1.x - p2.x) * lines[i].leftStep / length,
                                      p1.y + (p1.y - p2.y) * lines[i].leftStep / length,
                                      0.2f);
-                QVector3D rightStep1(p2.x, p2.y, 0.2f);
-                QVector3D rightStep2(p2.x + (p2.x - p1.x) * lines[i].rightStep / length,
+                QVector3D leftStep1(p2.x, p2.y, 0.2f);
+                QVector3D leftStep2(p2.x + (p2.x - p1.x) * lines[i].rightStep / length,
                                    p2.y + (p2.y - p1.y) * lines[i].rightStep / length,
                                    0.2f);
                 lines[i].stepPoint_Begin = step1;
@@ -1708,12 +1732,12 @@ void RoadSimple::resizeByControl(int index, float dx, float dy, float x, float y
                                step1.y() + factor * (y1 - y2) * lines[i].step / this->length,
                                0.2f);
                 QVector3D linkedPoint(p.x, p.y, p.z);
-                QVector3D leftStep1(p1.x, p1.y, 0.2f);
-                QVector3D leftStep2(p1.x + (p1.x - p2.x) * lines[i].leftStep / length,
+                QVector3D rightStep1(p1.x, p1.y, 0.2f);
+                QVector3D rightStep2(p1.x + (p1.x - p2.x) * lines[i].leftStep / length,
                                      p1.y + (p1.y - p2.y) * lines[i].leftStep / length,
                                      0.2f);
-                QVector3D rightStep1(p2.x, p2.y, 0.2f);
-                QVector3D rightStep2(p2.x + (p2.x - p1.x) * lines[i].rightStep / length,
+                QVector3D leftStep1(p2.x, p2.y, 0.2f);
+                QVector3D leftStep2(p2.x + (p2.x - p1.x) * lines[i].rightStep / length,
                                    p2.y + (p2.y - p1.y) * lines[i].rightStep / length,
                                    0.2f);
                 lines[i].stepPoint_Begin = step1;
@@ -2456,14 +2480,23 @@ QJsonObject RoadSimple::getJSONInfo()
     {
         QJsonObject line;
         line["Line"] = lines[i].line->getJSONInfo();
-        line["LineType"] = lines[i].type;
-        line["LineWidth"] = lines[i].lineWidth;
-        line["RightSide"] = lines[i].linkedToRightSide;
+        line["LineType"] = int(lines[i].type);
         line["Step"] = lines[i].step;
-        line["BeginSide"] = lines[i].linkedToBeginSide;
         line["BeginStep"] = lines[i].beginStep;
         line["EndStep"] = lines[i].endStep;
+        line["RightStep"] = lines[i].rightStep;
+        line["LeftStep"] = lines[i].leftStep;
+        line["RightSide"] = lines[i].linkedToRightSide;
+        line["BeginSide"] = lines[i].linkedToBeginSide;
+        line["SplitZoneType"] = int(lines[i].splitZoneType);
+        line["BeginRounding"] = lines[i].beginRounding;
+        line["EndRounding"] = lines[i].endRounding;
+        line["SplitZoneHeight"] = lines[i].splitZoneHeight;
         line["SplitZoneWidth"] = lines[i].splitZoneWidth;
+        line["LineWidth"] = lines[i].lineWidth;
+        line["SingleWay"] = lines[i].singleWay;
+        line["AxisStep"] = lines[i].axisStep;
+
         linesArray.append(line);
     }
     element["Lines"] = linesArray;
@@ -3195,6 +3228,19 @@ void RoadSimple::addLine(LineLinkedToRoad line)
     lines.push_back(line);
     //if (layout && render)
     //    emit linesChanged(layout, render);
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].type == Line::SplitZone)
+        {
+            SplitZone *splitZone = qobject_cast<SplitZone*>(lines[i].line);
+            splitZone->setDescription(QString("Линия №") + QString::number(i + 1));
+        }
+        else
+        {
+            LineSimple *lineSimple = qobject_cast<LineSimple*>(lines[i].line);
+            lineSimple->setDescription(QString("Линия №") + QString::number(i + 1));
+        }
+    }
     emit linesChanged();
 }
 
@@ -3528,6 +3574,11 @@ void RoadSimple::deleteLine(LineLinked line)
 }
 
 void RoadSimple::deleteLine(LineLinkedToRoad line)
+{
+    RoadElement::undoStack->push(new DeleteLineCommand(this, line, render));
+}
+
+void RoadSimple::removeLine(LineLinkedToRoad line)
 {
     int i;
     for (i = 0; i < lines.size(); ++i)

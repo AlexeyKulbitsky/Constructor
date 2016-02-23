@@ -63,6 +63,8 @@ public:
     virtual int getLayer();
     virtual void clear();
     vec3 getAxisPoint(int index);
+    QVector<float> getAxisArray() { return axisArray; }
+
 signals:
     void widthChanged(double width);
     void heightChanged(double height);

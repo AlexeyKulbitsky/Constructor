@@ -20,12 +20,12 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    settings("LpGR","Constructor")
+    settings("Simicon","Constructor")
 {    
     camera = NULL;
     Logger::getLogger()->startLogging();
     ui->setupUi(this);
-    setWindowTitle("Constructor ver.1.2.0");
+    setWindowTitle("Constructor ver.1.2.1");
     model = new Model(this);
     jsonFileManager = new JSONFileManager(model);
     setFileManager(jsonFileManager);

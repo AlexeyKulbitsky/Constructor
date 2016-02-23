@@ -336,11 +336,11 @@ void Pole::setVertexArray()
         float dy = r * sinf(angle);
         vertexArray.push_back(elementX + dx);
         vertexArray.push_back(elementY + dy);
-        vertexArray.push_back(z);
+        vertexArray.push_back(z1);
 
         vertexArray.push_back(elementX + dx);
         vertexArray.push_back(elementY + dy);
-        vertexArray.push_back(z + height);
+        vertexArray.push_back(z1 + height);
     }
 }
 

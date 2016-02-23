@@ -770,7 +770,11 @@ void LineBuilderState::del()
 {
     if (log)
         Logger::getLogger()->infoLog() << "LineBuilderState::del()\n";
-    RoadElement::undoStack->push(new DeleteCommand(lineBroken, model, stateManager, properties, groupIndex, elementIndex, scene));
+    int result = QMessageBox::warning(0, tr("Удаление элемента"),
+                                 tr("Вы действительно хотите удалить выделенный элемент?"),
+                                 QMessageBox::Yes | QMessageBox::No);
+    if (result == QMessageBox::Yes)
+        RoadElement::undoStack->push(new DeleteCommand(lineBroken, model, stateManager, properties, groupIndex, elementIndex, scene));
 }
 
 

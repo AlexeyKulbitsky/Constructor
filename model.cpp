@@ -156,24 +156,33 @@ void Model::clear()
 void Model::setRoadVisible(bool status)
 {
     Logger::getLogger()->writeLog("Model::setRoadVisible(" + QString::number(status) + ")");
-    group[0].visible = status;
+    //group[0].visible = status;
+    for (int i = 0; i < group[0].elements.size(); ++i)
+        group[0].elements[i]->setDrawRoadStatus(status);
+    emit visibilityChanged();
 }
 
 void Model::setLinesVilible(bool status)
 {
     Logger::getLogger()->writeLog("Model::setLinesVilible(" + QString::number(status) + ")");
     group[1].visible = status;
+    for (int i = 0; i < group[0].elements.size(); ++i)
+        group[0].elements[i]->setDrawLinesStatus(status);
+    emit visibilityChanged();
+
 }
 
 void Model::setMapVisible(bool status)
 {
     Logger::getLogger()->writeLog("Model::setMapVisible(" + QString::number(status) + ")");
     group[numberOfGroups - 1].visible = status;
+    emit visibilityChanged();
 }
 
 void Model::setRulerVisible(bool status)
 {
     Logger::getLogger()->writeLog("Model::setRulerVisible(" + QString::number(status) + ")");
     group[numberOfGroups - 2].visible = status;
+    emit visibilityChanged();
 }
 

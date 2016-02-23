@@ -189,6 +189,7 @@ public slots:
     void deleteLine();
     void deleteLine(LineLinked line);
     void deleteLine(LineLinkedToRoad line);
+    void removeLine(LineLinkedToRoad line);
 
     virtual void getProperties(QVBoxLayout *layout, QGLWidget* render = 0);
     virtual bool setFixed(bool fixed);

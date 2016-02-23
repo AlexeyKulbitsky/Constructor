@@ -370,7 +370,7 @@ void DefaultState::dropEvent(QDropEvent *event)
     if (s == "Дорога ломаная")
     {
 
-        RoadBroken* road = new RoadBroken(x, y, x + 2.75f, y, 6.0f,
+        RoadBroken* road = new RoadBroken(x, y, x + 10.0f, y, 6.0f,
                                           "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
                                           "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
                                           "RoadBroken", 0);
@@ -603,7 +603,7 @@ void DefaultState::dropEvent(QDropEvent *event)
     {
         //Pole* pole = new Pole(x, y, 0.2f, 1.5f);
         //Pole* pole = new Pole(x, y, 0.0f, x + 5.0f, y + 5.0f, 5.0f, 1.0f);
-        Pole* pole = new Pole(x, y, 0.0f, x, y, 5.0f, 1.0f);
+        Pole* pole = new Pole(x, y, 1.0f, 5.0f);
         pole->setModel(model);
         RoadElement::undoStack->push(new InsertCommand(pole, stateManager, properties, model, pole->getLayer(), scene));
         return;

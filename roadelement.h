@@ -223,7 +223,8 @@ public:
     virtual float calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4);
     virtual float calculateAngle(vec3 v1, vec3 v2);
     virtual unsigned int getSize() { return sizeof(*this); }
-
+    virtual void setDrawRoadStatus(bool status) { drawRoad = status; qDebug() << name << "drawRoad =" << status;}
+    virtual void setDrawLinesStatus(bool status) { drawLines = status; qDebug() << name << "drawLine =" << status;}
 public slots:
     virtual bool setFixed(bool fixed) = 0;
     virtual void setShowMeasurements(bool status);
@@ -236,6 +237,8 @@ protected:
     float elementX, elementY;
     int Id;
     bool showMeasurements;
+    bool drawRoad;
+    bool drawLines;
 
 private:
     static const unsigned SIZE = 10000;

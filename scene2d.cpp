@@ -537,6 +537,7 @@ void Scene2D::setModel(Model *model)
     if (model)
     {
         this->model = model;
+        connect(model, SIGNAL(visibilityChanged()), this, SLOT(updateGL()));
         if (properties)
         {
             stateManager = new StateManager(this->model, this, properties);
@@ -1091,6 +1092,8 @@ void Scene2D::setScale(double scale)
     if (this->nSca == scale)
         return;
     this->nSca = scale;
+//    if (this->nSca <= 0.0f)
+//        this->nSca = 0.001f;
     updateGL();
     emit scaleChanged(scale);
 }
@@ -1143,7 +1146,7 @@ void Scene2D::getProperties(QFormLayout *layout)
 
     QDoubleSpinBox* scaleSpinBox = new QDoubleSpinBox();
     scaleSpinBox->setKeyboardTracking(false);
-    scaleSpinBox->setMinimum(0.0);
+    scaleSpinBox->setMinimum(0.001);
     scaleSpinBox->setDecimals(5);
     scaleSpinBox->setValue(nSca);
     connect(scaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setScale(double)));
@@ -1156,7 +1159,7 @@ void Scene2D::getProperties(QFormLayout *layout)
 
     QDoubleSpinBox* scaleStepSpinBox = new QDoubleSpinBox();
     scaleStepSpinBox->setKeyboardTracking(false);
-    scaleStepSpinBox->setMinimum(0.0);
+    scaleStepSpinBox->setMinimum(0.001);
     scaleStepSpinBox->setDecimals(5);
     scaleStepSpinBox->setValue(scaleStep);
     connect(scaleStepSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setScaleStep(double)));

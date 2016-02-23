@@ -700,10 +700,21 @@ AddLineCommand::AddLineCommand(RoadSimple *roadSimple, LineLinkedToRoad line, QG
 }
 
 AddLineCommand::AddLineCommand(RoundingRoad *roundingRoad, LineLinkedToRoad line, QGLWidget *scene, QUndoCommand *parent)
+    : QUndoCommand(parent)
 {
     type = 1;
     isInFigure = false;
     this->roundingRoad = roundingRoad;
+    this->line = line;
+    this->scene = scene;
+}
+
+AddLineCommand::AddLineCommand(RoadBroken *roadBroken, LineLinkedToRoad line, QGLWidget *scene, QUndoCommand *parent)
+    : QUndoCommand(parent)
+{
+    type = 2;
+    isInFigure = false;
+    this->roadBroken = roadBroken;
     this->line = line;
     this->scene = scene;
 }
@@ -716,18 +727,15 @@ AddLineCommand::~AddLineCommand()
         {
         case 0:
             roadSimple = NULL;
-            delete lineLinked->line;
-            delete lineLinked;
+            delete line.line;
             break;
         case 1:
-            roadBroken = NULL;
-            delete lineBrokenLinkedToRoadBroken->line;
-            delete lineBrokenLinkedToRoadBroken;
+            roundingRoad = NULL;
+            delete line.line;
             break;
         case 2:
-            roundingRoad = NULL;
-            delete lineBrokenLinked->line;
-            delete lineBrokenLinked;
+            roadBroken = NULL;
+            delete line.line;
             break;
         default:
             break;
@@ -741,14 +749,14 @@ void AddLineCommand::undo()
     switch (type)
     {
     case 0:
-        roadSimple->deleteLine(line);
-        break;
-    case 2:
-        roadBroken->deleteLine(*lineBrokenLinkedToRoadBroken);
+        roadSimple->removeLine(line);
         break;
     case 1:
-        roundingRoad->deleteLine(line);
+        roundingRoad->removeLine(line);
         break;
+    case 2:
+        roadBroken->removeLine(line);
+        break;   
     default:
         break;
     }
@@ -764,11 +772,11 @@ void AddLineCommand::redo()
     case 0:
         roadSimple->addLine(line);
         break;
-    case 2:
-        roadBroken->addLine(*lineBrokenLinkedToRoadBroken);
-        break;
     case 1:
         roundingRoad->addLine(line);
+        break;
+    case 2:
+        roadBroken->addLine(line);
         break;
     default:
         break;
@@ -779,36 +787,33 @@ void AddLineCommand::redo()
 }
 
 
-DeleteLineCommand::DeleteLineCommand(RoadSimple *roadSimple, LineLinked linked, QGLWidget *scene, QUndoCommand *parent)
+DeleteLineCommand::DeleteLineCommand(RoadSimple *roadSimple, LineLinkedToRoad linked, QGLWidget *scene, QUndoCommand *parent)
     : QUndoCommand(parent)
 {
     type = 0;
     isInFigure = false;
     this->roadSimple = roadSimple;
-    lineLinked = new LineLinked();
-    *lineLinked = linked;
+    line = linked;
     this->scene = scene;
 }
 
-DeleteLineCommand::DeleteLineCommand(RoadBroken *roadBroken, LineBrokenLinkedToRoadBroken brokenLinkedToRoadBroken, QGLWidget *scene, QUndoCommand *parent)
+DeleteLineCommand::DeleteLineCommand(RoadBroken *roadBroken, LineLinkedToRoad brokenLinkedToRoadBroken, QGLWidget *scene, QUndoCommand *parent)
     : QUndoCommand(parent)
 {
     type = 1;
     isInFigure = false;
     this->roadBroken = roadBroken;
-    lineBrokenLinkedToRoadBroken = new LineBrokenLinkedToRoadBroken();
-    *lineBrokenLinkedToRoadBroken = brokenLinkedToRoadBroken;
+    line = brokenLinkedToRoadBroken;
     this->scene = scene;
 }
 
-DeleteLineCommand::DeleteLineCommand(RoundingRoad *roundingRoad, LineBrokenLinked brokenLinked, QGLWidget *scene, QUndoCommand *parent)
+DeleteLineCommand::DeleteLineCommand(RoundingRoad *roundingRoad, LineLinkedToRoad brokenLinked, QGLWidget *scene, QUndoCommand *parent)
     : QUndoCommand(parent)
 {
     type = 2;
     isInFigure = false;
     this->roundingRoad = roundingRoad;
-    lineBrokenLinked = new LineBrokenLinked();
-    *lineBrokenLinked = brokenLinked;
+    line = brokenLinked;
     this->scene = scene;
 }
 
@@ -820,18 +825,18 @@ DeleteLineCommand::~DeleteLineCommand()
         {
         case 0:
             roadSimple = NULL;
-            delete lineLinked->line;
-            delete lineLinked;
+            delete line.line;
+            line.line = NULL;
             break;
         case 1:
             roadBroken = NULL;
-            delete lineBrokenLinkedToRoadBroken->line;
-            delete lineBrokenLinkedToRoadBroken;
+            delete line.line;
+            line.line = NULL;
             break;
         case 2:
             roundingRoad = NULL;
-            delete lineBrokenLinked->line;
-            delete lineBrokenLinked;
+            delete line.line;
+            line.line = NULL;
             break;
         default:
             break;
@@ -844,14 +849,13 @@ void DeleteLineCommand::undo()
     switch (type)
     {
     case 0:
-        //roadSimple->addLine(*lineLinked);
-        //roadSimple->addLine(*line);
+        roadSimple->addLine(line);
         break;
     case 1:
-        roadBroken->addLine(*lineBrokenLinkedToRoadBroken);
+        roadBroken->addLine(line);
         break;
     case 2:
-        roundingRoad->addLine(*lineBrokenLinked);
+        roundingRoad->addLine(line);
         break;
     default:
         break;
@@ -866,13 +870,13 @@ void DeleteLineCommand::redo()
     switch (type)
     {
     case 0:
-        roadSimple->deleteLine(*lineLinked);
+        roadSimple->removeLine(line);
         break;
     case 1:
-        roadBroken->deleteLine(*lineBrokenLinkedToRoadBroken);
+        roadBroken->removeLine(line);
         break;
     case 2:
-        roundingRoad->deleteLine(*lineBrokenLinked);
+        roundingRoad->removeLine(line);
         break;
     default:
         break;

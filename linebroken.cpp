@@ -549,7 +549,7 @@ void LineBroken::drawFigure(QGLWidget* )
         //getTextures(textureSource);
         glVertexPointer(3, GL_FLOAT, 0, VertexArray.begin());
         glTexCoordPointer(2, GL_FLOAT, 0, TextureArray.begin());
-        glDrawElements(GL_TRIANGLES, IndexArray.size(), GL_UNSIGNED_BYTE, IndexArray.begin());
+        glDrawElements(GL_TRIANGLES, IndexArray.size(), GL_UNSIGNED_INT, IndexArray.begin());
 
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         glDisable(GL_TEXTURE_2D);
@@ -559,7 +559,7 @@ void LineBroken::drawFigure(QGLWidget* )
     {
         glVertexPointer(3, GL_FLOAT, 0, VertexArray.begin());
         glColorPointer(4, GL_FLOAT, 0, ColorArray.begin());
-        glDrawElements(GL_TRIANGLES, IndexArray.size(), GL_UNSIGNED_BYTE, IndexArray.begin());
+        glDrawElements(GL_TRIANGLES, IndexArray.size(), GL_UNSIGNED_INT, IndexArray.begin());
     }
     if (selected == true)
     {
@@ -571,7 +571,7 @@ void LineBroken::drawFigure(QGLWidget* )
 
         glVertexPointer(3, GL_FLOAT, 0, vertexArrayForAxis.begin());
         glColorPointer(3, GL_FLOAT, 0, colorArrayForAxis.begin());
-        glDrawElements(GL_LINE_STRIP, indexArrayForAxis.size(), GL_UNSIGNED_BYTE, indexArrayForAxis.begin());
+        glDrawElements(GL_LINE_STRIP, indexArrayForAxis.size(), GL_UNSIGNED_INT, indexArrayForAxis.begin());
         glEnable(GL_DEPTH_TEST);
 
     }
@@ -660,15 +660,15 @@ void LineBroken::drawSelectionFrame()
     glVertexPointer(3, GL_FLOAT, 0, VertexArray.begin());
     glColorPointer(3, GL_FLOAT, 0, ColorArrayForSelection.begin());
     glLineWidth(2.0);
-    glDrawElements(GL_LINE_LOOP, IndexArrayForSelection.size(), GL_UNSIGNED_BYTE, IndexArrayForSelection.begin());
+    glDrawElements(GL_LINE_LOOP, IndexArrayForSelection.size(), GL_UNSIGNED_INT, IndexArrayForSelection.begin());
 
     // Угловые точки для изменения размера
     glPointSize(5.0);
-    glDrawElements(GL_POINTS, IndexArrayForSelection.size(), GL_UNSIGNED_BYTE, IndexArrayForSelection.begin());
+    glDrawElements(GL_POINTS, IndexArrayForSelection.size(), GL_UNSIGNED_INT, IndexArrayForSelection.begin());
 
     glPointSize(10.0);
     glVertexPointer(3, GL_FLOAT, 0, vertexArrayForAxis.begin());
-    glDrawElements(GL_POINTS, indexArrayForAxis.size(), GL_UNSIGNED_BYTE, indexArrayForAxis.begin());
+    glDrawElements(GL_POINTS, indexArrayForAxis.size(), GL_UNSIGNED_INT, indexArrayForAxis.begin());
 
 }
 

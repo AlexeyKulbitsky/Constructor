@@ -183,6 +183,7 @@ public:
 
     AddLineCommand(RoadSimple* roadSimple, LineLinkedToRoad line, QGLWidget* scene, QUndoCommand* parent = 0);
     AddLineCommand(RoundingRoad* roundingRoad, LineLinkedToRoad line, QGLWidget* scene, QUndoCommand* parent = 0);
+    AddLineCommand(RoadBroken* roadBroken, LineLinkedToRoad line, QGLWidget* scene, QUndoCommand* parent = 0);
     ~AddLineCommand();
 private:
     int type;
@@ -205,9 +206,11 @@ public:
 class DeleteLineCommand : public QUndoCommand
 {
 public:
-    DeleteLineCommand(RoadSimple* roadSimple, LineLinked linked, QGLWidget* scene, QUndoCommand* parent = 0);
-    DeleteLineCommand(RoadBroken* roadBroken, LineBrokenLinkedToRoadBroken brokenLinkedToRoadBroken, QGLWidget *scene, QUndoCommand* parent = 0);
-    DeleteLineCommand(RoundingRoad* roundingRoad, LineBrokenLinked brokenLinked, QGLWidget *scene, QUndoCommand* parent = 0);
+    DeleteLineCommand(RoadSimple* roadSimple, LineLinkedToRoad linked, QGLWidget* scene, QUndoCommand* parent = 0);
+    DeleteLineCommand(RoadBroken* roadBroken, LineLinkedToRoad brokenLinkedToRoadBroken, QGLWidget *scene, QUndoCommand* parent = 0);
+    DeleteLineCommand(RoundingRoad* roundingRoad, LineLinkedToRoad brokenLinked, QGLWidget *scene, QUndoCommand* parent = 0);
+
+
     ~DeleteLineCommand();
 private:
     int type;
@@ -215,10 +218,8 @@ private:
     RoadSimple* roadSimple;
     RoadBroken* roadBroken;
     RoundingRoad* roundingRoad;
-    LineLinked* lineLinked;
-    LineBrokenLinkedToRoadBroken* lineBrokenLinkedToRoadBroken;
-    LineBrokenLinked* lineBrokenLinked;
     QGLWidget* scene;
+    LineLinkedToRoad line;
     // QUndoCommand interface
 public:
     virtual void undo();

@@ -382,13 +382,21 @@ RoadSimple *JSONFileManager::readRoadSimple(QJsonObject &obj)
                 lineLinked.line = readLineSimple(lineElement);
 
             lineLinked.type = Line::LineType(line["LineType"].toInt());
-            lineLinked.lineWidth = line["LineWidth"].toDouble();
-            lineLinked.linkedToRightSide = line["RightSide"].toBool();
             lineLinked.step = line["Step"].toDouble();
-            lineLinked.linkedToBeginSide = line["BeginSide"].toBool();
             lineLinked.beginStep = line["BeginStep"].toDouble();
             lineLinked.endStep = line["EndStep"].toDouble();
+            lineLinked.rightStep = line["RightStep"].toDouble();
+            lineLinked.leftStep = line["LeftStep"].toDouble();
+            lineLinked.linkedToRightSide = line["RightSide"].toBool();
+            lineLinked.linkedToBeginSide = line["BeginSide"].toBool();
+            lineLinked.splitZoneType = Line::SplitZoneType(line["SplitZoneType"].toInt());
+            lineLinked.beginRounding = line["BeginRounding"].toBool();
+            lineLinked.endRounding = line["EndRounding"].toBool();
+            lineLinked.splitZoneHeight = line["SplitZoneHeight"].toDouble();
             lineLinked.splitZoneWidth = line["SplitZoneWidth"].toDouble();
+            lineLinked.lineWidth = line["LineWidth"].toDouble();
+            lineLinked.singleWay = line["SingleWay"].toBool();
+            lineLinked.axisStep = line["AxisStep"].toDouble();
             road->addLine(lineLinked);
         }
 
@@ -452,7 +460,7 @@ RoadBroken* JSONFileManager::readRoadBroken(QJsonObject &obj)
         QJsonObject line = lines[i].toObject();
         QJsonObject lineElement = line["Line"].toObject();
         QString name = lineElement["Name"].toString();
-        LineBrokenLinkedToRoadBroken lineLinked;
+        LineLinkedToRoad lineLinked;
         if (name == "LineBroken" ||
             name == "Tramways")
         {
@@ -460,18 +468,22 @@ RoadBroken* JSONFileManager::readRoadBroken(QJsonObject &obj)
         } else
         if (name == "SplitZone")
             lineLinked.line = readSplitZone(lineElement);
-        lineLinked.lineType = line["LineType"].toInt();
-        //lineLinked.lineWidth = line["LineWidth"].toDouble();
-        lineLinked.rightSide = line["RightSide"].toBool();
+        lineLinked.type = Line::LineType(line["LineType"].toInt());
         lineLinked.step = line["Step"].toDouble();
-        lineLinked.beginSide = line["BeginSide"].toBool();
         lineLinked.beginStep = line["BeginStep"].toDouble();
         lineLinked.endStep = line["EndStep"].toDouble();
-        lineLinked.differentDirections = line["DifferentDirections"].toBool();
-        lineLinked.splitZoneWidth = line["SplitZoneWidth"].toDouble();
+        lineLinked.rightStep = line["RightStep"].toDouble();
+        lineLinked.leftStep = line["LeftStep"].toDouble();
+        lineLinked.linkedToRightSide = line["RightSide"].toBool();
+        lineLinked.linkedToBeginSide = line["BeginSide"].toBool();
+        lineLinked.splitZoneType = Line::SplitZoneType(line["SplitZoneType"].toInt());
         lineLinked.beginRounding = line["BeginRounding"].toBool();
         lineLinked.endRounding = line["EndRounding"].toBool();
-        lineLinked.textureSource = line["TextureSource"].toString();
+        lineLinked.splitZoneHeight = line["SplitZoneHeight"].toDouble();
+        lineLinked.splitZoneWidth = line["SplitZoneWidth"].toDouble();
+        lineLinked.lineWidth = line["LineWidth"].toDouble();
+        lineLinked.singleWay = line["SingleWay"].toBool();
+        lineLinked.axisStep = line["AxisStep"].toDouble();
         road->addLine(lineLinked);
     }
 
@@ -531,7 +543,7 @@ RoundingRoad* JSONFileManager::readRoundingRoad(QJsonObject &obj)
         QJsonObject line = lines[i].toObject();
         QJsonObject lineElement = line["Line"].toObject();
         QString name = lineElement["Name"].toString();
-        LineBrokenLinked lineLinked;
+        LineLinkedToRoad lineLinked;
 
         if (name == "LineBroken" ||
             name == "Tramways")
@@ -544,15 +556,22 @@ RoundingRoad* JSONFileManager::readRoundingRoad(QJsonObject &obj)
         if (name == "LineSimple")
             lineLinked.line = readLineSimple(lineElement);
 
-        lineLinked.lineType = line["LineType"].toInt();
-        lineLinked.lineWidth = line["LineWidth"].toDouble();
-        lineLinked.nearSide = line["NearSide"].toBool();
+        lineLinked.type = Line::LineType(line["LineType"].toInt());
         lineLinked.step = line["Step"].toDouble();
-        lineLinked.beginSide = line["BeginSide"].toBool();
         lineLinked.beginStep = line["BeginStep"].toDouble();
         lineLinked.endStep = line["EndStep"].toDouble();
-        lineLinked.differentDirections = line["DifferentDirections"].toBool();
+        lineLinked.rightStep = line["RightStep"].toDouble();
+        lineLinked.leftStep = line["LeftStep"].toDouble();
+        lineLinked.linkedToRightSide = line["RightSide"].toBool();
+        lineLinked.linkedToBeginSide = line["BeginSide"].toBool();
+        lineLinked.splitZoneType = Line::SplitZoneType(line["SplitZoneType"].toInt());
+        lineLinked.beginRounding = line["BeginRounding"].toBool();
+        lineLinked.endRounding = line["EndRounding"].toBool();
+        lineLinked.splitZoneHeight = line["SplitZoneHeight"].toDouble();
         lineLinked.splitZoneWidth = line["SplitZoneWidth"].toDouble();
+        lineLinked.lineWidth = line["LineWidth"].toDouble();
+        lineLinked.singleWay = line["SingleWay"].toBool();
+        lineLinked.axisStep = line["AxisStep"].toDouble();
         road->addLine(lineLinked);
     }
 

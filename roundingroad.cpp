@@ -233,16 +233,8 @@ RoundingRoad::RoundingRoad(const RoundingRoad &source)
     lines.resize(source.lines.size());
     for (int i = 0; i < source.lines.size(); ++i)
     {
-//        lines[i].line = source.lines[i].line->getCopy();
-//        lines[i].lineType = source.lines[i].lineType;
-//        lines[i].lineWidth = source.lines[i].lineWidth;
-//        lines[i].nearSide = source.lines[i].nearSide;
-//        lines[i].beginSide = source.lines[i].beginSide;
-//        lines[i].step = source.lines[i].step;
-//        lines[i].beginStep = source.lines[i].beginStep;
-//        lines[i].endStep = source.lines[i].endStep;
-//        lines[i].differentDirections = source.lines[i].differentDirections;
-//        lines[i].splitZoneWidth = source.lines[i].splitZoneWidth;
+        lines[i] = source.lines[i];
+        lines[i].line = source.lines[i].line->getCopy();
     }
 
     connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
@@ -821,56 +813,64 @@ void RoundingRoad::drawFigure(QGLWidget* render)
         if (render == NULL)
             Logger::getLogger()->warningLog() << "RoundingRoad::drawFigure(QGLWidget* render) render = NULL\n";
     }
-    glDisableClientState(GL_COLOR_ARRAY);
-    glEnable(GL_TEXTURE_2D);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    //glVertexPointer(3, GL_FLOAT, 0, vertexArray);
-    //glColorPointer(3, GL_FLOAT, 0, colorArray);
-    //glDrawElements(GL_TRIANGLES, numberOfPolygones * 3, GL_UNSIGNED_BYTE, indexArray);
-    glBindTexture(GL_TEXTURE_2D, textureID[0]);
-    glVertexPointer(3, GL_FLOAT, 0, vertexArray.begin());
-    glTexCoordPointer(2, GL_FLOAT, 0, textureArray.begin());
-    glDrawElements(GL_TRIANGLES, indexArray.size(), GL_UNSIGNED_BYTE, indexArray.begin());
-
-    if (showNearBoard)
+    if (drawRoad)
     {
-        glBindTexture(GL_TEXTURE_2D, textureID[1]);
-        glVertexPointer(3, GL_FLOAT, 0, vertexArrayNear.begin());
-        glTexCoordPointer(2, GL_FLOAT, 0, textureArrayNear.begin());
-        glDrawElements(GL_TRIANGLES, indexArrayNear.size(), GL_UNSIGNED_BYTE, indexArrayNear.begin());
+        glDisableClientState(GL_COLOR_ARRAY);
+        glEnable(GL_TEXTURE_2D);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        //glVertexPointer(3, GL_FLOAT, 0, vertexArray);
+        //glColorPointer(3, GL_FLOAT, 0, colorArray);
+        //glDrawElements(GL_TRIANGLES, numberOfPolygones * 3, GL_UNSIGNED_BYTE, indexArray);
+        glBindTexture(GL_TEXTURE_2D, textureID[0]);
+        glVertexPointer(3, GL_FLOAT, 0, vertexArray.begin());
+        glTexCoordPointer(2, GL_FLOAT, 0, textureArray.begin());
+        glDrawElements(GL_TRIANGLES, indexArray.size(), GL_UNSIGNED_INT, indexArray.begin());
+
+        if (showNearBoard)
+        {
+            glBindTexture(GL_TEXTURE_2D, textureID[1]);
+            glVertexPointer(3, GL_FLOAT, 0, vertexArrayNear.begin());
+            glTexCoordPointer(2, GL_FLOAT, 0, textureArrayNear.begin());
+            glDrawElements(GL_TRIANGLES, indexArrayNear.size(), GL_UNSIGNED_INT, indexArrayNear.begin());
+        }
+
+        if (showFarBoard)
+        {
+            glBindTexture(GL_TEXTURE_2D, textureID[1]);
+            glVertexPointer(3, GL_FLOAT, 0, vertexArrayFar.begin());
+            glTexCoordPointer(2, GL_FLOAT, 0, textureArrayFar.begin());
+            glDrawElements(GL_TRIANGLES, indexArrayFar.size(), GL_UNSIGNED_INT, indexArrayFar.begin());
+        }
+
+
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisable(GL_TEXTURE_2D);
+        glEnableClientState(GL_COLOR_ARRAY);
+
+        if (selected == true)
+        {
+            glDisable(GL_DEPTH_TEST);
+            drawSelectionFrame();
+            glEnable(GL_DEPTH_TEST);
+        }
+        if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
+        {
+            glDisable(GL_DEPTH_TEST);
+            drawControlElement(indexOfSelectedControl, 5.0f, 10.0f);
+            glEnable(GL_DEPTH_TEST);
+        }
     }
 
-    if (showFarBoard)
-    {
-        glBindTexture(GL_TEXTURE_2D, textureID[1]);
-        glVertexPointer(3, GL_FLOAT, 0, vertexArrayFar.begin());
-        glTexCoordPointer(2, GL_FLOAT, 0, textureArrayFar.begin());
-        glDrawElements(GL_TRIANGLES, indexArrayFar.size(), GL_UNSIGNED_BYTE, indexArrayFar.begin());
-    }
 
 
-
+    if (drawLines)
     for (int i = 0; i < lines.size(); ++i)
     {
         lines[i].line->drawFigure(render);
+        lines[i].drawDescription(render);
     }
 
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisable(GL_TEXTURE_2D);
-    glEnableClientState(GL_COLOR_ARRAY);
 
-    if (selected == true)
-    {
-        glDisable(GL_DEPTH_TEST);        
-        drawSelectionFrame();
-        glEnable(GL_DEPTH_TEST);
-    }
-    if (indexOfSelectedControl >= 0 && indexOfSelectedControl < getNumberOfControls())
-    {
-        glDisable(GL_DEPTH_TEST);
-        drawControlElement(indexOfSelectedControl, 5.0f, 10.0f);
-        glEnable(GL_DEPTH_TEST);
-    }
 }
 
 void RoundingRoad::drawSelectionFrame()
@@ -1008,6 +1008,8 @@ void RoundingRoad::drawControlElement(int index, float lineWidth, float pointSiz
 
     if (index >= linesCount)
     {
+        if (!drawRoad)
+            return;
         index -= linesCount;
 
         switch (index)
@@ -1214,6 +1216,8 @@ void RoundingRoad::drawControlElement(int index, float lineWidth, float pointSiz
     }
     else
     {
+        if (!drawLines)
+            return;
         int i;
         for (i = 0; i < lines.size(); ++i)
         {
@@ -1232,7 +1236,7 @@ void RoundingRoad::drawControlElement(int index, float lineWidth, float pointSiz
                 lines[i].line->drawControlElement(lines[i].line->getNumberOfControls() - 1,
                                                   lineWidth, pointSize);
         }
-        qDebug() << "Draw control" << index;
+        //qDebug() << "Draw control" << index;
     }
 
 
@@ -1303,6 +1307,7 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             float factor = res > 0 ? 1.0f : -1.0f;
             angle = factor * angle * 180.0f / pi;
             setAngel_1_NearRadius(angel1NearRadius + angle);
+            resetLines();
         }
             break;
         case 1:
@@ -1330,6 +1335,7 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             float factor = res > 0 ? 1.0f : -1.0f;
             angle = factor * angle * 180.0f / pi;
             setAngel_2_NearRadius(angel2NearRadius + angle);
+            resetLines();
         }
             break;
         case 2:
@@ -1357,6 +1363,7 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             float factor = res > 0 ? 1.0f : -1.0f;
             angle = factor * angle * 180.0f / pi;
             setAngel_1_FarRadius(angel1FarRadius + angle);
+            resetLines();
         }
             break;
         case 3:
@@ -1384,6 +1391,7 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             float factor = res > 0 ? 1.0f : -1.0f;
             angle = factor * angle * 180.0f / pi;
             setAngel_2_FarRadius(angel2FarRadius + angle);
+            resetLines();
         }
             break;
         case 4:
@@ -1395,9 +1403,11 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
                            xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
                            numberOfSides);
             emit nearRadiusChanged(nearRadius);
-
+            resetLines();
             break;
         case 5:
+            qDebug() << "X" << x;
+            qDebug() << "Y" << y;
             dr = ((x - xCenterFarRadius)*dx + (y - yCenterFarRadius)*dy)/
                     sqrt((x - xCenterFarRadius)*(x - xCenterFarRadius) + (y - yCenterFarRadius)*(y - yCenterFarRadius));
             //this->nearRadius += factor * dr;
@@ -1406,7 +1416,7 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
                            xCenterFarRadius, yCenterFarRadius, farRadius, angel1FarRadius, angel2FarRadius,
                            numberOfSides);
             emit farRadiusChanged(farRadius);
-
+            resetLines();
             break;
         case 6:
             xCenterNearRadius += dx;
@@ -1419,6 +1429,7 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             setFarTextureArray(texture_2Usize,texture_2Vsize);
             //resetLines();
             emit nearRadiusChanged(nearRadius);
+            resetLines();
             break;
         case 7:
             xCenterFarRadius += dx;
@@ -1431,6 +1442,7 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             setFarTextureArray(texture_2Usize,texture_2Vsize);
             //resetLines();
             emit farRadiusChanged(farRadius);
+            resetLines();
             break;
         case 8:
             dr = ((x - xCenterNearRadius)*dx + (y - yCenterNearRadius)*dy)/
@@ -1481,7 +1493,12 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             float res = dx2*dy1 - dx1*dy2;
             float factor = res > 0 ? 1.0f : -1.0f;
             angle = factor * angle * 180.0f / pi;
-            setAngel_1_NearRadius(angel1NearRadius + angle);
+
+            float deltaNearRadius = 0.0f;
+            if ((angel1NearRadius + angle) > angel2NearRadius)
+                deltaNearRadius = angel2NearRadius - angel1NearRadius;
+            else
+                deltaNearRadius = angle;
 
             x1 = x + dx;
             y1 = y + dy;
@@ -1504,8 +1521,20 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             res = dx2*dy1 - dx1*dy2;
             factor = res > 0 ? 1.0f : -1.0f;
             angle = factor * angle * 180.0f / pi;
-            setAngel_1_FarRadius(angel1FarRadius + angle);
 
+            float deltaFarRadius = 0.0f;
+            if ((angel1FarRadius + angle) > angel2FarRadius)
+                deltaFarRadius = angel2FarRadius - angel1FarRadius;
+            else
+                deltaFarRadius = angle;
+
+
+            float deltaResult = deltaNearRadius < deltaFarRadius ?
+                                deltaNearRadius :
+                                deltaFarRadius;
+            setAngel_1_NearRadius(angel1NearRadius + deltaResult - 0.001f);
+            setAngel_1_FarRadius(angel1FarRadius + deltaResult - 0.001f);
+            resetLines();
         }
             break;
         case 11:
@@ -1532,7 +1561,12 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             float res = dx2*dy1 - dx1*dy2;
             float factor = res > 0 ? 1.0f : -1.0f;
             angle = factor * angle * 180.0f / pi;
-            setAngel_2_NearRadius(angel2NearRadius + angle);
+
+            float deltaNearRadius = 0.0f;
+            if ((angel2NearRadius + angle) < angel1NearRadius)
+                deltaNearRadius = angel1NearRadius - angel2NearRadius;
+            else
+                deltaNearRadius = angle;
 
             x1 = x + dx;
             y1 = y + dy;
@@ -1555,7 +1589,25 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             res = dx2*dy1 - dx1*dy2;
             factor = res > 0 ? 1.0f : -1.0f;
             angle = factor * angle * 180.0f / pi;
-            setAngel_2_FarRadius(angel2FarRadius + angle);
+
+            float deltaFarRadius = 0.0f;
+            if ((angel2FarRadius + angle) < angel1FarRadius)
+                deltaFarRadius = angel1FarRadius - angel2FarRadius;
+            else
+                deltaFarRadius = angle;
+
+
+            float deltaResult = deltaNearRadius > deltaFarRadius ?
+                                deltaNearRadius :
+                                deltaFarRadius;
+            setAngel_2_NearRadius(angel2NearRadius + deltaResult + 0.001f);
+            setAngel_2_FarRadius(angel2FarRadius + deltaResult + 0.001f);
+//            qDebug() << "------------";
+//            qDebug() << "Far2" << angel2FarRadius;
+//            qDebug() << "Far1" << angel1FarRadius;
+//            qDebug() << "Near2" << angel2NearRadius;
+//            qDebug() << "Near1" << angel1NearRadius;
+            resetLines();
         }
             break;
 
@@ -1580,16 +1632,95 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
 
             if (lines[i].linkedToRightSide)
             {
-                lines[i].step += dr;
+                if (lines[i].type == Line::StopLine)
+                {
+                    float x1 = x + dx;
+                    float y1 = y + dy;
+                    float x2 = xCenterNearRadius;
+                    float y2 = yCenterNearRadius;
+                    float x3 = x;
+                    float y3 = y;
+                    float dx1 = x1 - x2;
+                    float dy1 = y1 - y2;
+                    float r1 = sqrt(dx1*dx1 + dy1*dy1);
+                    float dx2 = x3 - x2;
+                    float dy2 = y3 - y2;
+                    float r2 = sqrt(dx2*dx2 + dy2*dy2);
+                    float t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
+                    if (t > 1)
+                        t = 1.0f;
+                    if (t < -1)
+                        t = -1.0f;
+                    float angle = acos(t);
+                    float res = dx2*dy1 - dx1*dy2;
+                    float factor = res > 0 ? 1.0f : -1.0f;
+                    angle = factor * angle;
+                    angle = lines[i].linkedToBeginSide ? angle : -angle;
+                    lines[i].step += angle * nearRadius;
+
+                    float deltaAngle = (angel2NearRadius - angel1NearRadius) * 3.14159265f / 180.0f;
+                    float fullLength = deltaAngle * nearRadius;
+
+                    if (lines[i].step < 0.0f)
+                        lines[i].step = 0.0f;
+                    if (lines[i].step > fullLength)
+                        lines[i].step = fullLength;
+                }
+                else
+                {
+                    lines[i].step += dr;
+                    if ((lines[i].step) < 0.0f)
+                        lines[i].step = 0.0f;
+                    if ((lines[i].step + lines[i].splitZoneWidth) > (farRadius - nearRadius))
+                        lines[i].step = farRadius - nearRadius - lines[i].splitZoneWidth;
+                }
             }
             else
             {
-                lines[i].step -= dr;
+                if (lines[i].type == Line::StopLine)
+                {
+                    float x1 = x + dx;
+                    float y1 = y + dy;
+                    float x2 = xCenterFarRadius;
+                    float y2 = yCenterFarRadius;
+                    float x3 = x;
+                    float y3 = y;
+                    float dx1 = x1 - x2;
+                    float dy1 = y1 - y2;
+                    float r1 = sqrt(dx1*dx1 + dy1*dy1);
+                    float dx2 = x3 - x2;
+                    float dy2 = y3 - y2;
+                    float r2 = sqrt(dx2*dx2 + dy2*dy2);
+                    float t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
+                    if (t > 1)
+                        t = 1.0f;
+                    if (t < -1)
+                        t = -1.0f;
+                    float angle = acos(t);
+                    float res = dx2*dy1 - dx1*dy2;
+                    float factor = res > 0 ? 1.0f : -1.0f;
+                    angle = factor * angle;
+                    angle = lines[i].linkedToBeginSide ? angle : -angle;
+                    lines[i].step += angle * farRadius;
+
+                    float deltaAngle = (angel2FarRadius - angel1FarRadius) * 3.14159265f / 180.0f;
+                    float fullLength = deltaAngle * farRadius;
+
+                    if (lines[i].step < 0.0f)
+                        lines[i].step = 0.0f;
+                    if (lines[i].step > fullLength)
+                        lines[i].step = fullLength;
+                }
+                else
+                {
+                    lines[i].step -= dr;
+                    if (lines[i].step < 0.0f)
+                        lines[i].step = 0.0f;
+                    if (lines[i].step > (farRadius - nearRadius))
+                        lines[i].step = farRadius - nearRadius;
+                }
             }
-            if (lines[i].step < 0.0f)
-                lines[i].step = 0.0f;
-            if (lines[i].step > (farRadius - nearRadius))
-                lines[i].step = farRadius - nearRadius;
+
 
             QVector<float> vertices;
             calculateVertexArray(lines[i], vertices);
@@ -1606,11 +1737,19 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
                 SplitZone* splitZone = qobject_cast<SplitZone*>(lines[i].line);
                 splitZone->calculateLine(lineVertexArray, size);
                 splitZone->reset();
+                lines[i].isActive = true;
             }
                 break;
             case Line::StopLine:
             {
-                return;
+                LineBroken *lineBroken = qobject_cast<LineBroken*>(lines[i].line);
+                lineBroken->setVertexArrayForAxis(lineVertexArray, size);
+                lineBroken->setIndexArrayForAxis();
+                lineBroken->setVertexArray(lineBroken->getWidth(),
+                                           lineVertexArray, size);
+                lineBroken->setIndexArray();
+                lineBroken->setTextureArray();
+                lines[i].isActive = true;
             }
                 break;
             default:
@@ -1621,6 +1760,7 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
                                            lineVertexArray, size);
                 lineBroken->setIndexArray();
                 lineBroken->setTextureArray();
+                lines[i].isActive = true;
                 break;
             }
             delete[] lineVertexArray;
@@ -1630,6 +1770,60 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
         {
             if (0 == index)
             {
+                if (lines[i].type == Line::StopLine)
+                {
+                    LineBroken *lineBroken = qobject_cast<LineBroken*>(lines[i].line);
+                    vec3 p1 = lineBroken->getAxisPoint(0);
+                    vec3 p2 = lineBroken->getAxisPoint(1);
+                    float dx1 = p1.x - p2.x;
+                    float dy1 = p1.y - p2.y;
+                    float length = sqrt(dx1 * dx1 + dy1 * dy1);
+                    if (lines[i].linkedToRightSide)
+                    {
+                        float dr = ((p2.x - p1.x)*dx + (p2.y - p1.y)*dy)/length;
+                        if (dr > length)
+                            dr = length - 0.001f;
+                        else
+                            if ((lines[i].rightStep + dr) < 0.0f)
+                                dr = -lines[i].rightStep;
+                        lines[i].rightStep += dr;
+                    }
+                    else
+                    {
+                        float dr = ((p2.x - p1.x)*dx + (p2.y - p1.y)*dy)/length;
+                        if (dr > length)
+                            dr = length - 0.001f;
+                        else
+                            if ((lines[i].leftStep + dr) < 0.0f)
+                                dr = -lines[i].leftStep;
+                        lines[i].leftStep += dr;
+                    }
+                    QVector<float> vertices;
+                    calculateVertexArray(lines[i], vertices);
+                    int size = vertices.size();
+                    float *lineVertexArray = new float[size];
+                    for (int i = 0; i < vertices.size(); ++i)
+                        lineVertexArray[i] = vertices[i];
+                    lineBroken->setVertexArrayForAxis(lineVertexArray, size);
+                    lineBroken->setIndexArrayForAxis();
+                    lineBroken->setVertexArray(lineBroken->getWidth(),
+                                               lineVertexArray, size);
+                    lineBroken->setIndexArray();
+                    lineBroken->setTextureArray();
+                    lines[i].isActive = true;
+                    return;
+                }
+                float fullLength = 0.0f;
+                if (lines[i].linkedToRightSide)
+                {
+                    float deltaAngle = (angel2NearRadius - angel1NearRadius) * 3.14159265f / 180.0f;
+                    fullLength = deltaAngle * (nearRadius + lines[i].step);
+                }
+                else
+                {
+                    float deltaAngle = (angel2FarRadius - angel1FarRadius) * 3.14159265f / 180.0f;
+                    fullLength = deltaAngle * (farRadius - lines[i].step);
+                }
                 float x1 = x + dx;
                 float y1 = y + dy;
                 float x2 = xCenterNearRadius;
@@ -1652,6 +1846,8 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
                 float factor = res > 0 ? 1.0f : -1.0f;
                 angle = factor * angle;
                 lines[i].beginStep += r2 * angle;
+                if ((lines[i].beginStep + lines[i].endStep) > fullLength)
+                    lines[i].beginStep = fullLength - lines[i].endStep - 0.001f;
 
                 QVector<float> vertices;
                 calculateVertexArray(lines[i], vertices);
@@ -1667,11 +1863,7 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
                     SplitZone* splitZone = qobject_cast<SplitZone*>(lines[i].line);
                     splitZone->calculateLine(lineVertexArray, size);
                     splitZone->reset();
-                }
-                    break;
-                case Line::StopLine:
-                {
-                    return;
+                    lines[i].isActive = true;
                 }
                     break;
                 default:
@@ -1682,6 +1874,7 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
                                                lineVertexArray, size);
                     lineBroken->setIndexArray();
                     lineBroken->setTextureArray();
+                    lines[i].isActive = true;
                     break;
                 }
                 delete[] lineVertexArray;
@@ -1689,6 +1882,60 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
             }
             else
             {
+                if (lines[i].type == Line::StopLine)
+                {
+                    LineBroken *lineBroken = qobject_cast<LineBroken*>(lines[i].line);
+                    vec3 p1 = lineBroken->getAxisPoint(0);
+                    vec3 p2 = lineBroken->getAxisPoint(1);
+                    float dx1 = p1.x - p2.x;
+                    float dy1 = p1.y - p2.y;
+                    float length = sqrt(dx1 * dx1 + dy1 * dy1);
+                    if (lines[i].linkedToRightSide)
+                    {
+                        float dr = ((p1.x - p2.x)*dx + (p1.y - p2.y)*dy)/length;
+                        if (dr > length)
+                            dr = length - 0.001f;
+                        else
+                            if ((lines[i].leftStep + dr) < 0.0f)
+                                dr = -lines[i].leftStep;
+                        lines[i].leftStep += dr;
+                    }
+                    else
+                    {
+                        float dr = ((p1.x - p2.x)*dx + (p1.y - p2.y)*dy)/length;
+                        if (dr > length)
+                            dr = length - 0.001f;
+                        else
+                            if ((lines[i].rightStep + dr) < 0.0f)
+                                dr = -lines[i].rightStep;
+                        lines[i].rightStep += dr;
+                    }
+                    QVector<float> vertices;
+                    calculateVertexArray(lines[i], vertices);
+                    int size = vertices.size();
+                    float *lineVertexArray = new float[size];
+                    for (int i = 0; i < vertices.size(); ++i)
+                        lineVertexArray[i] = vertices[i];
+                    lineBroken->setVertexArrayForAxis(lineVertexArray, size);
+                    lineBroken->setIndexArrayForAxis();
+                    lineBroken->setVertexArray(lineBroken->getWidth(),
+                                               lineVertexArray, size);
+                    lineBroken->setIndexArray();
+                    lineBroken->setTextureArray();
+                    lines[i].isActive = true;
+                    return;
+                }
+                float fullLength = 0.0f;
+                if (lines[i].linkedToRightSide)
+                {
+                    float deltaAngle = (angel2NearRadius - angel1NearRadius) * 3.14159265f / 180.0f;
+                    fullLength = deltaAngle * (nearRadius + lines[i].step);
+                }
+                else
+                {
+                    float deltaAngle = (angel2FarRadius - angel1FarRadius) * 3.14159265f / 180.0f;
+                    fullLength = deltaAngle * (farRadius - lines[i].step);
+                }
                 float x1 = x + dx;
                 float y1 = y + dy;
                 float x2 = xCenterNearRadius;
@@ -1711,6 +1958,8 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
                 float factor = res > 0 ? 1.0f : -1.0f;
                 angle = factor * angle;
                 lines[i].endStep -= r2 * angle;
+                if ((lines[i].beginStep + lines[i].endStep) > fullLength)
+                    lines[i].endStep = fullLength - lines[i].beginStep - 0.001f;
 
                 QVector<float> vertices;
                 calculateVertexArray(lines[i], vertices);
@@ -1726,6 +1975,7 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
                     SplitZone* splitZone = qobject_cast<SplitZone*>(lines[i].line);
                     splitZone->calculateLine(lineVertexArray, size);
                     splitZone->reset();
+                    lines[i].isActive = true;
                 }
                     break;
                 case Line::StopLine:
@@ -1741,6 +1991,7 @@ void RoundingRoad::resizeByControl(int index, float dx, float dy, float x, float
                                                lineVertexArray, size);
                     lineBroken->setIndexArray();
                     lineBroken->setTextureArray();
+                    lines[i].isActive = true;
                     break;
                 }
                 delete[] lineVertexArray;
@@ -1812,18 +2063,26 @@ QJsonObject RoundingRoad::getJSONInfo()
     QJsonArray linesArray;
     for (int i = 0; i < lines.size(); ++i)
     {
-//        QJsonObject line;
-//        line["Line"] = lines[i].line->getJSONInfo();
-//        line["LineType"] = lines[i].lineType;
-//        line["LineWidth"] = lines[i].lineWidth;
-//        line["NearSide"] = lines[i].nearSide;
-//        line["Step"] = lines[i].step;
-//        line["BeginSide"] = lines[i].beginSide;
-//        line["BeginStep"] = lines[i].beginStep;
-//        line["EndStep"] = lines[i].endStep;
-//        line["DifferentDirections"] = lines[i].differentDirections;
-//        line["SplitZoneWidth"] = lines[i].splitZoneWidth;
-//        linesArray.append(line);
+        QJsonObject line;
+        line["Line"] = lines[i].line->getJSONInfo();
+        line["LineType"] = int(lines[i].type);
+        line["Step"] = lines[i].step;
+        line["BeginStep"] = lines[i].beginStep;
+        line["EndStep"] = lines[i].endStep;
+        line["RightStep"] = lines[i].rightStep;
+        line["LeftStep"] = lines[i].leftStep;
+        line["RightSide"] = lines[i].linkedToRightSide;
+        line["BeginSide"] = lines[i].linkedToBeginSide;
+        line["SplitZoneType"] = int(lines[i].splitZoneType);
+        line["BeginRounding"] = lines[i].beginRounding;
+        line["EndRounding"] = lines[i].endRounding;
+        line["SplitZoneHeight"] = lines[i].splitZoneHeight;
+        line["SplitZoneWidth"] = lines[i].splitZoneWidth;
+        line["LineWidth"] = lines[i].lineWidth;
+        line["SingleWay"] = lines[i].singleWay;
+        line["AxisStep"] = lines[i].axisStep;
+
+        linesArray.append(line);
     }
     element["Lines"] = linesArray;
     return element;    
@@ -1852,6 +2111,7 @@ void RoundingRoad::getProperties(QVBoxLayout *layout, QGLWidget* render)
     QDoubleSpinBox* farRadiusSpinBox = new QDoubleSpinBox();
     farRadiusSpinBox->setKeyboardTracking(false);
     farRadiusSpinBox->setMaximum(10000.0);
+    farRadiusSpinBox->setFocusPolicy(Qt::StrongFocus);
 
     QDoubleSpinBox* angel_1_NearRadiusSpinBox = new QDoubleSpinBox();
     angel_1_NearRadiusSpinBox->setKeyboardTracking(false);
@@ -1942,29 +2202,12 @@ void RoundingRoad::getProperties(QVBoxLayout *layout, QGLWidget* render)
 
     QPushButton *addLineButton = new QPushButton("+");
 
-//    connect(stepDialog, SIGNAL(lineTypeChanged(int)), this, SLOT(setLineType(int)));
-//    connect(stepDialog, SIGNAL(rightSideChanged(bool)), this, SLOT(setNearSide(bool)));
-//    connect(stepDialog, SIGNAL(stepChanged(double)), this, SLOT(setStep(double)));
-//    connect(stepDialog, SIGNAL(beginStepChanged(double)), this, SLOT(setBeginStep(double)));
-//    connect(stepDialog, SIGNAL(endStepChanged(double)), this, SLOT(setEndStep(double)));
-//    connect(stepDialog, SIGNAL(beginSideChanged(bool)), this, SLOT(setBeginSide(bool)));
-//    connect(stepDialog, SIGNAL(beginRoundingChanged(bool)), this, SLOT(setBeginRounding(bool)));
-//    connect(stepDialog, SIGNAL(endRoundingChanged(bool)), this, SLOT(setEndRounding(bool)));
-//    connect(stepDialog, SIGNAL(splitZoneWidthChanged(double)), this, SLOT(setSplitZoneWidth(double)));
-//    connect(stepDialog, SIGNAL(differentDirectionsChanged(bool)), this, SLOT(setDifferentDirections(bool)));
-//    connect(stepDialog, SIGNAL(singleWayChanged(bool)), this, SLOT(setSingleWay(bool)));
-//    connect(stepDialog, SIGNAL(axisStepChanged(double)), this, SLOT(setAxisStep(double)));
-//    connect(stepDialog, SIGNAL(splitZoneTypeChanged(int)), this, SLOT(setSplitZoneType(int)));
-//    connect(stepDialog, SIGNAL(splitZoneHeightChanged(double)), this, SLOT(setSplitZoneHeight(double)));
-//    connect(addLineButton, SIGNAL(clicked(bool)), stepDialog, SLOT(exec()));
-//    connect(stepDialog, SIGNAL(accepted()), this, SLOT(addLine()));
-
     connect(addLineButton, SIGNAL(clicked(bool)), stepDialog, SLOT(exec()));
     connect(stepDialog, SIGNAL(lineCreated(LineLinkedToRoad)), this, SLOT(constructLine(LineLinkedToRoad)));
-    //connect(stepDialog, SIGNAL(lineDeleted(LineLinkedToRoad)), this, SLOT(deleteLine(LineLinkedToRoad)));
-    //connect(stepDialog, SIGNAL(lineEdited(LineLinkedToRoad)), this, SLOT(editLine(LineLinkedToRoad)));
-    //connect(roads[i], SIGNAL(linesChanged()), this, SLOT(updateListWidget()));
-    //connect(roads[i], SIGNAL(lineDeleted()), this, SLOT(updateListWidget()));
+    connect(stepDialog, SIGNAL(lineEdited(LineLinkedToRoad)), this, SLOT(editLine(LineLinkedToRoad)));
+    connect(stepDialog, SIGNAL(lineDeleted(LineLinkedToRoad)), this, SLOT(deleteLine(LineLinkedToRoad)));
+    connect(this, SIGNAL(lineAdded()), SLOT(updateListWidget()));
+    connect(this, SIGNAL(lineDeleted()), SLOT(updateListWidget()));
 
     QFormLayout *l = new QFormLayout();
 
@@ -1994,14 +2237,14 @@ void RoundingRoad::getProperties(QVBoxLayout *layout, QGLWidget* render)
     list->setResizeMode(QListWidget::Adjust);
     list->setSizeAdjustPolicy(QListWidget::AdjustToContents);
     list->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Ignored);
-
+    this->list = list;
 
     for (int j = 0; j < lines.size(); ++j)
     {
 
         QPushButton *editButton = new QPushButton();
         editButton->setObjectName(QString::number(j));
-        //connect(editButton, SIGNAL(clicked(bool)), roads[i], SLOT(editLine()));
+        connect(editButton, SIGNAL(clicked(bool)), this, SLOT(editLine()));
         editButton->setContentsMargins(0, 0, 0, 0);
         editButton->setText("Редактировать");
         QListWidgetItem *item = new QListWidgetItem();
@@ -2023,6 +2266,205 @@ void RoundingRoad::getProperties(QVBoxLayout *layout, QGLWidget* render)
     l->addRow("Добавить линию", addLineButton);    
     layout->addLayout(l);
     layout->addWidget(list);
+}
+
+void RoundingRoad::updateListWidget()
+{
+    if (!selected)
+        return;
+
+    list->clear();
+
+    for (int j = 0; j < lines.size(); ++j)
+    {
+        QPushButton *editButton = new QPushButton();
+        editButton->setObjectName(QString::number(j));
+        connect(editButton, SIGNAL(clicked(bool)), this, SLOT(editLine()));
+        editButton->setContentsMargins(0, 0, 0, 0);
+        editButton->setText("Редактировать");
+        QListWidgetItem *item = new QListWidgetItem();
+        list->addItem(item);
+
+        QWidget *itemWidget = new QWidget(list);
+        QHBoxLayout *itemLayout = new QHBoxLayout(itemWidget);
+        itemLayout->setMargin(0);
+        itemLayout->setContentsMargins(5, 0, 5, 0);
+        itemWidget->setLayout(itemLayout);
+        itemLayout->addWidget(new QLabel(QString("Линия №") + QString::number(j + 1)));
+        itemLayout->addWidget(editButton);
+        list->setItemWidget(item, itemWidget);
+    }
+    list->setFixedHeight(list->sizeHintForRow(0) * list->count() + 2 * list->frameWidth());
+}
+
+void RoundingRoad::editLine()
+{
+    bool ok;
+    int i = sender()->objectName().toInt(&ok);
+    if (ok)
+    {
+        qDebug() << "Index =" << i;
+    }
+    else
+    {
+        QMessageBox::critical(0,"Ошибка","RoundingRoad::editLine(). objectName кнопки отправителя не конвертируется в int");
+        return;
+    }
+    if (i < 0 || i >= lines.size())
+    {
+        QMessageBox::critical(0, "Ошибка", "RoundingRoad::editLine(). Выход индекса за пределы массива");
+        return;
+    }
+    switch(lines[i].type)
+    {
+    case Line::StopLine:
+        break;
+    case Line::SplitZone:
+        break;
+    case Line::TramWays:
+        break;
+    default:
+        break;
+    }
+    if (stepDialog)
+    {
+        stepDialog->setLine(lines[i]);
+        stepDialog->setUsingTarget(Edit);
+        stepDialog->exec();
+        stepDialog->setUsingTarget(Create);
+    }
+    else
+    {
+        qDebug() << "No StepDialog";
+    }
+}
+
+void RoundingRoad::editLine(LineLinkedToRoad line)
+{
+    int i;
+    for (i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].line == line.line)
+            break;
+    }
+    if (i >= lines.size())
+    {
+        QMessageBox::critical(0, "Ошибка", "RoundingRoad::editLine(LineLinkedToRoad line). Невозможно найти переденную линию из списка линий дороги");
+        return;
+    }
+    QString textureSource;
+    switch(line.type)
+    {
+    case Line::SingleSolid:
+        textureSource = "/models/city_roads/solid.png";
+        line.lineWidth = 0.1f;
+        break;
+    case Line::SingleIntermittent:
+        textureSource = "/models/city_roads/inter.png";
+        line.lineWidth = 0.1f;
+        break;
+    case Line::DoubleSolid:
+        textureSource = "/models/city_roads/d_solid.png";
+        line.lineWidth = 0.25f;
+        break;
+    case Line::DoubleIntermittentLeft:
+        textureSource = "/models/city_roads/d_inter_l.png";
+        line.lineWidth = 0.25f;
+        break;
+    case Line::DoubleIntermittentRight:
+        textureSource = "/models/city_roads/d_inter_r.png";
+        line.lineWidth = 0.25f;
+        break;
+    case Line::DoubleIntermittent:
+        textureSource = "/models/city_roads/d_inter.png";
+        line.lineWidth = 0.25f;
+        break;
+    case Line::StopLine:
+        textureSource = "/models/city_roads/solid.png";
+        line.lineWidth = 0.4f;
+        break;
+    case Line::TramWays:
+        textureSource = QString("/models/city_roads/tramways.png");
+        line.lineWidth = 1.5f;
+        break;
+    default:
+        break;
+
+    }
+    if (lines[i].line)
+        delete lines[i].line;
+    lines[i].line = NULL;
+    lines[i] = line;
+
+    QVector<float> vertices;
+    calculateVertexArray(lines[i], vertices);
+    int size = vertices.size();
+    float *lineVertexArray = new float[size];
+    for (int i = 0; i < vertices.size(); ++i)
+        lineVertexArray[i] = vertices[i];
+
+
+    switch (lines[i].type)
+    {
+    case Line::SplitZone:
+    {
+        switch (lines[i].splitZoneType)
+        {
+        case Line::Marking:
+            lines[i].line = new SplitZone(lineVertexArray, size,
+                                                    lines[i].splitZoneWidth,
+                                                    lines[i].beginRounding,
+                                                    lines[i].endRounding,
+                                                    QString("Линия №") + QString::number(lines.size() + 1));
+            break;
+        case Line::Grass:
+            lines[i].line = new SplitZone(lineVertexArray, size,
+                                                   lines[i].splitZoneWidth,
+                                                   lines[i].beginRounding,
+                                                   lines[i].endRounding,
+                                                    lines[i].splitZoneType,
+                                                    lines[i].splitZoneHeight,
+                                                    "/models/city_roads/board.jpg",
+                                                    0.25f, 6.0f,
+                                                    "/models/city_roads/grass.jpg",
+                                                    3.0f, 3.0f,
+                                                    QString("Линия №") + QString::number(lines.size() + 1));
+            break;
+        case Line::Board:
+            lines[i].line = new SplitZone(lineVertexArray, size,
+                                      lines[i].splitZoneWidth,
+                                      lines[i].beginRounding,
+                                      lines[i].endRounding,
+                                      lines[i].splitZoneType,
+                                      lines[i].splitZoneHeight,
+                                      "/models/city_roads/board.jpg",
+                                      0.25f, 6.0f,
+                                      "/models/city_roads/nr_07S.jpg",
+                                      6.0f, 6.0f,
+                                      QString("Линия №") + QString::number(lines.size() + 1));
+            break;
+        default:
+            break;
+        }
+    }
+        break;
+    case Line::StopLine:
+    {
+        lines[i].line = new LineBroken(lines[i].lineWidth,
+                                                lineVertexArray, size,
+                                                textureSource, 6.0f, "LineBroken", 1,
+                                                QString("Линия №") + QString::number(lines.size() + 1));
+    }
+        break;
+    default:
+        lines[i].line = new LineBroken(lines[i].lineWidth,
+                                                lineVertexArray, size,
+                                                textureSource, 6.0f, "LineBroken", 1,
+                                                QString("Линия №") + QString::number(lines.size() + 1));
+        break;
+    }
+    delete[] lineVertexArray;
+    lineVertexArray = NULL;
 }
 
 void RoundingRoad::setNearRadius(double nearRadius)
@@ -2385,6 +2827,20 @@ void RoundingRoad::addLine(LineLinkedToRoad line)
     lines.push_back(line);
     //if (layout && render)
     //    emit linesChanged(layout, render);
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].type == Line::SplitZone)
+        {
+            SplitZone *splitZone = qobject_cast<SplitZone*>(lines[i].line);
+            splitZone->setDescription(QString("Линия №") + QString::number(i + 1));
+        }
+        else
+        {
+            LineBroken *lineBroken = qobject_cast<LineBroken*>(lines[i].line);
+            lineBroken->setDescription(QString("Линия №") + QString::number(i + 1));
+        }
+    }
+    emit lineAdded();
 }
 
 void RoundingRoad::constructLine(QString textureSource, float textureSize)
@@ -2528,9 +2984,9 @@ void RoundingRoad::constructLine(LineLinkedToRoad line)
     constructLine(textSource, 6.0f);
 }
 
-void RoundingRoad::calculateVertexArray(LineLinkedToRoad line, QVector<float> &vertices)
+void RoundingRoad::calculateVertexArray(LineLinkedToRoad& line, QVector<float> &vertices)
 {
-    float angel_1, angel_2;
+    double angel_1, angel_2;
     float x, y, radius;
     float factor;
     if (line.linkedToRightSide)
@@ -2552,6 +3008,8 @@ void RoundingRoad::calculateVertexArray(LineLinkedToRoad line, QVector<float> &v
         factor = -1.0f;
     }
 
+    line.beginStepPoints.clear();
+    line.endStepPoints.clear();
 
     switch(line.type)
     {
@@ -2561,36 +3019,100 @@ void RoundingRoad::calculateVertexArray(LineLinkedToRoad line, QVector<float> &v
         {
             if (line.linkedToRightSide)
             {
-                vertices.push_back(x + radius * cosf(angel_1 + line.step / radius));
-                vertices.push_back(y + radius * sinf(angel_1 + line.step / radius));
+                vertices.push_back(x + (radius + line.rightStep) * cosf(angel_1 * 3.14159265f / 180.0f + line.step / radius));
+                vertices.push_back(y + (radius + line.rightStep) * sinf(angel_1 * 3.14159265f / 180.0f + line.step / radius));
                 vertices.push_back(0.001f);
-                vertices.push_back(x + farRadius * cosf(angel_1 + line.step / radius)/* +
+                line.endStepPoint_Begin = QVector3D(x + (radius + line.rightStep) * cosf(angel_1 * 3.14159265f / 180.0f + line.step / radius),
+                                                    y + (radius + line.rightStep) * sinf(angel_1 * 3.14159265f / 180.0f + line.step / radius),
+                                                    0.2f);
+                line.endStepPoint_End = QVector3D(x + radius * cosf(angel_1 * 3.14159265f / 180.0f + line.step / radius),
+                                                  y + radius * sinf(angel_1 * 3.14159265f / 180.0f + line.step / radius),
+                                                  0.2f);
+                vertices.push_back(xCenterFarRadius + (farRadius - line.leftStep) * cosf(angel_1 * 3.14159265f / 180.0f + line.step / radius)/* +
                                    (xCenterFarRadius - xCenterNearRadius)*/);
-                vertices.push_back(y + farRadius * sinf(angel_1 + line.step / radius)/* +
+                vertices.push_back(yCenterFarRadius + (farRadius - line.leftStep) * sinf(angel_1 * 3.14159265f / 180.0f + line.step / radius)/* +
                                    (yCenterFarRadius - yCenterNearRadius)*/);
                 vertices.push_back(0.001f);
+                line.beginStepPoint_Begin = QVector3D(xCenterFarRadius + (farRadius - line.leftStep) * cosf(angel_1 * 3.14159265f / 180.0f + line.step / radius),
+                                                      yCenterFarRadius + (farRadius - line.leftStep) * sinf(angel_1 * 3.14159265f / 180.0f + line.step / radius),
+                                                                          0.2f);
+                line.beginStepPoint_End = QVector3D(xCenterFarRadius + farRadius * cosf(angel_1 * 3.14159265f / 180.0f + line.step / radius),
+                                                    yCenterFarRadius + farRadius * sinf(angel_1 * 3.14159265f / 180.0f + line.step / radius),
+                                                                        0.2f);
+                line.stepPoint_Begin = line.stepPoint_End = line.linkedPoint = QVector3D(vertexArray[0], vertexArray[1], 0.2f);
             }
             else
             {
-                vertices.push_back(x + radius * cosf(angel_1 + line.step / radius));
-                vertices.push_back(y + radius * sinf(angel_1 + line.step / radius));
+                vertices.push_back(x + (radius - line.leftStep) * cosf(angel_1 * 3.14159265f / 180.0f + line.step / radius));
+                vertices.push_back(y + (radius - line.leftStep) * sinf(angel_1 * 3.14159265f / 180.0f + line.step / radius));
                 vertices.push_back(0.001f);
-                vertices.push_back(x + nearRadius * cosf(angel_1 + line.step / radius));
-                vertices.push_back(y + nearRadius * sinf(angel_1 + line.step / radius));
+                line.beginStepPoint_Begin = QVector3D(x + (radius - line.leftStep) * cosf(angel_1 * 3.14159265f / 180.0f + line.step / radius),
+                                                      y + (radius - line.leftStep) * sinf(angel_1 * 3.14159265f / 180.0f + line.step / radius),
+                                                      0.2f);
+                line.beginStepPoint_End = QVector3D(xCenterFarRadius + farRadius * cosf(angel_1 * 3.14159265f / 180.0f + line.step / radius),
+                                                    yCenterFarRadius + farRadius * sinf(angel_1 * 3.14159265f / 180.0f + line.step / radius),
+                                                    0.2f);
+                vertices.push_back(xCenterNearRadius + (nearRadius + line.rightStep) * cosf(angel_1 * 3.14159265f / 180.0f + line.step / radius));
+                vertices.push_back(yCenterNearRadius + (nearRadius + line.rightStep) * sinf(angel_1 * 3.14159265f / 180.0f + line.step / radius));
                 vertices.push_back(0.001f);
+                line.endStepPoint_Begin = QVector3D(xCenterNearRadius + (nearRadius + line.rightStep) * cosf(angel_1 * 3.14159265f / 180.0f + line.step / radius),
+                                                    xCenterNearRadius + (nearRadius + line.rightStep) * sinf(angel_1 * 3.14159265f / 180.0f + line.step / radius),
+                                                    0.2f);
+                line.endStepPoint_End = QVector3D(xCenterNearRadius + nearRadius * cosf(angel_1 * 3.14159265f / 180.0f + line.step / radius),
+                                                  xCenterNearRadius + nearRadius * sinf(angel_1 * 3.14159265f / 180.0f + line.step / radius),
+                                                  0.2f);
+                line.stepPoint_Begin = line.stepPoint_End = line.linkedPoint = QVector3D(vertexArray[3], vertexArray[4], 0.2f);
             }
         }
         else
         {
             if (line.linkedToRightSide)
             {
-//                vertices.push_back(x + radius * cosf(angel_2 - line.step / radius));
-//                vertices.push_back(y + radius * sinf(angel_2 - line.step / radius));
+                vertices.push_back(x + (radius + line.rightStep) * cosf(angel_2 * 3.14159265f / 180.0f - line.step / radius));
+                vertices.push_back(y + (radius + line.rightStep) * sinf(angel_2 * 3.14159265f / 180.0f - line.step / radius));
+                vertices.push_back(0.001f);
+                line.endStepPoint_Begin = QVector3D(x + (radius + line.rightStep) * cosf(angel_2 * 3.14159265f / 180.0f - line.step / radius),
+                                                    y + (radius + line.rightStep) * sinf(angel_2 * 3.14159265f / 180.0f - line.step / radius),
+                                                    0.2f);
+                line.endStepPoint_End = QVector3D(x + radius * cosf(angel_2 * 3.14159265f / 180.0f - line.step / radius),
+                                                  y + radius * sinf(angel_2 * 3.14159265f / 180.0f - line.step / radius),
+                                                  0.2f);
+                vertices.push_back(xCenterFarRadius + (farRadius - line.leftStep) * cosf(angel_2 * 3.14159265f / 180.0f - line.step / radius)/* +
+                                   (xCenterFarRadius - xCenterNearRadius)*/);
+                vertices.push_back(yCenterFarRadius + (farRadius - line.leftStep) * sinf(angel_2 * 3.14159265f / 180.0f - line.step / radius)/* +
+                                   (yCenterFarRadius - yCenterNearRadius)*/);
+                vertices.push_back(0.001f);
+                line.beginStepPoint_Begin = QVector3D(xCenterFarRadius + (farRadius - line.leftStep) * cosf(angel_2 * 3.14159265f / 180.0f - line.step / radius),
+                                                      yCenterFarRadius + (farRadius - line.leftStep) * sinf(angel_2 * 3.14159265f / 180.0f - line.step / radius),
+                                                                          0.2f);
+                line.beginStepPoint_End = QVector3D(xCenterFarRadius + farRadius * cosf(angel_2 * 3.14159265f / 180.0f - line.step / radius),
+                                                    yCenterFarRadius + farRadius * sinf(angel_2 * 3.14159265f / 180.0f - line.step / radius),
+                                                                        0.2f);
+                int size = vertexArray.size() / 3;
+                line.stepPoint_Begin = line.stepPoint_End = line.linkedPoint = QVector3D(vertexArray[(size - 2) * 3], vertexArray[(size - 2) * 3 + 1], 0.2f);
             }
             else
             {
-//                vertices.push_back(x + radius * cosf(angel_2 - line.step / radius));
-//                vertices.push_back(y + radius * sinf(angel_2 - line.step / radius));
+                vertices.push_back(x + (radius - line.leftStep) * cosf(angel_2 * 3.14159265f / 180.0f - line.step / radius));
+                vertices.push_back(y + (radius - line.leftStep) * sinf(angel_2 * 3.14159265f / 180.0f - line.step / radius));
+                vertices.push_back(0.001f);
+                line.beginStepPoint_Begin = QVector3D(x + (radius - line.leftStep) * cosf(angel_2 * 3.14159265f / 180.0f - line.step / radius),
+                                                      y + (radius - line.leftStep) * sinf(angel_2 * 3.14159265f / 180.0f - line.step / radius),
+                                                      0.2f);
+                line.beginStepPoint_End = QVector3D(xCenterFarRadius + farRadius * cosf(angel_2 * 3.14159265f / 180.0f - line.step / radius),
+                                                    yCenterFarRadius + farRadius * sinf(angel_2 * 3.14159265f / 180.0f - line.step / radius),
+                                                    0.2f);
+                vertices.push_back(xCenterNearRadius + (nearRadius + line.rightStep) * cosf(angel_2 * 3.14159265f / 180.0f - line.step / radius));
+                vertices.push_back(yCenterNearRadius + (nearRadius + line.rightStep) * sinf(angel_2 * 3.14159265f / 180.0f - line.step / radius));
+                vertices.push_back(0.001f);
+                line.endStepPoint_Begin = QVector3D(xCenterNearRadius + (nearRadius + line.rightStep) * cosf(angel_2 * 3.14159265f / 180.0f - line.step / radius),
+                                                    xCenterNearRadius + (nearRadius + line.rightStep) * sinf(angel_2 * 3.14159265f / 180.0f - line.step / radius),
+                                                    0.2f);
+                line.endStepPoint_End = QVector3D(xCenterNearRadius + nearRadius * cosf(angel_2 * 3.14159265f / 180.0f - line.step / radius),
+                                                  xCenterNearRadius + nearRadius * sinf(angel_2 * 3.14159265f / 180.0f - line.step / radius),
+                                                  0.2f);
+                int size = vertexArray.size() / 3;
+                line.stepPoint_Begin = line.stepPoint_End = line.linkedPoint = QVector3D(vertexArray[(size - 1) * 3], vertexArray[(size - 1) * 3 + 1], 0.2f);
             }
         }
         return;
@@ -2599,28 +3121,54 @@ void RoundingRoad::calculateVertexArray(LineLinkedToRoad line, QVector<float> &v
     default:
         break;
     }
-    radius += factor * line.step;
+    switch (line.type)
+    {
+    case Line::SplitZone:
+        radius += factor * (line.step + line.splitZoneWidth / 2.0f);
+        break;
+    case Line::TramWays:
+        radius += factor * (line.step + 0.75f);
+        break;
+    default:
+        radius += factor * line.step;
+        break;
+    }
+
+
     bool beginStepReleased = false;
     bool endStepReleased = false;
+    bool firstTime = true;
     for (int i = 0; i <= numberOfSides; ++i)
     {
         //float angle = 2.0 * 3.1415926 * float(i) / float(numberOfSides);
-        float angle = (angel_1 + (angel_2 - angel_1) * float(i) / float(numberOfSides)) * 3.1415926 / 180.0f;
-        float dx = radius * cosf(angle);
-        float dy = radius * sinf(angle);
+        double angle = (angel_1 + (angel_2 - angel_1) * float(i) / float(numberOfSides)) * 3.1415926 / 180.0f;
+        //qDebug() << "angle" << angle;
+        float dx = radius * cos(angle);
+        float dy = radius * sin(angle);
         //float dr;
 
         if (!beginStepReleased)
         {
             if ((angle - angel_1 * 3.1415926 / 180.0f)*radius > line.beginStep)
             {
-                dx = radius * cosf(angel_1 * 3.1415926 / 180.0f + line.beginStep / radius);
-                dy = radius * sinf(angel_1 * 3.1415926 / 180.0f + line.beginStep / radius);
+                dx = radius * cos(angel_1 * 3.1415926 / 180.0f + line.beginStep / radius);
+                dy = radius * sin(angel_1 * 3.1415926 / 180.0f + line.beginStep / radius);
                 vertices.push_back(x + dx);
                 vertices.push_back(y + dy);
                 vertices.push_back(0.001f);
                 beginStepReleased = true;
                 //qDebug() << "Begin step...";
+                line.beginStepPoints.push_back(x + dx);
+                line.beginStepPoints.push_back(y + dy);
+                line.beginStepPoints.push_back(0.2f);
+            }
+            else
+            {
+                dx = radius * cos(angle);
+                dy = radius * sin(angle);
+                line.beginStepPoints.push_back(x + dx);
+                line.beginStepPoints.push_back(y + dy);
+                line.beginStepPoints.push_back(0.2f);
             }
         }
         else
@@ -2630,19 +3178,85 @@ void RoundingRoad::calculateVertexArray(LineLinkedToRoad line, QVector<float> &v
                 vertices.push_back(y + dy);
                 vertices.push_back(0.001f);
                 //qDebug() << "Middle part...";
+                if (firstTime)
+                {
+                    //qDebug() << "Middle part";
+                    if (line.linkedToRightSide)
+                    {
+                        switch (line.type)
+                        {
+                        case Line::SplitZone:
+                            line.stepPoint_Begin = QVector3D(x + (radius - line.splitZoneWidth / 2.0f) * cosf(angle),
+                                                             y + (radius - line.splitZoneWidth / 2.0f) * sinf(angle),
+                                                             0.2f);
+                            break;
+                        case Line::TramWays:
+                            line.stepPoint_Begin = QVector3D(x + (radius - 0.75f) * cosf(angle),
+                                                             y + (radius - 0.75f) * sinf(angle),
+                                                             0.2f);
+                            break;
+                        default:
+                            line.stepPoint_Begin = QVector3D(x + dx,
+                                                             y + dy,
+                                                             0.2f);
+                            break;
+                        }
+
+                        line.stepPoint_End = QVector3D(x + nearRadius * cosf(angle),
+                                                       y + nearRadius * sinf(angle),
+                                                       0.2f);
+                    }
+                    else
+                    {
+                        switch (line.type)
+                        {
+                        case Line::SplitZone:
+                            line.stepPoint_Begin = QVector3D(x + (radius + line.splitZoneWidth / 2.0f) * cosf(angle),
+                                                             y + (radius + line.splitZoneWidth / 2.0f) * sinf(angle),
+                                                             0.2f);
+                            break;
+                        case Line::TramWays:
+                            line.stepPoint_Begin = QVector3D(x + (radius + 0.75f) * cosf(angle),
+                                                             y + (radius + 0.75f) * sinf(angle),
+                                                             0.2f);
+                            break;
+                        default:
+                            line.stepPoint_Begin = QVector3D(x + dx,
+                                                             y + dy,
+                                                             0.2f);
+                            break;
+                        }
+
+                        line.stepPoint_End = QVector3D(x + farRadius * cosf(angle),
+                                                       y + farRadius * sinf(angle),
+                                                       0.2f);
+                    }
+                    firstTime = false;
+                }
             }
 
             else
             {
-                dx = radius * cosf(angel_2 * 3.1415926 / 180.0f - line.endStep / radius);
-                dy = radius * sinf(angel_2 * 3.1415926 / 180.0f - line.endStep / radius);
-                vertices.push_back(x + dx);
-                vertices.push_back(y + dy);
-                vertices.push_back(0.001f);
-                //qDebug() << "End step...";
-                break;
+                if (!endStepReleased)
+                {
+                    dx = radius * cos(angel_2 * 3.1415926 / 180.0f - line.endStep / radius);
+                    dy = radius * sin(angel_2 * 3.1415926 / 180.0f - line.endStep / radius);
+                    vertices.push_back(x + dx);
+                    vertices.push_back(y + dy);
+                    vertices.push_back(0.001f);
+                    //qDebug() << "End step...";
+                    endStepReleased = true;
+                    line.endStepPoints.push_back(x + dx);
+                    line.endStepPoints.push_back(y + dy);
+                    line.endStepPoints.push_back(0.2f);
+                }
+                else
+                {
+                    line.endStepPoints.push_back(x + dx);
+                    line.endStepPoints.push_back(y + dy);
+                    line.endStepPoints.push_back(0.2f);
+                }
             }
-
     }
 }
 
@@ -2712,6 +3326,11 @@ void RoundingRoad::deleteLine(LineBrokenLinked line)
 
 void RoundingRoad::deleteLine(LineLinkedToRoad line)
 {
+    RoadElement::undoStack->push(new DeleteLineCommand(this, line, render));
+}
+
+void RoundingRoad::removeLine(LineLinkedToRoad line)
+{
     int i;
     for (i = 0; i < lines.size(); ++i)
     {
@@ -2720,115 +3339,77 @@ void RoundingRoad::deleteLine(LineLinkedToRoad line)
     }
     if (i >= lines.size())
     {
-        QMessageBox::critical(0, "Ошибка", "RoadSimple::deleteLine. Невозможно найти переденную линию из списка линий дороги");
+        QMessageBox::critical(0, "Ошибка", "RoundingRoad::deleteLine. Невозможно найти переденную линию из списка линий дороги");
         return;
     }
     lines.removeAt(i);
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].type == Line::SplitZone)
+        {
+            SplitZone *splitZone = qobject_cast<SplitZone*>(lines[i].line);
+            splitZone->setDescription(QString("Линия №") + QString::number(i + 1));
+        }
+        else
+        {
+            LineBroken *lineBroken = qobject_cast<LineBroken*>(lines[i].line);
+            lineBroken->setDescription(QString("Линия №") + QString::number(i + 1));
+        }
+    }
+    emit lineDeleted();
 }
 
 void RoundingRoad::resetLines()
 {
-//    if (log)
-//        Logger::getLogger()->infoLog() << "RoundingRoad::resetLines()\n";
-//    float angel_1, angel_2;
-//    float x, y, radius;
-//    float factor;
-
-//    for (int i = 0; i < lines.size(); ++i)
-//    {
-//        if (lines[i].nearSide)
-//        {
-//            angel_1 = angel1NearRadius;
-//            angel_2 = angel2NearRadius;
-//            x = xCenterNearRadius;
-//            y = yCenterNearRadius;
-//            radius = nearRadius;
-//            factor = 1.0f;
-//        }
-//        else
-//        {
-//            angel_1 = angel1FarRadius;
-//            angel_2 = angel2FarRadius;
-//            x = xCenterFarRadius;
-//            y = yCenterFarRadius;
-//            radius = farRadius;
-//            factor = -1.0f;
-//        }
-//        radius += factor * lines[i].step;
-
-
-//        QVector<float> vertices;
-//        bool beginStepReleased = false;
-//        //bool endStepReleased = false;
-//        for (int j = 0; j <= numberOfSides; ++j)
-//        {
-//            //float angle = 2.0 * 3.1415926 * float(i) / float(numberOfSides);
-//            float angle = (angel_1 + (angel_2 - angel_1) * float(i) / float(numberOfSides)) * 3.1415926 / 180.0f;
-//            float dx = radius * cosf(angle);
-//            float dy = radius * sinf(angle);
-//            //float dr;
-
-//            if (!beginStepReleased)
-//            {
-//                if ((angle - angel_1 * 3.1415926 / 180.0f)*radius > beginStep)
-//                {
-//                    dx = radius * cosf(angel_1 * 3.1415926 / 180.0f + beginStep / radius);
-//                    dy = radius * sinf(angel_1 * 3.1415926 / 180.0f + beginStep / radius);
-//                    vertices.push_back(x + dx);
-//                    vertices.push_back(y + dy);
-//                    vertices.push_back(0.001f);
-//                    beginStepReleased = true;
-//                    ////qDebug() << "Begin step...";
-//                }
-//            }
-//            else
-//                if ((angel_2 * 3.1415926 / 180.0f - angle)*radius > endStep)
-//                {
-//                    vertices.push_back(x + dx);
-//                    vertices.push_back(y + dy);
-//                    vertices.push_back(0.001f);
-//                    ////qDebug() << "Middle part...";
-//                }
-
-//                else
-//                {
-//                    dx = radius * cosf(angel_2 * 3.1415926 / 180.0f - endStep / radius);
-//                    dy = radius * sinf(angel_2 * 3.1415926 / 180.0f - endStep / radius);
-//                    vertices.push_back(x + dx);
-//                    vertices.push_back(y + dy);
-//                    vertices.push_back(0.001f);
-//                    //.//qDebug() << "End step...";
-//                    break;
-//                }
-
-//        }
-
-
-//        int size = vertices.size();
-//        float *lineVertexArray = new float[size];
-//        for (int i = 0; i < vertices.size(); ++i)
-//            lineVertexArray[i] = vertices[i];
-
-//        if (lines[i].lineType == 6)
-//        {
-//            SplitZone *splitZone = dynamic_cast<SplitZone*>(lines[i].line);
-//            splitZone->calculateLine(lineVertexArray, size);
-//            splitZone->reset();
-//            //lines[i].line = new SplitZone(lineVertexArray, size, 1.0f, true, true);
-//        }
-//        else
-//        {
-//            LineBroken *lineBroken = dynamic_cast<LineBroken*>(lines[i].line);
-//            lineBroken->setVertexArrayForAxis(lineVertexArray, size);
-//            lineBroken->setVertexArray(lines[i].lineWidth,lineVertexArray, size);
-//            lineBroken->setTextureArray();
-//        }
-
-//        delete[] lineVertexArray;
-//        lineVertexArray = NULL;
-//    }
-
-//    //emit linesChanged(layout, render);
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        QVector<float> vertices;
+        calculateVertexArray(lines[i], vertices);
+        //qDebug() << "Calculated Vertex Array";
+        int size = vertices.size();
+        if (size < 3)
+            return;
+        float *lineVertexArray = new float[size];
+        for (int i = 0; i < vertices.size(); ++i)
+            lineVertexArray[i] = vertices[i];
+        //qDebug() << "VertexArray size" << size;
+        switch (lines[i].type)
+        {
+        case Line::SplitZone:
+        {
+            SplitZone* splitZone = qobject_cast<SplitZone*>(lines[i].line);
+            splitZone->calculateLine(lineVertexArray, size);
+            splitZone->reset();
+        }
+            break;
+        case Line::StopLine:
+        {
+            LineBroken *lineBroken = qobject_cast<LineBroken*>(lines[i].line);
+            lineBroken->setVertexArrayForAxis(lineVertexArray, size);
+            lineBroken->setIndexArrayForAxis();
+            lineBroken->setVertexArray(lineBroken->getWidth(),
+                                       lineVertexArray, size);
+            lineBroken->setIndexArrayForSelectionFrame();
+            lineBroken->setIndexArray();
+            lineBroken->setTextureArray();
+        }
+            break;
+        default:
+            LineBroken *lineBroken = qobject_cast<LineBroken*>(lines[i].line);
+            lineBroken->setVertexArrayForAxis(lineVertexArray, size);
+            lineBroken->setIndexArrayForAxis();
+            lineBroken->setVertexArray(lineBroken->getWidth(),
+                                       lineVertexArray, size);
+            lineBroken->setIndexArrayForSelectionFrame();
+            lineBroken->setIndexArray();
+            lineBroken->setTextureArray();
+            break;
+        }
+        delete[] lineVertexArray;
+        lineVertexArray = NULL;
+    }
+    //qDebug() << "ResetLines finished";
+    //qDebug() << "-----";
 }
 
 void RoundingRoad::setBeginStep(double step)

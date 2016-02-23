@@ -1090,8 +1090,54 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
     }
     xCenter = pointsArray[size / 6 * 3];
     yCenter = pointsArray[size / 6 * 3 + 1];
+
+    float radius = width / 2.0f;
+    int beginRoundingIndex = -1, endRoundingIndex = -1;
+    if (beginRounding)
+    {
+        float sum = 0.0f;
+        for (int i = 0; i < size / 3; ++i)
+        {
+            float x1 = pointsArray[i * 3];
+            float y1 = pointsArray[i * 3 + 1];
+            float x2 = pointsArray[(i + 1) * 3];
+            float y2 = pointsArray[(i + 1) * 3 + 1];
+            float dr = sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
+            sum += dr;
+            if (sum >= radius)
+            {
+                beginRoundingIndex = i;
+                qDebug() << "begin index" << i;
+                break;
+            }
+
+        }
+    }
+    if (endRounding)
+    {
+        float sum = 0.0f;
+        for (int i = size / 3 - 1; i >= 0; --i)
+        {
+            float x1 = pointsArray[i * 3];
+            float y1 = pointsArray[i * 3 + 1];
+            float x2 = pointsArray[(i - 1) * 3];
+            float y2 = pointsArray[(i - 1) * 3 + 1];
+            float dr = sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
+            sum += dr;
+            if (sum >= radius)
+            {
+                endRoundingIndex = i;
+                qDebug() << "end index" << i;
+                break;
+            }
+
+        }
+    }
+    qDebug() << "size" << size / 3;
     for (int i = 0; i < size / 3; ++i)
     {
+        if (i == endRoundingIndex)
+            i = size / 3 - 1;
         // Если теукщий индекс - начало осевой линии,
         // то строим перпендикуляр
         if (i == 0)
@@ -1134,7 +1180,25 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
                     lineAxis.push_back(xR1  + dx);
                     lineAxis.push_back(yR1 + dy);
                     lineAxis.push_back(0.02f);
+                }/*
+                int j;
+                float sum = 0.0f;
+                for (j = i; j < size / 3; ++j)
+                {
+                    float x1 = pointsArray[j * 3];
+                    float y1 = pointsArray[j * 3 + 1];
+                    float x2 = pointsArray[(j + 1) * 3];
+                    float y2 = pointsArray[(j + 1) * 3 + 1];
+                    float dr = sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
+                    sum += dr;
+                    if (sum >= r1)
+                    {
+                        i = j;
+                        break;
+                    }
                 }
+                qDebug() << "i =" << i;*/
+                i = beginRoundingIndex;
             }
             else
             {
@@ -1255,11 +1319,13 @@ void SplitZone::calculateLine(float *pointsArray, int size, float width)
 
     ////////////////////////////////////////////////////////
     int counter = 3;
-    for (int i = size / 3 - 2; i >= 0; --i)
+    int endCounter = endRounding ? endRoundingIndex - 1 : size / 3 - 2;
+    int beginCounter = beginRounding ? beginRoundingIndex : 0;
+    for (int i = endCounter; i >= beginCounter; --i)
     {
         // Если теукщий индекс - начало осевой линии,
         // то строим перпендикуляр
-        if (i == 0)
+        if (i == 0 || i == beginRoundingIndex)
         {
             if (!beginRounding)
             {
@@ -1408,8 +1474,53 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
     }
     xCenter = pointsArray[size / 6 * 3];
     yCenter = pointsArray[size / 6 * 3 + 1];
+
+    float radius = width / 2.0f;
+    int beginRoundingIndex = -1, endRoundingIndex = -1;
+    if (beginRounding)
+    {
+        float sum = 0.0f;
+        for (int i = 0; i < size / 3; ++i)
+        {
+            float x1 = pointsArray[i * 3];
+            float y1 = pointsArray[i * 3 + 1];
+            float x2 = pointsArray[(i + 1) * 3];
+            float y2 = pointsArray[(i + 1) * 3 + 1];
+            float dr = sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
+            sum += dr;
+            if (sum >= radius)
+            {
+                beginRoundingIndex = i;
+                qDebug() << "begin index" << i;
+                break;
+            }
+
+        }
+    }
+    if (endRounding)
+    {
+        float sum = 0.0f;
+        for (int i = size / 3; i >= 0; --i)
+        {
+            float x1 = pointsArray[i * 3];
+            float y1 = pointsArray[i * 3 + 1];
+            float x2 = pointsArray[(i - 1) * 3];
+            float y2 = pointsArray[(i - 1) * 3 + 1];
+            float dr = sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
+            sum += dr;
+            if (sum >= radius)
+            {
+                endRoundingIndex = i;
+                qDebug() << "end index" << i;
+                break;
+            }
+
+        }
+    }
     for (int i = 0; i < size / 3; ++i)
     {
+        if (i == endRoundingIndex)
+            i = size / 3 - 1;
         // Если теукщий индекс - начало осевой линии,
         // то строим перпендикуляр
         if (i == 0)
@@ -1453,6 +1564,8 @@ void SplitZone::calculateLine(QVector<GLfloat> &pointsArray, float width)
                     lineAxis.push_back(yR1 + dy);
                     lineAxis.push_back(0.02f);
                 }
+                i = beginRoundingIndex;
+                qDebug() << "i =" << i;
             }
             else
             {
@@ -1723,6 +1836,8 @@ void SplitZone::reset()
         line->setVertexArrayForAxis(lineAxisArray, this->size);
         line->setVertexArray(lineWidth,lineAxisArray, this->size);
         line->setTextureArray();
+        line->setIndexArray();
+        //setIndexArrayForSelectionFrame();
         break;
     case 1:
         qDebug() << "Grass";

@@ -59,6 +59,7 @@ public:
     bool isModified();
     void clear();
 signals:
+    void visibilityChanged();
 
 public slots:
     void setRoadVisible(bool);

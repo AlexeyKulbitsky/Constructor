@@ -63,13 +63,17 @@ signals:
     void roundingsChanged();
     void roadAdded();
     void linesChanged(QVBoxLayout* layout, QGLWidget* render);
+    void widthChanged(double value);
 
 public slots:
     virtual bool setFixed(bool fixed);
     virtual void getProperties(QVBoxLayout *layout, QGLWidget *render);
+    void setRoadWidth(double value);
 
     bool calculateRoadIntersections();
     void calculateRoundings();
+    void setLeftLength(double value);
+    void setRightLength(double value);
 
     void setVertexArray();
     void setIndexArray();
@@ -118,6 +122,11 @@ public:
     virtual RoadElement *getCopy();
     virtual void setCoordForControl(int index, std::vector<vec3> &controls);
     virtual QJsonObject getJSONInfo();
+
+    // RoadElement interface
+public:
+    virtual void setDrawRoadStatus(bool status);
+    virtual void setDrawLinesStatus(bool status);
 };
 
 #endif // INTERSECTION_H

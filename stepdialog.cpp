@@ -704,60 +704,131 @@ void LineLinkedToRoad::drawDescription(QGLWidget *render)
 
 void LineLinkedToRoad::drawLineDescription(QGLWidget *render)
 {
-    glLineWidth(1.0f);
-    glColor3f(1.0f, 1.0f, 0.0f);
-    glBegin(GL_LINES);
-    // Отступ
-    glVertex3f(stepPoint_Begin.x(), stepPoint_Begin.y(), stepPoint_Begin.z());
-    glVertex3f(stepPoint_End.x(), stepPoint_End.y(), stepPoint_End.z());
-    // Отступ от начала
-    glVertex3f(beginStepPoint_Begin.x(), beginStepPoint_Begin.y(), beginStepPoint_Begin.z());
-    glVertex3f(beginStepPoint_End.x(), beginStepPoint_End.y(), beginStepPoint_End.z());
-    // Отступ с конца
-    glVertex3f(endStepPoint_Begin.x(), endStepPoint_Begin.y(), endStepPoint_Begin.z());
-    glVertex3f(endStepPoint_End.x(), endStepPoint_End.y(), endStepPoint_End.z());
-    glEnd();
-    if (!render)
+    if (beginStepPoints.size() == 0 && endStepPoints.size() == 0)
     {
-        return;
+        glLineWidth(1.0f);
+        glColor3f(1.0f, 1.0f, 0.0f);
+        glBegin(GL_LINES);
+        // Отступ
+        glVertex3f(stepPoint_Begin.x(), stepPoint_Begin.y(), stepPoint_Begin.z());
+        glVertex3f(stepPoint_End.x(), stepPoint_End.y(), stepPoint_End.z());
+        // Отступ от начала
+        glVertex3f(beginStepPoint_Begin.x(), beginStepPoint_Begin.y(), beginStepPoint_Begin.z());
+        glVertex3f(beginStepPoint_End.x(), beginStepPoint_End.y(), beginStepPoint_End.z());
+        // Отступ с конца
+        glVertex3f(endStepPoint_Begin.x(), endStepPoint_Begin.y(), endStepPoint_Begin.z());
+        glVertex3f(endStepPoint_End.x(), endStepPoint_End.y(), endStepPoint_End.z());
+        glEnd();
+        if (!render)
+        {
+            return;
+        }
+        GLdouble x, y, z;
+        GLdouble wx, wy, wz;
+        QFont shrift = QFont("Times", 8, QFont::Bold);
+        float x1, x2, y1, y2;
+
+        // Отрисовка шага
+        x1 = stepPoint_Begin.x();
+        y1 = stepPoint_Begin.y();
+        x2 = stepPoint_End.x();
+        y2 = stepPoint_End.y();
+        x = (x1 + x2) / 2.0f;
+        y = (y1 + y2) / 2.0f;
+        z = 0.0f;
+        RoadElement::getWindowCoord(x, y, z, wx, wy, wz);
+        render->renderText(wx + 5, wy + 5, QString("%1").arg(step, 0, 'f', 2), shrift);
+
+        // Отрисовка шага от начала
+        x1 = beginStepPoint_Begin.x();
+        y1 = beginStepPoint_Begin.y();
+        x2 = beginStepPoint_End.x();
+        y2 = beginStepPoint_End.y();
+        x = (x1 + x2) / 2.0f;
+        y = (y1 + y2) / 2.0f;
+        z = 0.0f;
+        RoadElement::getWindowCoord(x, y, z, wx, wy, wz);
+        render->renderText(wx + 5, wy + 5, QString("%1").arg(beginStep, 0, 'f', 2), shrift);
+
+        // Отрисовка шага с конца
+        x1 = endStepPoint_Begin.x();
+        y1 = endStepPoint_Begin.y();
+        x2 = endStepPoint_End.x();
+        y2 = endStepPoint_End.y();
+        x = (x1 + x2) / 2.0f;
+        y = (y1 + y2) / 2.0f;
+        z = 0.0f;
+        RoadElement::getWindowCoord(x, y, z, wx, wy, wz);
+        render->renderText(wx + 5, wy + 5, QString("%1").arg(endStep, 0, 'f', 2), shrift);
     }
-    GLdouble x, y, z;
-    GLdouble wx, wy, wz;
-    QFont shrift = QFont("Times", 8, QFont::Bold);
-    float x1, x2, y1, y2;
+    else
+    {
+        glLineWidth(1.0f);
+        glColor3f(1.0f, 1.0f, 0.0f);
+        glBegin(GL_LINES);
+        // Отступ
+        glVertex3f(stepPoint_Begin.x(), stepPoint_Begin.y(), stepPoint_Begin.z());
+        glVertex3f(stepPoint_End.x(), stepPoint_End.y(), stepPoint_End.z());
+        glEnd();
 
-    // Отрисовка шага
-    x1 = stepPoint_Begin.x();
-    y1 = stepPoint_Begin.y();
-    x2 = stepPoint_End.x();
-    y2 = stepPoint_End.y();
-    x = (x1 + x2) / 2.0f;
-    y = (y1 + y2) / 2.0f;
-    z = 0.0f;
-    RoadElement::getWindowCoord(x, y, z, wx, wy, wz);
-    render->renderText(wx + 5, wy + 5, QString("%1").arg(step, 0, 'f', 2), shrift);
+        glBegin(GL_LINE_STRIP);
+        for (int i = 0; i < beginStepPoints.size() / 3; ++i)
+        {
+            glVertex3f(beginStepPoints[i * 3],
+                       beginStepPoints[i * 3 + 1],
+                       beginStepPoints[i * 3 + 2]);
+        }
+        glEnd();
 
-    // Отрисовка шага от начала
-    x1 = beginStepPoint_Begin.x();
-    y1 = beginStepPoint_Begin.y();
-    x2 = beginStepPoint_End.x();
-    y2 = beginStepPoint_End.y();
-    x = (x1 + x2) / 2.0f;
-    y = (y1 + y2) / 2.0f;
-    z = 0.0f;
-    RoadElement::getWindowCoord(x, y, z, wx, wy, wz);
-    render->renderText(wx + 5, wy + 5, QString("%1").arg(beginStep, 0, 'f', 2), shrift);
+        glBegin(GL_LINE_STRIP);
+        for (int i = 0; i < endStepPoints.size() / 3; ++i)
+        {
+            glVertex3f(endStepPoints[i * 3],
+                       endStepPoints[i * 3 + 1],
+                       endStepPoints[i * 3 + 2]);
+        }
+        glEnd();
+        if (!render)
+        {
+            return;
+        }
+        GLdouble x, y, z;
+        GLdouble wx, wy, wz;
+        QFont shrift = QFont("Times", 8, QFont::Bold);
+        float x1, x2, y1, y2;
 
-    // Отрисовка шага с конца
-    x1 = endStepPoint_Begin.x();
-    y1 = endStepPoint_Begin.y();
-    x2 = endStepPoint_End.x();
-    y2 = endStepPoint_End.y();
-    x = (x1 + x2) / 2.0f;
-    y = (y1 + y2) / 2.0f;
-    z = 0.0f;
-    RoadElement::getWindowCoord(x, y, z, wx, wy, wz);
-    render->renderText(wx + 5, wy + 5, QString("%1").arg(endStep, 0, 'f', 2), shrift);
+        // Отрисовка шага
+        x1 = stepPoint_Begin.x();
+        y1 = stepPoint_Begin.y();
+        x2 = stepPoint_End.x();
+        y2 = stepPoint_End.y();
+        x = (x1 + x2) / 2.0f;
+        y = (y1 + y2) / 2.0f;
+        z = 0.0f;
+        RoadElement::getWindowCoord(x, y, z, wx, wy, wz);
+        render->renderText(wx + 5, wy + 5, QString("%1").arg(step, 0, 'f', 2), shrift);
+
+        int index = beginStepPoints.size() / 6;
+        // Отрисовка шага от начала
+        x1 = beginStepPoints[index * 3];
+        y1 = beginStepPoints[index * 3 + 1];
+        x = x1;
+        y = y1;
+        z = 0.0f;
+        RoadElement::getWindowCoord(x, y, z, wx, wy, wz);
+        render->renderText(wx + 5, wy + 5, QString("%1").arg(beginStep, 0, 'f', 2), shrift);
+
+        index = endStepPoints.size() / 6;
+        // Отрисовка шага с конца
+        x1 = endStepPoints[index * 3];
+        y1 = endStepPoints[index * 3 + 1];
+        x = x1;
+        y = y1;
+        z = 0.0f;
+        RoadElement::getWindowCoord(x, y, z, wx, wy, wz);
+        render->renderText(wx + 5, wy + 5, QString("%1").arg(endStep, 0, 'f', 2), shrift);
+    }
+
 }
 
 void LineLinkedToRoad::drawSplitZoneDescription(QGLWidget *render)
@@ -843,7 +914,7 @@ void LineLinkedToRoad::drawStopLineDescription(QGLWidget *render)
     y = (y1 + y2) / 2.0f;
     z = 0.0f;
     RoadElement::getWindowCoord(x, y, z, wx, wy, wz);
-    render->renderText(wx + 5, wy + 5, QString("%1").arg(leftStep, 0, 'f', 2), shrift);
+    render->renderText(wx + 5, wy + 5, QString("%1").arg(rightStep, 0, 'f', 2), shrift);
 
     // Отрисовка шага от правой стороны
     x1 = beginStepPoint_Begin.x();
@@ -854,7 +925,7 @@ void LineLinkedToRoad::drawStopLineDescription(QGLWidget *render)
     y = (y1 + y2) / 2.0f;
     z = 0.0f;
     RoadElement::getWindowCoord(x, y, z, wx, wy, wz);
-    render->renderText(wx + 5, wy + 5, QString("%1").arg(rightStep, 0, 'f', 2), shrift);
+    render->renderText(wx + 5, wy + 5, QString("%1").arg(leftStep, 0, 'f', 2), shrift);
 
 
 }

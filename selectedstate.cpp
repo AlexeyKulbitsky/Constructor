@@ -111,6 +111,12 @@ void SelectedState::mousePressEvent(QMouseEvent *pe)
         else
             if (this->tryToSelectControlsInSelectedFigure(pe->pos(), selectedElement, index) == true)
             {
+//                qDebug() << "x" << (GLdouble)pe->x()/
+//                        scene->width()/(scene->nSca * scene->ratio) * 2.0 - scene->dX;
+//                qDebug() << "y" << (GLdouble)(scene->height() -  pe->y())/
+//                        scene->width()/(scene->nSca * scene->ratio) * 2.0 - scene->dY;
+//                qDebug() << "x" << (GLdouble)(pe->x() - scene->width() / 2.0)/
+//                            scene->width()/(scene->nSca * scene->ratio) * 2.0 + scene->dX;
                 controlIsSelected = true;
                 controlIndex = index;
                 if (resizeByControlCommand == NULL)
@@ -229,7 +235,6 @@ void SelectedState::mouseMoveEvent(QMouseEvent *pe)
                             scene->width()/(scene->nSca * scene->ratio) * 2.0;
                     float dX = (GLdouble)(pe->x()-ptrMousePosition.x())/
                             scene->width()/(scene->nSca * scene->ratio) * 2.0;
-
                     float x = (GLdouble)ptrMousePosition.x()/
                             scene->width()/(scene->nSca * scene->ratio) * 2.0;
                     float y = (GLdouble)(scene->height() -  ptrMousePosition.y())/
@@ -1240,13 +1245,22 @@ void SelectedState::del()
 {
     if (log)
         Logger::getLogger()->infoLog() << "SelectedState::del()\n";
+
     if (selectedElements.size() > 0)
     {
-        RoadElement::undoStack->push(new DeleteCommand(selectedElements, model, stateManager, properties, scene));
+        int result = QMessageBox::warning(0, tr("Удаление элементов"),
+                                     tr("Вы действительно хотите удалить выделенные элементы?"),
+                                     QMessageBox::Yes | QMessageBox::No);
+        if (result == QMessageBox::Yes)
+            RoadElement::undoStack->push(new DeleteCommand(selectedElements, model, stateManager, properties, scene));
     }
     else
     {
-        RoadElement::undoStack->push(new DeleteCommand(selectedElement, model, stateManager, properties, groupIndex, elementIndex, scene));
+        int result = QMessageBox::warning(0, tr("Удаление элемента"),
+                                     tr("Вы действительно хотите удалить выделенный элемент?"),
+                                     QMessageBox::Yes | QMessageBox::No);
+        if (result == QMessageBox::Yes)
+            RoadElement::undoStack->push(new DeleteCommand(selectedElement, model, stateManager, properties, groupIndex, elementIndex, scene));
     }
 }
 

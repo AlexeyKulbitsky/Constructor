@@ -5,6 +5,7 @@
 #include "roadelement.h"
 #include <QLabel>
 #include <QCheckBox>
+#include <QListWidget>
 #include "linebroken.h"
 #include "splitzone.h"
 
@@ -44,7 +45,7 @@ public:
 private:
     QVector<GLfloat> vertexArray;
     QVector<GLfloat> colorArray;
-    QVector<GLubyte> indexArray; // количество полигонов
+    QVector<GLuint> indexArray; // количество полигонов
     QVector<GLfloat> textureArray;
 
     QVector<LineLinkedToRoad> lines;
@@ -78,8 +79,8 @@ private:
     QVector<GLfloat> textureArrayNear;
     QVector<GLfloat> textureArrayFar;
 
-    QVector<GLubyte> indexArrayNear;
-    QVector<GLubyte> indexArrayFar;
+    QVector<GLuint> indexArrayNear;
+    QVector<GLuint> indexArrayFar;
 
     int textureID[2];
 
@@ -103,6 +104,7 @@ private:
     QGLWidget* render;
     static bool log;
     LineLinkedToRoad currentLineLinked;
+    QListWidget *list;
 
 public:
     RoundingRoad();
@@ -163,6 +165,8 @@ signals:
 
     void nearBoardWidthChanged(double width);
     void farBoardWidthChanged(double width);
+    void lineAdded();
+    void lineDeleted();
 
 public slots:
     void setNearRadius(double nearRadius);
@@ -180,7 +184,7 @@ public slots:
 
     void constructLine(QString textureSource, float textureSize);
     void constructLine(LineLinkedToRoad line);
-    void calculateVertexArray(LineLinkedToRoad line, QVector<float>& vertexArray);
+    void calculateVertexArray(LineLinkedToRoad &line, QVector<float>& vertexArray);
 
     void setNearSide(bool status);
     void setStep(double value);
@@ -188,6 +192,7 @@ public slots:
     void deleteLine();
     void deleteLine(LineBrokenLinked line);
     void deleteLine(LineLinkedToRoad line);
+    void removeLine(LineLinkedToRoad line);
 
     void resetLines();
     void setBeginStep(double step);
@@ -209,6 +214,11 @@ public slots:
     void setFarBoardWidth(double width);
 
     virtual void getProperties(QVBoxLayout *layout, QGLWidget* render = 0);
+
+    void updateListWidget();
+    void editLine();
+    void editLine(LineLinkedToRoad line);
+
     // RoadElement interface
 public:
     virtual bool isFixed();

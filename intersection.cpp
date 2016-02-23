@@ -272,36 +272,45 @@ void Intersection::drawFigure(QGLWidget *render)
     if (log)
         Logger::getLogger()->infoLog() << "Intersection::drawFigure(QGLWidget *render)\n";
 
-    glDisableClientState(GL_COLOR_ARRAY);
-    glEnable(GL_TEXTURE_2D);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-    glBindTexture(GL_TEXTURE_2D, textureID[0]);
-    glVertexPointer(3, GL_FLOAT, 0, vertexArray.begin());
-    glTexCoordPointer(2, GL_FLOAT, 0, textureArray.begin());
-    glDrawElements(GL_TRIANGLES, indexArray.size(), GL_UNSIGNED_BYTE, indexArray.begin());
-
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glDisable(GL_TEXTURE_2D);
-    glEnableClientState(GL_COLOR_ARRAY);
-
-
-
-    for (int i = 0; i < curves.size(); ++i)
+    if (drawRoad)
     {
-        roads[i]->setLeftBoardShowStatus(curves[i]->getBoardShowStatus());
-        if (i == curves.size() - 1)
-            roads[0]->setRightBoardShowStatus(curves[i]->getBoardShowStatus());
-        else
-            roads[i + 1]->setRightBoardShowStatus(curves[i]->getBoardShowStatus());
-        curves[i]->drawFigure(render);
+        glDisableClientState(GL_COLOR_ARRAY);
+        glEnable(GL_TEXTURE_2D);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+        glBindTexture(GL_TEXTURE_2D, textureID[0]);
+        glVertexPointer(3, GL_FLOAT, 0, vertexArray.begin());
+        glTexCoordPointer(2, GL_FLOAT, 0, textureArray.begin());
+        glDrawElements(GL_TRIANGLES, indexArray.size(), GL_UNSIGNED_BYTE, indexArray.begin());
+
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisable(GL_TEXTURE_2D);
+        glEnableClientState(GL_COLOR_ARRAY);
+
+
+
+        for (int i = 0; i < curves.size(); ++i)
+        {
+            roads[i]->setLeftBoardShowStatus(curves[i]->getBoardShowStatus());
+            if (i == curves.size() - 1)
+                roads[0]->setRightBoardShowStatus(curves[i]->getBoardShowStatus());
+            else
+                roads[i + 1]->setRightBoardShowStatus(curves[i]->getBoardShowStatus());
+            curves[i]->drawFigure(render);
+        }
     }
+    else
+    {
+        qDebug() << "Intersection drawRoad = false";
+    }
+
 
     for (int i = 0; i < roads.size(); ++i)
     {
         roads[i]->drawFigure(render);
     }
 
+    if (drawRoad)
     if (indexOfSelectedControl >=0 && indexOfSelectedControl < getNumberOfControls())
         drawControlElement(indexOfSelectedControl, 5.0f, 10.0f);
 }
@@ -426,6 +435,8 @@ void Intersection::drawControlElement(int index, float lineWidth, float pointSiz
     }
     if (index == roads[i]->getNumberOfControls())
     {
+        if (!drawRoad)
+            return;
         bool right = roads[i]->getShowRightBoardStatus();
         bool left = roads[i]->getShowLeftBoardStatus();
         roads[i]->setRightBoardShowStatus(false);
@@ -627,6 +638,8 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
                                                       x + dx, y + dy);
                         }
                     }
+                    if (angles[j]->getAngle() < 180.0f)
+                        return;
                     p1 = roads[i]->getCoordOfPoint(0);
                     p2 = roads[i]->getCoordOfPoint(3);
                     dx1 = p2.x - p1.x;
@@ -641,7 +654,7 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
                     res = dx1*dx2 + dy1*dy2;
                     if (res < 0)
                     {
-                        qDebug() << "Out of side";
+                        //qDebug() << "Out of side";
                         float k = (lPrevious + lCurrent) / dr;
                         float delta = (curves[j]->getLeftLength() + lCurrent) / k;
                         float factor = angles[j]->getAngle() < 180.0f ? 1.0f : -1.0f;
@@ -663,7 +676,7 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
                         vec2 perp2 = roads[i]->getPerpendicular_2();
                         if (curves[i]->getRightLength() > s)
                         {
-                            qDebug() << "Out of board";
+                            //qDebug() << "Out of board";
                             roads[i]->resizeByControl(index,
                                                       factor * (perp1.x - perp2.x) * delta / roads[i]->getWidth(),
                                                       factor * (perp1.y - perp2.y) * delta / roads[i]->getWidth(),
@@ -717,7 +730,8 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
                                                           x + dx, y + dy);
                             }
                         }
-
+                        if (angles[i]->getAngle() < 180.0f)
+                            return;
                         p1 = roads[i]->getCoordOfPoint(1);
                         p2 = roads[i]->getCoordOfPoint(2);
                         dx1 = p2.x - p1.x;
@@ -732,7 +746,7 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
                         res = dx1*dx2 + dy1*dy2;
                         if (res < 0)
                         {
-                            qDebug() << "Out of side";
+                            //qDebug() << "Out of side";
                             float k = (lPrevious + lCurrent) / dr;
                             float delta = (curves[i]->getRightLength() + lCurrent) / k;
                             float factor = angles[i]->getAngle() < 180.0f ? 1.0f : -1.0f;
@@ -754,7 +768,7 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
                             vec2 perp2 = roads[i]->getPerpendicular_2();
                             if (curves[i]->getRightLength() > s)
                             {
-                                qDebug() << "Out of board";
+                                //qDebug() << "Out of board";
                                 roads[i]->resizeByControl(index,
                                                           factor * (perp2.x - perp1.x) * delta / roads[i]->getWidth(),
                                                           factor * (perp2.y - perp1.y) * delta / roads[i]->getWidth(),
@@ -1073,8 +1087,6 @@ void Intersection::getProperties(QVBoxLayout *layout, QGLWidget *render)
 
     for (int i = 0; i < roads.size(); ++i)
     {
-
-
         QWidget *widget = new QWidget(layout->parentWidget());
         QFormLayout *layer = new QFormLayout(widget);
         //widget->setLayout(layer);
@@ -1104,11 +1116,13 @@ void Intersection::getProperties(QVBoxLayout *layout, QGLWidget *render)
         layout->addWidget(list);
 
         QDoubleSpinBox *widthDoubleSpinBox = new QDoubleSpinBox();
+        widthDoubleSpinBox->setObjectName(QString::number(i));
         widthDoubleSpinBox->setKeyboardTracking(false);
         widthDoubleSpinBox->setValue(roads[i]->getWidth());
         widthDoubleSpinBox->setMinimum(0.1);
         QObject::connect(roads[i], SIGNAL(widthChanged(double)), widthDoubleSpinBox, SLOT(setValue(double)));
-        QObject::connect(widthDoubleSpinBox, SIGNAL(valueChanged(double)), roads[i], SLOT(setWidth(double)));
+//        QObject::connect(widthDoubleSpinBox, SIGNAL(valueChanged(double)), roads[i], SLOT(setWidth(double)));
+        QObject::connect(widthDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setRoadWidth(double)));
         if (render)
         {
             //QObject::connect(widthDoubleSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
@@ -1182,6 +1196,7 @@ void Intersection::getProperties(QVBoxLayout *layout, QGLWidget *render)
         leftLengthDoubleSpinBox->setMinimum(0.0);
         connect(curves[i], SIGNAL(leftLengthChanged(double)), leftLengthDoubleSpinBox, SLOT(setValue(double)));
         connect(leftLengthDoubleSpinBox, SIGNAL(valueChanged(double)), curves[i], SLOT(setLeftLength(double)));
+        connect(curves[i], SIGNAL(leftLengthChanged(double)), this, SLOT(setLeftLength(double)));
         connect(leftLengthDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setRoadsTextures()));
 
         QDoubleSpinBox *rightLengthDoubleSpinBox = new QDoubleSpinBox();
@@ -1191,6 +1206,7 @@ void Intersection::getProperties(QVBoxLayout *layout, QGLWidget *render)
         connect(curves[i], SIGNAL(rightLengthChanged(double)), rightLengthDoubleSpinBox, SLOT(setValue(double)));
         connect(rightLengthDoubleSpinBox, SIGNAL(valueChanged(double)), curves[i], SLOT(setRightLength(double)));
         connect(rightLengthDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setRoadsTextures()));
+        connect(curves[i], SIGNAL(rightLengthChanged(double)), this, SLOT(setRightLength(double)));
 
         QCheckBox *showBoardCheckBox = new QCheckBox();
         showBoardCheckBox->setChecked(curves[i]->getBoardShowStatus());
@@ -1229,6 +1245,26 @@ void Intersection::getProperties(QVBoxLayout *layout, QGLWidget *render)
 
     }
 
+}
+
+void Intersection::setRoadWidth(double value)
+{
+    bool ok;
+    int i = sender()->objectName().toInt(&ok);
+    if (!ok)
+    {
+        QMessageBox::critical(0, "Ошибка", "Intersection::setRoadWidth. Невозможно привести имя\nобъекта - отправителя к типу int");
+        return;
+    }
+    int j = i == 0 ? roads.size() - 1 : i - 1;
+    if ((angles[i]->getAngle() >= 178.0f && angles[i]->getAngle() <= 182.0f) ||
+        (angles[j]->getAngle() >= 178.0f && angles[j]->getAngle() <= 182.0f))
+    {
+        emit widthChanged(roads[i]->getWidth());
+        return;
+    }
+    else
+        roads[i]->setWidth(value);
 }
 
 bool Intersection::isFixed()
@@ -1349,6 +1385,67 @@ void Intersection::calculateRoundings()
 
 }
 
+void Intersection::setLeftLength(double value)
+{
+    Curve *curve = qobject_cast<Curve*>(sender());
+    int i;
+    for (i = 0 ; i < curves.size(); ++i)
+    {
+        if (curves[i] == curve)
+            break;
+    }
+    if (i == curves.size())
+        return;
+    int j = i == roads.size() - 1 ? 0 : i + 1;
+    vec3 p1 = roads[j]->getCoordOfPoint(0);
+    vec3 p2 = roads[j]->getCoordOfPoint(3);
+    float dx = p2.x - p1.x;
+    float dy = p2.y - p1.y;
+    float length = sqrt(dx * dx + dy * dy);
+    if (length < float(value))
+    {
+        float deltaX = (dx / length) * (float(value) - length);
+        float deltaY = (dy / length) * (float(value) - length);
+        int index = roads[j]->getNumberOfControls() - 12;
+        roads[j]->resizeByControl(index + 7,deltaX,deltaY, 0.0f, 0.0f);
+    }
+    calculateRoadIntersections();
+    calculateRoundings();
+    setRoadsTextures();
+    setVertexArray();
+    setTextureArray(texture1USize, texture1VSize);
+}
+
+void Intersection::setRightLength(double value)
+{
+    Curve *curve = qobject_cast<Curve*>(sender());
+    int i;
+    for (i = 0 ; i < curves.size(); ++i)
+    {
+        if (curves[i] == curve)
+            break;
+    }
+    if (i == curves.size())
+        return;
+    vec3 p1 = roads[i]->getCoordOfPoint(1);
+    vec3 p2 = roads[i]->getCoordOfPoint(2);
+    float dx = p2.x - p1.x;
+    float dy = p2.y - p1.y;
+    float length = sqrt(dx * dx + dy * dy);
+    if (length < float(value))
+    {
+        float deltaX = (dx / length) * (float(value) - length);
+        float deltaY = (dy / length) * (float(value) - length);
+        int index = roads[i]->getNumberOfControls() - 12;
+        roads[i]->resizeByControl(index + 7,deltaX,deltaY, 0.0f, 0.0f);
+    }
+    calculateRoadIntersections();
+    calculateRoundings();
+    setRoadsTextures();
+    setVertexArray();
+    setTextureArray(texture1USize, texture1VSize);
+}
+
 void Intersection::setVertexArray()
 {
     if (log)
@@ -1451,7 +1548,7 @@ void Intersection::recalculateRoads()
 
 void Intersection::resetWidth()
 {
-    qDebug() << "ResetWidth";
+    //qDebug() << "ResetWidth";
     if (log)
         Logger::getLogger()->infoLog() << "Intersection::resetWidth()\n";
     RoadSimple* road = qobject_cast<RoadSimple*>(sender());
@@ -1464,7 +1561,7 @@ void Intersection::resetWidth()
             break;
         }
     }
-    qDebug() << "Index" << index;
+    //qDebug() << "Index" << index;
     if (index < 0)
         return;
 
@@ -1529,6 +1626,8 @@ void Intersection::addLine()
 
 void Intersection::updateListWidget()
 {
+    if (!selected)
+        return;
     RoadSimple *road = qobject_cast<RoadSimple*>(sender());
     if (!road)
     {
@@ -1788,3 +1887,18 @@ QJsonObject Intersection::getJSONInfo()
 
 
 
+
+
+void Intersection::setDrawRoadStatus(bool status)
+{
+    drawRoad = status;
+    for (int i = 0; i < roads.size(); ++i)
+        roads[i]->setDrawRoadStatus(status);
+}
+
+void Intersection::setDrawLinesStatus(bool status)
+{
+    drawLines = status;
+    for (int i = 0; i < roads.size(); ++i)
+        roads[i]->setDrawLinesStatus(status);
+}
