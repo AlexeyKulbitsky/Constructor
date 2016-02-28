@@ -220,6 +220,11 @@ public:
     virtual bool calculateLinesIntersection(vec2 p1, vec2 p2,
                                             vec2 s1, vec2 s2,
                                             float& x, float& y);
+    virtual int calculateLineCircleIntersection(float x0, float y0, float r, // центр и рдиус окружности
+                                                float x1, float y1,           // точки
+                                                float x2, float y2,           //    отрезка
+                                                float& xa, float &ya,         // резуль-
+                                                float& xb, float &yb);
     virtual float calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4);
     virtual float calculateAngle(vec3 v1, vec3 v2);
     virtual unsigned int getSize() { return sizeof(*this); }

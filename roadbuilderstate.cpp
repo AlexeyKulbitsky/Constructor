@@ -157,10 +157,12 @@ void RoadBuilderState::mousePressEvent(QMouseEvent *pe)
             {
                 if (this->tryToSelectFigures(ptrMousePosition) == true)
                 {
-                    oldX = (GLdouble)ptrMousePosition.x()/
-                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
-                    oldY = (GLdouble)(scene->height() -  ptrMousePosition.y())/
-                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                    oldX = (GLdouble)ptrMousePosition.x()/
+//                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                    oldY = (GLdouble)(scene->height() -  ptrMousePosition.y())/
+//                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+
+                    scene->getWorldCoord(ptrMousePosition, oldX, oldY);
                     scene->setCursor(Qt::SizeAllCursor);
                     scene->updateGL();
                 }
@@ -212,15 +214,22 @@ void RoadBuilderState::mouseMoveEvent(QMouseEvent *pe)
                 // двигать фигуру или контролы
                 if (controlIsSelected == true)
                 {
-                    float dY = (GLdouble)(-1)*(pe->y()-ptrMousePosition.y())/
-                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
-                    float dX = (GLdouble)(pe->x()-ptrMousePosition.x())/
-                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                    float dY = (GLdouble)(-1)*(pe->y()-ptrMousePosition.y())/
+//                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                    float dX = (GLdouble)(pe->x()-ptrMousePosition.x())/
+//                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
 
-                    float x = (GLdouble)ptrMousePosition.x()/
-                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
-                    float y = (GLdouble)(scene->height() -  ptrMousePosition.y())/
-                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                    float x = (GLdouble)ptrMousePosition.x()/
+//                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                    float y = (GLdouble)(scene->height() -  ptrMousePosition.y())/
+//                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+
+                    float x1, y1, x2, y2, dX, dY, x, y;
+                    scene->getWorldCoord(pe->pos(), x1, y1);
+                    scene->getWorldCoord(ptrMousePosition, x2, y2);
+                    dX = x1 - x2;
+                    dY = y1 - y2;
+                    scene->getWorldCoord(ptrMousePosition, x, y);
 
                     switch (key)
                     {
@@ -240,10 +249,15 @@ void RoadBuilderState::mouseMoveEvent(QMouseEvent *pe)
                 {
                     //if (this->tryToSelectFigures(pe->pos()) == true)
                     //{
-                        float dY = (GLfloat)(-1)*(pe->y()-ptrMousePosition.y())/
-                                scene->width()/(scene->nSca * scene->ratio) * 2.0;
-                        float dX = (GLfloat)(pe->x()-ptrMousePosition.x())/
-                                scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                        float dY = (GLfloat)(-1)*(pe->y()-ptrMousePosition.y())/
+//                                scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                        float dX = (GLfloat)(pe->x()-ptrMousePosition.x())/
+//                                scene->width()/(scene->nSca * scene->ratio) * 2.0;
+                    float x1, y1, x2, y2, dX, dY;
+                    scene->getWorldCoord(pe->pos(), x1, y1);
+                    scene->getWorldCoord(ptrMousePosition, x2, y2);
+                    dX = x1 - x2;
+                    dY = y1 - y2;
 
                         roadBroken->move(dX, dY);
                         scene->updateGL();
@@ -295,10 +309,12 @@ void RoadBuilderState::mouseReleaseEvent(QMouseEvent *pe)
         }
         else
         {
-            newX = (GLdouble)pe->x()/
-                    scene->width()/(scene->nSca * scene->ratio) * 2.0;
-            newY = (GLdouble)(scene->height() -  pe->y())/
-                    scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//            newX = (GLdouble)pe->x()/
+//                    scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//            newY = (GLdouble)(scene->height() -  pe->y())/
+//                    scene->width()/(scene->nSca * scene->ratio) * 2.0;
+
+            scene->getWorldCoord(pe->pos(), newX, newX);
             RoadElement::undoStack->push(new MoveCommand(roadBroken, oldX, oldY, newX, newY, scene));
         }
         leftButtonIsPressed = false;

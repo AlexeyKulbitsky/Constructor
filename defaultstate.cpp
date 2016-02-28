@@ -65,7 +65,7 @@ DefaultState::DefaultState(StateManager *manager, Model *model, Scene2D* scene, 
 void DefaultState::mousePressEvent(QMouseEvent *pe)
 {
     if (log)
-        Logger::getLogger()->infoLog() << "DefaultState::mousePressEvent(QMouseEvent *pe)\n";
+        Logger::getLogger()->infoLog() << "DefaultState::mousePressEvent(QMouseEvent *pe)\n";   
     ptrMousePosition = pe->pos();
     switch (pe->button())
     {

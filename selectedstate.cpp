@@ -93,10 +93,14 @@ void SelectedState::mousePressEvent(QMouseEvent *pe)
         {
             if (this->tryToSelectFigures(pe->pos(), selectedElements) == true)
             {
-                oldX = (GLdouble)pe->x()/
-                        scene->width()/(scene->nSca * scene->ratio) * 2.0;
-                oldY = (GLdouble)(scene->height() -  pe->y())/
-                        scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                oldX = (GLdouble)pe->pos().x()/
+//                        scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                oldY = (GLdouble)(scene->height() -  pe->pos().y())/
+//                        scene->width()/(scene->nSca * scene->ratio) * 2.0;
+                float x, y;
+                scene->getWorldCoord(pe->pos(), x, y);
+                oldX = x;
+                oldY = y;
                 scene->setCursor(Qt::SizeAllCursor);
             }
             else
@@ -167,10 +171,19 @@ void SelectedState::mousePressEvent(QMouseEvent *pe)
                     else
                     {
                         figureIsSelected = true;
-                        oldX = (GLdouble)pe->x()/
-                                scene->width()/(scene->nSca * scene->ratio) * 2.0;
-                        oldY = (GLdouble)(scene->height() -  pe->y())/
-                                scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                        oldX = (GLdouble)pe->x()/
+//                                scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                        oldY = (GLdouble)(scene->height() -  pe->y())/
+//                                scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                        oldX = (GLdouble)pe->pos().x()/
+//                                scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                        oldY = (GLdouble)(scene->height() -  pe->pos().y())/
+//                                scene->width()/(scene->nSca * scene->ratio) * 2.0;
+
+                        float x, y;
+                        scene->getWorldCoord(pe->pos(), x, y);
+                        oldX = x;
+                        oldY = y;
                     }
                 }
                 else
@@ -215,10 +228,16 @@ void SelectedState::mouseMoveEvent(QMouseEvent *pe)
         {
             if (selectedElements.size() > 0)
             {
-                float dY = (GLfloat)(-1)*(pe->y()-ptrMousePosition.y())/
-                        scene->width()/(scene->nSca * scene->ratio) * 2.0;
-                float dX = (GLfloat)(pe->x()-ptrMousePosition.x())/
-                        scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                float dY = (GLfloat)(-1)*(pe->y()-ptrMousePosition.y())/
+//                        scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                float dX = (GLfloat)(pe->x()-ptrMousePosition.x())/
+//                        scene->width()/(scene->nSca * scene->ratio) * 2.0;
+
+                float x1, y1, x2, y2, dX, dY;
+                scene->getWorldCoord(pe->pos(), x1, y1);
+                scene->getWorldCoord(ptrMousePosition, x2, y2);
+                dX = x1 - x2;
+                dY = y1 - y2;
 
                 for (QList<RoadElement*>::iterator it = selectedElements.begin();
                      it != selectedElements.end(); ++it)
@@ -231,14 +250,21 @@ void SelectedState::mouseMoveEvent(QMouseEvent *pe)
                 // двигать фигуру или контролы
                 if (controlIsSelected == true)
                 {
-                    float dY = (GLdouble)(-1)*(pe->y()-ptrMousePosition.y())/
-                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
-                    float dX = (GLdouble)(pe->x()-ptrMousePosition.x())/
-                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
-                    float x = (GLdouble)ptrMousePosition.x()/
-                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
-                    float y = (GLdouble)(scene->height() -  ptrMousePosition.y())/
-                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                    float dY = (GLdouble)(-1)*(pe->pos().y()-ptrMousePosition.y())/
+//                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                    float dX = (GLdouble)(pe->pos().x()-ptrMousePosition.x())/
+//                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+
+//                    float x = (GLdouble)ptrMousePosition.x()/
+//                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                    float y = (GLdouble)(scene->height() -  ptrMousePosition.y())/
+//                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+                    float x1, y1, x2, y2, dX, dY, x, y;
+                    scene->getWorldCoord(pe->pos(), x1, y1);
+                    scene->getWorldCoord(ptrMousePosition, x2, y2);
+                    dX = x1 - x2;
+                    dY = y1 - y2;
+                    scene->getWorldCoord(ptrMousePosition, x, y);
                     selectedElement->resizeByControl(controlIndex, dX, dY, x, y);
                     scene->updateGL();
                     model->setModified(true);
@@ -248,11 +274,15 @@ void SelectedState::mouseMoveEvent(QMouseEvent *pe)
                 {
                     if (figureIsSelected == true)
                     {
-                        float dY = (GLfloat)(-1)*(pe->y()-ptrMousePosition.y())/
-                                scene->width()/(scene->nSca * scene->ratio) * 2.0;
-                        float dX = (GLfloat)(pe->x()-ptrMousePosition.x())/
-                                scene->width()/(scene->nSca * scene->ratio) * 2.0;
-
+//                        float dY = (GLfloat)(-1)*(pe->y()-ptrMousePosition.y())/
+//                                scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                        float dX = (GLfloat)(pe->x()-ptrMousePosition.x())/
+//                                scene->width()/(scene->nSca * scene->ratio) * 2.0;
+                        float x1, y1, x2, y2, dX, dY;
+                        scene->getWorldCoord(pe->pos(), x1, y1);
+                        scene->getWorldCoord(ptrMousePosition, x2, y2);
+                        dX = x1 - x2;
+                        dY = y1 - y2;
                         selectedElement->move(dX, dY);
                         scene->updateGL();
                         model->setModified(true);
@@ -317,10 +347,15 @@ void SelectedState::mouseReleaseEvent(QMouseEvent *pe)
 
         if (selectedElements.size() > 0)
         {
-            newX = (GLdouble)pe->x()/
-                    scene->width()/(scene->nSca * scene->ratio) * 2.0;
-            newY = (GLdouble)(scene->height() -  pe->y())/
-                    scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//            newX = (GLdouble)pe->x()/
+//                    scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//            newY = (GLdouble)(scene->height() -  pe->y())/
+//                    scene->width()/(scene->nSca * scene->ratio) * 2.0;
+
+            float x, y;
+            scene->getWorldCoord(pe->pos(), x, y);
+            newX = x;
+            newY = y;
             RoadElement::undoStack->push(new MoveCommand(selectedElements, oldX, oldY, newX, newY, scene));
         }
         else
@@ -332,10 +367,15 @@ void SelectedState::mouseReleaseEvent(QMouseEvent *pe)
             } else
                 if (figureIsSelected)
                 {
-                    newX = (GLdouble)pe->x()/
-                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
-                    newY = (GLdouble)(scene->height() -  pe->y())/
-                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                    newX = (GLdouble)pe->x()/
+//                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+//                    newY = (GLdouble)(scene->height() -  pe->y())/
+//                            scene->width()/(scene->nSca * scene->ratio) * 2.0;
+
+                    float x, y;
+                    scene->getWorldCoord(pe->pos(), x, y);
+                    newX = x;
+                    newY = y;
                     RoadElement::undoStack->push(new MoveCommand(selectedElement, oldX, oldY, newX, newY, scene));
 
                 }

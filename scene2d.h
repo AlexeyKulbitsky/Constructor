@@ -105,6 +105,7 @@ public:
 
     void getYDelta(float value) { yDelta = value; }
     float getYDelta() { return yDelta; }
+    void getWorldCoord(QPoint p, float& x, float& y);
 
 signals:
     //void selectedFigureChanged(RoadElement* roadElement);
@@ -167,6 +168,8 @@ private:
     static bool log;
     void qSleep(int msec);
     int delay;
+    bool recompileGrid;
+    GLuint gridList;
     // QWidget interface
 protected:
     virtual void contextMenuEvent(QContextMenuEvent *pe);

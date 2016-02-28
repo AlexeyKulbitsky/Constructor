@@ -16,6 +16,8 @@ GLint viewport[4]; // декларируем матрицу поля просм�
 
 Scene2D::Scene2D(QWidget* parent) : QGLWidget(parent), widget(0)
 {
+    gridList = 0;
+    recompileGrid = true;
     firstTime = true;
     delay = 0;
     widgetWidth = widgetHeight = 1.0f;
@@ -48,6 +50,8 @@ Scene2D::Scene2D(QWidget* parent) : QGLWidget(parent), widget(0)
 
 Scene2D::Scene2D(QSettings *settings, QWidget *parent) : QGLWidget(parent)
 {
+    gridList = 0;
+    recompileGrid = true;
     firstTime = true;
     delay = 0;
     widgetWidth = widgetHeight = 1.0f;
@@ -495,10 +499,42 @@ void Scene2D::drawGrid()
         Logger::getLogger()->infoLog() << "Scene2D::drawGrid()\n";
     if (gridStep <= 0.0f)
         return;
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    if (showGrid)
+//    glDisable(GL_DEPTH_TEST);
+//    glDisable(GL_LIGHTING);
+//    if (showGrid)
+//    {
+//        glLineWidth(1.0);
+//        for (double i = -1000.0; i < 1001.0; i += gridStep)
+//        {
+//            glBegin(GL_LINES);
+//            glColor3d(0.7,0.7,0.7);
+//            glVertex3d(i, -1000.0, 0.005f);
+//            glVertex3d(i, 1000.0, 0.005f);
+//            glEnd();
+//        }
+
+//        for (double i = -1000.0; i < 1001.0; i += gridStep)
+//        {
+//            glBegin(GL_LINES);
+//            glColor3d(0.7,0.7,0.7);
+//            glVertex3d(-1000.0, i, 0.005f);
+//            glVertex3d(1000.0, i, 0.005f);
+//            glEnd();
+//        }
+//    }
+//    glEnable(GL_LIGHTING);
+//    glEnable(GL_DEPTH_TEST);
+
+    if (recompileGrid)
     {
+        if (gridList > 0)
+            glDeleteLists(gridList, 1);
+
+        gridList = glGenLists(1);
+        glNewList(gridList, GL_COMPILE);
+
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_LIGHTING);
         glLineWidth(1.0);
         for (double i = -1000.0; i < 1001.0; i += gridStep)
         {
@@ -517,9 +553,15 @@ void Scene2D::drawGrid()
             glVertex3d(1000.0, i, 0.005f);
             glEnd();
         }
+        glEnable(GL_LIGHTING);
+        glEnable(GL_DEPTH_TEST);
+        glEndList();
+        recompileGrid = false;
     }
-    glEnable(GL_LIGHTING);
-    glEnable(GL_DEPTH_TEST);
+    if (showGrid)
+    {
+        glCallList(gridList);
+    }
 }
 
 bool Scene2D::isRulerActive()
@@ -785,6 +827,17 @@ void Scene2D::drawSubstrate()
     glEnable(GL_LIGHTING);
     glEnable(GL_DEPTH_TEST);
 
+}
+
+void Scene2D::getWorldCoord(QPoint p, float &x, float &y)
+{
+    double x1, y1, z1, wx, wy, wz;
+    x1 = p.x();
+    y1 = p.y();
+    z1 = 0.0;
+    RoadElement::getWorldCoord(x1, y1, z1, wx, wy, wz);
+    x = float(wx) / nSca + xDelta;
+    y = float(wy) / nSca + yDelta;
 }
 
 void Scene2D::copy()
@@ -1119,6 +1172,7 @@ void Scene2D::setGridStep(double step)
     this->gridStep = step;
     if (gridStep <= 0.0f)
         gridStep = 0.0f;
+    recompileGrid = true;
     updateGL();
     emit gridStepChanged(step);
 }

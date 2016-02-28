@@ -500,18 +500,81 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
                                     (point1.y - point2.y)*(point1.y - point2.y));
 
             roads[i]->resizeByControl(index, dx, dy, x, y);
+            //calculateRoadIntersections();
+
+            int j = i == 0 ? roads.size() - 1 : i - 1;
+            vec2 a_1 = roads[i]->getAxisPoint_1();
+            vec2 a_2 = roads[i]->getAxisPoint_2();
+
+            vec2 a_1_1 = roads[j]->getAxisPoint_1();
+            vec2 a_2_1 = roads[j]->getAxisPoint_2();
+            float xT, yT;
+            calculateLinesIntersection(a_1, a_2, a_1_1, a_2_1, xT, yT);
+            float l = sqrt((xT - a_1.x) * (xT - a_1.x) +
+                           (yT - a_1.y) * (yT - a_1.y));
+            float max = 10.0f;
+            if (l > max)
+            {
+                float xa, ya, xb, yb;
+                int res = calculateLineCircleIntersection(a_1.x, a_1.x, max,
+                                                a_1_1.x, a_1_1.y,
+                                                a_2_1.x, a_2_1.y,
+                                                xa, ya, xb, yb);
+                float xRes, yRes;
+                if (res == 2)
+                {
+                    if (fabs(xT - xa) < (fabs(xT - xb)))
+                    {
+                        xRes = xa;
+                        yRes = ya;
+                    }
+                    else
+                    {
+                        xRes = xb;
+                        yRes = yb;
+                    }
+                }
+                else
+                {
+                    if (res == 1)
+                    {
+                        xRes = xa;
+                        yRes = ya;
+                    }
+                }
+
+//                qDebug() << "l>max";
+//                vec2 p1(xT, yT);
+//                vec2 p2(xRes, yRes);
+//                //vec3 vector1(xT - a_1.x, yT - a_1.y, 0.0f);
+//                //vec3 vector2(xRes - a_1.x, yRes - a_1.y, 0.0f);
+//                float angle = calculateAngle(a_1, p1, a_1, p2);
+//                //float angle = calculateAngle(vector2, vector1);
+//                qDebug() << "Angle" << angle;
+//                roads[i]->rotate(angle, a_1.x, a_1.y, 0.0f);
+//                //calculateRoadIntersections();
+                float len = sqrt((a_1.x - a_2.x) * (a_1.x - a_2.x) +
+                                 (a_1.y - a_2.y) * (a_1.y - a_2.y));
+                a_2.x = a_1.x + (a_1.x - xRes) * len / max;
+                a_2.y = a_1.y + (a_1.y - yRes) * len / max;
+                roads[i]->setCoordForAxisPoint(1, a_2.x, a_2.y);
+                roads[i]->setVertexArray();
+                roads[i]->setTextureArray();
+            }
+
 
             calculateRoadIntersections();
             point1 = roads[i]->getCoordOfPoint(0);
             point2 = roads[i]->getCoordOfPoint(3);
             float curLength = sqrt((point1.x - point2.x)*(point1.x - point2.x) +
                                    (point1.y - point2.y)*(point1.y - point2.y));
-            int j = i == 0 ? roads.size() - 1 : i - 1;
+
             if (curLength < curves[j]->getLeftLength())
             {
                 float factor = prevLength / curLength - prevLength /  curves[j]->getLeftLength();
                 vec3 ax2 = point2 - point1;
                 float angle = calculateAngle(ax1, ax2);
+
                 roads[i]->rotate(angle * factor,
                                  roads[i]->getAxisPoint_1().x,
                                  roads[i]->getAxisPoint_1().y,
@@ -525,6 +588,7 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
             vec2 t1 = roads[j]->getAxisPoint_1();
             vec2 t2 = roads[j]->getAxisPoint_2();
             float angle = calculateAngle(p1, p2, t1, t2) * 180.0f / pi;
+            //qDebug() << "Rotate Angle" << angle;
             float delta = angle - angles[i]->getAngle();
             angles[i]->setAngle(angle);
             j = i == 0 ? roads.size() - 1 : i - 1;
@@ -1260,7 +1324,7 @@ void Intersection::setRoadWidth(double value)
     if ((angles[i]->getAngle() >= 178.0f && angles[i]->getAngle() <= 182.0f) ||
         (angles[j]->getAngle() >= 178.0f && angles[j]->getAngle() <= 182.0f))
     {
-        emit widthChanged(roads[i]->getWidth());
+        emit roads[i]->widthChanged(roads[i]->getWidth());
         return;
     }
     else

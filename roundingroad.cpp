@@ -2117,6 +2117,7 @@ void RoundingRoad::getProperties(QVBoxLayout *layout, QGLWidget* render)
     angel_1_NearRadiusSpinBox->setKeyboardTracking(false);
     angel_1_NearRadiusSpinBox->setMaximum(10000.0);
     angel_1_NearRadiusSpinBox->setMinimum(-10000.0);
+    //angel_1_NearRadiusSpinBox->setFocusPolicy(Qt::StrongFocus);
     QDoubleSpinBox* angel_2_NearRadiusSpinBox = new QDoubleSpinBox();
     angel_2_NearRadiusSpinBox->setKeyboardTracking(false);
     angel_2_NearRadiusSpinBox->setMaximum(10000.0);

@@ -141,7 +141,7 @@ void RoadElement::getWindowCoord(double x, double y, double z, double &wx, doubl
 void RoadElement::getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz)
 {
     if (log)
-    Logger::getLogger()->infoLog() << "RoadElement::getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz)\n";
+        Logger::getLogger()->infoLog() << "RoadElement::getWorldCoord(double x, double y, double z, double &wx, double &wy, double &wz)\n";
     GLint viewport[4];
     GLdouble mvmatrix[16], projmatrix[16];
 
@@ -188,6 +188,53 @@ bool RoadElement::calculateLinesIntersection(vec2 p1, vec2 p2, vec2 s1, vec2 s2,
     c2 = s1.y * (s2.x - s1.x) - s1.x * (s2.y - s1.y);
 
     return calculateLinesIntersection(a1, b1, c1, a2, b2, c2, x, y);
+}
+
+int RoadElement::calculateLineCircleIntersection(float x0, float y0, float r,
+                                                 float x1, float y1,
+                                                 float x2, float y2,
+                                                 float &xa, float &ya,
+                                                 float &xb, float &yb)
+{
+    float a1, a2, b1, b2, c1, c2;
+    a1 = y2 - y1;
+    b1 = x1 - x2;
+    c1 = y1 * (x2 - x1) - x1 * (y2 - y1);
+
+    a2 = b1;
+    b2 = -a1;
+    c2 = a1 * y0 - b1 * x0;
+    float xTemp, yTemp;
+    if (!calculateLinesIntersection(a1, b1, c1, a2, b2, c2, xTemp, yTemp))
+        return 0;
+
+    float d = sqrt((xTemp - x0) * (xTemp - x0) + (yTemp - y0) * (yTemp - y0));
+    if (d > r)
+    {
+        return 0;
+    }
+    else
+    {
+        if (fabs(d - r) < 1e-5)
+        {
+            xa = xTemp;
+            ya = yTemp;
+            return 1;
+        }
+        else
+        {
+            if (d < r)
+            {
+                float l = sqrt(r * r - d * d);
+                float dr = sqrt(a1 * a1 + b1 * b1);
+                xa = xTemp - b1 * l / dr;
+                ya = yTemp + a1 * l / dr;
+                xb = xTemp + b1 * l / dr;
+                yb = yTemp - a1 * l / dr;
+                return 2;
+            }
+        }
+    }
 }
 
 float RoadElement::calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4)
