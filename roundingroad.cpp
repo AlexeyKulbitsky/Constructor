@@ -2108,6 +2108,7 @@ void RoundingRoad::getProperties(QVBoxLayout *layout, QGLWidget* render)
     QDoubleSpinBox* nearRadiusSpinBox = new QDoubleSpinBox();
     nearRadiusSpinBox->setKeyboardTracking(false);
     nearRadiusSpinBox->setMaximum(10000.0);
+    //nearRadiusSpinBox->setMouseTracking(false);
     QDoubleSpinBox* farRadiusSpinBox = new QDoubleSpinBox();
     farRadiusSpinBox->setKeyboardTracking(false);
     farRadiusSpinBox->setMaximum(10000.0);

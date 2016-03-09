@@ -238,13 +238,16 @@ QJsonObject MapPlane::getJSONInfo()
     element["Height"] = height;
     if (texture.size() == 0)
     {
-        QString fileName = QFileDialog::getSaveFileName(0, tr("Сохранить изображение захваченного участка карты"), QApplication::applicationDirPath(), tr("JPEG files (*.jpg)") );
-        while (fileName.size() == 0)
-        {
-            fileName = QFileDialog::getSaveFileName(0, tr("Сохранить изображение захваченного участка карты"), QApplication::applicationDirPath(), tr("JPEG files (*.jpg)") );
-        }
-        texture = fileName;
-        image.save(fileName);
+//        QString fileName = QFileDialog::getSaveFileName(0, tr("Сохранить изображение захваченного участка карты"), QApplication::applicationDirPath(), tr("JPEG files (*.jpg)") );
+//        while (fileName.size() == 0)
+//        {
+//            fileName = QFileDialog::getSaveFileName(0, tr("Сохранить изображение захваченного участка карты"), QApplication::applicationDirPath(), tr("JPEG files (*.jpg)") );
+//        }
+//        texture = fileName;
+
+
+//        QString fileName = QTime::currentTime().toString("hh:mm:ss") + QString(".jpg");
+//        image.save(fileName);
     }
     element["Texture"] = texture;
 

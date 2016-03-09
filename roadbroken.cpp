@@ -417,8 +417,8 @@ void RoadBroken::resetVertexArray(float dx, float dy, bool right)
             dy1 = y2 - y1;
             r1 = sqrt(dx1*dx1 + dy1*dy1);
             float rTemp = r1 / (r1 + r2);
-            if (fabs(x2 - x1) < 1e-5
-                    && fabs(y2 - y1) < 1e-5)
+            if (fabs(x2 - x1) < 1e-5 &&
+                fabs(y2 - y1) < 1e-5)
             {
                 rTemp = 0.001f;
             }
@@ -3419,9 +3419,9 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
         vertexArray[4] += dyRes;
 
 //        float res1 = d_dx1 * (vertexArray[0] - vertexArray[6]) +
-//                    d_dy1 * (vertexArray[1] - vertexArray[7]);
+//                     d_dy1 * (vertexArray[1] - vertexArray[7]);
 //        float res2 = d_dx2 * (vertexArray[3] - vertexArray[9]) +
-//                    d_dy2 * (vertexArray[4] - vertexArray[10]);
+//                     d_dy2 * (vertexArray[4] - vertexArray[10]);
 //        if (res1 < 0.0f)
 //        {
 
@@ -3467,7 +3467,59 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
 //                recalculate = true;
 //            }
 
+        // Проверка верхней части на излом
+        x1 = vertexArray[0];
+        y1 = vertexArray[1];
+        x2 = vertexArray[3];
+        y2 = vertexArray[4];
+        float x3 = vertexArray[9];
+        float y3 = vertexArray[10];
+        dx1 = x1 - x2;
+        dy1 = y1 - y2;
+        dx2 = x3 - x2;
+        dy2 = y3 - y2;
+        float res = dx2*dy1 - dx1*dy2;
+        if (res > 0)
+        {
+            float angle = calculateAngle(vec3(dx2, dy2, 0.0f), vec3(dx1, dy1, 0.0f));
+            float pi = 3.14159265f;
+            angle -= pi / 2.0f;
+            float dr = sqrt(dx2*dx2 + dy2*dy2) * cosf(angle);
+            dx2 = dy1;
+            dy2 = -dx1;
+            r = sqrt(dx2*dx2 + dy2*dy2);
+            dxRes = dx2 / r * dr;
+            dyRes = dy2 / r * dr;
+            vertexArray[0] += dxRes;
+            vertexArray[1] += dyRes;
+            vertexArray[3] += dxRes;
+            vertexArray[4] += dyRes;
+        }
 
+        // Проверка нижней части на излом
+        x3 = vertexArray[6];
+        y3 = vertexArray[7];
+        dx1 = x2 - x1;
+        dy1 = y2 - y1;
+        dx2 = x3 - x1;
+        dy2 = y3 - y1;
+        res = dx2*dy1 - dx1*dy2;
+        if (res < 0)
+        {
+            float angle = calculateAngle(vec3(dx2, dy2, 0.0f), vec3(dx1, dy1, 0.0f));
+            float pi = 3.14159265f;
+            angle -= pi / 2.0f;
+            float dr = sqrt(dx2*dx2 + dy2*dy2) * cosf(angle);
+            dx2 = dy1;
+            dy2 = -dx1;
+            r = sqrt(dx2*dx2 + dy2*dy2);
+            dxRes = dx2 / r * dr;
+            dyRes = dy2 / r * dr;
+            vertexArray[0] += dxRes;
+            vertexArray[1] += dyRes;
+            vertexArray[3] += dxRes;
+            vertexArray[4] += dyRes;
+        }
 
 
 
@@ -3509,6 +3561,61 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
 //                }
 
 //            }
+
+
+            // Проверка верхней части на излом
+            x1 = vertexArray[j * 3];
+            y1 = vertexArray[j * 3 + 1];
+            x2 = vertexArray[(j + 1) * 3];
+            y2 = vertexArray[(j + 1) * 3 + 1];
+            float x3 = vertexArray[(j - 1) * 3];
+            float y3 = vertexArray[(j - 1) * 3 + 1];
+            dx1 = x1 - x2;
+            dy1 = y1 - y2;
+            dx2 = x3 - x2;
+            dy2 = y3 - y2;
+            float res = dx2*dy1 - dx1*dy2;
+            if (res < 0)
+            {
+                float angle = calculateAngle(vec3(dx2, dy2, 0.0f), vec3(dx1, dy1, 0.0f));
+                float pi = 3.14159265f;
+                angle -= pi / 2.0f;
+                float dr = sqrt(dx2*dx2 + dy2*dy2) * cosf(angle);
+                dx2 = dy1;
+                dy2 = -dx1;
+                r = sqrt(dx2*dx2 + dy2*dy2);
+                dxRes = dx2 / r * dr;
+                dyRes = dy2 / r * dr;
+                vertexArray[j * 3] += dxRes;
+                vertexArray[j * 3 + 1] += dyRes;
+                vertexArray[(j + 1) * 3] += dxRes;
+                vertexArray[(j + 1) * 3 + 1] += dyRes;
+            }
+
+            // Проверка нижней части на излом
+            x3 = vertexArray[(j - 2) * 3];
+            y3 = vertexArray[(j - 2) * 3 + 1];
+            dx1 = x2 - x1;
+            dy1 = y2 - y1;
+            dx2 = x3 - x1;
+            dy2 = y3 - y1;
+            res = dx2*dy1 - dx1*dy2;
+            if (res > 0)
+            {
+                float angle = calculateAngle(vec3(dx2, dy2, 0.0f), vec3(dx1, dy1, 0.0f));
+                float pi = 3.14159265f;
+                angle -= pi / 2.0f;
+                float dr = sqrt(dx2*dx2 + dy2*dy2) * cosf(angle);
+                dx2 = dy1;
+                dy2 = -dx1;
+                r = sqrt(dx2*dx2 + dy2*dy2);
+                dxRes = dx2 / r * dr;
+                dyRes = dy2 / r * dr;
+                vertexArray[j * 3] += dxRes;
+                vertexArray[j * 3 + 1] += dyRes;
+                vertexArray[(j + 1) * 3] += dxRes;
+                vertexArray[(j + 1) * 3 + 1] += dyRes;
+            }
             resetLines();
         }
 

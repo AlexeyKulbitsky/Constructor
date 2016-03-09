@@ -239,6 +239,7 @@ int RoadElement::calculateLineCircleIntersection(float x0, float y0, float r,
 
 float RoadElement::calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4)
 {
+//    qDebug() << "----------------";
     float dx1 = p2.x - p1.x;
     float dy1 = p2.y - p1.y;
     float r1 = sqrt(dx1*dx1 + dy1*dy1);
@@ -246,15 +247,19 @@ float RoadElement::calculateAngle(vec2 p1, vec2 p2, vec2 p3, vec2 p4)
     float dy2 = p4.y - p3.y;
     float r2 = sqrt(dx2*dx2 + dy2*dy2);
     float t = (dx1*dx2 + dy1*dy2) / (r1 * r2);
-    if (t > 1)
+//    qDebug() << "T =" << t;
+    if (t > 1.0f)
         t = 1.0f;
-    if (t < -1)
+    if (t < -1.0f)
         t = -1.0f;
     float angle = acos(t);
-    float res = dx1*dy2 - dx2*dy1;
-    float pi = 3.14159265f;
-    if (res < 0)
-        angle = 2.0f * pi - angle;
+//    qDebug() << "Ang1 =" << angle;
+//    float res = dx1*dy2 - dx2*dy1;
+//    float pi = 3.14159265f;
+//    if (res < 0)
+//        angle = 2.0f * pi - angle;
+//    qDebug() << "Ang2 =" << angle;
+//    qDebug() << "----------------";
     return angle;
 }
 

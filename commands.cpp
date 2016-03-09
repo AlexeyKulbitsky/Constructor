@@ -849,13 +849,27 @@ void DeleteLineCommand::undo()
     switch (type)
     {
     case 0:
+    {
         roadSimple->addLine(line);
+        roadSimple->getStepDialog()->setLine(line);
+        roadSimple->getStepDialog()->setUsingTarget(Edit);
+        roadSimple->getStepDialog()->exec();
+        roadSimple->getStepDialog()->setUsingTarget(Create);
+    }
         break;
     case 1:
         roadBroken->addLine(line);
+        roadBroken->getStepDialog()->setLine(line);
+        roadBroken->getStepDialog()->setUsingTarget(Edit);
+        roadBroken->getStepDialog()->exec();
+        roadBroken->getStepDialog()->setUsingTarget(Create);
         break;
     case 2:
         roundingRoad->addLine(line);
+        roundingRoad->getStepDialog()->setLine(line);
+        roundingRoad->getStepDialog()->setUsingTarget(Edit);
+        roundingRoad->getStepDialog()->exec();
+        roundingRoad->getStepDialog()->setUsingTarget(Create);
         break;
     default:
         break;

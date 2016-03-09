@@ -230,6 +230,7 @@ public:
     virtual unsigned int getSize() { return sizeof(*this); }
     virtual void setDrawRoadStatus(bool status) { drawRoad = status; qDebug() << name << "drawRoad =" << status;}
     virtual void setDrawLinesStatus(bool status) { drawLines = status; qDebug() << name << "drawLine =" << status;}
+    virtual inline StepDialog* getStepDialog() { return stepDialog; }
 public slots:
     virtual bool setFixed(bool fixed) = 0;
     virtual void setShowMeasurements(bool status);

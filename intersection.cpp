@@ -29,12 +29,15 @@ Intersection::Intersection(float x, float y, int numberOfRoads)
     if (numberOfRoads < 3)
         numberOfRoads = 3;
     lists.resize(numberOfRoads);
+    float eps = 0.001f;
     for (int i = 0; i < numberOfRoads; ++i)
     {
         float angle = 2.0f * pi / numberOfRoads * float(i);
         float dx = r * cosf(angle);
         float dy = r * sinf(angle);
-        RoadSimple *road = new RoadSimple(x, y, x + dx, y + dy, 6.0f,
+        float ddx = eps * cosf(angle);
+        float ddy = eps * sinf(angle);
+        RoadSimple *road = new RoadSimple(x + ddx, y + ddy, x + dx, y + dy, 6.0f,
                                           "/models/city_roads/nr_07C.jpg", 6.0f, 6.0f,
                                           "/models/city_roads/bksid_11.jpg", 2.75f, 6.0f,
                                           "RoadSimple", 0,
@@ -498,32 +501,65 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
 
             float prevLength = sqrt((point1.x - point2.x)*(point1.x - point2.x) +
                                     (point1.y - point2.y)*(point1.y - point2.y));
-
+            int j = i == 0 ? roads.size() - 1 : i - 1;
+            vec2 aPrevious = roads[j]->getAxisPoint_1();
             roads[i]->resizeByControl(index, dx, dy, x, y);
             //calculateRoadIntersections();
 
-            int j = i == 0 ? roads.size() - 1 : i - 1;
+
             vec2 a_1 = roads[i]->getAxisPoint_1();
             vec2 a_2 = roads[i]->getAxisPoint_2();
 
             vec2 a_1_1 = roads[j]->getAxisPoint_1();
             vec2 a_2_1 = roads[j]->getAxisPoint_2();
             float xT, yT;
-            calculateLinesIntersection(a_1, a_2, a_1_1, a_2_1, xT, yT);
+            calculateLinesIntersection(a_1, a_2, a_1_1, a_2_1, xT, yT);            
+
             float l = sqrt((xT - a_1.x) * (xT - a_1.x) +
                            (yT - a_1.y) * (yT - a_1.y));
-            float max = 10.0f;
-            if (l > max)
+
+            float L1 = sqrt((a_1.x - xT) * (a_1.x - xT) +
+                            (a_1.y - yT) * (a_1.y - yT));
+            float L2 = sqrt((a_2.x - xT) * (a_2.x - xT) +
+                            (a_2.y - yT) * (a_2.y - yT));
+
+            bool isInRoad = ((xT >= a_1.x && xT <= a_2.x) || (xT <= a_1.x && xT >= a_2.x)) &&
+                            ((yT >= a_1.y && yT <= a_2.y) || (yT <= a_1.y && yT >= a_2.y));
+            float max = 100.0f;
+            if (l > max || L2 < L1 || isInRoad)
             {
                 float xa, ya, xb, yb;
-                int res = calculateLineCircleIntersection(a_1.x, a_1.x, max,
+                int res = calculateLineCircleIntersection(a_1.x, a_1.y, max,
                                                 a_1_1.x, a_1_1.y,
                                                 a_2_1.x, a_2_1.y,
                                                 xa, ya, xb, yb);
                 float xRes, yRes;
+                float factor;
                 if (res == 2)
                 {
-                    if (fabs(xT - xa) < (fabs(xT - xb)))
+//                    float l1 = sqrt((xT - xa) * (xT - xa) + (yT - ya) * (yT - ya));
+//                    float l2 = sqrt((xT - xb) * (xT - xb) + (yT - yb) * (yT - yb));
+                    float l1 = sqrt((aPrevious.x - xa) * (aPrevious.x - xa) +
+                                    (aPrevious.y - ya) * (aPrevious.y - ya));
+                    float l2 = sqrt((aPrevious.x - xb) * (aPrevious.x - xb) +
+                                    (aPrevious.y - yb) * (aPrevious.y - yb));
+//                    float L1 = sqrt((a_1.x - xT) * (a_1.x - xT) +
+//                                    (a_1.y - yT) * (a_1.y - yT));
+//                    float L2 = sqrt((a_2.x - xT) * (a_2.x - xT) +
+//                                    (a_2.y - yT) * (a_2.y - yT));
+                    if (L2 < L1 || isInRoad)
+                    {
+//                        qDebug() << "Перелом";
+//                        float t = l1;
+//                        l1 = l2;
+//                        l2 = t;
+                        factor = 1.0f;
+                    }
+                    else
+                    {
+                        factor = -1.0f;
+                    }
+                    if (l1 < l2)
                     {
                         xRes = xa;
                         yRes = ya;
@@ -544,22 +580,29 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
                 }
 
 //                qDebug() << "l>max";
-//                vec2 p1(xT, yT);
-//                vec2 p2(xRes, yRes);
-//                //vec3 vector1(xT - a_1.x, yT - a_1.y, 0.0f);
-//                //vec3 vector2(xRes - a_1.x, yRes - a_1.y, 0.0f);
-//                float angle = calculateAngle(a_1, p1, a_1, p2);
-//                //float angle = calculateAngle(vector2, vector1);
-//                qDebug() << "Angle" << angle;
-//                roads[i]->rotate(angle, a_1.x, a_1.y, 0.0f);
-//                //calculateRoadIntersections();
-                float len = sqrt((a_1.x - a_2.x) * (a_1.x - a_2.x) +
-                                 (a_1.y - a_2.y) * (a_1.y - a_2.y));
-                a_2.x = a_1.x + (a_1.x - xRes) * len / max;
-                a_2.y = a_1.y + (a_1.y - yRes) * len / max;
-                roads[i]->setCoordForAxisPoint(1, a_2.x, a_2.y);
-                roads[i]->setVertexArray();
-                roads[i]->setTextureArray();
+//                qDebug() << "xTemp =" << xT << "yTemp =" << yT;
+//                qDebug() << "xRes =" << xRes << "yRes =" << yRes;
+//                qDebug() << "x0 =" << a_1.x << "y0 =" << a_1.y;
+//                qDebug()  << "l =" << l << "max =" << max;
+                vec2 p1(xT, yT);
+                vec2 p2(xRes, yRes);
+                float angle = calculateAngle(a_1, p1, a_1, p2);
+                if (factor > 0.0f)
+                {
+                    //qDebug() << "Angle:" << angle;
+                    angle = 3.14159265f - angle;
+                }
+                roads[i]->rotate(-angle, a_1.x, a_1.y, 0.0f);
+                //calculateRoadIntersections();
+
+
+//                float len = sqrt((a_1.x - a_2.x) * (a_1.x - a_2.x) +
+//                                 (a_1.y - a_2.y) * (a_1.y - a_2.y));
+//                a_2.x = a_1.x + (a_1.x - xRes) * len / max;
+//                a_2.y = a_1.y + (a_1.y - yRes) * len / max;
+//                roads[i]->setCoordForAxisPoint(1, a_2.x, a_2.y);
+//                roads[i]->setVertexArray();
+//                roads[i]->setTextureArray();
             }
 
 
