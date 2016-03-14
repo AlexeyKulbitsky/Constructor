@@ -5,6 +5,7 @@
 #include <QVector>
 #include <GL/glu.h>
 #include <QListWidget>
+#include <QTreeWidget>
 #include "linebroken.h"
 #include "splitzone.h"
 
@@ -23,6 +24,62 @@ struct LineBrokenLinkedToRoadBroken
      bool beginRounding;
      bool endRounding;
     QString textureSource;
+};
+
+class Poly: public QObject
+{
+    Q_OBJECT
+public:
+    Poly():leftLength(0.0f), rightLength(0.0f), topLength(0.0f), bottomLength(0.0f){}
+    Poly(const Poly &) {}
+    virtual ~Poly() {}
+public slots:
+    void setLeftLength(double value)
+    {
+        if (value == leftLength)
+            return;
+        leftLength = value;
+        emit leftLengthChanged(value);
+    }
+    void setRightLength(double value)
+    {
+        if (value == rightLength)
+            return;
+        rightLength = value;
+        emit rightLengthChanged(value);
+    }
+    void setTopLength(double value)
+    {
+        if (value == topLength)
+            return;
+        topLength = value;
+        emit topLengthChanged(value);
+    }
+    void setBottomLength(double value)
+    {
+        if (value == bottomLength)
+            return;
+        bottomLength = value;
+        emit bottomLengthChanged(value);
+    }
+
+signals:
+    void leftLengthChanged(double value);
+    void rightLengthChanged(double value);
+    void topLengthChanged(double value);
+    void bottomLengthChanged(double value);
+
+private:
+    float leftLength;
+    float rightLength;
+    float topLength;
+    float bottomLength;
+
+public:
+    float getLeftLength() { return leftLength; }
+    float getRightLength() { return rightLength; }
+    float getTopLength() { return topLength; }
+    float getBottomLength() { return bottomLength; }
 };
 
 class RoadBroken: public RoadElement
@@ -67,6 +124,8 @@ protected:
 
     QVector<LineLinkedToRoad> lines;
 
+    QVector<Poly> polys;
+
     int textureID[2];
     float texture_1Usize, texture_1Vsize;
     float texture_2Usize, texture_2Vsize;
@@ -106,6 +165,7 @@ protected:
     QGLWidget* render;
     static bool log;
     QListWidget *list;
+    QTreeWidget* tree;
     LineLinkedToRoad currentLineLinked;
 
 public:
@@ -136,6 +196,7 @@ public:
     void deleteBreak(bool front);
     void setIndexArrayForSelectionFrame();
     void setColorArrayForSelectionFrame(float red, float green, float blue);
+    void calculatePolys();
 
     // RoadElement interface
 public:
@@ -211,7 +272,12 @@ public slots:
     void setSplitZoneHeight(double height);
     virtual void getProperties(QVBoxLayout *layout, QGLWidget* render = 0);
     void updateListWidget();
+    void updateTreeWidget();
 
+    void setLeftLength(double value);
+    void setRightLength(double value);
+    void setTopLength(double value);
+    void setBottomLength(double value);
     // RoadElement interface
 public:
     virtual void clearProperties(QLayout *layout);

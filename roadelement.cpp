@@ -103,6 +103,19 @@ void RoadElement::rotate(float, float, float, float)
 
 }
 
+void RoadElement::rotate(float angle, float x0, float y0, float &x, float &y)
+{
+    float tx = 0.0f, ty = 0.0f;
+    x -= x0;
+    y -= y0;
+    tx = x;
+    ty = y;
+    x = tx * cos(angle) - ty * sin(angle);
+    y = tx * sin(angle) + ty * cos(angle);
+    x += x0;
+    y += y0;
+}
+
 
 void RoadElement::setStepDialog(StepDialog *dialog)
 {

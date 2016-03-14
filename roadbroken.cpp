@@ -39,6 +39,7 @@ RoadBroken::RoadBroken(float x1, float y1, float x2, float y2, float width, floa
     selected = false;
     fixed = false;
     indexOfSelectedControl = -1;
+    calculatePolys();
 }
 
 RoadBroken::RoadBroken(QVector<GLfloat> &vetrexArray, float red, float green, float blue, float alpha, QString name, int layer)
@@ -63,6 +64,7 @@ RoadBroken::RoadBroken(QVector<GLfloat> &vetrexArray, float red, float green, fl
     selected = false;
     fixed = false;
     indexOfSelectedControl = -1;
+    calculatePolys();
 }
 
 RoadBroken::RoadBroken(float x1, float y1, float x2, float y2, float width,
@@ -112,6 +114,7 @@ RoadBroken::RoadBroken(float x1, float y1, float x2, float y2, float width,
     selected = false;
     fixed = false;
     indexOfSelectedControl = -1;
+    calculatePolys();
     connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
 }
 
@@ -172,6 +175,7 @@ RoadBroken::RoadBroken(QVector<float> &vertexArray,
     selected = false;
     this->fixed = fixed;
     indexOfSelectedControl = -1;
+    calculatePolys();
     connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
 }
 
@@ -274,6 +278,8 @@ RoadBroken::RoadBroken(const RoadBroken &source)
     elementY = source.elementY;
     layout = source.layout;
     render = source.render;
+
+    calculatePolys();
     connect(this, SIGNAL(linesChanged(QFormLayout*,QGLWidget*)),SLOT(getProperties(QFormLayout*,QGLWidget*)));
 }
 
@@ -354,6 +360,7 @@ void RoadBroken::setVertexArray(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, 
     }
     elementX = sumX / float(this->vertexArray.size() / 3);
     elementY = sumY / float(this->vertexArray.size() / 3);
+//    calculatePolys();
 }
 
 void RoadBroken::setVertexArray(QVector<GLfloat> &vertexArray)
@@ -374,6 +381,7 @@ void RoadBroken::setVertexArray(QVector<GLfloat> &vertexArray)
     }
     elementX = sumX / float(this->vertexArray.size() / 3);
     elementY = sumY / float(this->vertexArray.size() / 3);
+//    calculatePolys();
 }
 
 void RoadBroken::resetVertexArray(float dx, float dy, bool right)
@@ -469,6 +477,7 @@ void RoadBroken::resetVertexArray(float dx, float dy, bool right)
     }
     elementX = sumX / float(this->vertexArray.size() / 3);
     elementY = sumY / float(this->vertexArray.size() / 3);
+    //calculatePolys();
 }
 
 void RoadBroken::setColorArray(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha)
@@ -2762,7 +2771,8 @@ void RoadBroken::addBreak(bool front)
 
     }
     resetLines();
-
+    calculatePolys();
+    updateTreeWidget();
 }
 
 void RoadBroken::deleteBreak(bool front)
@@ -2861,6 +2871,8 @@ void RoadBroken::deleteBreak(bool front)
         }
 
     }
+    calculatePolys();
+    updateTreeWidget();
 }
 
 void RoadBroken::setIndexArrayForSelectionFrame()
@@ -2900,6 +2912,34 @@ void RoadBroken::setColorArrayForSelectionFrame(float red, float green, float bl
         colorArrayForSelection[i * 3] = red;
         colorArrayForSelection[i * 3 + 1] = green;
         colorArrayForSelection[i * 3 + 2] = blue;
+    }
+}
+
+void RoadBroken::calculatePolys()
+{
+    if (polys.size() != vertexArray.size() / 12)
+        polys.resize(vertexArray.size() / 12);
+    int count = 0;
+    float dx, dy;
+    for (int i = 0; i < vertexArray.size() / 3; i += 4)
+    {
+        dx = vertexArray[i * 3] - vertexArray[(i + 1) * 3];
+        dy = vertexArray[i * 3 + 1] - vertexArray[(i + 1) * 3 + 1];
+        polys[count].setLeftLength(sqrt(dx*dx + dy*dy));
+
+        dx = vertexArray[(i + 3) * 3] - vertexArray[(i + 2) * 3];
+        dy = vertexArray[(i + 3) * 3 + 1] - vertexArray[(i + 2) * 3 + 1];
+        polys[count].setRightLength(sqrt(dx*dx + dy*dy));
+
+        dx = vertexArray[(i + 3) * 3] - vertexArray[(i + 1) * 3];
+        dy = vertexArray[(i + 3) * 3 + 1] - vertexArray[(i + 1) * 3 + 1];
+        polys[count].setTopLength(sqrt(dx*dx + dy*dy));
+
+        dx = vertexArray[i * 3] - vertexArray[(i + 2) * 3];
+        dy = vertexArray[i * 3 + 1] - vertexArray[(i + 2) * 3 + 1];
+        polys[count].setBottomLength(sqrt(dx*dx + dy*dy));
+
+        count++;
     }
 }
 
@@ -4614,7 +4654,7 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
     resetLeftVertexArray();
     setLeftTextureArray(texture_2Usize, texture_2Vsize);
     //resetLines();
-
+    calculatePolys();
 }
 
 void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y, int keyBoardKey)
@@ -4859,7 +4899,7 @@ void RoadBroken::resizeByControl(int index, float dx, float dy, float x, float y
     resetLeftVertexArray();
     setLeftTextureArray(texture_2Usize, texture_2Vsize);
     resetLines();
-
+    calculatePolys();
 }
 
 int RoadBroken::getNumberOfControls()
@@ -5084,6 +5124,12 @@ void RoadBroken::getProperties(QVBoxLayout *layout, QGLWidget* render)
 
     l->addRow("Добавить линию", addLineButton);
     layout->addLayout(l);
+
+
+    tree = new QTreeWidget(layout->parentWidget());
+    updateTreeWidget();
+    layout->addWidget(tree);
+
     layout->addWidget(list);
 }
 
@@ -5113,6 +5159,284 @@ void RoadBroken::updateListWidget()
         list->setItemWidget(item, itemWidget);
     }
     list->setFixedHeight(list->sizeHintForRow(0) * list->count() + 2 * list->frameWidth());
+}
+
+void RoadBroken::updateTreeWidget()
+{
+    tree->clear();
+    int size = vertexArray.size() / 12;
+
+    //tree->topLevelItem(0)->childCount()
+    QTreeWidgetItem *topItem = new QTreeWidgetItem(tree);
+    topItem->setText(0, "Блоки");
+    tree->addTopLevelItem(topItem);
+
+    for (int i = 0; i < size; ++i)
+    {
+        QTreeWidgetItem *item = new QTreeWidgetItem(topItem);
+        item->setText(0, QString("Поле №") + QString::number(i + 1));
+
+        QTreeWidgetItem *rightLengthItem = new QTreeWidgetItem(item);
+        QWidget *rightLengthWidget = new QWidget(tree);
+        QHBoxLayout *rightLengthLayout = new QHBoxLayout(rightLengthWidget);
+        rightLengthLayout->setMargin(0);
+        rightLengthLayout->setContentsMargins(5, 0, 5, 0);
+        rightLengthWidget->setLayout(rightLengthLayout);
+        rightLengthLayout->addWidget(new QLabel(QString("Правая длина")));
+        QDoubleSpinBox *rightLengthSpinBox = new QDoubleSpinBox(tree);
+
+        rightLengthSpinBox->setObjectName(QString::number(i));
+        connect(&polys[i], SIGNAL(rightLengthChanged(double)), rightLengthSpinBox, SLOT(setValue(double)));
+        connect(rightLengthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setRightLength(double)));
+
+        rightLengthSpinBox->setValue(polys[i].getRightLength());
+
+        rightLengthLayout->addWidget(rightLengthSpinBox);
+        tree->setItemWidget(rightLengthItem, 0, rightLengthWidget);
+
+        QTreeWidgetItem *leftLengthItem = new QTreeWidgetItem(item);
+        QWidget *leftLengthWidget = new QWidget(tree);
+        QHBoxLayout *leftLengthLayout = new QHBoxLayout(leftLengthWidget);
+        leftLengthLayout->setMargin(0);
+        leftLengthLayout->setContentsMargins(5, 0, 5, 0);
+        leftLengthWidget->setLayout(leftLengthLayout);
+        leftLengthLayout->addWidget(new QLabel(QString("Левая длина")));
+        QDoubleSpinBox *leftLengthSpinBox = new QDoubleSpinBox(tree);
+
+        leftLengthSpinBox->setObjectName(QString::number(i));
+        connect(&polys[i], SIGNAL(leftLengthChanged(double)), leftLengthSpinBox, SLOT(setValue(double)));
+        connect(leftLengthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setLeftLength(double)));
+        leftLengthSpinBox->setValue(polys[i].getLeftLength());
+
+        leftLengthLayout->addWidget(leftLengthSpinBox);
+        tree->setItemWidget(leftLengthItem, 0, leftLengthWidget);
+
+
+        QTreeWidgetItem *topLengthItem = new QTreeWidgetItem(item);
+        QWidget *topLengthWidget = new QWidget(tree);
+        QHBoxLayout *topLengthLayout = new QHBoxLayout(topLengthWidget);
+        topLengthLayout->setMargin(0);
+        topLengthLayout->setContentsMargins(5, 0, 5, 0);
+        topLengthWidget->setLayout(topLengthLayout);
+        topLengthLayout->addWidget(new QLabel(QString("Верхняя длина")));
+        QDoubleSpinBox *topLengthSpinBox = new QDoubleSpinBox(tree);
+
+        topLengthSpinBox->setObjectName(QString::number(i));
+        connect(&polys[i], SIGNAL(topLengthChanged(double)), topLengthSpinBox, SLOT(setValue(double)));
+        connect(topLengthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setTopLength(double)));
+        topLengthSpinBox->setValue(polys[i].getTopLength());
+
+        topLengthLayout->addWidget(topLengthSpinBox);
+        tree->setItemWidget(topLengthItem, 0, topLengthWidget);
+
+        QTreeWidgetItem *bottomLengthItem = new QTreeWidgetItem(item);
+        QWidget *bottomLengthWidget = new QWidget(tree);
+        QHBoxLayout *bottomLengthLayout = new QHBoxLayout(bottomLengthWidget);
+        bottomLengthLayout->setMargin(0);
+        bottomLengthLayout->setContentsMargins(5, 0, 5, 0);
+        bottomLengthWidget->setLayout(bottomLengthLayout);
+        bottomLengthLayout->addWidget(new QLabel(QString("Нижняя длина")));
+        QDoubleSpinBox *bottomLengthSpinBox = new QDoubleSpinBox(tree);
+
+        bottomLengthSpinBox->setObjectName(QString::number(i));
+        connect(&polys[i], SIGNAL(bottomLengthChanged(double)), bottomLengthSpinBox, SLOT(setValue(double)));
+        connect(bottomLengthSpinBox, SIGNAL(valueChanged(double)), this, SLOT(setBottomLength(double)));
+        bottomLengthSpinBox->setValue(polys[i].getBottomLength());
+
+        bottomLengthLayout->addWidget(bottomLengthSpinBox);
+        tree->setItemWidget(bottomLengthItem, 0, bottomLengthWidget);
+
+        if (render)
+        {
+            connect(rightLengthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+            connect(leftLengthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+            connect(topLengthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+            connect(bottomLengthSpinBox, SIGNAL(valueChanged(double)), render, SLOT(updateGL()));
+        }
+    }
+    tree->resizeColumnToContents(0);
+}
+
+void RoadBroken::setLeftLength(double value)
+{
+    bool ok;
+    int i = sender()->objectName().toInt(&ok);
+    if (!ok)
+        return;
+    if (abs(polys[i].getLeftLength() - value) < 0.01)
+        return;
+    float x1 = vertexArray[i * 4 * 3];
+    float y1 = vertexArray[i * 4 * 3 + 1];
+    float x2 = vertexArray[(i * 4 + 1) * 3];
+    float y2 = vertexArray[(i * 4 + 1) * 3 + 1];
+
+    float dx = (x2 - x1) / polys[i].getLeftLength() * (value - polys[i].getLeftLength());
+    float dy = (y2 - y1) / polys[i].getLeftLength() * (value - polys[i].getLeftLength());
+
+//    vertexArray[(i * 4 + 1) * 3] = x1 + (x2 - x1) / polys[i].getLeftLength() * value;
+//    vertexArray[(i * 4 + 1) * 3 + 1] = y1 + (y2 - y1) / polys[i].getLeftLength() * value;
+
+    vertexArray[(i * 4 + 1) * 3] = x2 + dx / 2.0f;
+    vertexArray[(i * 4 + 1) * 3 + 1] = y2 + dy / 2.0f;
+    vertexArray[i * 4 * 3] = x1 - dx / 2.0f;
+    vertexArray[i * 4 * 3 + 1] = y1 - dy / 2.0f;
+
+    polys[i].setLeftLength(value);
+
+    if (i != 0)
+    {
+        vertexArray[(i * 4 - 1) * 3] = vertexArray[(i * 4 + 1) * 3];
+        vertexArray[(i * 4 - 1) * 3 + 1] = vertexArray[(i * 4 + 1) * 3 + 1];
+        vertexArray[(i * 4 - 2) * 3] = vertexArray[i * 4 * 3];
+        vertexArray[(i * 4 - 2) * 3 + 1] = vertexArray[i * 4 * 3 + 1];
+        polys[i - 1].setRightLength(value);
+    }
+
+    setTextureArray(texture_1Usize, texture_1Vsize);
+    resetRightVertexArray();
+    setRightTextureArray(texture_2Usize, texture_2Vsize);
+    resetLeftVertexArray();
+    setLeftTextureArray(texture_2Usize, texture_2Vsize);
+    resetLines();
+
+}
+
+void RoadBroken::setRightLength(double value)
+{
+    bool ok;
+    int i = sender()->objectName().toInt(&ok);
+    if (!ok)
+        return;
+    if (abs(polys[i].getRightLength() - value) < 0.01)
+        return;
+    float x1 = vertexArray[(i * 4 + 2) * 3];
+    float y1 = vertexArray[(i * 4 + 2) * 3 + 1];
+    float x2 = vertexArray[(i * 4 + 3) * 3];
+    float y2 = vertexArray[(i * 4 + 3) * 3 + 1];
+
+    float dx = (x2 - x1) / polys[i].getRightLength() * (value - polys[i].getRightLength());
+    float dy = (y2 - y1) / polys[i].getRightLength() * (value - polys[i].getRightLength());
+
+//    vertexArray[(i * 4 + 1) * 3] = x1 + (x2 - x1) / polys[i].getLeftLength() * value;
+//    vertexArray[(i * 4 + 1) * 3 + 1] = y1 + (y2 - y1) / polys[i].getLeftLength() * value;
+
+    vertexArray[(i * 4 + 3) * 3] = x2 + dx / 2.0f;
+    vertexArray[(i * 4 + 3) * 3 + 1] = y2 + dy / 2.0f;
+    vertexArray[(i * 4 + 2) * 3] = x1 - dx / 2.0f;
+    vertexArray[(i * 4 + 2) * 3 + 1] = y1 - dy / 2.0f;
+
+    polys[i].setRightLength(value);
+
+    if (i != polys.size() - 1)
+    {
+        vertexArray[(i * 4 + 4) * 3] = vertexArray[(i * 4 + 2) * 3];
+        vertexArray[(i * 4 + 4) * 3 + 1] = vertexArray[(i * 4 + 2) * 3 + 1];
+        vertexArray[(i * 4 + 5) * 3] = vertexArray[(i * 4 + 3) * 3];
+        vertexArray[(i * 4 + 5) * 3 + 1] = vertexArray[(i * 4 + 3) * 3 + 1];
+        polys[i + 1].setRightLength(value);
+    }
+
+    setTextureArray(texture_1Usize, texture_1Vsize);
+    resetRightVertexArray();
+    setRightTextureArray(texture_2Usize, texture_2Vsize);
+    resetLeftVertexArray();
+    setLeftTextureArray(texture_2Usize, texture_2Vsize);
+    resetLines();
+}
+
+void RoadBroken::setTopLength(double value)
+{
+    bool ok;
+    int i = sender()->objectName().toInt(&ok);
+    if (!ok)
+        return;
+    if (abs(polys[i].getTopLength() - value) < 0.01)
+        return;
+    float x1 = vertexArray[(i * 4 + 1) * 3];
+    float y1 = vertexArray[(i * 4 + 1) * 3 + 1];
+    float x2 = vertexArray[(i * 4 + 3) * 3];
+    float y2 = vertexArray[(i * 4 + 3) * 3 + 1];
+    vertexArray[(i * 4 + 3) * 3] = x1 + (x2 - x1) / polys[i].getTopLength() * value;
+    vertexArray[(i * 4 + 3) * 3 + 1] = y1 + (y2 - y1) / polys[i].getTopLength() * value;
+
+    float dx0 = x2 - vertexArray[(i * 4 + 2) * 3];
+    float dy0 = y2 - vertexArray[(i * 4 + 2) * 3 + 1];
+    float dx1 = vertexArray[(i * 4 + 3) * 3] - vertexArray[(i * 4 + 2) * 3];
+    float dy1 = vertexArray[(i * 4 + 3) * 3 + 1] - vertexArray[(i * 4 + 2) * 3 + 1];
+    float rightLength = sqrt(dx1*dx1 + dy1*dy1);
+    float angle = calculateAngle(vec3(dx0, dy0, 0.0f), vec3(dx1, dy1, 0.0f));
+
+    polys[i].setTopLength(value);
+    polys[i].setRightLength(rightLength);
+
+
+    if (i != polys.size() - 1)
+    {
+        polys[i + 1].setLeftLength(rightLength);
+        vertexArray[(i * 4 + 5) * 3] = vertexArray[(i * 4 + 3) * 3];
+        vertexArray[(i * 4 + 5) * 3 + 1] = vertexArray[(i * 4 + 3) * 3 + 1];
+        for (int j = i * 4 + 6; j < vertexArray.size() / 3; ++j)
+        {
+            rotate(angle * 2.0f,
+                   vertexArray[(i * 4 + 2) * 3], vertexArray[(i * 4 + 2) * 3 + 1],
+                   vertexArray[j * 3], vertexArray[j * 3 + 1]);
+        }
+    }
+
+    setTextureArray(texture_1Usize, texture_1Vsize);
+    resetRightVertexArray();
+    setRightTextureArray(texture_2Usize, texture_2Vsize);
+    resetLeftVertexArray();
+    setLeftTextureArray(texture_2Usize, texture_2Vsize);
+    resetLines();
+}
+
+void RoadBroken::setBottomLength(double value)
+{
+    bool ok;
+    int i = sender()->objectName().toInt(&ok);
+    if (!ok)
+        return;
+    if (abs(polys[i].getBottomLength() - value) < 0.01)
+        return;
+    float x1 = vertexArray[i * 4 * 3];
+    float y1 = vertexArray[i * 4 * 3 + 1];
+    float x2 = vertexArray[(i * 4 + 2) * 3];
+    float y2 = vertexArray[(i * 4 + 2) * 3 + 1];
+    vertexArray[(i * 4 + 2) * 3] = x1 + (x2 - x1) / polys[i].getBottomLength() * value;
+    vertexArray[(i * 4 + 2) * 3 + 1] = y1 + (y2 - y1) / polys[i].getBottomLength() * value;
+
+    float dx0 = x2 - vertexArray[(i * 4 + 3) * 3];
+    float dy0 = y2 - vertexArray[(i * 4 + 3) * 3 + 1];
+    float dx1 = vertexArray[(i * 4 + 2) * 3] - vertexArray[(i * 4 + 3) * 3];
+    float dy1 = vertexArray[(i * 4 + 2) * 3 + 1] - vertexArray[(i * 4 + 3) * 3 + 1];
+    float rightLength = sqrt(dx1*dx1 + dy1*dy1);
+    float angle = calculateAngle(vec3(dx0, dy0, 0.0f), vec3(dx1, dy1, 0.0f));
+
+    polys[i].setBottomLength(value);
+    polys[i].setRightLength(rightLength);
+
+
+    if (i != polys.size() - 1)
+    {
+        polys[i + 1].setLeftLength(rightLength);
+        vertexArray[(i * 4 + 4) * 3] = vertexArray[(i * 4 + 2) * 3];
+        vertexArray[(i * 4 + 4) * 3 + 1] = vertexArray[(i * 4 + 2) * 3 + 1];
+        for (int j = i * 4 + 6; j < vertexArray.size() / 3; ++j)
+        {
+            rotate(angle * 2.0f,
+                   vertexArray[(i * 4 + 3) * 3], vertexArray[(i * 4 + 3) * 3 + 1],
+                    vertexArray[j * 3], vertexArray[j * 3 + 1]);
+        }
+    }
+
+    setTextureArray(texture_1Usize, texture_1Vsize);
+    resetRightVertexArray();
+    setRightTextureArray(texture_2Usize, texture_2Vsize);
+    resetLeftVertexArray();
+    setLeftTextureArray(texture_2Usize, texture_2Vsize);
+    resetLines();
+
 }
 
 

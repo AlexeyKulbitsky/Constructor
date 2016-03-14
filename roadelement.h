@@ -204,6 +204,7 @@ public:
     virtual int getLayer() = 0;
     virtual void clear() = 0;
     virtual void rotate(float angle, float x, float y, float z);
+    virtual void rotate(float angle, float x0, float y0, float &x, float &y);
     virtual void setStepDialog(StepDialog* dialog);
     virtual void setStepDialogs(StepDialog** dialogs, int size);
     virtual void deleteLine(RoadElement* line);

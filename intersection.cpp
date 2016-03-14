@@ -503,9 +503,6 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
                                     (point1.y - point2.y)*(point1.y - point2.y));
             int j = i == 0 ? roads.size() - 1 : i - 1;
             vec2 aPrevious = roads[j]->getAxisPoint_1();
-            roads[i]->resizeByControl(index, dx, dy, x, y);
-            //calculateRoadIntersections();
-
 
             vec2 a_1 = roads[i]->getAxisPoint_1();
             vec2 a_2 = roads[i]->getAxisPoint_2();
@@ -513,6 +510,19 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
             vec2 a_1_1 = roads[j]->getAxisPoint_1();
             vec2 a_2_1 = roads[j]->getAxisPoint_2();
             float xT, yT;
+            calculateLinesIntersection(a_1, a_2, a_1_1, a_2_1, xT, yT);
+            bool isInRoadPrevious = ((xT >= a_1.x && xT <= a_2.x) || (xT <= a_1.x && xT >= a_2.x)) &&
+                                    ((yT >= a_1.y && yT <= a_2.y) || (yT <= a_1.y && yT >= a_2.y));
+            roads[i]->resizeByControl(index, dx, dy, x, y);
+            //calculateRoadIntersections();
+
+
+            a_1 = roads[i]->getAxisPoint_1();
+            a_2 = roads[i]->getAxisPoint_2();
+
+            a_1_1 = roads[j]->getAxisPoint_1();
+            a_2_1 = roads[j]->getAxisPoint_2();
+
             calculateLinesIntersection(a_1, a_2, a_1_1, a_2_1, xT, yT);            
 
             float l = sqrt((xT - a_1.x) * (xT - a_1.x) +
@@ -524,7 +534,8 @@ void Intersection::resizeByControl(int index, float dx, float dy, float x, float
                             (a_2.y - yT) * (a_2.y - yT));
 
             bool isInRoad = ((xT >= a_1.x && xT <= a_2.x) || (xT <= a_1.x && xT >= a_2.x)) &&
-                            ((yT >= a_1.y && yT <= a_2.y) || (yT <= a_1.y && yT >= a_2.y));
+                            ((yT >= a_1.y && yT <= a_2.y) || (yT <= a_1.y && yT >= a_2.y)) &&
+                            !isInRoadPrevious;
             float max = 100.0f;
             if (l > max || L2 < L1 || isInRoad)
             {
